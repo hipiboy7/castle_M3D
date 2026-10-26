@@ -84,10 +84,14 @@ func _ground() -> void:
 	tex.width = 256
 	tex.height = 256
 	tex.seamless = true
+	var ramp := Gradient.new()                       # 거칠기 0.72 ~ 0.95 — 대비가 크면 표범 무늬처럼 번쩍인다
+	ramp.set_color(0, Color(0.72, 0.72, 0.72))
+	ramp.set_color(1, Color(0.95, 0.95, 0.95))
+	tex.color_ramp = ramp
 	var asphalt := StandardMaterial3D.new()
 	asphalt.albedo_color = Color(0.12, 0.125, 0.145)     # 무늬는 거칠기에만 — 색 얼룩(구름 · 대리석 같음)을 없앴다
 	asphalt.roughness_texture = tex                  # 얼룩진 거칠기 = 젖은 곳은 빛을 비춘다
-	asphalt.roughness = 0.9
+	asphalt.roughness = 1.0
 	asphalt.metallic_specular = 0.6
 	asphalt.uv1_scale = Vector3(16, 16, 16)
 	var ground := PlaneMesh.new()

@@ -522,7 +522,7 @@ func _down_pose(f, gets_up: bool) -> Dictionary:
 
 func _update_flash(f) -> void:
 	var on: bool = f.flash > 0 and (f.flash / 2) % 2 == 0
-	var col := Color(0.28, 0.25, 0.22) if on else Color(0, 0, 0)
+	var col := Color(0.12, 0.1, 0.09) if on else Color(0, 0, 0)
 	for m in mats:
 		m.emission = col
 

@@ -3,7 +3,7 @@ extends Node3D
 ## main.gd 가 combat/world.gd 신호(hit · parry · block · finish · dodge · feint)와 공격 시작을 보고 부른다.
 ## 연출은 판정과 따로라(전용 난수) 결투 결과에 영향이 없다.
 
-var _items: Array = []            # [노드, 남은 시간, 처음 시간, 재질 또는 빛]
+var _items: Array = []            # [노드, 남은 시간, 처음 시간, 재질 또는 빛, 처음 밝기 · 투명도]
 var rng := RandomNumberGenerator.new()
 
 
@@ -21,7 +21,7 @@ func _process(dt: float) -> void:
 			thing.light_energy = float(it[4]) * k * k
 		elif thing is StandardMaterial3D:
 			var c: Color = thing.albedo_color
-			c.a = k
+			c.a = float(it[4]) * k                     # 처음 투명도에서 줄인다 (1 로 덮으면 반투명 궤적이 흰 판이 된다)
 			thing.albedo_color = c
 		if it[1] <= 0.0:
 			it[0].queue_free()
@@ -64,7 +64,7 @@ func spark(at: Vector3, col: Color, amount: int, speed: float, life := 0.32) -> 
 	p.position = at
 	add_child(p)
 	p.emitting = true
-	_items.append([p, life + 0.3, life + 0.3, null])
+	_items.append([p, life + 0.3, life + 0.3, null, 0.0])
 
 
 func flash(at: Vector3, col: Color, energy: float, life := 0.14, reach := 4.0) -> void:
@@ -123,7 +123,7 @@ func _place(mesh: Mesh, m: StandardMaterial3D, at: Vector3, yaw: float, life: fl
 	mi.position = at
 	mi.rotation.y = yaw
 	add_child(mi)
-	_items.append([mi, life, life, m])
+	_items.append([mi, life, life, m, m.albedo_color.a])
 
 
 ## 기술 모양별 궤적 (Move.shape) — 공격 판정이 시작되는 프레임에 부른다
