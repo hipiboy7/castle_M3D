@@ -88,8 +88,8 @@ func arc(at: Vector3, yaw: float, a0: float, a1: float, r_in: float, r_out: floa
 		var u := float(i) / n
 		var a := deg_to_rad(lerpf(a0, a1, u))
 		var d := Vector3(-sin(a), 0, -cos(a))
-		var w := sin(u * PI) * 0.5 + 0.5
-		var c := Color(1, 1, 1, u * u)
+		var w := 0.28 + 0.22 * sin(u * PI)               # 띠 폭: 바깥 가장자리에서 안쪽 반지름까지의 28 ~ 50 %
+		var c := Color(1, 1, 1, u * u * 0.55)
 		im.surface_set_color(c)
 		im.surface_add_vertex(d * lerpf(r_out, r_in, w) + Vector3(0, h - 0.04 * u, 0))
 		im.surface_set_color(c)
@@ -146,7 +146,7 @@ func swing(f, yaw: float, left_hand: bool) -> void:
 			spike(at, yaw, 0.3, reach + radius + 0.2, 0.95, 0.13, Color(1.0, 0.95, 0.85, 0.9), 0.18)
 		"spin":
 			for k in 3:
-				arc(at, yaw + k * 2.1, 0.0, 300.0, radius * 0.55, radius, 0.95 + k * 0.08, Color(1.0, 0.5, 0.45, 0.9), 0.42)
+				arc(at, yaw + k * 2.1, 0.0, 300.0, radius * 0.8, radius, 0.95 + k * 0.08, Color(1.0, 0.5, 0.45, 0.5), 0.42)
 		"cross":
 			arc(at, yaw, -70, 70, reach * 0.3, reach + radius, 1.45, Color(1.0, 0.85, 0.5, 1.0), 0.24)
 			arc(at, yaw, 70, -70, reach * 0.3, reach + radius, 0.9, Color(1.0, 0.85, 0.5, 1.0), 0.24)

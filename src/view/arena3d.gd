@@ -77,7 +77,7 @@ func _lamp(at: Vector3, shadow: bool) -> OmniLight3D:
 func _ground() -> void:
 	var noise := FastNoiseLite.new()
 	noise.seed = 6
-	noise.frequency = 0.012
+	noise.frequency = 0.035
 	noise.fractal_octaves = 4
 	var tex := NoiseTexture2D.new()
 	tex.noise = noise
@@ -85,12 +85,11 @@ func _ground() -> void:
 	tex.height = 256
 	tex.seamless = true
 	var asphalt := StandardMaterial3D.new()
-	asphalt.albedo_color = Color(0.2, 0.21, 0.24)
-	asphalt.albedo_texture = tex
+	asphalt.albedo_color = Color(0.12, 0.125, 0.145)     # 무늬는 거칠기에만 — 색 얼룩(구름 · 대리석 같음)을 없앴다
 	asphalt.roughness_texture = tex                  # 얼룩진 거칠기 = 젖은 곳은 빛을 비춘다
-	asphalt.roughness = 0.85
+	asphalt.roughness = 0.9
 	asphalt.metallic_specular = 0.6
-	asphalt.uv1_scale = Vector3(5, 5, 5)
+	asphalt.uv1_scale = Vector3(16, 16, 16)
 	var ground := PlaneMesh.new()
 	ground.size = Vector2(HALF_W * 2 + 6, HALF_D * 2 + 3)
 	_mesh(self, ground, asphalt, Vector3(0, 0, 0.9))

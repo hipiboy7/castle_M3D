@@ -7,6 +7,7 @@ set -u
 PKG=com.hipiboy7.castlem3d
 mkdir -p emu
 adb install -r apk/castle_m3d.apk || { echo "설치 실패"; exit 1; }
+adb shell settings put secure immersive_mode_confirmations confirmed   # 전체 화면 안내 창이 스크린샷을 가린다(castle_M android_smoke.sh 와 같게)
 adb logcat -c
 adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 > /dev/null
 sleep 12
@@ -25,6 +26,10 @@ grep -E "FPS_LOG|MODE " emu/logcat.txt | sed -E 's/.*(FPS_LOG|MODE )/\1/' > emu/
 grep -iE "OpenGL API|Using Device|renderer" emu/logcat.txt | head -5 >> emu/fps.txt || true
 echo "--- FPS (main.gd 가 실제 시간 10초마다 찍는다) · 렌더러 ---"
 cat emu/fps.txt
+if grep -E "Program linking failed" emu/logcat.txt | head -3 | grep .; then
+  echo "3D 셰이더 링크 실패 — 화면이 안 그려진다 (docs/트러블슈팅.md T-4)"
+  exit 1
+fi
 pid=$(adb shell pidof "$PKG" | tr -d '\r')
 if grep -E "FATAL EXCEPTION|SCRIPT ERROR|USER SCRIPT ERROR" emu/logcat.txt; then
   echo "logcat 에 오류가 있다"

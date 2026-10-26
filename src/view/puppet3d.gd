@@ -140,11 +140,11 @@ func _build() -> void:
 
 func _hair(head: Node3D, m: Material, style: String) -> void:
 	if style == "parted":
-		_mesh(head, _sphere(0.114, 0.2), m, Vector3(0, 0.04, 0.012), Vector3.ZERO, Vector3(1.0, 0.76, 1.04))
+		_mesh(head, _sphere(0.108, 0.2), m, Vector3(0, 0.05, 0.022), Vector3.ZERO, Vector3(1.0, 0.66, 1.02))
 		_mesh(head, _box(Vector3(0.11, 0.03, 0.17)), m, Vector3(0.034, 0.088, -0.004), Vector3(0, 0, -12))
 		_mesh(head, _box(Vector3(0.16, 0.03, 0.04)), m, Vector3(-0.01, 0.072, -0.086), Vector3(-24, 0, -8))
 	else:
-		_mesh(head, _sphere(0.113, 0.2), m, Vector3(0, 0.036, 0.012), Vector3.ZERO, Vector3(1.0, 0.8, 1.03))
+		_mesh(head, _sphere(0.107, 0.2), m, Vector3(0, 0.048, 0.024), Vector3.ZERO, Vector3(1.0, 0.64, 1.02))
 		_mesh(head, _box(Vector3(0.15, 0.036, 0.05)), m, Vector3(0, 0.07, -0.084), Vector3(-22, 0, 0))
 
 
@@ -517,7 +517,7 @@ func _down_pose(f, gets_up: bool) -> Dictionary:
 
 func _update_flash(f) -> void:
 	var on: bool = f.flash > 0 and (f.flash / 2) % 2 == 0
-	var col := Color(0.9, 0.9, 0.9) if on else Color(0, 0, 0)
+	var col := Color(0.28, 0.25, 0.22) if on else Color(0, 0, 0)
 	for m in mats:
 		m.emission = col
 
