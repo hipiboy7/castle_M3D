@@ -52,7 +52,7 @@ func decide() -> Dictionary:
 			return it
 	var open: bool = foe.state in ["stagger", "recoil", "hitstun", "down", "stun"] or foe.in_recovery()
 	skill_cd -= 1
-	var sk := _pick_skill(open, d)
+	var sk := _pick_skill(d)
 	if sk >= 0:
 		me.skill_idx = sk                        # '기술 바꾸기'를 그만큼 누른 것과 같다
 		it["skill"] = true
@@ -78,16 +78,22 @@ func decide() -> Dictionary:
 	return it
 
 
-## 기술: 쉬는 틈(skill_cd) 뒤 게이지가 되면 — 쳐낸 뒤 삼연타, 다른 빈틈엔 각법, 서로 재는 중엔 가끔 엇박 찌르기.
-## 고를 수 없으면 -1
-func _pick_skill(open: bool, d: float) -> int:
+## 기술: 쉬는 틈(skill_cd) 뒤 게이지가 되면 — 백도찬이 못 구르는 순간(쳐내기 당한 휘청 · 기절)엔 엇박 계열(배운 뒤,
+## 엇엇박 → 엇박 → 반대발 순), 없으면 쳐낸 뒤 삼연타 · 움찔이나 헛친 뒤엔 각법. 빈틈엔 기술 대신 제압. 고를 수 없으면 -1
+func _pick_skill(d: float) -> int:
 	if skill_cd > 0 or not me.can_act() or me.skills.is_empty() or d > 1.6:
 		return -1
-	var want := -1
-	if open:
-		want = 2 if foe.state == "recoil" else 1
-	elif foe.can_act() and rng.randf() < 0.02:
-		want = 0
-	if want < 0 or me.gauge < float(me.skills[want]["cost"]) * Skills.BAR:
-		return -1
-	return want
+	var order: Array = []
+	match str(foe.state):
+		"stun", "recoil":
+			order = ["offbeat2", "offbeat", "offbeat_rev", "triple"]
+		"hitstun":
+			order = ["kickarts"]
+		_:
+			if foe.in_recovery():
+				order = ["kickarts"]
+	for id in order:
+		var i: int = me.skill_index(id)
+		if i >= 0 and me.can_pay(me.skills[i]):
+			return i
+	return -1

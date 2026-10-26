@@ -23,12 +23,14 @@ var fighters: Array = []
 var frame := 0
 var hitstop := 0
 var shake := 0
+var slowmo := 0                          # 남은 슬로모션 로직 프레임 (main.gd 가 두 화면에 한 번만 돌린다 — 판정은 그대로)
 var events: Array = []                   # [종류, ...] — 그림 · 소리가 매 프레임 가져가고 비운다
 var bounds := Rect2(-6.6, -3.6, 13.2, 7.4)
 var over := ""                           # "" / win / lose
 var phase := 1
 var pending: Array = []                  # 미룬 맞음 [공격자, 맞는 사람, 기술, 맞은 자리, 남은 프레임]
-var stats := {"hits": 0, "parries": 0, "boss_parries": 0, "dodges": 0, "blocks": 0, "staggers": 0}
+var stats := {"hits": 0, "parries": 0, "boss_parries": 0, "dodges": 0, "blocks": 0, "staggers": 0,
+	"offbeats": 0, "boss_offbeats": 0}       # offbeats: 엇박 계열이 맞은 수 (김신 · 백도찬)
 
 
 func add(f) -> void:
@@ -51,6 +53,8 @@ func boss():
 
 func tick() -> void:
 	frame += 1
+	if slowmo > 0:
+		slowmo -= 1
 	if shake > 0:
 		shake -= 1
 	if hitstop > 0:
@@ -197,20 +201,23 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 		a.gain("finisher")
 		_check_hp(d)
 		return
-	if str(mv["lethal"]) != "":
-		# 엇박: 맞는 쪽 등급에 따라 최대 체력의 몇 분의 몇 (김신 내성 상위 → 백도찬 톱: 1/3 × 2/3)
-		var frac := Skills.lethal_fraction(d.rank, a.rank)
+	var lethal := str(mv["lethal"])
+	if lethal != "":
+		# 엇박 계열: 맞는 쪽 등급에 따라 최대 체력의 몇 분의 몇 (김신 내성 상위 → 백도찬 톱 엇박: 1/3 × 2/3,
+		# 백도찬 → 김신: 1/2), 엇엇박은 쓴 칸 / 10
+		var frac := Skills.lethal_fraction(lethal, d.rank, a.rank, a.skill_paid)
 		dmg = d.hp_max * frac
 		shake = maxi(shake, 6)
-		events.append(["lethal", d, at, frac])
+		events.append(["lethal", d, at, frac, lethal])
+		stats["boss_offbeats" if a.is_boss else "offbeats"] += 1
 	d.hp -= dmg
 	d.take_posture(float(mv["posture"]))
 	d.get_hit(mv, push)
-	var stun := Skills.stun_frames(mv, a.rank, d.rank)
-	if stun > 0 and d.hp > 0.0:
-		d.get_stun(stun)
-		if d.state == "stun":                    # 빈틈 · 넘어짐 중이면 기절이 걸리지 않는다(run #8 에서 글자만 떴다)
-			events.append(["stun", d, at, stun])
+	if float(mv["self_cost"]) > 0.0:
+		# 엇엇박: 맞히면 쓴 사람도 체력 1/5 를 잃는다 (쓰러지지는 않는다)
+		var cost: float = a.hp_max * float(mv["self_cost"])
+		a.hp = maxf(1.0, a.hp - cost)
+		events.append(["self_cost", a, cost])
 	if int(mv.get("hit_no", 0)) >= int(mv["hits"]) and mv["knockdown"] and not d.is_boss:
 		d.get_down()
 	stats["hits"] += 1
@@ -221,6 +228,13 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 	d.gain("taken")
 	if d.posture >= d.posture_max and d.state != "stagger" and d.state != "down":
 		_stagger(d)
+	# 기절은 빈틈(체간 무너짐) 다음에 본다 — 같은 대에 체간이 다 차면 빈틈이 이긴다(폰 리뷰 2026-10-26: 빈틈이 뜨면서
+	# "기절!" 도 뜨던 것). 빈틈 · 넘어짐 중이면 기절이 걸리지 않는다(run #8 에서 글자만 떴다)
+	var stun := Skills.stun_frames(mv, a.rank, d.rank)
+	if stun > 0 and d.hp > 0.0:
+		d.get_stun(stun)
+		if d.state == "stun":
+			events.append(["stun", d, at, stun])
 	_check_hp(d)
 
 
@@ -235,7 +249,9 @@ func _hit_move(a) -> Dictionary:
 	var no := mini(int(mv["hits"]), maxi(1, (a.t - s - 1) / seg + 1))
 	var m2: Dictionary = mv.duplicate()
 	m2["hit_no"] = no
-	if no >= int(mv["hits"]):
+	if no < int(mv["hits"]):
+		m2["stun_rel"] = []                       # 기절은 셋째 대만
+	else:
 		m2["knockback"] = float(mv["knockback"]) * TRIPLE_LAST["knockback_k"]
 		m2["hitstop"] = TRIPLE_LAST["hitstop"]
 		m2["shake"] = TRIPLE_LAST["shake"]
@@ -274,6 +290,8 @@ func _stagger(f) -> void:
 
 
 func _check_hp(d) -> void:
+	if d.hp_floor > 0.0:
+		d.hp = maxf(d.hp, d.hp_max * d.hp_floor)
 	if d.is_boss and phase == 1 and d.hp <= d.hp_max * PHASE2_AT:
 		d.hp = d.hp_max * PHASE2_AT
 		phase = 2

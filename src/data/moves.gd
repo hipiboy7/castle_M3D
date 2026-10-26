@@ -11,9 +11,10 @@ const DEFAULTS := {
 	"hitstun": 16, "hitstop": 4, "knockdown": false, "posture": 10.0, "lunge": 0.0,
 	"next": "", "cancel": -1, "telegraph": "", "shape": "slash", "sfx": "swing", "hit_sfx": "hit",
 	"shake": 0, "hits": 1, "side": 0.0, "skill": false, "feints": [], "any_state": false, "hand": "R",      # hand: 치는 손 · 발 (R · L)
-	"guard_break": false, "lethal": "", "stun_rel": [], "fx": "",
-	# guard_break: 막기 · 쳐내기를 뚫는다 / lethal: 엇박 피해(src/data/skills.gd) / stun_rel: 기절 [아랫급에게, 같은 급 · 윗급에게]
-	# fx "triple": 리천식 삼연타 — 맞은 순서를 세어 셋째에 크게 (world.gd)
+	"guard_break": false, "lethal": "", "self_cost": 0.0, "stun_rel": [], "fx": "",
+	# guard_break: 막기 · 쳐내기를 뚫는다 / lethal: 엇박 계열 피해 종류(src/data/skills.gd lethal_fraction) /
+	# self_cost: 맞혔을 때 쓴 사람이 잃는 체력(최대 체력 비율, 엇엇박 1/5) / stun_rel: 기절 [아랫급에게, 같은 급 · 윗급에게]
+	# fx "triple": 리천식 삼연타 — 맞은 순서를 세어 셋째에 크게, 기절은 셋째 대만 (world.gd)
 }
 
 const M := {
@@ -40,14 +41,25 @@ const M := {
 		"radius": 9, "lunge": 22, "knockback": 4.2, "hitstop": 10, "posture": 45, "guard_break": true,
 		"shape": "thrust", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 4, "skill": true, "lethal": "offbeat",
 		"feints": [6], "telegraph": "unblock"},
+	# 엇엇박 찌르기: 두 번 멈칫한 뒤 찌른다 — 게이지 전부, 피해는 쓴 칸에 비례, 맞히면 내 체력 1/5
+	"s_offbeat2": {"label": "엇엇박 찌르기", "startup": 26, "active": 5, "recovery": 18, "damage": 26, "reach": 21,
+		"radius": 10, "lunge": 26, "knockback": 5.0, "hitstop": 14, "posture": 80, "guard_break": true,
+		"shape": "thrust", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 6, "skill": true, "lethal": "offbeat2",
+		"self_cost": 0.2, "feints": [7, 16], "telegraph": "unblock"},
+	# 반대발 엇박: 디딤발을 바꾸는 반 박자 — 옆으로 한 번 비켜 디딘 잔상 뒤 찌름, 엇박의 절반 효과 (모습은 잠정)
+	"s_offbeat_rev": {"label": "반대발 엇박 찌르기", "startup": 13, "active": 4, "recovery": 15, "damage": 14,
+		"reach": 18, "radius": 9, "lunge": 20, "side": 6, "knockback": 3.6, "hitstop": 9, "posture": 35,
+		"guard_break": true, "shape": "thrust", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 3, "skill": true,
+		"lethal": "offbeat_rev", "feints": [5], "telegraph": "unblock"},
 	# 각법: 다리를 위로 곧게 들어 올렸다가 내려찍는다 — 맞으면 아랫급 3초 · 같은 급 · 윗급 1초 기절
 	"s_kick": {"label": "각법 — 내려찍기", "startup": 12, "active": 3, "recovery": 14, "damage": 12, "reach": 13,
 		"radius": 10, "lunge": 4, "knockback": 0.8, "hitstop": 10, "posture": 22, "shape": "axe", "sfx": "kick",
 		"hit_sfx": "hit_heavy", "shake": 5, "skill": true, "stun_rel": [180, 60]},
-	# 리천식 삼연타: 주먹 세 번 — 앞 두 대는 붙잡아 두고(넉백 작게) 셋째에 크게
+	# 리천식 삼연타: 주먹 세 번 — 앞 두 대는 붙잡아 두고(넉백 작게) 셋째에 크게, 셋째 대에 각법의 절반만큼 기절
+	# (기절은 3D 초안에서 먼저 — 폰 리뷰 2026-10-26 "삼연타 맞고도 각법보다 1/2 정도 스턴 하자", castle_M 반영은 그쪽 세션)
 	"s_triple": {"label": "리천식 삼연타", "startup": 4, "active": 15, "recovery": 14, "damage": 7, "reach": 13,
 		"radius": 9, "arc": 60, "lunge": 4, "knockback": 0.5, "hitstop": 5, "posture": 12, "hits": 3, "shape": "punch",
-		"sfx": "swing", "hit_sfx": "hit", "skill": true, "fx": "triple"},
+		"sfx": "swing", "hit_sfx": "hit", "skill": true, "fx": "triple", "stun_rel": [90, 30]},
 	# 보스 — 백도찬 (사시미 나이프 파이팅). 패턴 · 박자는 src/combat/boss_ai.gd (castle_M P2 설계서 8.2절)
 	"b_slash1": {"label": "사시미 베기", "startup": 14, "active": 3, "recovery": 10, "damage": 9, "reach": 14, "radius": 10,
 		"arc": 70, "lunge": 5, "posture": 10, "telegraph": "parry", "shape": "slash", "sfx": "knife"},

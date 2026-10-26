@@ -130,8 +130,10 @@ func update_bars(hero, boss, phase: int, dt: float) -> void:
 		_gauge[i].color = COL_GAUGE if k >= 1.0 else COL_GAUGE_PART
 	var sk: Dictionary = hero.current_skill()
 	if not sk.is_empty():
-		var ok: bool = hero.gauge + 0.001 >= float(sk["cost"]) * Skills.BAR
-		skill_name.text = "기술: %s (%d칸)" % [sk["name"], roundi(float(sk["cost"]))]
+		var ok: bool = hero.can_pay(sk)
+		var cost := float(sk["cost"])
+		var cost_txt := "%d칸+ 전부" % Skills.ALL_MIN_BARS if cost < 0.0 else "%d칸" % roundi(cost)
+		skill_name.text = "기술: %s (%s)" % [sk["name"], cost_txt]
 		skill_name.add_theme_color_override("font_color", COL_TEXT if ok else COL_DIM)
 	boss_name.text = "백도찬" + ("   2차 · 전력" if phase == 2 else "")
 	fps.text = "FPS %d · %.1fms" % [Engine.get_frames_per_second(), Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0]

@@ -65,6 +65,26 @@ static func step(d: Dictionary, hero_intent = null) -> void:
 	w.tick()
 	if w.phase == 2 and d["ai"].phase == 1:
 		d["ai"].enter_phase2()
+	for e in w.events.duplicate():
+		if e[0] == "skill" and e[1] == d["boss"] and str(e[2]["id"]) == "s_offbeat":
+			_boss_offbeat(d)
+
+
+## 백도찬이 엇박을 쓰는 순간: 첫 번은 슬로모션, 김신이 보고 엇박 계열을 얻는다
+## (castle_common data/progression.json 'duel_offbeat:baekdochan' — 엇박 · 엇엇박 · 반대발 엇박)
+static func _boss_offbeat(d: Dictionary) -> void:
+	var h = d["hero"]
+	var w = d["world"]
+	if d.get("learned", false):
+		return
+	d["learned"] = true
+	w.slowmo = maxi(w.slowmo, int(Skills.BAEK_OFFBEAT["slowmo"]))
+	h.skills = Skills.KIM_LEARN + Skills.KIM_SKILLS
+	h.skill_idx = maxi(0, h.skill_index("offbeat"))        # 방금 본 엇박을 골라 둔다
+	var names: Array = []
+	for sk in Skills.KIM_LEARN:
+		names.append(sk["name"])
+	w.events.append(["learn", h, " · ".join(names)])
 
 
 ## 그림 없이 끝까지(또는 frames 까지) 돌린 결과 — 테스트 · --autoplay --headless 가 쓴다

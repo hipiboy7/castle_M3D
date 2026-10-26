@@ -76,6 +76,8 @@ var gauge := 0.0
 var gauge_max := 0.0
 var gauge_rate := 1.0
 var buf_skill := 0
+var skill_paid := 0.0            # 마지막 기술에 쓴 칸 수 (엇엇박 피해가 비례)
+var hp_floor := 0.0              # 체력이 최대 체력의 이 비율 아래로 내려가지 않는다 (백도찬 첫 엇박 장면)
 
 
 func set_target(f) -> void:
@@ -238,6 +240,8 @@ func _tick_free() -> void:
 	var use: String = intent.get("use", "")
 	if use != "":
 		start_move(use)
+		if move["skill"]:
+			events.append(["skill", self, {"id": use, "name": move["label"]}])     # 보스 기술 (게이지 없이 패턴으로)
 		return
 	if buf_attack > 0:
 		var nm := _pick_attack()
@@ -328,11 +332,15 @@ func _try_skill() -> bool:
 		return false
 	buf_skill = 0
 	var sk: Dictionary = skills[skill_idx]
-	var cost: float = float(sk["cost"]) * Skills.BAR
-	if gauge + 0.001 < cost:
+	if not can_pay(sk):
 		events.append(["no_gauge", self])
 		return false
-	gauge -= cost
+	if float(sk["cost"]) < 0.0:
+		skill_paid = gauge / Skills.BAR                 # 엇엇박: 게이지 전부
+		gauge = 0.0
+	else:
+		skill_paid = float(sk["cost"])
+		gauge -= skill_paid * Skills.BAR
 	start_move(str(sk["move"]))
 	events.append(["skill", self, sk])
 	return true
@@ -340,6 +348,22 @@ func _try_skill() -> bool:
 
 func current_skill() -> Dictionary:
 	return skills[skill_idx] if not skills.is_empty() else {}
+
+
+## 이 기술을 쓸 만큼 게이지가 찼는지 (cost < 0 = 엇엇박: ALL_MIN_BARS 칸 이상)
+func can_pay(sk: Dictionary) -> bool:
+	var cost := float(sk["cost"])
+	if cost < 0.0:
+		return gauge + 0.001 >= Skills.ALL_MIN_BARS * Skills.BAR
+	return gauge + 0.001 >= cost * Skills.BAR
+
+
+## 기술 목록에서 id 의 자리 (없으면 -1)
+func skill_index(id: String) -> int:
+	for i in skills.size():
+		if str(skills[i]["id"]) == id:
+			return i
+	return -1
 
 
 ## 기술 게이지 채우기 (kind: Skills.GAIN 의 종류)

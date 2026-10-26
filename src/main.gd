@@ -214,9 +214,11 @@ func _physics_process(_dt: float) -> void:
 				_new_duel()
 				_start("fight")
 				return
-			var hero_it = null if mode == "demo" else _player_intent()
-			Duel.step(d, hero_it)
-			_after_tick()
+			# 슬로모션(백도찬 첫 엇박): 로직을 두 화면에 한 번만 돌린다
+			if d["world"].slowmo <= 0 or frames % 2 == 1:
+				var hero_it = null if mode == "demo" else _player_intent()
+				Duel.step(d, hero_it)
+				_after_tick()
 		"result":
 			if mode_t > 300 or (mode_t > 60 and not args["autoplay"] and _pressed_anything()):
 				seed_now += 1
@@ -285,8 +287,19 @@ func _after_tick() -> void:
 			"no_gauge":
 				fx.pop(Vector3(e[1].pos.x, 2.35, e[1].pos.y), "게이지 부족", Color(0.75, 0.78, 0.85), 44, 0.7)
 			"lethal":
-				fx.pop(e[2] + Vector3(0, 0.75, 0), "엇박 — %d%%" % roundi(float(e[3]) * 100.0), Color(0.75, 0.9, 1.0), 72, 1.2)
-				cam.punch_zoom(0.85)
+				var kind_name: String = {"offbeat2": "엇엇박", "offbeat_rev": "반대발 엇박"}.get(str(e[4]), "엇박")
+				fx.pop(e[2] + Vector3(0, 0.75, 0), "%s — %d%%" % [kind_name, roundi(float(e[3]) * 100.0)],
+					Color(0.75, 0.9, 1.0), 72, 1.2)
+				cam.punch_zoom(0.8 if str(e[4]) == "offbeat2" else 0.85)
+			"self_cost":
+				fx.pop(Vector3(e[1].pos.x, 2.1, e[1].pos.y), "-%d" % roundi(float(e[2])), Color(1.0, 0.47, 0.43), 52, 0.9)
+			"first_offbeat":
+				hud.message("백도찬", "재주를 좀 더 부려 보거라. 아가야.", 2.2)
+			"learn":
+				hud.message("엇박을 보았다", "김신: 목숨.. 그따위 것에 얽매일 필요가 있었나?", 3.0)
+				fx.pop(Vector3(e[1].pos.x, 2.7, e[1].pos.y), str(e[2]), Color(0.75, 0.9, 1.0), 44, 2.0)
+				_play("shine", -2.0, 0.7)
+				_play("wind", -6.0, 1.2)
 			"pierce":
 				fx.pop(e[2] + Vector3(0, 0.45, 0), "가드 관통!", Color(1.0, 0.78, 0.47), 60, 0.9)
 			"stun":

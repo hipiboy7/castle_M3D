@@ -1,9 +1,16 @@
 extends RefCounted
 ## 백도찬 AI — 다른 컨트롤러처럼 Fighter.intent 만 채운다.
 ## 패턴 · 박자 · 맞수(칼날 쳐내기) · 백도찬식 찌르기는 castle_M `docs/P2_설계서_M1전투핵심.md` 8.1 · 8.2절.
-## 초안에서 뺀 것: 쓸어 베기(점프가 없다) · 손등 받기 · 엇박 찌르기(원조) · 동요 · 전력 컷인 연출.
+## 엇박 찌르기(원조)와 엇박 계열 피하기는 castle_M `castle_m/action/boss_ai.py` · `data/bosses.py` (2026-10-26):
+## 체력 90% 이하에서 처음 쓰고(그때까지 80% 아래로 안 내려간다 · 김신은 25% 아래로 안 내려간다), 그 뒤 쿨다운마다.
+## 김신이 엇박 계열을 내기 시작하면(4프레임 안) dodge_rate 확률로 구른다 — 그래서 엇박 계열은 백도찬이 못 구르는
+## '열린 순간'(쳐내기 당한 휘청 · 기절 · 움찔)에 넣는 기술이 된다.
+## 초안에서 뺀 것: 쓸어 베기(점프가 없다) · 손등 받기 · 동요 · 전력 컷인 연출.
 
 const Fighter = preload("res://src/combat/fighter.gd")
+const Skills = preload("res://src/data/skills.gd")
+const HELPLESS := ["down", "stagger", "hitstun", "recoil", "stun", "dead"]
+const OFFBEAT_RANGE := 2.0       # 엇박 찌르기가 닿는 거리 (찌르기 19px + 내딛기 22px ≈ 1.85m + 몸)
 
 const PATTERNS := {
 	"sashimi3": [["b_slash1", 6], ["b_slash2", 8], ["b_thrust", 0]],
@@ -35,6 +42,11 @@ var vital_seen := -1
 var used_wide := false
 var strafe := 1.0
 var strafe_t := 0
+var dodge_rate := 0.7
+var seen_dodge := -1
+var offbeat_cd := 0
+var offbeat_shown := false       # 첫 엇박을 썼다 (그 뒤 쿨다운마다)
+var demo := ""                   # 첫 엇박 장면: "" → wait(쓸 때를 기다림) → active(쓰는 중) → done
 
 
 func _init(boss, hero, r: RandomNumberGenerator) -> void:
@@ -48,6 +60,7 @@ func enter_phase2() -> void:
 	phase = 2
 	parry_rate = 0.6
 	vital_rate = 0.4
+	dodge_rate = 0.85
 	me.dmg_k = 1.2 * 1.1
 	me.parry_extra = 3
 	queue.clear()
@@ -59,6 +72,7 @@ func decide() -> Dictionary:
 	if not me.alive() or not foe.alive():
 		return it
 	var d: float = me.dist_to(foe)
+	_offbeat_clock()
 	# 1. 빈틈 · 움찔 중 상대가 치러 들어오면 가끔 빠져나오며 찌른다 (백도찬식 찌르기, 빨간 !)
 	if (me.state == "stagger" or me.state == "hitstun") and foe.state == "attack" and foe.t <= 2 \
 			and foe.attack_id != vital_seen:
@@ -75,6 +89,19 @@ func decide() -> Dictionary:
 	# 2. 쳐냈으면 곧바로 맞받아 베기
 	if me.counter_ready > 0:
 		it["use"] = "b_counter"
+		return it
+	# 2-1. 김신이 엇박 계열을 내기 시작하면 확률로 구른다 (막기 · 쳐내기를 뚫으니까)
+	if foe.state == "attack" and str(foe.move["lethal"]) != "" and foe.t <= 4 and foe.attack_id != seen_dodge:
+		seen_dodge = foe.attack_id
+		if d < OFFBEAT_RANGE + 0.8 and rng.randf() < dodge_rate:
+			var away: Vector2 = -it["face"]
+			var side := Vector2(-away.y, away.x) * (0.6 if rng.randf() < 0.5 else -0.6)
+			it["roll"] = true
+			it["move"] = (away + side).normalized()
+			queue.clear()
+			return it
+	# 2-2. 엇박 찌르기 (첫 번은 체력 90% 이하에서 꼭, 그 뒤 쿨다운마다)
+	if _offbeat(it, d):
 		return it
 	# 3. 김신이 공격을 시작하면(정면 · 사거리 안 · 시작 2프레임 안) 확률로 칼날 쳐내기
 	if foe.state == "attack" and foe.t <= 2 and foe.attack_id != seen_attack and d < 2.4 \
@@ -112,6 +139,42 @@ func decide() -> Dictionary:
 	else:
 		it["move"] = Vector2(-to.y, to.x) * strafe * 0.4
 	return it
+
+
+## 첫 엇박 장면의 시작 · 끝과 쿨다운
+func _offbeat_clock() -> void:
+	if offbeat_cd > 0:
+		offbeat_cd -= 1
+	var ob: Dictionary = Skills.BAEK_OFFBEAT
+	if demo == "" and me.hp <= me.hp_max * float(ob["first_hp"]) + 0.001:
+		demo = "wait"
+		me.hp_floor = float(ob["hold_hp"])           # 첫 엇박을 보이기 전에는 이 아래로 안 내려간다
+		foe.hp_floor = float(ob["demo_floor"])       # 보여 주는 한 방 — 김신이 여기서 지지 않게
+		me.events.append(["first_offbeat", me])
+	elif demo == "active" and me.state != "attack":
+		demo = "done"
+		me.hp_floor = 0.0
+		foe.hp_floor = 0.0
+
+
+func _offbeat(it: Dictionary, d: float) -> bool:
+	var forced := demo == "wait"
+	if not forced and not (offbeat_shown and offbeat_cd == 0):
+		return false
+	if foe.state in HELPLESS:
+		return false            # 피할 수 없는 상대에게는 쓰지 않는다 — 엇박은 '보고 구르는' 기술 (예고의 공정성)
+	if d > OFFBEAT_RANGE:
+		if forced:
+			it["move"] = it["face"] * 0.8
+			return true
+		return false
+	it["use"] = "s_offbeat"
+	offbeat_cd = int(Skills.BAEK_OFFBEAT["cd"][phase - 1])
+	offbeat_shown = true
+	if forced:
+		demo = "active"
+	queue.clear()
+	return true
 
 
 func _pick() -> void:
