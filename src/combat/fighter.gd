@@ -9,7 +9,7 @@ const Moves = preload("res://src/data/moves.gd")
 const ROLL_T := 20
 const ROLL_IFRAMES := Vector2i(2, 14)
 const ROLL_DIST := 2.2
-const PARRY_WINDOW := 7          # 누른 뒤 이 프레임 안에 칼을 받으면 '칼날 쳐내기'
+const PARRY_WINDOW := 7          # 누른 뒤 이 프레임 안에 들어오는 쪽(Moves.parry_side)으로 받으면 '쳐내기'
 const PARRY_MIN := 12            # 짧게 눌러도 이만큼은 막는 자세
 const PARRY_END := 8             # 막기를 풀고 돌아오는 동안은 빈틈
 const PARRY_SPAM := 24           # 막기를 푼 뒤 이 안에 다시 누르면 판정 창이 줄어든다
@@ -53,6 +53,8 @@ var run_speed := 4.6
 var intent := {}
 var buf_attack := 0
 var buf_parry := 0
+var buf_parry_side := "R"
+var parry_side := "R"            # 지금 쳐내는 쪽 (L 왼 · R 오른, 내 기준) — 반대쪽이면 막기만 된다
 var buf_roll := 0
 var parry_bonus := 0
 var last_parry_end := -999
@@ -121,14 +123,14 @@ func parry_open() -> bool:
 	return state == "parry" and t <= PARRY_WINDOW + parry_bonus + parry_extra
 
 
-## 예고: [종류, 판정까지 남은 프레임] — 종류 parry(흰 !) · unblock(빨간 !). 예고가 없으면 [].
+## 예고: [종류, 판정까지 남은 프레임, 쳐낼 쪽] — 종류 parry(흰 !) · unblock(빨간 !), 쪽은 받는 사람 기준 L · R. 없으면 [].
 func telegraph() -> Array:
 	if state != "attack" or str(move["telegraph"]) == "":
 		return []
 	var left := int(move["startup"]) - t
 	if left < 0:
 		return []
-	return [str(move["telegraph"]), left]
+	return [str(move["telegraph"]), left, Moves.parry_side(move)]
 
 
 func dir_to(other) -> Vector2:
@@ -146,6 +148,7 @@ func buffer_inputs() -> void:
 		buf_attack = ATTACK_BUFFER
 	if intent.get("parry", false):
 		buf_parry = PARRY_BUFFER
+		buf_parry_side = str(intent.get("parry_side", "R"))
 	if intent.get("roll", false):
 		buf_roll = ROLL_BUFFER
 
@@ -153,6 +156,8 @@ func buffer_inputs() -> void:
 func _decay_buffers() -> void:
 	buf_attack = ATTACK_BUFFER if intent.get("attack", false) else maxi(0, buf_attack - 1)
 	buf_parry = PARRY_BUFFER if intent.get("parry", false) else maxi(0, buf_parry - 1)
+	if intent.get("parry", false):
+		buf_parry_side = str(intent.get("parry_side", "R"))
 	buf_roll = ROLL_BUFFER if intent.get("roll", false) else maxi(0, buf_roll - 1)
 
 
@@ -177,7 +182,10 @@ func tick() -> void:
 		"attack":
 			_tick_attack()
 		"parry":
-			if t >= PARRY_MIN and not intent.get("parry_held", false):
+			if buf_parry > 0 and buf_parry_side != parry_side:
+				_start_parry()                       # 반대쪽으로 바꿔 쳐내기 — 다시 누른 셈이라 판정 창이 줄어든다
+				parry_bonus = -3
+			elif t >= PARRY_MIN and not intent.get("parry_held", false):
 				last_parry_end = clock
 				set_state("parry_end")
 		"parry_end":
@@ -301,6 +309,7 @@ func _tick_attack() -> void:
 
 func _start_parry() -> void:
 	buf_parry = 0
+	parry_side = buf_parry_side
 	parry_bonus = -3 if clock - last_parry_end < PARRY_SPAM else 0
 	set_state("parry")
 

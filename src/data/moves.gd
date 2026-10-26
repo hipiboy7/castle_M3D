@@ -10,7 +10,7 @@ const DEFAULTS := {
 	"reach": 14.0, "radius": 9.0, "arc": 0.0, "parryable": true, "knockback": 1.6,
 	"hitstun": 16, "hitstop": 4, "knockdown": false, "posture": 10.0, "lunge": 0.0,
 	"next": "", "cancel": -1, "telegraph": "", "shape": "slash", "sfx": "swing", "hit_sfx": "hit",
-	"shake": 0, "hits": 1, "side": 0.0, "skill": false, "feints": [], "any_state": false, "hand": "R",
+	"shake": 0, "hits": 1, "side": 0.0, "skill": false, "feints": [], "any_state": false, "hand": "R",      # hand: 치는 손 · 발 (R · L)
 }
 
 const M := {
@@ -79,6 +79,14 @@ static func get_move(name: String) -> Dictionary:
 	d["knockback"] = float(d["knockback"]) * PX * 6.0     # px/프레임 넉백 → m/초 첫 속도
 	_cache[name] = d
 	return d
+
+
+## 쳐내야 하는 쪽 (막는 사람 기준 L · R) — 칼날 · 주먹 · 발차기 모두 들어오는 쪽으로 받아야 쳐내진다.
+## 들어오는 쪽(치는 사람 기준): 바로 베기(slash)는 오른쪽, 되베기(slash_back)는 왼쪽(fx3d.swing 궤적이 시작하는 쪽),
+## 찌르기 · 주먹 · 발차기는 그 손 · 발("hand"). 마주 보고 있으니 치는 사람의 오른쪽은 막는 사람의 왼쪽이다.
+static func parry_side(mv: Dictionary) -> String:
+	var from := "L" if str(mv["shape"]) == "slash_back" else str(mv["hand"])
+	return "R" if from == "L" else "L"
 
 
 static func total(mv: Dictionary) -> int:

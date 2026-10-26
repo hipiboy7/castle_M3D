@@ -383,7 +383,12 @@ func _target_pose(f, dt: float) -> Dictionary:
 		"attack":
 			return _attack_pose(f)
 		"parry":
-			return _merge(guard_pose, P.PARRY)
+			# 쳐내는 쪽 팔만 세우고 반대 팔은 가드 그대로
+			var pp := _merge(guard_pose, P.PARRY)
+			var off := "l" if f.parry_side == "R" else "r"
+			pp["sh_" + off] = guard_pose["sh_" + off]
+			pp["el_" + off] = guard_pose["el_" + off]
+			return pp
 		"roll":
 			var u := float(f.t) / Fighter.ROLL_T
 			var p := _merge(guard_pose, P.TUCK)
@@ -526,6 +531,7 @@ func _update_telegraph(f) -> void:
 	if f.state == "stagger":
 		tele.visible = true
 		tele.text = "빈틈"
+		tele.position = Vector3(0, 2.22, 0)
 		tele.font_size = 64
 		tele.modulate = Color(1.0, 0.82, 0.3, 1.0)
 		tele.scale = Vector3.ONE
@@ -538,8 +544,11 @@ func _update_telegraph(f) -> void:
 	var left: int = tg[1]
 	var big := left <= 6
 	tele.visible = true
-	tele.text = "!"
-	tele.font_size = 96
+	# 흰 ! 는 쳐낼 쪽(받는 사람 기준)을 글자로 적고, 공격이 들어오는 쪽(치는 사람 기준 반대 손)으로 비켜 띄운다
+	var side: String = tg[2]
+	tele.text = ("왼!" if side == "L" else "오른!") if kind == "parry" else "!"
+	tele.font_size = 80 if kind == "parry" else 96
+	tele.position = Vector3((0.42 if side == "L" else -0.42) if kind == "parry" else 0.0, 2.22, 0)
 	var col := Color(1, 1, 1) if kind == "parry" else Color(1.0, 0.22, 0.18)
 	col.a = 0.5 if big and left % 2 == 1 else 1.0
 	tele.modulate = col

@@ -1,9 +1,10 @@
 extends RefCounted
-## 결투 판정 — 공격 판정 · 구르기 무적 · 칼날 쳐내기 · 막기 · 체간 · 빈틈 · 제압 · 역경직 · 페이즈.
+## 결투 판정 — 공격 판정 · 구르기 무적 · 왼쪽 · 오른쪽 쳐내기 · 막기 · 체간 · 빈틈 · 제압 · 역경직 · 페이즈.
 ## castle_M `castle_m/action/combat.py` 와 P2 설계서 8.3절(보스 규칙)의 수치를 초안 크기로 옮겼다.
 ## 순수 로직이라 테스트(tests/test_combat.gd)와 자동 플레이(--autoplay)가 그림 없이 돌린다.
 
 const Fighter = preload("res://src/combat/fighter.gd")
+const Moves = preload("res://src/data/moves.gd")
 
 const PARRY_HITSTOP := 9
 const PARRY_SHAKE := 4
@@ -128,7 +129,8 @@ func _resolve(a, d) -> void:
 		events.append(["dodge", d, at])
 		return
 	var parryable: bool = mv["parryable"]
-	if parryable and d.parry_open() and _faces(d, a):
+	# 쳐내기는 들어오는 쪽(칼날 · 주먹 · 발차기 모두)으로 받아야 한다. 반대쪽이거나 늦으면 막기만 된다
+	if parryable and d.parry_open() and d.parry_side == Moves.parry_side(mv) and _faces(d, a):
 		_parry(a, d, at)
 		return
 	if parryable and d.state == "parry" and _faces(d, a):

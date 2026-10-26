@@ -3,6 +3,7 @@ extends RefCounted
 
 const Duel = preload("res://src/combat/duel.gd")
 const Fighter = preload("res://src/combat/fighter.gd")
+const Moves = preload("res://src/data/moves.gd")
 
 var failures: Array = []
 
@@ -57,7 +58,7 @@ func test_parry_recoils_attacker() -> void:
 	_tick(d, {}, {"use": "b_slash1"})                       # 준비 14 → 판정 15
 	for i in 10:
 		_tick(d)
-	_tick(d, {"parry": true, "parry_held": true})           # 판정 4프레임 전
+	_tick(d, {"parry": true, "parry_side": "L", "parry_held": true})   # 판정 4프레임 전 · 오른쪽 베기는 왼쪽으로 받는다
 	var seen := false
 	for i in 12:
 		_tick(d, {"parry_held": true})
@@ -67,6 +68,31 @@ func test_parry_recoils_attacker() -> void:
 	check(is_equal_approx(d["hero"].hp, Duel.HERO["hp"]), "쳐내면 안 맞는다")
 	check(d["boss"].posture > 0.0, "쳐내기 당한 쪽 체간이 찬다")
 	check(d["hero"].counter_ready > 0, "쳐낸 쪽은 반격 베기를 낼 수 있다")
+
+
+func test_parry_wrong_side_only_blocks() -> void:
+	var d := _close(0.9)
+	_tick(d, {}, {"use": "b_slash1"})                       # 바로 베기 = 백도찬 오른쪽 → 김신 왼쪽
+	for i in 10:
+		_tick(d)
+	_tick(d, {"parry": true, "parry_side": "R", "parry_held": true})
+	var parried := false
+	var blocked := false
+	for i in 12:
+		_tick(d, {"parry_held": true})
+		for e in d["world"].events:
+			parried = parried or e[0] == "parry"
+			blocked = blocked or e[0] == "block"
+	check(not parried and blocked, "반대쪽으로 받으면 막기만 된다 (parry %s · block %s)" % [parried, blocked])
+	check(d["hero"].hp < Duel.HERO["hp"], "막기는 피해를 조금 받는다")
+
+
+func test_parry_side_by_limb() -> void:
+	check(Moves.parry_side(Moves.get_move("b_slash1")) == "L", "바로 베기 → 왼쪽")
+	check(Moves.parry_side(Moves.get_move("b_slash2")) == "R", "되베기 → 오른쪽")
+	check(Moves.parry_side(Moves.get_move("b_thrust")) == "L", "오른손 찌르기 → 왼쪽")
+	check(Moves.parry_side(Moves.get_move("b_sidekick")) == "L", "오른발 옆차기 → 왼쪽")
+	check(Moves.parry_side({"shape": "thrust", "hand": "L"}) == "R", "왼손 · 왼발(주먹 · 발차기 포함) → 오른쪽")
 
 
 func test_unblockable_ignores_parry() -> void:
