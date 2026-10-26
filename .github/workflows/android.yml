@@ -109,14 +109,12 @@ jobs:
           # Godot(X11)가 dlopen 으로 여는 X 라이브러리 + Mesa 소프트웨어 OpenGL(llvmpipe)
           sudo apt-get update -q && sudo apt-get install -y -q xvfb libgl1 libgl1-mesa-dri libglx-mesa0 libegl1 \
             libx11-6 libxcursor1 libxinerama1 libxrandr2 libxi6 libxext6 libxrender1 libxkbcommon0 > /dev/null
-          mkdir -p shots/pc shots/phone
-          timeout 420 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy \
-            --resolution 1280x720 --fixed-fps 60 -- --autoplay --seed 2 --seconds 42 \
-            --shots "$PWD/shots/pc:150,300,420,600,780,1000,1200,1420,1650,1880,2100,2300,2460" 2>&1 | grep --line-buffered -vE "^\s*$" || true
+          # 모바일 우선(2026-10-26 사용자) — 폰 화면만 찍는다. PC 화면(1280x720)은 PC 판을 시작할 때 다시 넣는다
+          mkdir -p shots/phone
           timeout 420 xvfb-run -a -s "-screen 0 2340x1080x24" "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy \
-            --resolution 2340x1080 --fixed-fps 60 -- --autoplay --touch --seed 4 --seconds 30 \
-            --shots "$PWD/shots/phone:300,600,900,1200,1500" 2>&1 | grep --line-buffered -vE "^\s*$" || true
-          ls -la shots/pc shots/phone
+            --resolution 2340x1080 --fixed-fps 60 -- --autoplay --touch --seed 2 --seconds 42 \
+            --shots "$PWD/shots/phone:300,420,600,900,1200,1650,2100,2460" 2>&1 | grep --line-buffered -vE "^\s*$" || true
+          ls -la shots/phone
 
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
