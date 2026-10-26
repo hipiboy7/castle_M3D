@@ -1,0 +1,546 @@
+extends Node3D
+## 3D 관절 인형 — 뼈 길이가 고정된 노드 계층(골반 → 허리 → 가슴 → 목 → 머리, 어깨 → 팔꿈치 → 손, 엉덩이 → 무릎 → 발목)에
+## 캡슐 · 원기둥 몸을 붙이고 관절 각도(src/view/poses.gd)로 자세를 잡는다. 길이는 노드 위치라 자세가 바뀌어도 그대로다
+## (castle_M 2D 인형의 '팔다리 길이가 자세마다 늘었다 줄었다' 하던 문제 — castle_M history 2026-10-26).
+## 상태가 바뀌면 자세를 지수 감쇠로 섞고(크로스페이드), 걷기 · 달리기는 주기 함수, 발은 땅에 붙인다(가장 낮은 발목 = 땅).
+## 나중에 ArtCraft · Mixamo GLB 캐릭터로 바꿀 때는 같은 update_from(f, dt, frozen) 을 가진 그림으로 바꿔 끼운다.
+
+const P = preload("res://src/view/poses.gd")
+const Fighter = preload("res://src/combat/fighter.gd")
+const FONT = preload("res://assets/fonts/Galmuri11-Bold.ttf")
+
+const PELVIS_H := 0.97
+const HIP_W := 0.095
+const THIGH := 0.45
+const SHIN := 0.44
+const ANKLE_H := 0.055
+const CHEST_UP := 0.27
+const NECK_UP := 0.215
+const HEAD_UP := 0.135
+const SHOULDER_W := 0.2
+const SHOULDER_UP := 0.165
+const UPPER_ARM := 0.29
+const FOREARM := 0.26
+const ROLL_PIVOT := 0.45
+const GRIP_FWD := Vector3(0, -0.82, -0.57)    # 바로 쥔 칼날 방향 (손 좌표: 아래팔 연장선에서 엄지 쪽으로)
+const GRIP_REV := Vector3(0, 0.55, 0.83)      # 거꾸로 쥔 칼날 (새끼손가락 쪽 → 아래팔을 따라 뒤로)
+
+var look: Dictionary
+var J := {}
+var mats: Array = []
+var cur := {}
+var guard_pose := {}
+var shape_keys := {}
+var phase := 0.0
+var yaw := 0.0
+var time := 0.0
+var glasses: Node3D = null
+var tele: Label3D
+var weapon_r: Node3D = null
+var weapon_l: Node3D = null
+var victory := false
+var _last_state := ""
+
+
+func setup(lk: Dictionary) -> void:
+	look = lk
+	guard_pose = _merge(P.NEUTRAL, P.GUARD_KIM if lk.get("guard", "kim") == "kim" else P.GUARD_BAEK)
+	for sh in P.SHAPES:
+		var keys: Dictionary = P.SHAPES[sh]
+		var w := _merge(guard_pose, keys["W"])
+		var s := _merge(w, keys["S"])
+		if sh.begins_with("slash"):
+			s = _merge(_merge(w, P.LUNGE_LEGS), keys["S"])
+		var f := _merge(s, keys["F"])
+		shape_keys[sh] = [w, s, f]
+	cur = guard_pose.duplicate()
+	_build()
+	_apply(cur)
+
+
+# ----------------------------------------------------------------------
+# 몸 만들기
+func _build() -> void:
+	var lk := look
+	var big: bool = lk.get("big", false)
+	var suit := _mat(lk["suit"], 0.74, 0.45)
+	var pants := _mat(lk["pants"], 0.78, 0.4)
+	var shirt := _mat(lk["shirt"], 0.85, 0.2)
+	var skin := _mat(lk["skin"], 0.62, 0.25)
+	var hair := _mat(lk["hair"], 0.42, 0.35)
+	var shoe := _mat(Color(0.05, 0.05, 0.06), 0.35, 0.3)
+	var eye := _mat(Color(0.07, 0.05, 0.05), 0.5, 0.0)
+	var wide := 1.08 if big else 1.0
+
+	J["fall"] = _node(self, Vector3.ZERO)
+	J["roll"] = _node(J["fall"], Vector3(0, ROLL_PIVOT, 0))
+	J["body"] = _node(J["roll"], Vector3(0, -ROLL_PIVOT, 0))
+	J["body"].scale = Vector3.ONE * (1.06 if big else 1.0)
+	J["hips"] = _node(J["body"], Vector3(0, PELVIS_H, 0))
+	_mesh(J["hips"], _capsule(0.125, 0.36), pants, Vector3(0, -0.03, 0), Vector3(0, 0, 90), Vector3(1, wide, 0.8))
+	J["spine"] = _node(J["hips"], Vector3(0, 0.02, 0))
+	_mesh(J["spine"], _capsule(0.13, 0.32), suit, Vector3(0, 0.12, 0), Vector3.ZERO, Vector3(1.12 * wide, 1, 0.74))
+	J["chest"] = _node(J["spine"], Vector3(0, CHEST_UP, 0))
+	_mesh(J["chest"], _cyl(0.2 * wide, 0.15 * wide, 0.34), suit, Vector3(0, 0.05, 0), Vector3.ZERO, Vector3(1, 1, 0.6))
+	_mesh(J["chest"], _capsule(0.082, 0.48 * wide), suit, Vector3(0, 0.15, 0), Vector3(0, 0, 90), Vector3(1, 1, 0.78))
+	# 셔츠 V · 넥타이 · 깃 (앞은 -Z)
+	_mesh(J["chest"], _box(Vector3(0.1, 0.2, 0.012)), shirt, Vector3(0, 0.12, -0.118))
+	_mesh(J["chest"], _cyl(0.062, 0.066, 0.04), shirt, Vector3(0, 0.205, -0.004))
+	if lk.get("tie") != null:
+		_mesh(J["chest"], _box(Vector3(0.036, 0.24, 0.014)), _mat(lk["tie"], 0.5, 0.2), Vector3(0, 0.085, -0.127))
+	J["neck"] = _node(J["chest"], Vector3(0, NECK_UP, 0))
+	_mesh(J["neck"], _cyl(0.047, 0.05, 0.12), skin, Vector3(0, 0.03, 0))
+	J["head"] = _node(J["neck"], Vector3(0, HEAD_UP, 0))
+	_mesh(J["head"], _sphere(0.105, 0.232), skin, Vector3(0, 0, 0))
+	_mesh(J["head"], _box(Vector3(0.022, 0.036, 0.022)), skin, Vector3(0, -0.012, -0.104))     # 코
+	for sx in [-1.0, 1.0]:
+		_mesh(J["head"], _sphere(0.022, 0.044), skin, Vector3(0.103 * sx, -0.004, 0.006))     # 귀
+		_mesh(J["head"], _box(Vector3(0.021, 0.011, 0.012)), eye, Vector3(0.037 * sx, 0.008, -0.096))
+	_hair(J["head"], hair, str(lk.get("hair_style", "short")))
+	if lk.get("glasses", false):
+		glasses = _glasses(J["head"])
+	# 팔 · 다리
+	for side in ["r", "l"]:
+		var sx := 1.0 if side == "r" else -1.0
+		var sh := _node(J["chest"], Vector3(sx * SHOULDER_W * wide, SHOULDER_UP, 0))
+		J["sh_" + side] = sh
+		_mesh(sh, _sphere(0.072, 0.144), suit, Vector3.ZERO)
+		_mesh(sh, _capsule(0.058 * wide, 0.34), suit, Vector3(0, -UPPER_ARM * 0.5, 0))
+		var el := _node(sh, Vector3(0, -UPPER_ARM, 0))
+		J["el_" + side] = el
+		_mesh(el, _capsule(0.048 * wide, 0.29), suit, Vector3(0, -FOREARM * 0.5, 0))
+		_mesh(el, _cyl(0.05, 0.05, 0.028), shirt, Vector3(0, -FOREARM + 0.028, 0))            # 소맷부리
+		var hand := _node(el, Vector3(0, -FOREARM, 0))
+		J["hand_" + side] = hand
+		_mesh(hand, _sphere(0.046, 0.1), skin, Vector3(0, -0.044, -0.004), Vector3.ZERO, Vector3(0.82, 1, 1))
+		var th := _node(J["hips"], Vector3(sx * HIP_W * wide, -0.03, 0))
+		J["th_" + side] = th
+		_mesh(th, _capsule(0.083 * wide, 0.5), pants, Vector3(0, -THIGH * 0.5, 0))
+		var kn := _node(th, Vector3(0, -THIGH, 0))
+		J["kn_" + side] = kn
+		_mesh(kn, _capsule(0.062 * wide, 0.48), pants, Vector3(0, -SHIN * 0.5, 0))
+		var ft := _node(kn, Vector3(0, -SHIN, 0))
+		J["ft_" + side] = ft
+		_mesh(ft, _capsule(0.045, 0.26), shoe, Vector3(0, -0.012, -0.055), Vector3(90, 0, 0), Vector3(1.05, 1, 0.9))
+	weapon_r = _attach(J["hand_r"], str(lk.get("weapon_r", "")), GRIP_FWD)
+	weapon_l = _attach(J["hand_l"], str(lk.get("weapon_l", "")), GRIP_REV)
+	# 예고 표시 (흰 ! 쳐내기 · 빨간 ! 가드 불가 · 빈틈)
+	tele = Label3D.new()
+	tele.font = FONT
+	tele.font_size = 96
+	tele.outline_size = 22
+	tele.outline_modulate = Color(0, 0, 0, 0.9)
+	tele.pixel_size = 0.0045
+	tele.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	tele.no_depth_test = true
+	tele.position = Vector3(0, 2.22, 0)
+	tele.visible = false
+	add_child(tele)
+
+
+func _hair(head: Node3D, m: Material, style: String) -> void:
+	if style == "parted":
+		_mesh(head, _sphere(0.114, 0.2), m, Vector3(0, 0.04, 0.012), Vector3.ZERO, Vector3(1.0, 0.76, 1.04))
+		_mesh(head, _box(Vector3(0.11, 0.03, 0.17)), m, Vector3(0.034, 0.088, -0.004), Vector3(0, 0, -12))
+		_mesh(head, _box(Vector3(0.16, 0.03, 0.04)), m, Vector3(-0.01, 0.072, -0.086), Vector3(-24, 0, -8))
+	else:
+		_mesh(head, _sphere(0.113, 0.2), m, Vector3(0, 0.036, 0.012), Vector3.ZERO, Vector3(1.0, 0.8, 1.03))
+		_mesh(head, _box(Vector3(0.15, 0.036, 0.05)), m, Vector3(0, 0.07, -0.084), Vector3(-22, 0, 0))
+
+
+func _glasses(head: Node3D) -> Node3D:
+	var g := _node(head, Vector3.ZERO)
+	var frame := _mat(Color(0.12, 0.12, 0.15), 0.3, 0.0, 0.7)
+	for sx in [-1.0, 1.0]:
+		var ring := TorusMesh.new()
+		ring.inner_radius = 0.016
+		ring.outer_radius = 0.021
+		ring.rings = 12
+		ring.ring_segments = 6
+		_mesh(g, ring, frame, Vector3(0.038 * sx, 0.01, -0.103), Vector3(90, 0, 0))
+		_mesh(g, _box(Vector3(0.005, 0.005, 0.09)), frame, Vector3(0.06 * sx, 0.012, -0.062))
+	_mesh(g, _box(Vector3(0.03, 0.005, 0.006)), frame, Vector3(0, 0.014, -0.106))
+	return g
+
+
+func remove_glasses() -> void:
+	if glasses != null:
+		glasses.visible = false
+
+
+func _attach(hand: Node3D, kind: String, dir: Vector3) -> Node3D:
+	if kind == "":
+		return null
+	var w := _knife(kind)
+	w.position = Vector3(0, -0.05, -0.006)
+	w.basis = Basis(Quaternion(Vector3.UP, dir.normalized()))
+	hand.add_child(w)
+	return w
+
+
+## 칼 (칼날이 +Y). gerber: 김신 거버 Mark II — 양날 창끝 · 고무 손잡이 / sashimi: 백도찬 — 길고 가는 외날 · 나무 손잡이
+func _knife(kind: String) -> Node3D:
+	var root := Node3D.new()
+	var steel := _mat(Color(0.86, 0.88, 0.92), 0.16, 0.0, 0.95)
+	if kind == "sashimi":
+		_mesh(root, _cyl(0.012, 0.012, 0.12), _mat(Color(0.45, 0.3, 0.17), 0.8, 0.0), Vector3(0, -0.01, 0))
+		_mesh(root, _box(Vector3(0.026, 0.25, 0.004)), steel, Vector3(0, 0.175, 0))
+		var tip := PrismMesh.new()
+		tip.size = Vector3(0.026, 0.055, 0.004)
+		tip.left_to_right = 1.0
+		_mesh(root, tip, steel, Vector3(0, 0.3275, 0))
+	else:
+		_mesh(root, _cyl(0.013, 0.013, 0.11), _mat(Color(0.09, 0.09, 0.1), 0.85, 0.0), Vector3(0, -0.01, 0))
+		_mesh(root, _box(Vector3(0.056, 0.012, 0.02)), _mat(Color(0.3, 0.3, 0.33), 0.3, 0.0, 0.8), Vector3(0, 0.05, 0))
+		var blade := CylinderMesh.new()
+		blade.top_radius = 0.0
+		blade.bottom_radius = 0.02
+		blade.height = 0.17
+		blade.radial_segments = 4
+		blade.rings = 1
+		_mesh(root, blade, steel, Vector3(0, 0.14, 0), Vector3(0, 45, 0), Vector3(1, 1, 0.3))
+	return root
+
+
+func _node(parent: Node3D, pos: Vector3) -> Node3D:
+	var n := Node3D.new()
+	n.position = pos
+	parent.add_child(n)
+	return n
+
+
+func _mesh(parent: Node3D, mesh: Mesh, mat: Material, pos := Vector3.ZERO, rot := Vector3.ZERO, scl := Vector3.ONE) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.material_override = mat
+	mi.position = pos
+	mi.rotation_degrees = rot
+	mi.scale = scl
+	parent.add_child(mi)
+	return mi
+
+
+func _mat(c: Color, rough := 0.7, rim := 0.3, metal := 0.0) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	m.roughness = rough
+	m.metallic = metal
+	if rim > 0.0:
+		m.rim_enabled = true
+		m.rim = rim
+		m.rim_tint = 0.35
+	# 번쩍임 때 셰이더를 새로 만들지 않게 발광은 늘 켜 두고 색만 바꾼다
+	m.emission_enabled = true
+	m.emission = Color(0, 0, 0)
+	mats.append(m)
+	return m
+
+
+func _capsule(r: float, h: float) -> CapsuleMesh:
+	var m := CapsuleMesh.new()
+	m.radius = r
+	m.height = maxf(h, r * 2.0)
+	m.radial_segments = 12
+	m.rings = 4
+	return m
+
+
+func _cyl(top: float, bottom: float, h: float) -> CylinderMesh:
+	var m := CylinderMesh.new()
+	m.top_radius = top
+	m.bottom_radius = bottom
+	m.height = h
+	m.radial_segments = 14
+	m.rings = 1
+	return m
+
+
+func _sphere(r: float, h: float) -> SphereMesh:
+	var m := SphereMesh.new()
+	m.radius = r
+	m.height = h
+	m.radial_segments = 16
+	m.rings = 8
+	return m
+
+
+func _box(size: Vector3) -> BoxMesh:
+	var m := BoxMesh.new()
+	m.size = size
+	return m
+
+
+# ----------------------------------------------------------------------
+# 자세
+static func _merge(a: Dictionary, b: Dictionary) -> Dictionary:
+	var out := a.duplicate()
+	for k in b:
+		out[k] = b[k]
+	return out
+
+
+static func _lerp_pose(a: Dictionary, b: Dictionary, k: float) -> Dictionary:
+	var out := {}
+	for key in P.NEUTRAL:
+		var va = a.get(key, P.NEUTRAL[key])
+		var vb = b.get(key, P.NEUTRAL[key])
+		if va is Vector3:
+			out[key] = (va as Vector3).lerp(vb, k)
+		else:
+			out[key] = lerpf(float(va), float(vb), k)
+	return out
+
+
+static func _ease_out(u: float) -> float:
+	u = clampf(u, 0.0, 1.0)
+	return 1.0 - (1.0 - u) * (1.0 - u)
+
+
+static func _ease_in_out(u: float) -> float:
+	u = clampf(u, 0.0, 1.0)
+	return u * u * (3.0 - 2.0 * u)
+
+
+static func _torso(v: Vector3) -> Vector3:
+	return Vector3(deg_to_rad(-v.x), deg_to_rad(v.y), deg_to_rad(-v.z))
+
+
+static func _limb(v: Vector3, side: float) -> Vector3:
+	return Vector3(deg_to_rad(v.x), deg_to_rad(v.y * side), deg_to_rad(v.z * side))
+
+
+func _apply(p: Dictionary) -> void:
+	J["hips"].position = Vector3(0, PELVIS_H + float(p["root_y"]), -float(p["root_fwd"]))
+	J["hips"].rotation = _torso(p["pelvis"])
+	J["spine"].rotation = _torso(p["spine"])
+	J["chest"].rotation = _torso(p["chest"])
+	J["neck"].rotation = _torso(p["head"])
+	for side in ["r", "l"]:
+		var sx := 1.0 if side == "r" else -1.0
+		J["sh_" + side].rotation = _limb(p["sh_" + side], sx)
+		J["el_" + side].rotation = Vector3(deg_to_rad(float(p["el_" + side])), 0, 0)
+		J["hand_" + side].rotation = _limb(p["wr_" + side], sx)
+		J["th_" + side].rotation = _limb(p["th_" + side], sx)
+		J["kn_" + side].rotation = Vector3(-deg_to_rad(float(p["kn_" + side])), 0, 0)
+		J["ft_" + side].rotation = Vector3(deg_to_rad(float(p["ft_" + side])), 0, 0)
+	J["body"].rotation = Vector3(0, deg_to_rad(float(p["spin"])), 0)
+	J["roll"].rotation = Vector3(deg_to_rad(float(p["roll"])), 0, 0)
+	var fall := deg_to_rad(float(p["fall"]))
+	J["fall"].rotation = Vector3(fall, 0, 0)
+	J["fall"].position = Vector3(0, 0.11 * sin(fall), 0)
+
+
+## 발 붙이기: 가장 낮은 발목이 땅 높이에 오도록 골반을 올리거나 내린다 (무릎을 굽히면 몸이 낮아진다)
+func _ground() -> void:
+	var lo := INF
+	for side in ["r", "l"]:
+		lo = minf(lo, to_local(J["ft_" + side].global_position).y)
+	var k: float = J["body"].scale.y
+	J["hips"].position.y += (ANKLE_H * k - lo) / k
+
+
+func update_from(f, dt: float, frozen: bool) -> void:
+	position = Vector3(f.pos.x, 0, f.pos.y)
+	_update_flash(f)
+	_update_telegraph(f)
+	if frozen:
+		return                                   # 역경직: 자세를 그대로 멈춘다
+	time += dt
+	if f.state != _last_state:
+		# 돌기 · 구르기 각도를 짧은 쪽으로 감아 둔다 (세 바퀴 돈 뒤 거꾸로 풀리지 않게)
+		cur["spin"] = wrapf(float(cur["spin"]), -180.0, 180.0)
+		cur["roll"] = wrapf(float(cur["roll"]), -180.0, 180.0)
+		_last_state = f.state
+	var target := _target_pose(f, dt)
+	var rate := 15.0
+	match f.state:
+		"attack":
+			rate = 38.0
+		"roll":
+			rate = 40.0
+		"recoil", "hitstun", "parry", "down", "dead":
+			rate = 28.0
+	cur = _lerp_pose(cur, target, 1.0 - exp(-rate * dt))
+	if f.state == "attack":
+		cur["spin"] = target["spin"]
+	elif f.state == "roll":
+		cur["roll"] = target["roll"]
+	_apply(cur)
+	if f.state != "roll" and f.state != "down" and f.state != "dead":
+		_ground()
+	var want: Vector2 = f.roll_dir if f.state == "roll" else f.facing
+	var yaw_rate := 40.0 if f.state == "roll" or f.state == "attack" else 14.0
+	yaw = lerp_angle(yaw, atan2(-want.x, -want.y), 1.0 - exp(-yaw_rate * dt))
+	rotation.y = yaw
+
+
+func _target_pose(f, dt: float) -> Dictionary:
+	if victory:
+		return _merge(guard_pose, P.VICTORY)
+	match f.state:
+		"idle", "move":
+			return _locomotion(f, dt)
+		"attack":
+			return _attack_pose(f)
+		"parry":
+			return _merge(guard_pose, P.PARRY)
+		"roll":
+			var u := float(f.t) / Fighter.ROLL_T
+			var p := _merge(guard_pose, P.TUCK)
+			p["root_y"] = -0.4
+			if u > 0.75:
+				p = _lerp_pose(p, guard_pose, (u - 0.75) / 0.25)
+			p["roll"] = -360.0 * _ease_in_out(u)
+			return p
+		"hitstun":
+			return _merge(guard_pose, P.HURT)
+		"recoil":
+			return _merge(guard_pose, P.RECOIL)
+		"stagger":
+			var q := _merge(guard_pose, P.STAGGER)
+			q["chest"] = q["chest"] + Vector3(0, 0, 9.0 * sin(time * 4.5))
+			q["head"] = q["head"] + Vector3(0, 0, 12.0 * sin(time * 4.5 - 0.6))
+			return q
+		"down":
+			return _down_pose(f, true)
+		"dead":
+			return _down_pose(f, false)
+	return guard_pose
+
+
+func _locomotion(f, dt: float) -> Dictionary:
+	var p: Dictionary = guard_pose.duplicate()
+	if f.flick_t > 0:
+		p = _merge(p, P.FLICK)
+	p["chest"] = p["chest"] + Vector3(1.4 * sin(time * 2.3), 0, 0)      # 숨
+	var sp: float = f.speed_now
+	if sp < 0.2:
+		return p
+	var mv: Vector2 = f.move_vec.normalized()
+	var fwd: float = mv.dot(f.facing)
+	var side: float = mv.dot(Vector2(-f.facing.y, f.facing.x))
+	var run := sp > 3.2
+	var cadence := 2.7 if run else 1.7 + 0.5 * clampf(sp / 2.1, 0.0, 1.0)
+	phase = fmod(phase + TAU * cadence * dt, TAU)
+	var s := sin(phase)
+	var c := cos(phase)
+	if run:
+		return _merge(p, {
+			"pelvis": Vector3(12, 8 * s, 0), "spine": Vector3(4, 0, 0), "chest": Vector3(6, -12 * s, 0),
+			"head": Vector3(-14, 4 * s, 0),
+			"th_r": Vector3(46 * s + 6, 0, 4), "th_l": Vector3(-46 * s + 6, 0, 4),
+			"kn_r": 16.0 + 80.0 * maxf(0.0, c), "kn_l": 16.0 + 80.0 * maxf(0.0, -c),
+			"ft_r": -12.0 * s, "ft_l": 12.0 * s,
+			"sh_r": Vector3(-36 * s + 18, 10, 14), "el_r": 88.0, "sh_l": Vector3(36 * s + 18, 10, 14), "el_l": 88.0,
+		})
+	# 칼 자세 그대로 발만 옮긴다 (마주 본 채 앞뒤 · 옆걸음)
+	var amp := 26.0 * clampf(sp / 2.1, 0.4, 1.0)
+	p["th_r"] = p["th_r"] + Vector3(amp * s * fwd, 0, 14.0 * s * side)
+	p["th_l"] = p["th_l"] + Vector3(-amp * s * fwd, 0, -14.0 * s * side)
+	p["kn_r"] = float(p["kn_r"]) + 24.0 * maxf(0.0, c)
+	p["kn_l"] = float(p["kn_l"]) + 24.0 * maxf(0.0, -c)
+	p["sh_r"] = p["sh_r"] + Vector3(4.0 * s, 0, 0)
+	p["sh_l"] = p["sh_l"] + Vector3(-4.0 * s, 0, 0)
+	return p
+
+
+func _attack_pose(f) -> Dictionary:
+	var mv: Dictionary = f.move
+	var shape := str(mv["shape"])
+	if shape == "slash_back":
+		shape = "slash_back_L" if str(mv["hand"]) == "L" and weapon_l != null else "slash_back_R"
+	var keys: Array = shape_keys.get(shape, shape_keys["slash"])
+	var w: Dictionary = keys[0]
+	var s: Dictionary = keys[1]
+	var fo: Dictionary = keys[2]
+	var su := int(mv["startup"])
+	var ac := int(mv["active"])
+	var rc := int(mv["recovery"])
+	var t: int = f.t
+	if t <= su:
+		var u := float(t) / maxf(1.0, su)
+		if shape == "sidekick":
+			return _sidekick_windup(f, u, w)
+		var p := _lerp_pose(guard_pose, w, _ease_in_out(u))
+		for fr in mv["feints"]:
+			if t >= int(fr) and t < int(fr) + 4:
+				p = _lerp_pose(w, s, 0.7)       # 멈칫: 치는 척만 하고 몸은 다시 준비로
+		return p
+	if t <= su + ac:
+		var u2 := float(t - su) / maxf(1.0, ac)
+		var p2 := _lerp_pose(w, s, minf(1.0, _ease_out(u2) * 1.5))
+		if shape == "spin":
+			p2["spin"] = 1080.0 * u2
+		return p2
+	var rt := t - su - ac
+	var hold := maxi(2, int(rc * 0.45))
+	var p3: Dictionary
+	if rt <= hold:
+		p3 = _lerp_pose(s, fo, _ease_out(float(rt) / hold))
+	else:
+		p3 = _lerp_pose(fo, guard_pose, _ease_in_out(float(rt - hold) / maxf(1.0, rc - hold)))
+	if shape == "spin":
+		p3["spin"] = 1080.0
+	return p3
+
+
+## 백도찬식 옆차기 준비: 빠르게 발을 구르며 달려나가다(앞 65%) 몸을 돌려 무릎을 접는다
+func _sidekick_windup(f, u: float, w: Dictionary) -> Dictionary:
+	var stomp := 0.65
+	var turn := _merge(guard_pose, {"spin": 50.0, "head": Vector3(-6, -60, 0), "pelvis": Vector3(12, 10, 0)})
+	if u < stomp:
+		var q := u / stomp
+		var p := _lerp_pose(guard_pose, turn, q)
+		var s := sin(f.t * 0.95)
+		var c := cos(f.t * 0.95)
+		p["th_r"] = Vector3(30 * s + 12, 0, 6)
+		p["th_l"] = Vector3(-30 * s + 12, 0, 8)
+		p["kn_r"] = 30.0 + 44.0 * maxf(0.0, c)
+		p["kn_l"] = 30.0 + 44.0 * maxf(0.0, -c)
+		return p
+	return _lerp_pose(turn, w, _ease_out((u - stomp) / (1.0 - stomp)))
+
+
+func _down_pose(f, gets_up: bool) -> Dictionary:
+	var lying := _merge(guard_pose, P.LYING)
+	var t: int = f.t
+	if t < 14:
+		var p := _lerp_pose(_merge(guard_pose, P.HURT), lying, t / 14.0)
+		p["fall"] = 88.0 * _ease_in_out(t / 14.0)
+		return p
+	if gets_up and t > Fighter.DOWN_T - 22:
+		var u := (t - (Fighter.DOWN_T - 22)) / 22.0
+		var kneel := _merge(guard_pose, {"kn_r": 70.0, "kn_l": 80.0, "th_r": Vector3(60, 0, 8), "fall": 0.0})
+		return _lerp_pose(lying, kneel if u < 0.7 else guard_pose, _ease_in_out(u))
+	return lying
+
+
+func _update_flash(f) -> void:
+	var on: bool = f.flash > 0 and (f.flash / 2) % 2 == 0
+	var col := Color(0.9, 0.9, 0.9) if on else Color(0, 0, 0)
+	for m in mats:
+		m.emission = col
+
+
+func _update_telegraph(f) -> void:
+	if f.state == "stagger":
+		tele.visible = true
+		tele.text = "빈틈"
+		tele.font_size = 64
+		tele.modulate = Color(1.0, 0.82, 0.3, 1.0)
+		tele.scale = Vector3.ONE
+		return
+	var tg: Array = f.telegraph()
+	if tg.is_empty():
+		tele.visible = false
+		return
+	var kind: String = tg[0]
+	var left: int = tg[1]
+	var big := left <= 6
+	tele.visible = true
+	tele.text = "!"
+	tele.font_size = 96
+	var col := Color(1, 1, 1) if kind == "parry" else Color(1.0, 0.22, 0.18)
+	col.a = 0.5 if big and left % 2 == 1 else 1.0
+	tele.modulate = col
+	tele.scale = Vector3.ONE * (1.6 if big else 0.95)

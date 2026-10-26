@@ -1,0 +1,159 @@
+# 캐슬 M 3D 초안 — 검증 · APK · 화면 찍기 · 에뮬레이터 점검
+#  build    : Godot(고정 버전) + 안드로이드 템플릿 → scripts/verify.py(가져오기 · 테스트 · 자동 결투) → APK(arm64 + x86_64 한 파일)
+#             → 가상 화면(xvfb + 소프트웨어 OpenGL)에서 PC 1280x720 · 폰 2340x1080 스크린샷
+#  emulator : APK 를 x86_64 API 34 에뮬레이터에 설치 · 실행 → 데모 스크린샷 · logcat 오류 · FPS (scripts/emu_check.sh)
+#  서명: android/debug.keystore (castle_M 과 같은 고정 디버그 키, 패키지 이름이 달라 서로 덮어쓰지 않는다)
+name: android
+
+on:
+  push:
+    branches: [main, "impl-*"]
+    paths:
+      - "src/**"
+      - "assets/**"
+      - "tests/**"
+      - "project.godot"
+      - "main.tscn"
+      - "export_presets.cfg"
+      - "icon.svg"
+      - "scripts/**"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.7.2-stable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ github.workspace }}/android/debug.keystore
+      GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
+      GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Godot · 템플릿 캐시
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-cache
+          key: godot-${{ env.GODOT_VERSION }}-android
+
+      - name: Godot · 안드로이드 템플릿 설치
+        run: |
+          set -e
+          V=$GODOT_VERSION
+          mkdir -p ~/godot-cache && cd ~/godot-cache
+          if [ ! -f "Godot_v${V}_linux.x86_64" ]; then
+            curl -sSLo g.zip "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_linux.x86_64.zip"
+            unzip -q g.zip && rm g.zip
+          fi
+          if [ ! -d android_templates ]; then
+            curl -sSLo t.tpz "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_export_templates.tpz"
+            mkdir -p android_templates
+            unzip -q -j t.tpz 'templates/android_*' 'templates/version.txt' -d android_templates
+            rm t.tpz
+          fi
+          T="$HOME/.local/share/godot/export_templates/${V/-/.}"
+          mkdir -p "$T" && cp android_templates/* "$T/"
+          ls -la "$T"
+          echo "GODOT=$HOME/godot-cache/Godot_v${V}_linux.x86_64" >> "$GITHUB_ENV"
+
+      - name: 안드로이드 내보내기 설정 (SDK · JDK · 고정 디버그 키)
+        run: |
+          set -e
+          mkdir -p ~/.config/godot
+          for f in editor_settings-4.tres editor_settings-4.7.tres; do
+            {
+              echo '[gd_resource type="EditorSettings" format=3]'
+              echo ''
+              echo '[resource]'
+              echo "export/android/android_sdk_path = \"$ANDROID_HOME\""
+              echo "export/android/java_sdk_path = \"$JAVA_HOME\""
+              echo "export/android/debug_keystore = \"$GITHUB_WORKSPACE/android/debug.keystore\""
+              echo 'export/android/debug_keystore_user = "androiddebugkey"'
+              echo 'export/android/debug_keystore_pass = "android"'
+            } > ~/.config/godot/$f
+          done
+          cat ~/.config/godot/editor_settings-4.7.tres
+          keytool -list -keystore android/debug.keystore -storepass android -alias androiddebugkey | head -3
+
+      - name: 검증 (가져오기 · 테스트 · 자동 결투 3판)
+        run: python3 scripts/verify.py
+
+      - name: APK 내보내기
+        run: |
+          mkdir -p build
+          "$GODOT" --headless --path . --export-debug "Android" build/castle_m3d.apk 2>&1 | tee build/export.log
+          ls -la build
+          test -f build/castle_m3d.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: castle_m3d-apk
+          path: build/castle_m3d.apk
+          retention-days: 14
+
+      - name: 화면 찍기 (가상 화면 · 소프트웨어 OpenGL — PC 1280x720 · 폰 2340x1080)
+        if: always()
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q xvfb libgl1-mesa-dri libglx-mesa0 > /dev/null
+          mkdir -p shots/pc shots/phone
+          xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy \
+            --resolution 1280x720 --fixed-fps 60 -- --autoplay --seed 2 --seconds 42 \
+            --shots "$PWD/shots/pc:150,420,780,1200,1650,2100,2460" 2>&1 | grep -vE "^$" | tail -25 || true
+          xvfb-run -a -s "-screen 0 2340x1080x24" "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy \
+            --resolution 2340x1080 --fixed-fps 60 -- --autoplay --touch --seed 4 --seconds 30 \
+            --shots "$PWD/shots/phone:300,900,1500" 2>&1 | grep -vE "^$" | tail -25 || true
+          ls -la shots/pc shots/phone
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shots
+          path: |
+            shots/
+            build/export.log
+          retention-days: 14
+
+  emulator:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: castle_m3d-apk
+          path: apk
+
+      - name: KVM 켜기
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: 에뮬레이터에서 설치 · 실행 · 스크린샷
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          emulator-boot-timeout: 900
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+          disable-animations: true
+          script: bash scripts/emu_check.sh
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emulator
+          path: emu/
+          retention-days: 14
