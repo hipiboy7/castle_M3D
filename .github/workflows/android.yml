@@ -32,15 +32,15 @@ jobs:
       GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
       GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Godot · 템플릿 캐시
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/godot-cache
           key: godot-${{ env.GODOT_VERSION }}-android
@@ -94,7 +94,7 @@ jobs:
           ls -la build
           test -f build/castle_m3d.apk
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: castle_m3d-apk
           path: build/castle_m3d.apk
@@ -103,7 +103,9 @@ jobs:
       - name: 화면 찍기 (가상 화면 · 소프트웨어 OpenGL — PC 1280x720 · 폰 2340x1080)
         if: always()
         run: |
-          sudo apt-get update -q && sudo apt-get install -y -q xvfb libgl1-mesa-dri libglx-mesa0 > /dev/null
+          # Godot(X11)가 dlopen 으로 여는 X 라이브러리 + Mesa 소프트웨어 OpenGL(llvmpipe)
+          sudo apt-get update -q && sudo apt-get install -y -q xvfb libgl1 libgl1-mesa-dri libglx-mesa0 libegl1 \
+            libx11-6 libxcursor1 libxinerama1 libxrandr2 libxi6 libxext6 libxrender1 libxkbcommon0 > /dev/null
           mkdir -p shots/pc shots/phone
           xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy \
             --resolution 1280x720 --fixed-fps 60 -- --autoplay --seed 2 --seconds 42 \
@@ -113,7 +115,7 @@ jobs:
             --shots "$PWD/shots/phone:300,900,1500" 2>&1 | grep -vE "^$" | tail -25 || true
           ls -la shots/pc shots/phone
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: shots
@@ -127,9 +129,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: castle_m3d-apk
           path: apk
@@ -139,19 +141,25 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+          sudo udevadm settle || true
+          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then echo "KVM 사용 가능"; else echo "::error::/dev/kvm 을 쓸 수 없다"; exit 1; fi
 
+      # castle_M 과 같은 에뮬레이터(pixel_6 = 가로 2400x1080 · 2코어 · 3GB) — FPS 를 2D 판과 견준다 (castle_M 보류 결정 #7 · #9)
       - name: 에뮬레이터에서 설치 · 실행 · 스크린샷
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
           arch: x86_64
           target: google_apis
+          profile: pixel_6
+          cores: 2
+          ram-size: 3072M
           emulator-boot-timeout: 900
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
           script: bash scripts/emu_check.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: emulator
