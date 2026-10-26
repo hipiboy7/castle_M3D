@@ -100,23 +100,26 @@ jobs:
           path: build/castle_m3d.apk
           retention-days: 14
 
+      # 소프트웨어 OpenGL 은 한 장에 약 0.44초(run #1: 2fps) — main.gd 가 찍을 프레임 바로 앞만 그리고 나머지는 로직만 돌린다.
+      # always() 대신 !cancelled(): always() 단계는 run 을 취소해도 끝까지 돈다(run #1)
       - name: 화면 찍기 (가상 화면 · 소프트웨어 OpenGL — PC 1280x720 · 폰 2340x1080)
-        if: always()
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
         run: |
           # Godot(X11)가 dlopen 으로 여는 X 라이브러리 + Mesa 소프트웨어 OpenGL(llvmpipe)
           sudo apt-get update -q && sudo apt-get install -y -q xvfb libgl1 libgl1-mesa-dri libglx-mesa0 libegl1 \
             libx11-6 libxcursor1 libxinerama1 libxrandr2 libxi6 libxext6 libxrender1 libxkbcommon0 > /dev/null
           mkdir -p shots/pc shots/phone
-          xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy \
+          timeout 420 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy \
             --resolution 1280x720 --fixed-fps 60 -- --autoplay --seed 2 --seconds 42 \
-            --shots "$PWD/shots/pc:150,420,780,1200,1650,2100,2460" 2>&1 | grep -vE "^$" | tail -25 || true
-          xvfb-run -a -s "-screen 0 2340x1080x24" "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy \
+            --shots "$PWD/shots/pc:150,300,420,600,780,1000,1200,1420,1650,1880,2100,2300,2460" 2>&1 | grep --line-buffered -vE "^\s*$" || true
+          timeout 420 xvfb-run -a -s "-screen 0 2340x1080x24" "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy \
             --resolution 2340x1080 --fixed-fps 60 -- --autoplay --touch --seed 4 --seconds 30 \
-            --shots "$PWD/shots/phone:300,900,1500" 2>&1 | grep -vE "^$" | tail -25 || true
+            --shots "$PWD/shots/phone:300,600,900,1200,1500" 2>&1 | grep --line-buffered -vE "^\s*$" || true
           ls -la shots/pc shots/phone
 
       - uses: actions/upload-artifact@v7
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: shots
           path: |
@@ -160,7 +163,7 @@ jobs:
           script: bash scripts/emu_check.sh
 
       - uses: actions/upload-artifact@v7
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: emulator
           path: emu/

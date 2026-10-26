@@ -29,6 +29,7 @@ const LOOKS := {
 const SFX := ["knife", "swing", "slash", "hit", "hit_heavy", "kick", "guard", "counter", "miss", "ko", "wind", "step",
 	"shine", "fall"]
 const DEMO_AFTER := 360
+const SHOT_WARMUP := 3          # --shots: 찍을 프레임 바로 앞 몇 프레임만 그린다
 
 var args := {"autoplay": false, "seconds": 0.0, "seed": 1, "shots": [], "shot_dir": "", "touch": false}
 var headless := false
@@ -36,6 +37,7 @@ var mode := "title"
 var d: Dictionary = {}
 var seed_now := 1
 var frames := 0
+var fps_log_ms := 0
 var mode_t := 0
 var fights := 0
 var results: Array = []
@@ -71,6 +73,7 @@ func _ready() -> void:
 	touch.visible = args["touch"] or DisplayServer.is_touchscreen_available()
 	_setup_audio()
 	seed_now = int(args["seed"])
+	fps_log_ms = Time.get_ticks_msec()
 	_new_duel()
 	if args["autoplay"]:
 		_start("demo")
@@ -178,6 +181,8 @@ func _start(m: String) -> void:
 	mode = m
 	mode_t = 0
 	fights += 1
+	if not headless:
+		print("MODE %s frame=%d" % [m, frames])    # 에뮬레이터 점검(scripts/emu_check.sh)이 logcat 에서 데모 시작을 기다린다
 	if m == "demo":
 		hud.message("데모", "봇이 예고만 보고 싸운다 — 누르면 직접", 2.5)
 		hud.set_hint("데모 · 누르면 직접 싸우기")
@@ -217,10 +222,13 @@ func _physics_process(_dt: float) -> void:
 				_new_duel()
 				_start("demo" if args["autoplay"] else "fight")
 	_shots()
-	if not headless and frames % 600 == 0:
-		# 10초마다 로그(안드로이드는 logcat) — 에뮬레이터 · 실기 FPS 를 CI 가 모은다 (castle_M 보류 결정 #7 · #9)
-		print("FPS_LOG fps=%d process_ms=%.1f mode=%s screen=%s" % [Engine.get_frames_per_second(),
-			Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, mode, str(get_viewport().get_visible_rect().size)])
+	if not headless and Time.get_ticks_msec() - fps_log_ms >= 10000:
+		# 실제 시간 10초마다 로그(안드로이드는 logcat) — 에뮬레이터 · 실기 FPS 를 CI 가 모은다 (castle_M 보류 결정 #7 · #9).
+		# frame = 지금까지 로직 프레임 수(느린 기기에서는 한 화면에 로직 4프레임까지만 돌아 게임이 느려진다)
+		fps_log_ms = Time.get_ticks_msec()
+		print("FPS_LOG fps=%d process_ms=%.1f frame=%d mode=%s screen=%s" % [Engine.get_frames_per_second(),
+			Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, frames, mode,
+			str(get_viewport().get_visible_rect().size)])
 	if float(args["seconds"]) > 0.0 and frames >= int(float(args["seconds"]) * 60.0):
 		_finish_run()
 
@@ -319,6 +327,13 @@ func _process(dt: float) -> void:
 func _shots() -> void:
 	if headless or args["shots"].is_empty():
 		return
+	# 찍을 프레임 바로 앞 몇 프레임만 그리고 나머지는 로직만 돌린다 — CI 가상 화면(소프트웨어 OpenGL)은 한 장 그리는 데
+	# 약 0.44초라 전부 그리면 30분이 넘는다(run #1). 불꽃은 CPUParticles3D(로직 쪽에서 움직임)라 그대로 찍힌다
+	var near := false
+	for s in args["shots"]:
+		if frames >= s - SHOT_WARMUP and frames < s:
+			near = true
+	RenderingServer.render_loop_enabled = near
 	if frames in args["shots"]:
 		var dir: String = args["shot_dir"]
 		DirAccess.make_dir_recursive_absolute(dir)

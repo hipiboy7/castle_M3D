@@ -25,8 +25,8 @@
 - **리뷰는 APK 로**(사용자는 PC 에서 플레이하지 않는다): Actions run 번호 · 아티팩트 링크를 알리고 리뷰를 요청한다
 
 ## 3. Git · 외부 서비스
-- 저장소 `hipiboy7/castle_M3D`(비공개). push 는 올라갈 커밋을 보여 주고 사용자 확인 뒤. `main` 에 직접 작업하지 않는다(`impl-*` 브랜치, 병합 `--no-ff`, 브랜치 보존)
-- Actions: `main` · `impl-*` push(경로 필터)와 workflow_dispatch. 한 번 약 15 ~ 25분(빌드 + 에뮬레이터). 무료 분량(계정 전체 월 2,000분)을 castle_M 과 같이 쓴다
+- 저장소 `hipiboy7/castle_M3D`(비공개, 2026-10-26 REST 로 만듦 — 사용자 확인 "둘 다 push 하고 Actions 돌려줘"). push 는 올라갈 커밋을 보여 주고 사용자 확인 뒤. `main` 에 직접 작업하지 않는다(`impl-*` 브랜치, 병합 `--no-ff`, 브랜치 보존)
+- Actions: `main` · `impl-*` push(경로 필터)와 workflow_dispatch(`POST /repos/hipiboy7/castle_M3D/actions/workflows/396637959/dispatches {"ref":"impl-draft1"}`). 한 번 약 15 ~ 25분(빌드 + 에뮬레이터). 무료 분량(계정 전체 월 2,000분)을 castle_M 과 같이 쓴다
 - GitHub API 는 `gh` 없이 GCM 토큰으로 REST. 토큰을 파일 · 로그 · 커밋에 남기지 않는다
 
 ## 4. 사용자와 말하기 · 사용량

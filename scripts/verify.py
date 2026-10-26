@@ -54,6 +54,10 @@ def main():
     g = godot()
     t0 = time.time()
     results = []
+    if not os.path.isdir(os.path.join(ROOT, ".godot", "imported")):
+        # 새로 받은 저장소(CI): 첫 가져오기는 프로젝트 글꼴을 가져오기 전에 읽으려 해 ERROR 를 낸다(run #1) — 한 번 돌리고 다시 본다
+        p = subprocess.run([g, "--headless", "--path", ".", "--import"], cwd=ROOT, capture_output=True, timeout=600)
+        print(f"[..] 첫 가져오기 (종료 코드 {p.returncode}, 출력은 다음 가져오기에서 본다)")
     results.append(run("가져오기", [g, "--headless", "--path", ".", "--import"]))
 
     def tests_ok(out):
