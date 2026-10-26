@@ -274,13 +274,13 @@ func _after_tick() -> void:
 				if no > 0:
 					# 리천식 삼연타: 한 대마다 번호, 셋째는 크게
 					var last := no >= int(mv2["hits"])
-					fx.pop(e[2] + Vector3(0, 0.5 + no * 0.12, 0), "%d%s" % [no, "!" if last else ""],
+					fx.pop(e[2] + Vector3(0, 0.25 + no * 0.1, 0) + cam.global_basis.x * (no - 2) * 0.3, "%d%s" % [no, "!" if last else ""],
 						Color(1.0, 0.8, 0.45) if last else Color(1.0, 0.95, 0.8), 80 if last else 56, 0.6)
 					if last:
 						cam.punch_zoom(0.9)
 			"skill":
 				var sk: Dictionary = e[2]
-				fx.pop(Vector3(e[1].pos.x, 2.35, e[1].pos.y), str(sk["name"]), Color(0.75, 0.9, 1.0), 52, 1.0)
+				fx.pop(Vector3(e[1].pos.x, 2.5, e[1].pos.y), str(sk["name"]), Color(0.75, 0.9, 1.0), 48, 0.8)
 				_play("shine", -6.0, 1.0)
 			"no_gauge":
 				fx.pop(Vector3(e[1].pos.x, 2.35, e[1].pos.y), "게이지 부족", Color(0.75, 0.78, 0.85), 44, 0.7)

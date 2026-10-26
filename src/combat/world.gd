@@ -209,7 +209,8 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 	var stun := Skills.stun_frames(mv, a.rank, d.rank)
 	if stun > 0 and d.hp > 0.0:
 		d.get_stun(stun)
-		events.append(["stun", d, at, stun])
+		if d.state == "stun":                    # 빈틈 · 넘어짐 중이면 기절이 걸리지 않는다(run #8 에서 글자만 떴다)
+			events.append(["stun", d, at, stun])
 	if int(mv.get("hit_no", 0)) >= int(mv["hits"]) and mv["knockdown"] and not d.is_boss:
 		d.get_down()
 	stats["hits"] += 1
