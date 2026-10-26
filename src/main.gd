@@ -109,7 +109,7 @@ func _parse_args() -> void:
 func _setup_input() -> void:
 	var keys := {
 		"left": [KEY_A, KEY_LEFT], "right": [KEY_D, KEY_RIGHT], "up": [KEY_W, KEY_UP], "down": [KEY_S, KEY_DOWN],
-		"attack": [KEY_J, KEY_Z], "parry_l": [KEY_U, KEY_X], "parry_r": [KEY_K, KEY_V], "roll": [KEY_SPACE, KEY_L, KEY_C],
+		"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_L, KEY_C],
 	}
 	for act in keys:
 		if not InputMap.has_action(act):
@@ -187,16 +187,15 @@ func _start(m: String) -> void:
 		hud.message("데모", "봇이 예고만 보고 싸운다 — 누르면 직접", 2.5)
 		hud.set_hint("데모 · 누르면 직접 싸우기")
 	else:
-		hud.message("결투", "흰 왼! · 오른! = 그쪽으로 쳐내기 · 빨간 ! = 구르기 · 빈틈 = 베기", 2.5)
-		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 왼 U · 오른 K(누르고) · 구르기 Space")
+		hud.message("결투", "흰 ! = 쳐내기 · 빨간 ! = 구르기 · 빈틈 = 베기", 2.5)
+		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 K(누르고) · 구르기 Space")
 	if not music.playing:
 		_music("boss")
 
 
 func _pressed_anything() -> bool:
 	return Input.is_action_just_pressed("attack") or Input.is_action_just_pressed("roll") \
-		or Input.is_action_just_pressed("parry_l") or Input.is_action_just_pressed("parry_r") \
-		or not touch.take_edges().is_empty() \
+		or Input.is_action_just_pressed("parry") or not touch.take_edges().is_empty() \
 		or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 
 
@@ -239,15 +238,11 @@ func _player_intent() -> Dictionary:
 	if touch.stick.length() > 0.12:
 		mv = touch.stick.limit_length(1.0)
 	var e: Dictionary = touch.take_edges()
-	var pl: bool = Input.is_action_just_pressed("parry_l") or e.has("parry_l")
-	var pr: bool = Input.is_action_just_pressed("parry_r") or e.has("parry_r")
 	return {
 		"move": mv, "face": d["hero"].dir_to(d["boss"]),
 		"attack": Input.is_action_just_pressed("attack") or e.has("attack"),
-		"parry": pl or pr,
-		"parry_side": "L" if pl else "R",
-		"parry_held": Input.is_action_pressed("parry_l") or Input.is_action_pressed("parry_r") \
-			or touch.held("parry_l") or touch.held("parry_r"),
+		"parry": Input.is_action_just_pressed("parry") or e.has("parry"),
+		"parry_held": Input.is_action_pressed("parry") or touch.held("parry"),
 		"roll": Input.is_action_just_pressed("roll") or e.has("roll"),
 	}
 

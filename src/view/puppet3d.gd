@@ -416,7 +416,7 @@ func _target_pose(f, dt: float) -> Dictionary:
 func _locomotion(f, dt: float) -> Dictionary:
 	var p: Dictionary = guard_pose.duplicate()
 	if f.flick_t > 0:
-		p = _merge(p, P.FLICK)
+		p = _merge(p, P.FLICK if f.parry_side == "R" else _mirror(P.FLICK))   # 들어오는 쪽 팔로 바깥으로 튕긴다
 	p["chest"] = p["chest"] + Vector3(1.4 * sin(time * 2.3), 0, 0)      # 숨
 	var sp: float = f.speed_now
 	if sp < 0.2:
@@ -466,7 +466,7 @@ func _attack_pose(f) -> Dictionary:
 		var u := float(t) / maxf(1.0, su)
 		if shape == "sidekick":
 			return _sidekick_windup(f, u, w)
-		var p := _lerp_pose(guard_pose, w, _ease_in_out(u))
+		var p := _lerp_pose(guard_pose, w, 1.0 - (1.0 - u) * (1.0 - u))   # 준비 자세가 일찍 보이게(처음이 빠르다)
 		for fr in mv["feints"]:
 			if t >= int(fr) and t < int(fr) + 4:
 				p = _lerp_pose(w, s, 0.7)       # 멈칫: 치는 척만 하고 몸은 다시 준비로
@@ -520,6 +520,22 @@ func _down_pose(f, gets_up: bool) -> Dictionary:
 	return lying
 
 
+## 좌우 뒤집기: 팔다리 r · l 을 맞바꾸고(팔다리 각도는 _limb 가 쪽마다 뒤집는다) 몸통 · 머리의 좌우 돌림(y · z)을 뒤집는다
+func _mirror(p: Dictionary) -> Dictionary:
+	var q := {}
+	for k in p:
+		var v = p[k]
+		var nk: String = k
+		if k.ends_with("_r"):
+			nk = k.substr(0, k.length() - 2) + "_l"
+		elif k.ends_with("_l"):
+			nk = k.substr(0, k.length() - 2) + "_r"
+		elif v is Vector3:
+			v = Vector3(v.x, -v.y, -v.z)
+		q[nk] = v
+	return q
+
+
 func _update_flash(f) -> void:
 	var on: bool = f.flash > 0 and (f.flash / 2) % 2 == 0
 	var col := Color(0.12, 0.1, 0.09) if on else Color(0, 0, 0)
@@ -544,11 +560,9 @@ func _update_telegraph(f) -> void:
 	var left: int = tg[1]
 	var big := left <= 6
 	tele.visible = true
-	# 흰 ! 는 쳐낼 쪽(받는 사람 기준)을 글자로 적고, 공격이 들어오는 쪽(치는 사람 기준 반대 손)으로 비켜 띄운다
-	var side: String = tg[2]
-	tele.text = ("왼!" if side == "L" else "오른!") if kind == "parry" else "!"
-	tele.font_size = 80 if kind == "parry" else 96
-	tele.position = Vector3((0.42 if side == "L" else -0.42) if kind == "parry" else 0.0, 2.22, 0)
+	tele.text = "!"
+	tele.font_size = 96
+	tele.position = Vector3(0, 2.22, 0)
 	var col := Color(1, 1, 1) if kind == "parry" else Color(1.0, 0.22, 0.18)
 	col.a = 0.5 if big and left % 2 == 1 else 1.0
 	tele.modulate = col

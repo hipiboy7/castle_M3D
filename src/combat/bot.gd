@@ -1,5 +1,5 @@
 extends RefCounted
-## 자동 플레이 봇 (김신 쪽) — 예고 표시만 보고 받는다: 흰 ! 는 표시된 쪽(왼 · 오른)으로 쳐내기, 빨간 ! 는 구르기.
+## 자동 플레이 봇 (김신 쪽) — 예고 표시만 보고 받는다: 흰 ! 는 쳐내기, 빨간 ! 는 구르기.
 ## castle_M BotController 처럼 '표시만 보고 이길 수 있는지'로 예고의 공정성을 확인하고, 데모 · 자동 점검에 쓴다.
 ## skill 은 제때 누를 확률(사람처럼 가끔 놓친다). 같은 시드면 같은 결과.
 
@@ -38,7 +38,6 @@ func decide() -> Dictionary:
 			answered = foe.attack_id
 			if rng.randf() < skill:
 				it["parry"] = true
-				it["parry_side"] = tel[2]
 				it["parry_held"] = true
 				hold = Fighter.PARRY_MIN
 			return it

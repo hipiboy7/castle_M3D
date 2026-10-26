@@ -1,5 +1,5 @@
 extends RefCounted
-## 결투 판정 — 공격 판정 · 구르기 무적 · 왼쪽 · 오른쪽 쳐내기 · 막기 · 체간 · 빈틈 · 제압 · 역경직 · 페이즈.
+## 결투 판정 — 공격 판정 · 구르기 무적 · 칼날 쳐내기(늦은 쳐내기) · 막기 · 체간 · 빈틈 · 제압 · 역경직 · 페이즈.
 ## castle_M `castle_m/action/combat.py` 와 P2 설계서 8.3절(보스 규칙)의 수치를 초안 크기로 옮겼다.
 ## 순수 로직이라 테스트(tests/test_combat.gd)와 자동 플레이(--autoplay)가 그림 없이 돌린다.
 
@@ -13,6 +13,8 @@ const BLOCK_POSTURE_K := 0.8
 const FINISHER_CAP_BOSS := 0.08          # 보스에게 제압 피해는 최대 체력의 8%
 const PHASE2_AT := 0.55                  # 1차 체력 바닥 — 여기서 2차로
 const PHASE2_FREEZE := 50                # 2차로 넘어가는 동안 멈춤(컷인)
+const LATE_PARRY := 6                    # 늦은 쳐내기: 서 있던 김신이 맞으면 맞음을 이만큼 미루고, 그 사이 누르면 쳐내기
+                                         # (휘두름이 보이는 순간이 판정 순간이라 보고 누르면 늦다 — castle_common rules/전투_쳐내기.md 1절)
 
 var fighters: Array = []
 var frame := 0
@@ -22,6 +24,7 @@ var events: Array = []                   # [종류, ...] — 그림 · 소리가
 var bounds := Rect2(-6.6, -3.6, 13.2, 7.4)
 var over := ""                           # "" / win / lose
 var phase := 1
+var pending: Array = []                  # 미룬 맞음 [공격자, 맞는 사람, 기술, 맞은 자리, 남은 프레임]
 var stats := {"hits": 0, "parries": 0, "boss_parries": 0, "dodges": 0, "blocks": 0, "staggers": 0}
 
 
@@ -63,7 +66,24 @@ func tick() -> void:
 	for f in fighters:
 		f.pos.x = clampf(f.pos.x, bounds.position.x, bounds.end.x)
 		f.pos.y = clampf(f.pos.y, bounds.position.y, bounds.end.y)
+	_tick_pending()
 	_hits()
+
+
+## 미룬 맞음: 그 사이 쳐내기를 눌렀으면 쳐내기, 시간이 다 됐거나 다른 행동을 시작했으면 그대로 맞는다
+func _tick_pending() -> void:
+	for p in pending.duplicate():
+		var a = p[0]
+		var d = p[1]
+		p[4] -= 1
+		if over != "" or not d.alive():
+			pending.erase(p)
+		elif d.parry_open() and _faces(d, a):
+			pending.erase(p)
+			_parry(a, d, p[3], p[2])
+		elif p[4] <= 0 or not d.can_act():
+			pending.erase(p)
+			_take_hit(a, d, p[2], p[3])
 
 
 func _separate() -> void:
@@ -129,9 +149,8 @@ func _resolve(a, d) -> void:
 		events.append(["dodge", d, at])
 		return
 	var parryable: bool = mv["parryable"]
-	# 쳐내기는 들어오는 쪽(칼날 · 주먹 · 발차기 모두)으로 받아야 한다. 반대쪽이거나 늦으면 막기만 된다
-	if parryable and d.parry_open() and d.parry_side == Moves.parry_side(mv) and _faces(d, a):
-		_parry(a, d, at)
+	if parryable and d.parry_open() and _faces(d, a):
+		_parry(a, d, at, mv)
 		return
 	if parryable and d.state == "parry" and _faces(d, a):
 		stats["blocks"] += 1
@@ -144,7 +163,14 @@ func _resolve(a, d) -> void:
 			_stagger(d)
 		_check_hp(d)
 		return
-	# 맞음
+	if parryable and not d.is_boss and d.can_act() and _faces(d, a) and LATE_PARRY > 0:
+		pending.append([a, d, mv, at, LATE_PARRY])
+		return
+	_take_hit(a, d, mv, at)
+
+
+func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
+	var push: Vector2 = a.dir_to(d)
 	var dmg: float = float(mv["damage"]) * a.dmg_k
 	if str(mv["name"]).ends_with("finisher") and d.state == "stagger":
 		if d.is_boss:
@@ -172,8 +198,8 @@ func _resolve(a, d) -> void:
 	_check_hp(d)
 
 
-func _parry(a, d, at: Vector3) -> void:
-	var mv: Dictionary = a.move
+func _parry(a, d, at: Vector3, mv: Dictionary) -> void:
+	d.parry_side = Moves.parry_side(mv)          # 쳐내는 동작 방향(그림) — 들어오는 쪽 팔로 튕긴다
 	# 보스가 김신을 쳐내면 휘청이 짧다 (맞받아 베기를 다시 쳐낼 수 있게) — castle_M P2 설계서 8.3
 	var k := 0.35 if d.is_boss else 2.2
 	var bonus := 0.0 if d.is_boss else 22.0

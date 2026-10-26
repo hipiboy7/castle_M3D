@@ -4,6 +4,7 @@ extends RefCounted
 const Duel = preload("res://src/combat/duel.gd")
 const Fighter = preload("res://src/combat/fighter.gd")
 const Moves = preload("res://src/data/moves.gd")
+const World = preload("res://src/combat/world.gd")
 
 var failures: Array = []
 
@@ -58,7 +59,7 @@ func test_parry_recoils_attacker() -> void:
 	_tick(d, {}, {"use": "b_slash1"})                       # 준비 14 → 판정 15
 	for i in 10:
 		_tick(d)
-	_tick(d, {"parry": true, "parry_side": "L", "parry_held": true})   # 판정 4프레임 전 · 오른쪽 베기는 왼쪽으로 받는다
+	_tick(d, {"parry": true, "parry_held": true})           # 판정 4프레임 전
 	var seen := false
 	for i in 12:
 		_tick(d, {"parry_held": true})
@@ -70,21 +71,27 @@ func test_parry_recoils_attacker() -> void:
 	check(d["hero"].counter_ready > 0, "쳐낸 쪽은 반격 베기를 낼 수 있다")
 
 
-func test_parry_wrong_side_only_blocks() -> void:
+func test_late_parry_after_contact() -> void:
 	var d := _close(0.9)
-	_tick(d, {}, {"use": "b_slash1"})                       # 바로 베기 = 백도찬 오른쪽 → 김신 왼쪽
+	_tick(d, {}, {"use": "b_slash1"})                       # 준비 14 → 판정 15
+	for i in 16:
+		_tick(d)                                            # 판정이 지나도록 아무것도 안 함 → 맞음이 미뤄진다
+	_tick(d, {"parry": true, "parry_held": true})           # 닿은 뒤 늦게 누름
+	var seen := false
 	for i in 10:
-		_tick(d)
-	_tick(d, {"parry": true, "parry_side": "R", "parry_held": true})
-	var parried := false
-	var blocked := false
-	for i in 12:
 		_tick(d, {"parry_held": true})
 		for e in d["world"].events:
-			parried = parried or e[0] == "parry"
-			blocked = blocked or e[0] == "block"
-	check(not parried and blocked, "반대쪽으로 받으면 막기만 된다 (parry %s · block %s)" % [parried, blocked])
-	check(d["hero"].hp < Duel.HERO["hp"], "막기는 피해를 조금 받는다")
+			seen = seen or e[0] == "parry"
+	check(seen, "닿은 뒤 %d프레임 안에 누르면 쳐내기" % World.LATE_PARRY)
+	check(is_equal_approx(d["hero"].hp, Duel.HERO["hp"]), "늦은 쳐내기는 피해가 없다 (hero hp %s)" % d["hero"].hp)
+	check(d["hero"].parry_side == "L", "바로 베기는 왼팔로 튕긴다 (%s)" % d["hero"].parry_side)
+
+
+func test_no_parry_hit_lands_after_grace() -> void:
+	var d := _close(0.9)
+	_tick(d, {}, {"use": "b_slash1"})
+	_run(d, 15 + World.LATE_PARRY + 4)
+	check(d["hero"].hp < Duel.HERO["hp"], "안 누르면 미룬 맞음이 들어온다 (hero hp %s)" % d["hero"].hp)
 
 
 func test_parry_side_by_limb() -> void:
@@ -92,7 +99,7 @@ func test_parry_side_by_limb() -> void:
 	check(Moves.parry_side(Moves.get_move("b_slash2")) == "R", "되베기 → 오른쪽")
 	check(Moves.parry_side(Moves.get_move("b_thrust")) == "L", "오른손 찌르기 → 왼쪽")
 	check(Moves.parry_side(Moves.get_move("b_sidekick")) == "L", "오른발 옆차기 → 왼쪽")
-	check(Moves.parry_side({"shape": "thrust", "hand": "L"}) == "R", "왼손 · 왼발(주먹 · 발차기 포함) → 오른쪽")
+	check(Moves.parry_side({"shape": "thrust", "hand": "L"}) == "R", "왼손 · 왼발(주먹 · 발차기 포함) → 오른팔")
 
 
 func test_unblockable_ignores_parry() -> void:

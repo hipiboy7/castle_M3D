@@ -1,5 +1,5 @@
 extends Control
-## 터치 조작 — 왼쪽 절반 어디든 누르면 그 자리가 스틱 가운데(따라오는 스틱), 오른쪽 아래 버튼 넷: 베기 · 왼 쳐내기 · 오른 쳐내기(누르고 있기) · 구르기.
+## 터치 조작 — 왼쪽 절반 어디든 누르면 그 자리가 스틱 가운데(따라오는 스틱), 오른쪽 아래 버튼 셋: 베기 · 쳐내기(누르고 있기) · 구르기.
 ## main.gd 가 매 프레임 stick · take_edges() · held() 로 읽는다(키보드와 같은 동작 이름 — castle_M engine/input.py 와 같은 생각).
 
 const COL_RING := Color(1, 1, 1, 0.28)
@@ -17,8 +17,7 @@ var _pressed := {}
 var _edges := {}
 var buttons := [
 	{"id": "attack", "label": "베기", "r": 82.0, "off": Vector2(-150, -150)},
-	{"id": "parry_r", "label": "오른쪽", "r": 60.0, "off": Vector2(-300, -100)},
-	{"id": "parry_l", "label": "왼쪽", "r": 60.0, "off": Vector2(-440, -100)},
+	{"id": "parry", "label": "쳐내기", "r": 64.0, "off": Vector2(-300, -100)},
 	{"id": "roll", "label": "구르기", "r": 64.0, "off": Vector2(-120, -320)},
 ]
 

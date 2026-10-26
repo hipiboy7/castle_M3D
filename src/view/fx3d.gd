@@ -156,7 +156,7 @@ func swing(f, yaw: float, left_hand: bool) -> void:
 
 func hit(at: Vector3, heavy: bool) -> void:
 	spark(at, Color(1.0, 0.78, 0.45), 22 if heavy else 12, 5.5 if heavy else 4.0)
-	flash(at, Color(1.0, 0.7, 0.4), 3.0 if heavy else 1.8)
+	flash(at, Color(1.0, 0.7, 0.4), 1.0 if heavy else 0.6, 0.1, 1.6)   # 몸 전체를 비추지 않게 약하고 좁게(폰 리뷰 2026-10-26)
 
 
 func parry(at: Vector3) -> void:

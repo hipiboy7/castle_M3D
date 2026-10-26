@@ -81,7 +81,7 @@ static func get_move(name: String) -> Dictionary:
 	return d
 
 
-## 쳐내야 하는 쪽 (막는 사람 기준 L · R) — 칼날 · 주먹 · 발차기 모두 들어오는 쪽으로 받아야 쳐내진다.
+## 쳐내는 동작 방향 (받는 사람 기준 L 왼팔 · R 오른팔, 그림용) — 판정은 쪽과 관계없다(castle_common rules/전투_쳐내기.md 2절).
 ## 들어오는 쪽(치는 사람 기준): 바로 베기(slash)는 오른쪽, 되베기(slash_back)는 왼쪽(fx3d.swing 궤적이 시작하는 쪽),
 ## 찌르기 · 주먹 · 발차기는 그 손 · 발("hand"). 마주 보고 있으니 치는 사람의 오른쪽은 막는 사람의 왼쪽이다.
 static func parry_side(mv: Dictionary) -> String:

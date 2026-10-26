@@ -4,7 +4,6 @@ extends RefCounted
 ## 초안에서 뺀 것: 쓸어 베기(점프가 없다) · 손등 받기 · 엇박 찌르기(원조) · 동요 · 전력 컷인 연출.
 
 const Fighter = preload("res://src/combat/fighter.gd")
-const Moves = preload("res://src/data/moves.gd")
 
 const PATTERNS := {
 	"sashimi3": [["b_slash1", 6], ["b_slash2", 8], ["b_thrust", 0]],
@@ -83,7 +82,6 @@ func decide() -> Dictionary:
 		seen_attack = foe.attack_id
 		if rng.randf() < parry_rate:
 			it["parry"] = true
-			it["parry_side"] = Moves.parry_side(foe.move)
 			it["parry_held"] = true
 			parry_hold = Fighter.PARRY_MIN + 2
 			return it
