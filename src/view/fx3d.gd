@@ -3,7 +3,7 @@ extends Node3D
 ## main.gd 가 combat/world.gd 신호(hit · parry · block · finish · dodge · feint)와 공격 시작을 보고 부른다.
 ## 연출은 판정과 따로라(전용 난수) 결투 결과에 영향이 없다.
 
-var _items: Array = []            # [노드, 남은 시간, 처음 시간, 재질 또는 빛, 처음 밝기 · 투명도]
+var _items: Array = []            # [노드, 남은 시간, 처음 시간, 재질 또는 빛, 처음 밝기 · 색]
 var rng := RandomNumberGenerator.new()
 
 
@@ -20,9 +20,7 @@ func _process(dt: float) -> void:
 		if thing is OmniLight3D:
 			thing.light_energy = float(it[4]) * k * k
 		elif thing is StandardMaterial3D:
-			var c: Color = thing.albedo_color
-			c.a = float(it[4]) * k                     # 처음 투명도에서 줄인다 (1 로 덮으면 반투명 궤적이 흰 판이 된다)
-			thing.albedo_color = c
+			thing.albedo_color = it[4] * k               # 처음 색에서 어둡게 — 더하기 섞기라 검정이 투명이다
 		if it[1] <= 0.0:
 			it[0].queue_free()
 			_items.remove_at(i)
@@ -36,7 +34,7 @@ func _add_mat(col: Color) -> StandardMaterial3D:
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	m.vertex_color_use_as_albedo = true
 	m.no_depth_test = false
-	m.albedo_color = col
+	m.albedo_color = Color(col.r * col.a, col.g * col.a, col.b * col.a, col.a)   # 투명도를 색에 미리 곱한다
 	return m
 
 
@@ -89,7 +87,8 @@ func arc(at: Vector3, yaw: float, a0: float, a1: float, r_in: float, r_out: floa
 		var a := deg_to_rad(lerpf(a0, a1, u))
 		var d := Vector3(-sin(a), 0, -cos(a))
 		var w := 0.28 + 0.22 * sin(u * PI)               # 띠 폭: 바깥 가장자리에서 안쪽 반지름까지의 28 ~ 50 %
-		var c := Color(1, 1, 1, u * u * 0.55)
+		var v := u * u * 0.55                            # 더하기 섞기: 투명도에 기대지 않고 색을 어둡게 한다(run #4 · #5 에서 투명도만으로는 흰 판, T-5)
+		var c := Color(v, v, v, v)
 		im.surface_set_color(c)
 		im.surface_add_vertex(d * lerpf(r_out, r_in, w) + Vector3(0, h - 0.04 * u, 0))
 		im.surface_set_color(c)
@@ -110,7 +109,8 @@ func spike(at: Vector3, yaw: float, r0: float, r1: float, h: float, w: float, co
 	var b2 := Vector3(0, h - w, -r0)
 	for tri in [[a, b, c], [a2, b2, c]]:
 		for k in 3:
-			im.surface_set_color(Color(1, 1, 1, 0.25 if k < 2 else 1.0))
+			var v := 0.25 if k < 2 else 1.0
+			im.surface_set_color(Color(v, v, v, v))
 			im.surface_add_vertex(tri[k])
 	im.surface_end()
 	_place(im, m, at, yaw, life)
@@ -123,7 +123,7 @@ func _place(mesh: Mesh, m: StandardMaterial3D, at: Vector3, yaw: float, life: fl
 	mi.position = at
 	mi.rotation.y = yaw
 	add_child(mi)
-	_items.append([mi, life, life, m, m.albedo_color.a])
+	_items.append([mi, life, life, m, m.albedo_color])
 
 
 ## 기술 모양별 궤적 (Move.shape) — 공격 판정이 시작되는 프레임에 부른다

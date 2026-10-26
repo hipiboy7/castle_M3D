@@ -8,6 +8,11 @@ PKG=com.hipiboy7.castlem3d
 mkdir -p emu
 adb install -r apk/castle_m3d.apk || { echo "설치 실패"; exit 1; }
 adb shell settings put secure immersive_mode_confirmations confirmed   # 전체 화면 안내 창이 스크린샷을 가린다(castle_M android_smoke.sh 와 같게)
+# 가로 고정 앱을 세로 홈에서 띄우면 느린 에뮬레이터에서는 시작 도중 화면이 돌며 액티비티가 다시 만들어지고
+# Godot 가 "Force quitting Godot instance" 로 스스로 끝난다(run #5, T-6) → 먼저 가로로 돌려 두고 띄운다
+adb shell settings put system accelerometer_rotation 0
+adb shell settings put system user_rotation 1
+sleep 5
 adb logcat -c
 adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 > /dev/null
 sleep 12
