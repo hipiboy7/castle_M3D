@@ -53,6 +53,11 @@ func setup(lk: Dictionary) -> void:
 			s = _merge(_merge(w, P.LUNGE_LEGS), keys["S"])
 		var f := _merge(s, keys["F"])
 		shape_keys[sh] = [w, s, f]
+		if sh == "punch":
+			# 왼손 주먹: 오른손 주먹을 좌우로 뒤집는다 (삼연타 둘째 대)
+			var wl := _merge(guard_pose, _mirror(keys["W"]))
+			var sl := _merge(wl, _mirror(keys["S"]))
+			shape_keys["punch_L"] = [wl, sl, _merge(sl, _mirror(keys["F"]))]
 	cur = guard_pose.duplicate()
 	_build()
 	_apply(cur)
@@ -358,7 +363,7 @@ func update_from(f, dt: float, frozen: bool) -> void:
 			rate = 38.0
 		"roll":
 			rate = 40.0
-		"recoil", "hitstun", "parry", "down", "dead":
+		"recoil", "hitstun", "parry", "down", "dead", "stun":
 			rate = 28.0
 	cur = _lerp_pose(cur, target, 1.0 - exp(-rate * dt))
 	if f.state == "attack":
@@ -401,6 +406,11 @@ func _target_pose(f, dt: float) -> Dictionary:
 			return _merge(guard_pose, P.HURT)
 		"recoil":
 			return _merge(guard_pose, P.RECOIL)
+		"stun":
+			var st := _merge(guard_pose, P.STUN)
+			st["chest"] = st["chest"] + Vector3(0, 6.0 * sin(time * 3.0), 10.0 * sin(time * 2.2))
+			st["head"] = st["head"] + Vector3(0, 10.0 * sin(time * 3.0 - 0.5), 0)
+			return st
 		"stagger":
 			var q := _merge(guard_pose, P.STAGGER)
 			q["chest"] = q["chest"] + Vector3(0, 0, 9.0 * sin(time * 4.5))
@@ -471,6 +481,8 @@ func _attack_pose(f) -> Dictionary:
 			if t >= int(fr) and t < int(fr) + 4:
 				p = _lerp_pose(w, s, 0.7)       # 멈칫: 치는 척만 하고 몸은 다시 준비로
 		return p
+	if t <= su + ac and str(mv["fx"]) == "triple":
+		return _triple_pose(mv, t - su)
 	if t <= su + ac:
 		var u2 := float(t - su) / maxf(1.0, ac)
 		var p2 := _lerp_pose(w, s, minf(1.0, _ease_out(u2) * 1.5))
@@ -487,6 +499,21 @@ func _attack_pose(f) -> Dictionary:
 	if shape == "spin":
 		p3["spin"] = 1080.0
 	return p3
+
+
+## 리천식 삼연타 판정 동안: 한 대마다 오른손 · 왼손 · 오른손을 번갈아 내지르고(앞 1/3) 반쯤 거둔다. 셋째 대는 더 깊이
+func _triple_pose(mv: Dictionary, ta: int) -> Dictionary:
+	var hits := int(mv["hits"])
+	var seg := maxi(1, int(mv["active"]) / hits)
+	var k := mini(hits - 1, (ta - 1) / seg)
+	var u := float((ta - 1) % seg + 1) / seg
+	var keys: Array = shape_keys["punch_L"] if k % 2 == 1 else shape_keys["punch"]
+	var e := minf(1.0, u * 3.0) if u < 0.34 else 1.0 - 0.6 * (u - 0.34) / 0.66
+	var p := _lerp_pose(keys[0], keys[1], e)
+	if k == hits - 1:
+		p["root_fwd"] = float(p["root_fwd"]) + 0.12 * e
+		p["chest"] = p["chest"] + Vector3(8, 0, 0) * e
+	return p
 
 
 ## 백도찬식 옆차기 준비: 빠르게 발을 구르며 달려나가다(앞 65%) 몸을 돌려 무릎을 접는다
@@ -544,9 +571,9 @@ func _update_flash(f) -> void:
 
 
 func _update_telegraph(f) -> void:
-	if f.state == "stagger":
+	if f.state == "stagger" or f.state == "stun":
 		tele.visible = true
-		tele.text = "빈틈"
+		tele.text = "빈틈" if f.state == "stagger" else "기절"
 		tele.position = Vector3(0, 2.22, 0)
 		tele.font_size = 64
 		tele.modulate = Color(1.0, 0.82, 0.3, 1.0)

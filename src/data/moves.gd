@@ -1,7 +1,7 @@
 extends RefCounted
 ## 기술 표 — 프레임(60프레임 = 1초) · 피해 · 체간 · 예고는 castle_M `castle_m/action/moves.py` 에서 그대로 옮겼다
 ## (2026-10-26, castle_M 커밋 5ea02c3). 거리(reach · radius · lunge · side)는 픽셀 단위 원본을 PX 로 미터로 바꾼다.
-## 초안이라 김신 쌍칼 · 백도찬 사시미만 옮긴다. 값을 바꿀 때는 castle_M 쪽이 원본이다(상류 → 하류).
+## 초안이라 김신 쌍칼 · 김신 기술 셋 · 백도찬 사시미만 옮긴다. 값을 바꿀 때는 castle_M 쪽이 원본이다(상류 → 하류).
 
 const PX := 0.045                 # castle_M 1px → m (키 46px ≈ 1.8m 에서 몸 너비가 맞게 조금 크게)
 
@@ -11,6 +11,9 @@ const DEFAULTS := {
 	"hitstun": 16, "hitstop": 4, "knockdown": false, "posture": 10.0, "lunge": 0.0,
 	"next": "", "cancel": -1, "telegraph": "", "shape": "slash", "sfx": "swing", "hit_sfx": "hit",
 	"shake": 0, "hits": 1, "side": 0.0, "skill": false, "feints": [], "any_state": false, "hand": "R",      # hand: 치는 손 · 발 (R · L)
+	"guard_break": false, "lethal": "", "stun_rel": [], "fx": "",
+	# guard_break: 막기 · 쳐내기를 뚫는다 / lethal: 엇박 피해(src/data/skills.gd) / stun_rel: 기절 [아랫급에게, 같은 급 · 윗급에게]
+	# fx "triple": 리천식 삼연타 — 맞은 순서를 세어 셋째에 크게 (world.gd)
 }
 
 const M := {
@@ -32,6 +35,19 @@ const M := {
 	"k_finisher": {"label": "제압", "startup": 3, "active": 4, "recovery": 18, "damage": 40, "reach": 16, "radius": 10,
 		"lunge": 8, "knockback": 4.0, "hitstop": 16, "posture": 0, "shape": "cross", "sfx": "slash",
 		"hit_sfx": "hit_heavy", "shake": 6},
+	# 김신 기술 (src/data/skills.gd — 게이지를 쓴다). 엇박 찌르기: 한 박자 멈칫(잔상)한 뒤 찌른다, 막기 · 쳐내기를 뚫는다
+	"s_offbeat": {"label": "엇박 찌르기", "startup": 16, "active": 4, "recovery": 16, "damage": 16, "reach": 19,
+		"radius": 9, "lunge": 22, "knockback": 4.2, "hitstop": 10, "posture": 45, "guard_break": true,
+		"shape": "thrust", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 4, "skill": true, "lethal": "offbeat",
+		"feints": [6], "telegraph": "unblock"},
+	# 각법: 다리를 위로 곧게 들어 올렸다가 내려찍는다 — 맞으면 아랫급 3초 · 같은 급 · 윗급 1초 기절
+	"s_kick": {"label": "각법 — 내려찍기", "startup": 12, "active": 3, "recovery": 14, "damage": 12, "reach": 13,
+		"radius": 10, "lunge": 4, "knockback": 0.8, "hitstop": 10, "posture": 22, "shape": "axe", "sfx": "kick",
+		"hit_sfx": "hit_heavy", "shake": 5, "skill": true, "stun_rel": [180, 60]},
+	# 리천식 삼연타: 주먹 세 번 — 앞 두 대는 붙잡아 두고(넉백 작게) 셋째에 크게
+	"s_triple": {"label": "리천식 삼연타", "startup": 4, "active": 15, "recovery": 14, "damage": 7, "reach": 13,
+		"radius": 9, "arc": 60, "lunge": 4, "knockback": 0.5, "hitstop": 5, "posture": 12, "hits": 3, "shape": "punch",
+		"sfx": "swing", "hit_sfx": "hit", "skill": true, "fx": "triple"},
 	# 보스 — 백도찬 (사시미 나이프 파이팅). 패턴 · 박자는 src/combat/boss_ai.gd (castle_M P2 설계서 8.2절)
 	"b_slash1": {"label": "사시미 베기", "startup": 14, "active": 3, "recovery": 10, "damage": 9, "reach": 14, "radius": 10,
 		"arc": 70, "lunge": 5, "posture": 10, "telegraph": "parry", "shape": "slash", "sfx": "knife"},

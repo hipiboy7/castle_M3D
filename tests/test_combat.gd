@@ -1,10 +1,12 @@
 extends RefCounted
-## 전투 규칙 테스트 — 맞기 · 구르기 무적 · 칼날 쳐내기 · 가드 불가 · 빈틈 → 제압 상한 · 연타 · 2차 바닥 · 결정성.
+## 전투 규칙 테스트 — 맞기 · 구르기 무적 · 칼날 쳐내기 · 가드 불가 · 빈틈 → 제압 상한 · 연타 · 2차 바닥 ·
+## 기술(엇박 관통 · 각법 기절 · 삼연타 · 게이지) · 결정성.
 
 const Duel = preload("res://src/combat/duel.gd")
 const Fighter = preload("res://src/combat/fighter.gd")
 const Moves = preload("res://src/data/moves.gd")
 const World = preload("res://src/combat/world.gd")
+const Skills = preload("res://src/data/skills.gd")
 
 var failures: Array = []
 
@@ -149,6 +151,73 @@ func test_phase2_floor() -> void:
 	check(d["world"].phase == 2, "1차 바닥에서 2차로")
 	check(is_equal_approx(b.hp, b.hp_max * 0.55), "1차는 55%% 아래로 안 내려간다 (%s)" % b.hp)
 	check(seen, "phase2 신호")
+
+
+func _events(d: Dictionary, kind: String) -> Array:
+	var out := []
+	for e in d["world"].events:
+		if e[0] == kind:
+			out.append(e)
+	return out
+
+
+func test_offbeat_pierces_parry_lethal() -> void:
+	var d := _close(1.4)
+	var h = d["hero"]
+	var b = d["boss"]
+	h.skill_idx = 0                                         # 엇박 찌르기: 4칸, 준비 16 (6에서 멈칫)
+	var g0: float = h.gauge
+	_tick(d, {"skill": true})
+	check(h.state == "attack" and h.move["name"] == "s_offbeat", "기술 버튼 → 엇박 찌르기 (%s)" % h.move.get("name", ""))
+	check(is_equal_approx(g0 - h.gauge, 4.0 * Skills.BAR - Skills.PASSIVE * h.gauge_rate), "4칸을 쓴다 (%s)" % (g0 - h.gauge))
+	for i in 8:
+		_tick(d)
+	_tick(d, {}, {"parry": true, "parry_held": true})       # 보스가 판정 전에 쳐내기를 들어도
+	for i in 20:
+		_tick(d, {}, {"parry_held": true})
+	check(not _events(d, "pierce").is_empty(), "엇박은 막기 · 쳐내기를 뚫는다")
+	check(_events(d, "parry").is_empty(), "엇박은 쳐내지지 않는다")
+	var want: float = b.hp_max * (1.0 - Skills.lethal_fraction(b.rank, h.rank))
+	check(is_equal_approx(b.hp, want), "아랫급(내성 상위)이 톱에게: 체력 1/3 × 2/3 (boss hp %s, 기대 %s)" % [b.hp, want])
+
+
+func test_kick_stuns_boss_one_second() -> void:
+	var d := _close(0.8)
+	var h = d["hero"]
+	var b = d["boss"]
+	h.skill_idx = 1                                         # 각법 내려찍기: 준비 12 → 판정 13
+	_tick(d, {"skill": true})
+	_run(d, 14)
+	check(b.state == "stun", "각법에 맞으면 기절 (state %s)" % b.state)
+	check(b.hold_t == 60, "같은 급 · 윗급에게는 1초 (%d)" % b.hold_t)
+	_run(d, 75)                                             # 역경직 10 + 기절 60
+	check(b.state != "stun", "1초 뒤 풀린다 (state %s)" % b.state)
+
+
+func test_triple_three_hits() -> void:
+	var d := _close(0.8)
+	var h = d["hero"]
+	var b = d["boss"]
+	h.skill_idx = 2                                         # 리천식 삼연타: 판정 15프레임에 세 번
+	_tick(d, {"skill": true})
+	_run(d, 60)
+	var nos := []
+	for e in _events(d, "hit"):
+		nos.append(int(e[3].get("hit_no", 0)))
+	check(nos == [1, 2, 3], "주먹 세 번, 순서 번호 (%s)" % [nos])
+	check(is_equal_approx(b.hp, b.hp_max - 21.0), "7 × 3 (boss hp %s)" % b.hp)
+
+
+func test_skill_needs_gauge() -> void:
+	var d := _close(0.8)
+	var h = d["hero"]
+	h.gauge = 50.0
+	h.skill_idx = 1
+	_tick(d, {"skill": true})
+	check(h.state != "attack", "게이지가 모자라면 기술이 안 나간다 (state %s)" % h.state)
+	check(not _events(d, "no_gauge").is_empty(), "게이지 부족 신호")
+	_tick(d, {"skill_next": true})
+	check(h.skill_idx == 2, "기술 바꾸기 (%d)" % h.skill_idx)
 
 
 func test_deterministic_same_seed() -> void:

@@ -7,6 +7,7 @@ const Fighter = preload("res://src/combat/fighter.gd")
 const World = preload("res://src/combat/world.gd")
 const BossAI = preload("res://src/combat/boss_ai.gd")
 const Bot = preload("res://src/combat/bot.gd")
+const Skills = preload("res://src/data/skills.gd")
 
 const HERO := {"hp": 200.0, "posture": 60.0, "walk": 2.1, "run": 4.6, "stagger": 50}
 const BOSS := {"hp": 400.0, "posture": 220.0, "walk": 1.9, "run": 4.0, "stagger": 100, "poise": 12.0}
@@ -22,6 +23,11 @@ static func make(seed_value: int) -> Dictionary:
 	h.run_speed = HERO["run"]
 	h.stagger_len = HERO["stagger"]
 	h.moveset = {"combo": "k_slash1", "dash": "k_dash", "counter": "k_counter", "finisher": "k_finisher"}
+	h.rank = Skills.KIM["rank"]
+	h.skills = Skills.KIM_SKILLS
+	h.gauge_max = Skills.KIM["bars"] * Skills.BAR
+	h.gauge_rate = Skills.KIM["rate"]
+	h.gauge = Skills.KIM_START_BARS * Skills.BAR
 	h.pos = Vector2(-2.2, 0.5)
 	h.facing = Vector2(1, 0)
 	var b = Fighter.new("백도찬", 1)
@@ -33,6 +39,7 @@ static func make(seed_value: int) -> Dictionary:
 	b.run_speed = BOSS["run"]
 	b.stagger_len = BOSS["stagger"]
 	b.poise = BOSS["poise"]
+	b.rank = Skills.RANK["톱"]
 	b.pos = Vector2(2.2, -0.5)
 	b.facing = Vector2(-1, 0)
 	h.set_target(b)

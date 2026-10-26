@@ -5,6 +5,7 @@ extends RefCounted
 ## 좌표: pos 는 바닥 평면 (x, z) 미터. z 는 화면 아래(카메라 쪽)로 커진다.
 
 const Moves = preload("res://src/data/moves.gd")
+const Skills = preload("res://src/data/skills.gd")
 
 const ROLL_T := 20
 const ROLL_IFRAMES := Vector2i(2, 14)
@@ -66,6 +67,15 @@ var speed_now := 0.0             # 지난 프레임 움직인 빠르기 (m/초, 
 var move_vec := Vector2.ZERO     # 지난 프레임 움직인 방향 (그림용)
 var flash := 0
 var events: Array = []           # world 가 모아 가는 연출 신호
+
+# 기술(스킬) — src/data/skills.gd. 게이지는 점수(한 칸 = Skills.BAR), 보스는 게이지 없이 패턴으로 쓴다(gauge_max 0)
+var rank := 0
+var skills: Array = []
+var skill_idx := 0
+var gauge := 0.0
+var gauge_max := 0.0
+var gauge_rate := 1.0
+var buf_skill := 0
 
 
 func set_target(f) -> void:
@@ -149,9 +159,14 @@ func buffer_inputs() -> void:
 		buf_parry = PARRY_BUFFER
 	if intent.get("roll", false):
 		buf_roll = ROLL_BUFFER
+	if intent.get("skill", false):
+		buf_skill = ATTACK_BUFFER
+	if intent.get("skill_next", false) and not skills.is_empty():
+		skill_idx = (skill_idx + 1) % skills.size()
 
 
 func _decay_buffers() -> void:
+	buf_skill = ATTACK_BUFFER if intent.get("skill", false) else maxi(0, buf_skill - 1)
 	buf_attack = ATTACK_BUFFER if intent.get("attack", false) else maxi(0, buf_attack - 1)
 	buf_parry = PARRY_BUFFER if intent.get("parry", false) else maxi(0, buf_parry - 1)
 	buf_roll = ROLL_BUFFER if intent.get("roll", false) else maxi(0, buf_roll - 1)
@@ -167,6 +182,8 @@ func tick() -> void:
 		counter_ready -= 1
 	if flick_t > 0:
 		flick_t -= 1
+	if intent.get("skill_next", false) and not skills.is_empty():
+		skill_idx = (skill_idx + 1) % skills.size()
 	_decay_buffers()
 	# 빈틈 · 움찔 중에도 쓰는 기술 (백도찬식 찌르기 — Move.any_state)
 	var use: String = intent.get("use", "")
@@ -186,7 +203,7 @@ func tick() -> void:
 				set_state("idle")
 		"roll":
 			_tick_roll()
-		"hitstun", "recoil":
+		"hitstun", "recoil", "stun":
 			if t >= hold_t:
 				set_state("idle")
 		"stagger":
@@ -215,6 +232,8 @@ func _tick_free() -> void:
 		return
 	if buf_parry > 0:
 		_start_parry()
+		return
+	if buf_skill > 0 and _try_skill():
 		return
 	var use: String = intent.get("use", "")
 	if use != "":
@@ -283,6 +302,9 @@ func _tick_attack() -> void:
 	for fr in move["feints"]:
 		if t == int(fr):
 			events.append(["feint", self])
+	# 연타 중에도 기술로 끊을 수 있다(기술 동작에서 다른 기술로는 안 된다)
+	if buf_skill > 0 and t >= Moves.cancel_at(move) and not move["skill"] and _try_skill():
+		return
 	if buf_attack > 0 and t >= Moves.cancel_at(move) and not is_boss:
 		var special := _special_attack()
 		if special != "" and special != str(move["name"]):
@@ -298,6 +320,32 @@ func _tick_attack() -> void:
 		return
 	if t >= Moves.total(move):
 		set_state("idle")
+
+
+## 고른 기술을 낸다 — 게이지가 모자라면 아무것도 안 하고 false (버퍼는 남겨 두지 않는다)
+func _try_skill() -> bool:
+	if skills.is_empty():
+		return false
+	buf_skill = 0
+	var sk: Dictionary = skills[skill_idx]
+	var cost: float = float(sk["cost"]) * Skills.BAR
+	if gauge + 0.001 < cost:
+		events.append(["no_gauge", self])
+		return false
+	gauge -= cost
+	start_move(str(sk["move"]))
+	events.append(["skill", self, sk])
+	return true
+
+
+func current_skill() -> Dictionary:
+	return skills[skill_idx] if not skills.is_empty() else {}
+
+
+## 기술 게이지 채우기 (kind: Skills.GAIN 의 종류)
+func gain(kind: String, k := 1.0) -> void:
+	if gauge_max > 0.0:
+		gauge = clampf(gauge + float(Skills.GAIN.get(kind, 0.0)) * k * gauge_rate, 0.0, gauge_max)
 
 
 func _start_parry() -> void:
@@ -345,6 +393,14 @@ func get_recoil(frames: int, from_dir: Vector2) -> void:
 	vel = from_dir * 1.8
 	hold_t = frames
 	set_state("recoil")
+
+
+## 기절 (각법): 움직이지 못하고 머리 위에 '기절'
+func get_stun(frames: int) -> void:
+	if state == "stagger" or state == "down" or state == "dead":
+		return
+	hold_t = frames
+	set_state("stun")
 
 
 func get_stagger() -> void:

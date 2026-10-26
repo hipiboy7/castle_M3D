@@ -110,6 +110,7 @@ func _setup_input() -> void:
 	var keys := {
 		"left": [KEY_A, KEY_LEFT], "right": [KEY_D, KEY_RIGHT], "up": [KEY_W, KEY_UP], "down": [KEY_S, KEY_DOWN],
 		"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_L, KEY_C],
+		"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B],
 	}
 	for act in keys:
 		if not InputMap.has_action(act):
@@ -188,7 +189,7 @@ func _start(m: String) -> void:
 		hud.set_hint("데모 · 누르면 직접 싸우기")
 	else:
 		hud.message("결투", "흰 ! = 쳐내기 · 빨간 ! = 구르기 · 빈틈 = 베기", 2.5)
-		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 K(누르고) · 구르기 Space")
+		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 K(누르고) · 구르기 Space · 기술 U · 기술 바꾸기 I")
 	if not music.playing:
 		_music("boss")
 
@@ -244,6 +245,8 @@ func _player_intent() -> Dictionary:
 		"parry": Input.is_action_just_pressed("parry") or e.has("parry"),
 		"parry_held": Input.is_action_pressed("parry") or touch.held("parry"),
 		"roll": Input.is_action_just_pressed("roll") or e.has("roll"),
+		"skill": Input.is_action_just_pressed("skill") or e.has("skill"),
+		"skill_next": Input.is_action_just_pressed("skill_next") or e.has("skill_next"),
 	}
 
 
@@ -267,6 +270,27 @@ func _after_tick() -> void:
 				var heavy := str(mv2["hit_sfx"]) == "hit_heavy"
 				fx.hit(e[2], heavy)
 				_play(str(mv2["hit_sfx"]), -2.0)
+				var no := int(mv2.get("hit_no", 0))
+				if no > 0:
+					# 리천식 삼연타: 한 대마다 번호, 셋째는 크게
+					var last := no >= int(mv2["hits"])
+					fx.pop(e[2] + Vector3(0, 0.5 + no * 0.12, 0), "%d%s" % [no, "!" if last else ""],
+						Color(1.0, 0.8, 0.45) if last else Color(1.0, 0.95, 0.8), 80 if last else 56, 0.6)
+					if last:
+						cam.punch_zoom(0.9)
+			"skill":
+				var sk: Dictionary = e[2]
+				fx.pop(Vector3(e[1].pos.x, 2.35, e[1].pos.y), str(sk["name"]), Color(0.75, 0.9, 1.0), 52, 1.0)
+				_play("shine", -6.0, 1.0)
+			"no_gauge":
+				fx.pop(Vector3(e[1].pos.x, 2.35, e[1].pos.y), "게이지 부족", Color(0.75, 0.78, 0.85), 44, 0.7)
+			"lethal":
+				fx.pop(e[2] + Vector3(0, 0.75, 0), "엇박 — %d%%" % roundi(float(e[3]) * 100.0), Color(0.75, 0.9, 1.0), 72, 1.2)
+				cam.punch_zoom(0.85)
+			"pierce":
+				fx.pop(e[2] + Vector3(0, 0.45, 0), "가드 관통!", Color(1.0, 0.78, 0.47), 60, 0.9)
+			"stun":
+				fx.pop(e[2] + Vector3(0, 0.6, 0), "기절!", Color(1.0, 0.9, 0.47), 72, 1.0)
 			"parry":
 				fx.parry(e[2])
 				_play("guard", 0.0, 1.15)
@@ -287,6 +311,7 @@ func _after_tick() -> void:
 				_play("miss", -6.0)
 			"feint":
 				_play("swing", -12.0, 0.7)
+				fx.feint(e[1], (hero_p if e[1] == d["hero"] else boss_p).yaw)
 			"phase2":
 				boss_p.remove_glasses()
 				_play("wind", -2.0, 0.8)

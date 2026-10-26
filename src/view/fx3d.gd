@@ -3,7 +3,9 @@ extends Node3D
 ## main.gd 가 combat/world.gd 신호(hit · parry · block · finish · dodge · feint)와 공격 시작을 보고 부른다.
 ## 연출은 판정과 따로라(전용 난수) 결투 결과에 영향이 없다.
 
-var _items: Array = []            # [노드, 남은 시간, 처음 시간, 재질 또는 빛, 처음 밝기 · 색]
+const FONT = preload("res://assets/fonts/Galmuri11-Bold.ttf")
+
+var _items: Array = []            # [노드, 남은 시간, 처음 시간, 재질 · 빛 · 글자, 처음 밝기 · 색]
 var rng := RandomNumberGenerator.new()
 
 
@@ -19,6 +21,11 @@ func _process(dt: float) -> void:
 		var thing = it[3]
 		if thing is OmniLight3D:
 			thing.light_energy = float(it[4]) * k * k
+		elif thing is Label3D:
+			thing.position.y += dt * 0.5
+			var c: Color = it[4]
+			thing.modulate = Color(c.r, c.g, c.b, minf(1.0, k * 2.5))
+			thing.outline_modulate = Color(0, 0, 0, 0.85 * minf(1.0, k * 2.5))
 		elif thing is StandardMaterial3D:
 			thing.albedo_color = it[4] * k               # 처음 색에서 어둡게 — 더하기 섞기라 검정이 투명이다
 		if it[1] <= 0.0:
@@ -97,6 +104,43 @@ func arc(at: Vector3, yaw: float, a0: float, a1: float, r_in: float, r_out: floa
 	_place(im, m, at, yaw, life)
 
 
+## 세로 궤적 (각법 내려찍기): 정면 세로면에서 a0 → a1(도, 0 = 정면 수평, 90 = 머리 위), 가운데 높이 h
+func arc_v(at: Vector3, yaw: float, a0: float, a1: float, r_in: float, r_out: float, h: float, col: Color, life := 0.2) -> void:
+	var m := _add_mat(col)
+	var im := ImmediateMesh.new()
+	im.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, m)
+	var n := 16
+	for i in n + 1:
+		var u := float(i) / n
+		var a := deg_to_rad(lerpf(a0, a1, u))
+		var d := Vector3(0, sin(a), -cos(a))
+		var v := u * u * 0.55
+		var c := Color(v, v, v, v)
+		im.surface_set_color(c)
+		im.surface_add_vertex(d * r_in + Vector3(0, h, -0.2))
+		im.surface_set_color(c)
+		im.surface_add_vertex(d * r_out + Vector3(0, h, -0.2))
+	im.surface_end()
+	_place(im, m, at, yaw, life)
+
+
+## 떠오르며 사라지는 글자 (엇박 % · 기절 · 가드 관통 · 삼연타 번호 · 기술 이름)
+func pop(at: Vector3, text: String, col: Color, size := 64, life := 0.9) -> void:
+	var l := Label3D.new()
+	l.font = FONT
+	l.text = text
+	l.font_size = size
+	l.outline_size = 16
+	l.outline_modulate = Color(0, 0, 0, 0.85)
+	l.pixel_size = 0.0045
+	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	l.no_depth_test = true
+	l.modulate = col
+	l.position = at
+	add_child(l)
+	_items.append([l, life, life, l, col])
+
+
 ## 찌르기 · 차기 쐐기: 정면으로 r0 → r1, 뿌리 폭 w
 func spike(at: Vector3, yaw: float, r0: float, r1: float, h: float, w: float, col: Color, life := 0.14) -> void:
 	var m := _add_mat(col)
@@ -150,8 +194,18 @@ func swing(f, yaw: float, left_hand: bool) -> void:
 		"cross":
 			arc(at, yaw, -70, 70, reach * 0.3, reach + radius, 1.45, Color(1.0, 0.85, 0.5, 1.0), 0.24)
 			arc(at, yaw, 70, -70, reach * 0.3, reach + radius, 0.9, Color(1.0, 0.85, 0.5, 1.0), 0.24)
+		"axe":
+			arc_v(at, yaw, 110.0, -20.0, 0.75, 1.05, 0.95, Color(1.0, 0.95, 0.85, 0.9), 0.22)
+		"punch":
+			spike(at, yaw, 0.3, reach + radius * 0.5, 1.25, 0.06, Color(1.0, 0.95, 0.85, 0.8), 0.1)
 	if left_hand:
 		pass
+
+
+## 엇박 멈칫: 앞으로 찌르는 척한 잔상(흐린 쐐기)만 남긴다
+func feint(f, yaw: float) -> void:
+	var mv: Dictionary = f.move
+	spike(Vector3(f.pos.x, 0, f.pos.y), yaw, 0.35, float(mv["reach"]) * 0.7, 1.2, 0.05, Color(0.6, 0.75, 1.0, 0.45), 0.22)
 
 
 func hit(at: Vector3, heavy: bool) -> void:

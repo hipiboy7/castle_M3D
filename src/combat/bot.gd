@@ -1,9 +1,10 @@
 extends RefCounted
-## 자동 플레이 봇 (김신 쪽) — 예고 표시만 보고 받는다: 흰 ! 는 쳐내기, 빨간 ! 는 구르기.
+## 자동 플레이 봇 (김신 쪽) — 예고 표시만 보고 받는다: 흰 ! 는 쳐내기, 빨간 ! 는 구르기. 게이지가 되면 기술도 쓴다.
 ## castle_M BotController 처럼 '표시만 보고 이길 수 있는지'로 예고의 공정성을 확인하고, 데모 · 자동 점검에 쓴다.
 ## skill 은 제때 누를 확률(사람처럼 가끔 놓친다). 같은 시드면 같은 결과.
 
 const Fighter = preload("res://src/combat/fighter.gd")
+const Skills = preload("res://src/data/skills.gd")
 
 var me
 var foe
@@ -12,6 +13,7 @@ var skill := 0.85
 var answered := -1
 var hold := 0
 var poke_t := 0
+var skill_cd := 120
 
 
 func _init(hero, boss, r: RandomNumberGenerator) -> void:
@@ -48,7 +50,14 @@ func decide() -> Dictionary:
 				it["roll"] = true
 				it["move"] = (side - to * 0.6).normalized()
 			return it
-	var open: bool = foe.state in ["stagger", "recoil", "hitstun", "down"] or foe.in_recovery()
+	var open: bool = foe.state in ["stagger", "recoil", "hitstun", "down", "stun"] or foe.in_recovery()
+	skill_cd -= 1
+	var sk := _pick_skill(open, d)
+	if sk >= 0:
+		me.skill_idx = sk                        # '기술 바꾸기'를 그만큼 누른 것과 같다
+		it["skill"] = true
+		skill_cd = 240
+		return it
 	if me.counter_ready > 0 or open:
 		if d > 1.15:
 			it["move"] = to
@@ -67,3 +76,18 @@ func decide() -> Dictionary:
 		poke_t = 50 + rng.randi_range(0, 60)
 		it["attack"] = true
 	return it
+
+
+## 기술: 쉬는 틈(skill_cd) 뒤 게이지가 되면 — 쳐낸 뒤 삼연타, 다른 빈틈엔 각법, 서로 재는 중엔 가끔 엇박 찌르기.
+## 고를 수 없으면 -1
+func _pick_skill(open: bool, d: float) -> int:
+	if skill_cd > 0 or not me.can_act() or me.skills.is_empty() or d > 1.6:
+		return -1
+	var want := -1
+	if open:
+		want = 2 if foe.state == "recoil" else 1
+	elif foe.can_act() and rng.randf() < 0.02:
+		want = 0
+	if want < 0 or me.gauge < float(me.skills[want]["cost"]) * Skills.BAR:
+		return -1
+	return want

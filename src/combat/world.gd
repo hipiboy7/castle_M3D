@@ -1,10 +1,12 @@
 extends RefCounted
-## 결투 판정 — 공격 판정 · 구르기 무적 · 칼날 쳐내기(늦은 쳐내기) · 막기 · 체간 · 빈틈 · 제압 · 역경직 · 페이즈.
+## 결투 판정 — 공격 판정 · 구르기 무적 · 칼날 쳐내기(늦은 쳐내기) · 막기 · 체간 · 빈틈 · 제압 · 역경직 · 페이즈 ·
+## 기술(엇박 관통 · 엇박 피해 · 기절 · 삼연타) · 기술 게이지.
 ## castle_M `castle_m/action/combat.py` 와 P2 설계서 8.3절(보스 규칙)의 수치를 초안 크기로 옮겼다.
 ## 순수 로직이라 테스트(tests/test_combat.gd)와 자동 플레이(--autoplay)가 그림 없이 돌린다.
 
 const Fighter = preload("res://src/combat/fighter.gd")
 const Moves = preload("res://src/data/moves.gd")
+const Skills = preload("res://src/data/skills.gd")
 
 const PARRY_HITSTOP := 9
 const PARRY_SHAKE := 4
@@ -15,6 +17,7 @@ const PHASE2_AT := 0.55                  # 1차 체력 바닥 — 여기서 2차
 const PHASE2_FREEZE := 50                # 2차로 넘어가는 동안 멈춤(컷인)
 const LATE_PARRY := 6                    # 늦은 쳐내기: 서 있던 김신이 맞으면 맞음을 이만큼 미루고, 그 사이 누르면 쳐내기
                                          # (휘두름이 보이는 순간이 판정 순간이라 보고 누르면 늦다 — castle_common rules/전투_쳐내기.md 1절)
+const TRIPLE_LAST := {"knockback_k": 8.0, "hitstop": 13, "shake": 6}   # 리천식 삼연타 셋째 대 (castle_M combat.py 와 같다)
 
 var fighters: Array = []
 var frame := 0
@@ -59,6 +62,7 @@ func tick() -> void:
 		return
 	for f in fighters:
 		f.tick()
+		f.gauge = minf(f.gauge_max, f.gauge + Skills.PASSIVE * f.gauge_rate)
 		for e in f.events:
 			events.append(e)
 		f.events.clear()
@@ -141,12 +145,17 @@ func _hits() -> void:
 
 
 func _resolve(a, d) -> void:
-	var mv: Dictionary = a.move
+	var mv: Dictionary = _hit_move(a)
 	var at: Vector3 = _contact(a, d)
 	var push: Vector2 = a.dir_to(d)
 	if d.iframes():
 		stats["dodges"] += 1
 		events.append(["dodge", d, at])
+		return
+	# 엇박 계열: 막기 · 쳐내기를 뚫는다 (castle_M combat.py '가드 관통!')
+	if mv["guard_break"] and d.state == "parry" and _faces(d, a):
+		events.append(["pierce", d, at])
+		_take_hit(a, d, mv, at)
 		return
 	var parryable: bool = mv["parryable"]
 	if parryable and d.parry_open() and _faces(d, a):
@@ -159,11 +168,12 @@ func _resolve(a, d) -> void:
 		d.vel = push * float(mv["knockback"]) * 0.6
 		hitstop = maxi(hitstop, 4)
 		events.append(["block", d, at])
+		d.gain("guard")
 		if d.posture >= d.posture_max:
 			_stagger(d)
 		_check_hp(d)
 		return
-	if parryable and not d.is_boss and d.can_act() and _faces(d, a) and LATE_PARRY > 0:
+	if parryable and not mv["guard_break"] and not d.is_boss and d.can_act() and _faces(d, a) and LATE_PARRY > 0:
 		pending.append([a, d, mv, at, LATE_PARRY])
 		return
 	_take_hit(a, d, mv, at)
@@ -184,18 +194,53 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 		shake = maxi(shake, int(mv["shake"]))
 		stats["hits"] += 1
 		events.append(["finish", d, at, a])
+		a.gain("finisher")
 		_check_hp(d)
 		return
+	if str(mv["lethal"]) != "":
+		# 엇박: 맞는 쪽 등급에 따라 최대 체력의 몇 분의 몇 (김신 내성 상위 → 백도찬 톱: 1/3 × 2/3)
+		var frac := Skills.lethal_fraction(d.rank, a.rank)
+		dmg = d.hp_max * frac
+		shake = maxi(shake, 6)
+		events.append(["lethal", d, at, frac])
 	d.hp -= dmg
 	d.take_posture(float(mv["posture"]))
 	d.get_hit(mv, push)
+	var stun := Skills.stun_frames(mv, a.rank, d.rank)
+	if stun > 0 and d.hp > 0.0:
+		d.get_stun(stun)
+		events.append(["stun", d, at, stun])
+	if int(mv.get("hit_no", 0)) >= int(mv["hits"]) and mv["knockdown"] and not d.is_boss:
+		d.get_down()
 	stats["hits"] += 1
 	hitstop = maxi(hitstop, int(mv["hitstop"]))
 	shake = maxi(shake, int(mv["shake"]))
 	events.append(["hit", d, at, mv])
+	a.gain("hit", Skills.SKILL_HIT_K if mv["skill"] else 1.0)
+	d.gain("taken")
 	if d.posture >= d.posture_max and d.state != "stagger" and d.state != "down":
 		_stagger(d)
 	_check_hp(d)
+
+
+## 이번 한 대의 기술 값 — 리천식 삼연타는 맞은 순서(1 ~ hits)를 "hit_no" 로 달고, 셋째 대는 넉백 · 멈춤 · 흔들림을 크게
+## (보스는 넘어지지 않는다 — 초안 잠정)
+func _hit_move(a) -> Dictionary:
+	var mv: Dictionary = a.move
+	if str(mv["fx"]) != "triple" or int(mv["hits"]) <= 1:
+		return mv
+	var s := int(mv["startup"])
+	var seg := maxi(1, int(mv["active"]) / int(mv["hits"]))
+	var no := mini(int(mv["hits"]), maxi(1, (a.t - s - 1) / seg + 1))
+	var m2: Dictionary = mv.duplicate()
+	m2["hit_no"] = no
+	if no >= int(mv["hits"]):
+		m2["knockback"] = float(mv["knockback"]) * TRIPLE_LAST["knockback_k"]
+		m2["hitstop"] = TRIPLE_LAST["hitstop"]
+		m2["shake"] = TRIPLE_LAST["shake"]
+		m2["hit_sfx"] = "hit_heavy"
+		m2["knockdown"] = true
+	return m2
 
 
 func _parry(a, d, at: Vector3, mv: Dictionary) -> void:
@@ -208,6 +253,7 @@ func _parry(a, d, at: Vector3, mv: Dictionary) -> void:
 	a.get_recoil(frames, d.dir_to(a))
 	d.counter_ready = Fighter.COUNTER_T
 	d.flick_t = 10
+	d.gain("parry")
 	d.set_state("idle")
 	hitstop = maxi(hitstop, PARRY_HITSTOP)
 	shake = maxi(shake, PARRY_SHAKE)

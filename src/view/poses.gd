@@ -106,6 +106,25 @@ const SHAPES := {
 		"F": {"pelvis": Vector3(6, 10, 0), "chest": Vector3(4, 10, 0), "sh_r": Vector3(14, 30, 70), "el_r": 30.0,
 			"sh_l": Vector3(30, 40, 30), "el_l": 80.0},
 	},
+	# 각법 — 오른 다리를 위로 곧게 들어 올렸다가(W) 내려찍는다(S). 몸은 젖혔다가 앞으로, 두 팔은 옆으로 균형
+	"axe": {
+		"W": {"pelvis": Vector3(-12, 8, 0), "spine": Vector3(-6, 0, 0), "chest": Vector3(-8, 4, 0), "head": Vector3(10, -10, 0),
+			"th_r": Vector3(150, -6, 6), "kn_r": 4.0, "ft_r": -20.0, "th_l": Vector3(-6, 4, 6), "kn_l": 14.0,
+			"sh_r": Vector3(20, -20, 60), "el_r": 50.0, "sh_l": Vector3(30, 20, 56), "el_l": 70.0},
+		"S": {"pelvis": Vector3(18, 8, 0), "spine": Vector3(6, 0, 0), "chest": Vector3(12, 4, 0), "head": Vector3(-14, -10, 0),
+			"th_r": Vector3(36, -4, 6), "kn_r": 8.0, "ft_r": -10.0, "th_l": Vector3(-18, 4, 6), "kn_l": 40.0,
+			"sh_r": Vector3(10, -10, 50), "el_r": 40.0, "sh_l": Vector3(20, 20, 46), "el_l": 60.0, "root_fwd": 0.1},
+		"F": {"pelvis": Vector3(14, 8, 0), "chest": Vector3(10, 4, 0), "head": Vector3(-10, -10, 0),
+			"th_r": Vector3(30, -4, 6), "kn_r": 34.0, "th_l": Vector3(-20, 4, 8), "kn_l": 30.0, "root_fwd": 0.08},
+	},
+	# 주먹 (리천식 삼연타 — 인형이 한 대마다 오른손 · 왼손을 번갈아 내지른다)
+	"punch": {
+		"W": {"pelvis": Vector3(4, -20, 0), "chest": Vector3(4, -24, 0), "head": Vector3(-4, 28, 0),
+			"sh_r": Vector3(30, -6, 14), "el_r": 124.0, "sh_l": Vector3(50, 30, 12), "el_l": 110.0},
+		"S": {"pelvis": Vector3(8, 20, 0), "chest": Vector3(8, 26, 0), "head": Vector3(-6, -30, 0),
+			"sh_r": Vector3(86, 10, 4), "el_r": 6.0, "th_r": Vector3(34, -4, 6), "kn_r": 40.0, "root_fwd": 0.1},
+		"F": {"sh_r": Vector3(60, 10, 10), "el_r": 40.0},
+	},
 	# 제압 — 두 칼을 높이 엇갈려 들었다가 X 자로 내리벤다
 	"cross": {
 		"W": {"pelvis": Vector3(-6, 0, 0), "chest": Vector3(-8, 0, 0), "head": Vector3(-6, 0, 0),
@@ -131,6 +150,10 @@ const RECOIL := {"pelvis": Vector3(-14, -14, 0), "chest": Vector3(-12, -20, 0), 
 	"th_r": Vector3(-8, 0, 6), "kn_r": 22.0, "th_l": Vector3(10, 0, 8), "kn_l": 26.0}
 const HURT := {"pelvis": Vector3(-12, 0, 0), "chest": Vector3(-16, 10, 0), "head": Vector3(22, 0, 0),
 	"sh_r": Vector3(-14, 0, 34), "el_r": 30.0, "sh_l": Vector3(-14, 0, 34), "el_l": 30.0, "kn_r": 18.0, "kn_l": 18.0}
+# 기절: 무릎이 풀려 몸이 늘어진다 (인형이 흔든다)
+const STUN := {"pelvis": Vector3(10, 0, 0), "chest": Vector3(14, 0, 0), "head": Vector3(26, 0, 14),
+	"sh_r": Vector3(0, 0, 14), "el_r": 10.0, "sh_l": Vector3(0, 0, 14), "el_l": 10.0,
+	"th_r": Vector3(18, 0, 6), "kn_r": 46.0, "th_l": Vector3(14, 0, 6), "kn_l": 44.0}
 # 빈틈: 체간이 무너져 고개를 떨구고 휘청인다
 const STAGGER := {"pelvis": Vector3(20, 0, 0), "chest": Vector3(18, 0, 0), "head": Vector3(30, 0, 0),
 	"sh_r": Vector3(8, 10, 12), "el_r": 16.0, "sh_l": Vector3(8, 10, 12), "el_l": 16.0,
