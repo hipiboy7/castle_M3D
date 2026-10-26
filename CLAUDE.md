@@ -5,6 +5,7 @@
 **이 폴더에서 Claude Code 를 따로 열어 개발한다** — 3D 일은 이 폴더 세션에서, 2D 본편 일은 castle_M 폴더 세션에서(2026-10-26 사용자).
 이 문서만으로 일할 수 있게 썼다. 여기 없는 규칙이 필요할 때만 castle_M `CLAUDE.md` 의 해당 절을 찾아 읽는다(전체를 읽지 않는다).
 
+> 정정 이력: 2026-10-26 — 0절 **모바일 우선**(사용자: "PC 버전은 모바일 버전이 완성된 다음에 진행하자. 모바일 버전 우선으로 진행해."), **공통 규칙 폴더** `D:\claude\fun\castle_common`(사용자: "이런 내용은 '공통'으로 빼서 별도 디렉토리에 구성하고 castle 게임에서 공통으로 참고하도록").
 > 정정 이력: 2026-10-26 — 이 폴더에서 Claude Code 를 따로 연다(사용자: "디렉토리 2개로 해서 3d와 기존에 하던작업 분리해서 클로드코드로 개발 진행하게") → 0-1절 세션 시작 순서, 4절 말하기 · 사용량 · 토큰 규칙을 castle_M 에서 옮겨 적음, 3절 `tools/ci.py`, 6절 주의.
 > 정정 이력: 2026-10-26 — 첫 작성. 사용자: "권장안대로 진행해. 별도 브랜치를 따거나 별도 프로젝트 디렉토리로 만드는게 좋을까?" → 별도 디렉토리 · 별도 저장소(이유는 `docs/P1_설계서_3D초안.md` 1절).
 
@@ -12,6 +13,8 @@
 - **무엇**: 인천항 제3부두의 밤, 김신 vs 백도찬 1:1 결투 한 판(castle_M Phase 2 결투의 3D 판). 캐릭터는 임시 3D 관절 인형 → ArtCraft · Mixamo 등으로 만든 GLB 로 바꿔 끼울 예정
 - **왜**: castle_M 2D 관절 인형이 "팔다리 움직이는 게 종잇장 같다"(2026-10-26 사용자) → 3D 가 얼마나 나은지 폰에서 보고 엔진을 정한다
 - **엔진**: Godot 4.7.2-stable, Compatibility 렌더러(폰 · 에뮬레이터 · CI 가상 화면 공통). 버전은 `scripts/get_godot.py` 와 `.github/workflows/android.yml` 두 곳에 같게
+- **모바일 우선**(2026-10-26 사용자): 조작 · 화면 · 성능은 폰 기준으로 만들고 판단한다. PC(키보드 · 마우스 · PC 화면 비율)는 모바일 판이 완성된 다음에 한다 — 그때까지 PC 쪽은 깨지지만 않게 두고 다듬지 않는다
+- **공통 규칙(최상류)**: 엔진과 상관없는 게임 규칙(쳐내기 · 막기 · 예고 등)은 `D:\claude\fun\castle_common\rules\`. 규칙을 바꿀 때는 그 폴더가 먼저, 옮긴 뒤 그 문서의 '반영 현황' 표에 커밋을 적는다. 그 폴더 사용법은 `castle_common\README.md`
 - **원본 데이터(상류)**: 기술 프레임 · 피해 · 예고는 castle_M `castle_m/action/moves.py`, 보스 패턴은 castle_M `docs/P2_설계서_M1전투핵심.md` 8절, 외형 색은 `castle_m/data/looks.py`, 소리 · 음악 · 글꼴은 castle_M `assets/`, 스토리는 castle_M `docs/story/`. 여기는 하류다 — 값을 바꿀 때는 castle_M 쪽이 먼저
 - **패키지** `com.hipiboy7.castlem3d`(castle_M 앱과 따로 설치된다), 서명 `android/debug.keystore`(castle_M 과 같은 고정 디버그 키, 의도적으로 커밋)
 - **개발 환경**: castle_M 과 같은 Windows Server 2022. Python 은 `py -3.12`(기본 `python` 은 3.14 라 쓰지 않는다), Godot 는 `.tools/`(커밋 안 함, `py -3.12 scripts/get_godot.py` 로 받음)
