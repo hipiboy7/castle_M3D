@@ -288,7 +288,7 @@ func _after_tick() -> void:
 						cam.punch_zoom(0.9)
 			"skill":
 				var sk: Dictionary = e[2]
-				fx.pop(Vector3(e[1].pos.x, 2.5, e[1].pos.y), str(sk["name"]), Color(0.75, 0.9, 1.0), 48, 0.8)
+				fx.pop(Vector3(e[1].pos.x, 2.95, e[1].pos.y), str(sk["name"]), Color(0.75, 0.9, 1.0), 48, 0.8)     # 머리 위 기절 · 빈틈 글자(2.22)보다 위
 				_play("shine", -6.0, 1.0)
 			"no_gauge":
 				fx.pop(Vector3(e[1].pos.x, 2.35, e[1].pos.y), "게이지 부족", Color(0.75, 0.78, 0.85), 44, 0.7)
@@ -312,7 +312,7 @@ func _after_tick() -> void:
 				_play("guard", -2.0, 0.7)
 				cam.punch_zoom(0.9)
 			"self_cost":
-				fx.pop(Vector3(e[1].pos.x, 2.1, e[1].pos.y), "-%d" % roundi(float(e[2])), Color(1.0, 0.47, 0.43), 52, 0.9)
+				fx.pop(Vector3(e[1].pos.x, 1.5, e[1].pos.y) - cam.global_basis.x * 0.5, "-%d" % roundi(float(e[2])), Color(1.0, 0.47, 0.43), 52, 0.9)
 			"first_offbeat":
 				hud.message("백도찬", "재주를 좀 더 부려 보거라. 아가야.", 2.2)
 			"learn":
@@ -323,7 +323,7 @@ func _after_tick() -> void:
 			"pierce":
 				fx.pop(e[2] + Vector3(0, 0.45, 0), "가드 관통!", Color(1.0, 0.78, 0.47), 60, 0.9)
 			"stun":
-				fx.pop(e[2] + Vector3(0, 0.6, 0), "기절!", Color(1.0, 0.9, 0.47), 72, 1.0)
+				fx.pop(e[2] + Vector3(0, -0.35, 0) + cam.global_basis.x * 0.6, "기절!", Color(1.0, 0.9, 0.47), 60, 1.0)   # 삼연타 번호 · 엇박 % 와 겹치지 않게 옆 아래
 			"parry":
 				fx.parry(e[2])
 				_play("guard", 0.0, 1.15)

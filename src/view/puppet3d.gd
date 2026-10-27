@@ -599,7 +599,7 @@ func _update_flash(f) -> void:
 	var on: bool = f.flash > 0 and (f.flash / 2) % 2 == 0
 	var col := Color(0.12, 0.1, 0.09) if on else Color(0, 0, 0)
 	if f.state == "attack" and int(f.move["brake"]) > 0 and f.t >= int(f.move["brake"]) \
-			and f.t <= int(f.move["startup"]) + 2:
+			and f.t <= int(f.move["startup"]):              # 찌르는 순간 풀린다 (run #11: 맞은 뒤 멈춤 내내 붉었다)
 		var k := 0.6 + 0.4 * sin(time * 38.0)
 		col = Color(0.34 * k, 0.07 * k, 0.03 * k)       # 엇엇박 브레이크: 온몸이 붉게 달아오른다(부하)
 	for m in mats:
