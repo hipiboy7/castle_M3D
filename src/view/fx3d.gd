@@ -28,6 +28,8 @@ func _process(dt: float) -> void:
 			thing.outline_modulate = Color(0, 0, 0, 0.85 * minf(1.0, k * 2.5))
 		elif thing is StandardMaterial3D:
 			thing.albedo_color = it[4] * k               # 처음 색에서 어둡게 — 더하기 섞기라 검정이 투명이다
+		if it.size() > 6:
+			it[0].scale = Vector3.ONE * lerpf(float(it[6]), float(it[5]), k * k)   # 퍼지는 고리: 처음 크기 → 끝 크기
 		if it[1] <= 0.0:
 			it[0].queue_free()
 			_items.remove_at(i)
@@ -170,6 +172,85 @@ func _place(mesh: Mesh, m: StandardMaterial3D, at: Vector3, yaw: float, life: fl
 	_items.append([mi, life, life, m, m.albedo_color])
 
 
+## 퍼지는 고리 (바닥 충격파 · 주먹 충격): 반지름 r 의 띠를 s0 → s1 배로 키우며 흐려진다. up = 세운 고리(정면을 본다)
+func ring(at: Vector3, yaw: float, r: float, width: float, col: Color, life: float, s0: float, s1: float, up := false) -> void:
+	var m := _add_mat(col)
+	var im := ImmediateMesh.new()
+	im.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, m)
+	var n := 28
+	for i in n + 1:
+		var a := TAU * i / n
+		var d := Vector3(cos(a), sin(a), 0) if up else Vector3(cos(a), 0, sin(a))
+		im.surface_set_color(Color(0.15, 0.15, 0.15, 0.15))
+		im.surface_add_vertex(d * (r - width))
+		im.surface_set_color(Color(1, 1, 1, 1))
+		im.surface_add_vertex(d * r)
+	im.surface_end()
+	var mi := MeshInstance3D.new()
+	mi.mesh = im
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.position = at
+	mi.rotation.y = yaw
+	mi.scale = Vector3.ONE * s0
+	add_child(mi)
+	_items.append([mi, life, life, m, m.albedo_color, s0, s1])
+
+
+## 몸 둘레에서 솟는 입자 (엇엇박 부하) — 몸통 크기 상자에서 위로
+func rise(at: Vector3, col: Color, amount: int, life: float) -> void:
+	var p := CPUParticles3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(0.03, 0.09, 0.03)
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_color = col
+	mesh.material = m
+	p.mesh = mesh
+	p.amount = amount
+	p.lifetime = life * 0.6
+	p.one_shot = true
+	p.explosiveness = 0.0
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	p.emission_box_extents = Vector3(0.32, 0.8, 0.32)
+	p.direction = Vector3(0, 1, 0)
+	p.spread = 15.0
+	p.initial_velocity_min = 1.2
+	p.initial_velocity_max = 2.6
+	p.gravity = Vector3(0, 1.5, 0)
+	p.particle_flag_align_y = true
+	p.position = at + Vector3(0, 0.95, 0)
+	add_child(p)
+	p.emitting = true
+	_items.append([p, life + 0.3, life + 0.3, null, 0.0])
+
+
+## 엇엇박 브레이크: 온몸에 부하 — 붉은 기운이 솟고, 발밑에 고리가 퍼지고, 몸을 붉게 비춘다 (인형은 떨며 달아오른다)
+func strain(f) -> void:
+	var at := Vector3(f.pos.x, 0, f.pos.y)
+	rise(at, Color(1.0, 0.35, 0.18), 46, 0.5)
+	ring(at + Vector3(0, 0.04, 0), 0.0, 0.7, 0.18, Color(1.0, 0.4, 0.2, 0.8), 0.32, 0.4, 1.6)
+	flash(at + Vector3(0, 1.1, 0), Color(1.0, 0.35, 0.2), 2.2, 0.45, 2.2)
+
+
+## 각법 바닥 찍기: 발이 닿는 자리에 큰 충격파 두 겹 · 흙먼지 · 불빛
+func slam(at: Vector3) -> void:
+	ring(at + Vector3(0, 0.04, 0), 0.0, 0.6, 0.22, Color(1.0, 0.9, 0.7, 0.9), 0.38, 0.3, 3.6)
+	ring(at + Vector3(0, 0.05, 0), 0.0, 0.6, 0.12, Color(1.0, 0.75, 0.45, 0.7), 0.55, 0.2, 2.4)
+	spark(at + Vector3(0, 0.05, 0), Color(0.75, 0.68, 0.58), 40, 4.5, 0.45)
+	spark(at + Vector3(0, 0.1, 0), Color(1.0, 0.85, 0.6), 16, 6.0, 0.3)
+	flash(at + Vector3(0, 0.4, 0), Color(1.0, 0.8, 0.55), 2.5, 0.18, 3.0)
+
+
+## 주먹 한 대: 맞은 자리에 세운 충격 고리 · 불꽃 (셋째 대는 크게)
+func impact(at: Vector3, yaw: float, big: bool) -> void:
+	var sc := 1.7 if big else 1.0
+	ring(at, yaw, 0.32, 0.1, Color(1.0, 0.95, 0.8, 0.9), 0.2 * sc, 0.3, 1.6 * sc, true)
+	if big:
+		ring(at, yaw, 0.32, 0.06, Color(1.0, 0.7, 0.4, 0.8), 0.32, 0.2, 2.8, true)
+	spark(at, Color(1.0, 0.9, 0.65), int(18 * sc), 5.0 * sc, 0.3)
+	flash(at, Color(1.0, 0.8, 0.5), 0.8 * sc, 0.1, 1.8)
+
+
 ## 기술 모양별 궤적 (Move.shape) — 공격 판정이 시작되는 프레임에 부른다
 func swing(f, yaw: float, left_hand: bool) -> void:
 	var mv: Dictionary = f.move
@@ -194,10 +275,18 @@ func swing(f, yaw: float, left_hand: bool) -> void:
 		"cross":
 			arc(at, yaw, -70, 70, reach * 0.3, reach + radius, 1.45, Color(1.0, 0.85, 0.5, 1.0), 0.24)
 			arc(at, yaw, 70, -70, reach * 0.3, reach + radius, 0.9, Color(1.0, 0.85, 0.5, 1.0), 0.24)
+		"offbeat":
+			# 엇박 · 엇엇박: 길고 굵은 찌르기 — 바깥 푸른 띠 + 안쪽 흰 심
+			spike(at, yaw, 0.3, reach + radius + 0.55, 1.18, 0.13, Color(0.55, 0.75, 1.0, 0.8), 0.22)
+			spike(at, yaw, 0.4, reach + radius + 0.45, 1.18, 0.05, steel, 0.16)
+		"offbeat_rev":
+			spike(at, yaw, 0.35, reach + radius + 0.15, 1.15, 0.07, Color(0.6, 0.8, 1.0, 0.75), 0.14)
 		"axe":
-			arc_v(at, yaw, 110.0, -20.0, 0.75, 1.05, 0.95, Color(1.0, 0.95, 0.85, 0.9), 0.22)
+			arc_v(at, yaw, 125.0, -30.0, 0.7, 1.2, 0.95, Color(1.0, 0.95, 0.85, 0.95), 0.26)
+			var fwd := Vector3(-sin(yaw), 0, -cos(yaw))
+			slam(at + fwd * (reach + 0.15))
 		"punch":
-			spike(at, yaw, 0.3, reach + radius * 0.5, 1.25, 0.06, Color(1.0, 0.95, 0.85, 0.8), 0.1)
+			spike(at, yaw, 0.3, reach + radius * 0.7, 1.25, 0.09, Color(1.0, 0.95, 0.85, 0.85), 0.12)
 	if left_hand:
 		pass
 

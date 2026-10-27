@@ -36,6 +36,8 @@ var clock := 0
 var move: Dictionary = {}
 var attack_id := 0               # 기술을 낼 때마다 1씩 — AI 가 같은 공격에 두 번 반응하지 않게
 var hit_ids := {}
+var landed := false              # 이번 기술이 누군가에게 닿았는지 (맞힘 · 막힘 · 쳐내짐) — 헛치면 move.whiff 만큼 더 멈춘다
+var whiff_t := 0                 # 헛쳐서 회수에 더해진 프레임
 var moveset := {}
 var _target: WeakRef = null      # 마주 보는 상대 (서로 붙잡으면 순환 참조라 약한 참조)
 
@@ -110,6 +112,8 @@ func start_move(nm: String) -> void:
 	move = Moves.get_move(nm)
 	attack_id += 1
 	hit_ids.clear()
+	landed = false
+	whiff_t = 0
 	buf_attack = 0
 	running_t = 0
 	set_state("attack")
@@ -306,10 +310,16 @@ func _tick_attack() -> void:
 	for fr in move["feints"]:
 		if t == int(fr):
 			events.append(["feint", self])
+	if int(move["brake"]) > 0 and t == int(move["brake"]):
+		events.append(["brake", self])                  # 엇엇박: 브레이크 — 온몸에 부하
+	# 헛침: 판정이 끝날 때까지 아무도 못 맞혔으면 뻗은 채로 더 멈춘다 (엇박 · 엇엇박 — 역공을 받는다)
+	if t == s + a + 1 and not landed and int(move["whiff"]) > 0:
+		whiff_t = int(move["whiff"])
+		events.append(["whiff", self])
 	# 연타 중에도 기술로 끊을 수 있다(기술 동작에서 다른 기술로는 안 된다)
 	if buf_skill > 0 and t >= Moves.cancel_at(move) and not move["skill"] and _try_skill():
 		return
-	if buf_attack > 0 and t >= Moves.cancel_at(move) and not is_boss:
+	if buf_attack > 0 and t >= Moves.cancel_at(move) and not is_boss and whiff_t == 0:
 		var special := _special_attack()
 		if special != "" and special != str(move["name"]):
 			start_move(special)
@@ -318,11 +328,11 @@ func _tick_attack() -> void:
 			start_move(str(move["next"]))
 			return
 	# 회수 뒤쪽은 구르기로 끊을 수 있다
-	if buf_roll > 0 and t > s + a + 4:
+	if buf_roll > 0 and t > s + a + whiff_t + 4:
 		var mv: Vector2 = intent.get("move", Vector2.ZERO)
 		_start_roll(mv.normalized() if mv.length() > 0.2 else -facing)
 		return
-	if t >= Moves.total(move):
+	if t >= Moves.total(move) + whiff_t:
 		set_state("idle")
 
 

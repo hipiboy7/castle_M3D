@@ -156,6 +156,11 @@ func _resolve(a, d) -> void:
 		stats["dodges"] += 1
 		events.append(["dodge", d, at])
 		return
+	# 엇박 · 반대발 엇박이 엇엇박을 치면 무조건 엇엇박이 이긴다 — 브레이크로 박자를 흘려 닿지 않는다(헛침), 엇엇박은 그대로
+	if d.state == "attack" and str(d.move["lethal"]) == "offbeat2" and str(mv["lethal"]) in ["offbeat", "offbeat_rev"]:
+		events.append(["clash", d, at, a])
+		return
+	a.landed = true
 	# 엇박 계열: 막기 · 쳐내기를 뚫는다 (castle_M combat.py '가드 관통!')
 	if mv["guard_break"] and d.state == "parry" and _faces(d, a):
 		events.append(["pierce", d, at])

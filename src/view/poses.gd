@@ -71,6 +71,33 @@ const SHAPES := {
 			"sh_r": Vector3(70, 10, 8), "el_r": 22.0, "th_r": Vector3(44, -4, 6), "kn_r": 52.0,
 			"th_l": Vector3(-30, 4, 8), "kn_l": 10.0, "root_fwd": 0.12},
 	},
+	# 엇박 찌르기 (엇엇박도) — 찌르는 오른팔과 오른다리가 같은 쪽으로 깊고 길게 쭉 뻗는다(펜싱 런지처럼). 뒷다리는 곧게,
+	# 왼팔은 뒤로 균형. 준비(W)는 뒷다리에 무게를 싣고 칼을 허리 옆으로 당겨 몸을 감는다 (폰 리뷰 3차 2026-10-27)
+	"offbeat": {
+		"W": {"pelvis": Vector3(4, -30, 0), "chest": Vector3(4, -30, 0), "head": Vector3(-4, 50, 0),
+			"sh_r": Vector3(-14, -14, 24), "el_r": 124.0, "wr_r": Vector3(-20, 0, 0), "sh_l": Vector3(50, 40, 12),
+			"el_l": 100.0, "th_r": Vector3(12, -4, 6), "kn_r": 44.0, "th_l": Vector3(-8, 4, 10), "kn_l": 46.0},
+		"S": {"pelvis": Vector3(22, 34, 0), "spine": Vector3(6, 0, 0), "chest": Vector3(12, 22, 0), "head": Vector3(-20, -52, 0),
+			"sh_r": Vector3(88, 4, 2), "el_r": 0.0, "wr_r": Vector3(-24, 0, 0), "sh_l": Vector3(-36, -10, 46), "el_l": 18.0,
+			"th_r": Vector3(74, -4, 6), "kn_r": 84.0, "ft_r": -16.0, "th_l": Vector3(-52, 4, 8), "kn_l": 2.0, "ft_l": 28.0,
+			"root_fwd": 0.42},
+		"F": {"pelvis": Vector3(20, 30, 0), "chest": Vector3(10, 20, 0), "head": Vector3(-18, -46, 0),
+			"sh_r": Vector3(80, 4, 4), "el_r": 12.0, "th_r": Vector3(68, -4, 6), "kn_r": 78.0,
+			"th_l": Vector3(-48, 4, 8), "kn_l": 6.0, "root_fwd": 0.38},
+	},
+	# 반대발 엇박 — 디딤발을 바꿔 왼발이 앞, 오른팔로 몸을 가로질러 짧게 찌른다. 엇박보다 작고 빨리 돌아온다
+	"offbeat_rev": {
+		"W": {"pelvis": Vector3(2, -12, 0), "chest": Vector3(2, -16, 0), "head": Vector3(-4, 24, 0),
+			"sh_r": Vector3(0, -8, 24), "el_r": 110.0, "th_r": Vector3(14, -4, 6), "kn_r": 36.0,
+			"th_l": Vector3(-10, 4, 10), "kn_l": 34.0},
+		"S": {"pelvis": Vector3(10, -14, 0), "chest": Vector3(8, 30, 0), "head": Vector3(-8, -14, 0),
+			"sh_r": Vector3(84, 14, 6), "el_r": 6.0, "wr_r": Vector3(-20, 0, 0), "sh_l": Vector3(20, 10, 30), "el_l": 70.0,
+			"th_l": Vector3(46, 4, 8), "kn_l": 52.0, "ft_l": -10.0, "th_r": Vector3(-30, -4, 6), "kn_r": 10.0, "ft_r": 16.0,
+			"root_fwd": 0.2},
+		"F": {"pelvis": Vector3(8, -12, 0), "chest": Vector3(8, 22, 0), "head": Vector3(-6, -10, 0),
+			"sh_r": Vector3(66, 10, 8), "el_r": 24.0, "th_l": Vector3(40, 4, 8), "kn_l": 46.0,
+			"th_r": Vector3(-26, -4, 6), "kn_r": 12.0, "root_fwd": 0.16},
+	},
 	# 백도찬식 찌르기 — 낮게 깊이 파고들어 급소
 	"thrust_low": {
 		"W": {"pelvis": Vector3(16, -26, 0), "chest": Vector3(10, -20, 0), "head": Vector3(-10, 30, 0),
@@ -106,24 +133,27 @@ const SHAPES := {
 		"F": {"pelvis": Vector3(6, 10, 0), "chest": Vector3(4, 10, 0), "sh_r": Vector3(14, 30, 70), "el_r": 30.0,
 			"sh_l": Vector3(30, 40, 30), "el_l": 80.0},
 	},
-	# 각법 — 오른 다리를 위로 곧게 들어 올렸다가(W) 내려찍는다(S). 몸은 젖혔다가 앞으로, 두 팔은 옆으로 균형
+	# 각법 — 오른 다리를 머리 위까지 곧게 들어 올렸다가(W) 바닥까지 내려찍는다(S). 몸은 크게 젖혔다가 앞으로 접히고,
+	# 디딤 무릎이 깊이 굽는다. 두 팔은 옆으로 넓게 균형 (폰 리뷰 3차: 동작을 더 크게)
 	"axe": {
-		"W": {"pelvis": Vector3(-12, 8, 0), "spine": Vector3(-6, 0, 0), "chest": Vector3(-8, 4, 0), "head": Vector3(10, -10, 0),
-			"th_r": Vector3(150, -6, 6), "kn_r": 4.0, "ft_r": -20.0, "th_l": Vector3(-6, 4, 6), "kn_l": 14.0,
-			"sh_r": Vector3(20, -20, 60), "el_r": 50.0, "sh_l": Vector3(30, 20, 56), "el_l": 70.0},
-		"S": {"pelvis": Vector3(18, 8, 0), "spine": Vector3(6, 0, 0), "chest": Vector3(12, 4, 0), "head": Vector3(-14, -10, 0),
-			"th_r": Vector3(36, -4, 6), "kn_r": 8.0, "ft_r": -10.0, "th_l": Vector3(-18, 4, 6), "kn_l": 40.0,
-			"sh_r": Vector3(10, -10, 50), "el_r": 40.0, "sh_l": Vector3(20, 20, 46), "el_l": 60.0, "root_fwd": 0.1},
-		"F": {"pelvis": Vector3(14, 8, 0), "chest": Vector3(10, 4, 0), "head": Vector3(-10, -10, 0),
-			"th_r": Vector3(30, -4, 6), "kn_r": 34.0, "th_l": Vector3(-20, 4, 8), "kn_l": 30.0, "root_fwd": 0.08},
+		"W": {"pelvis": Vector3(-22, 8, 0), "spine": Vector3(-10, 0, 0), "chest": Vector3(-12, 4, 0), "head": Vector3(18, -10, 0),
+			"th_r": Vector3(176, -6, 4), "kn_r": 0.0, "ft_r": -30.0, "th_l": Vector3(-8, 4, 6), "kn_l": 22.0, "ft_l": 10.0,
+			"sh_r": Vector3(30, -30, 80), "el_r": 30.0, "sh_l": Vector3(40, 20, 76), "el_l": 40.0},
+		"S": {"pelvis": Vector3(30, 8, 0), "spine": Vector3(10, 0, 0), "chest": Vector3(20, 4, 0), "head": Vector3(-24, -10, 0),
+			"th_r": Vector3(24, -4, 6), "kn_r": 4.0, "ft_r": -8.0, "th_l": Vector3(-24, 4, 6), "kn_l": 70.0, "ft_l": 20.0,
+			"sh_r": Vector3(-10, -10, 56), "el_r": 30.0, "sh_l": Vector3(0, 20, 54), "el_l": 40.0, "root_fwd": 0.2},
+		"F": {"pelvis": Vector3(24, 8, 0), "chest": Vector3(16, 4, 0), "head": Vector3(-18, -10, 0),
+			"th_r": Vector3(26, -4, 6), "kn_r": 40.0, "th_l": Vector3(-22, 4, 8), "kn_l": 50.0, "root_fwd": 0.16},
 	},
-	# 주먹 (리천식 삼연타 — 인형이 한 대마다 오른손 · 왼손을 번갈아 내지른다)
+	# 주먹 (리천식 삼연타 — 인형이 한 대마다 오른손 · 왼손을 번갈아 내지른다). 몸통을 크게 비틀고 한 발씩 내딛는다
 	"punch": {
-		"W": {"pelvis": Vector3(4, -20, 0), "chest": Vector3(4, -24, 0), "head": Vector3(-4, 28, 0),
-			"sh_r": Vector3(30, -6, 14), "el_r": 124.0, "sh_l": Vector3(50, 30, 12), "el_l": 110.0},
-		"S": {"pelvis": Vector3(8, 20, 0), "chest": Vector3(8, 26, 0), "head": Vector3(-6, -30, 0),
-			"sh_r": Vector3(86, 10, 4), "el_r": 6.0, "th_r": Vector3(34, -4, 6), "kn_r": 40.0, "root_fwd": 0.1},
-		"F": {"sh_r": Vector3(60, 10, 10), "el_r": 40.0},
+		"W": {"pelvis": Vector3(6, -30, 0), "chest": Vector3(6, -34, 0), "head": Vector3(-6, 44, 0),
+			"sh_r": Vector3(24, -14, 18), "el_r": 130.0, "sh_l": Vector3(54, 30, 12), "el_l": 108.0,
+			"th_r": Vector3(16, -4, 6), "kn_r": 40.0},
+		"S": {"pelvis": Vector3(12, 32, 0), "chest": Vector3(10, 36, 0), "head": Vector3(-10, -50, 0),
+			"sh_r": Vector3(90, 8, 2), "el_r": 0.0, "th_r": Vector3(46, -4, 6), "kn_r": 56.0, "th_l": Vector3(-30, 4, 8),
+			"kn_l": 12.0, "root_fwd": 0.2},
+		"F": {"sh_r": Vector3(64, 10, 10), "el_r": 40.0},
 	},
 	# 제압 — 두 칼을 높이 엇갈려 들었다가 X 자로 내리벤다
 	"cross": {

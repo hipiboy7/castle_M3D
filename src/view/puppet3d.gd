@@ -14,6 +14,7 @@ const HIP_W := 0.095
 const THIGH := 0.45
 const SHIN := 0.44
 const ANKLE_H := 0.055
+const BRAKE_AT := 0.45            # 엇엇박: 준비 → 타격 자세의 이만큼 뻗은 데서 브레이크가 걸린다
 const CHEST_UP := 0.27
 const NECK_UP := 0.215
 const HEAD_UP := 0.135
@@ -472,6 +473,10 @@ func _attack_pose(f) -> Dictionary:
 	var ac := int(mv["active"])
 	var rc := int(mv["recovery"])
 	var t: int = f.t
+	var brake := int(mv["brake"])
+	var from := w if brake <= 0 else _lerp_pose(w, s, BRAKE_AT)
+	if t <= su and brake > 0:
+		return _brake_pose(t, brake, w, s, from)
 	if t <= su:
 		var u := float(t) / maxf(1.0, su)
 		if shape == "sidekick":
@@ -485,11 +490,19 @@ func _attack_pose(f) -> Dictionary:
 		return _triple_pose(mv, t - su)
 	if t <= su + ac:
 		var u2 := float(t - su) / maxf(1.0, ac)
-		var p2 := _lerp_pose(w, s, minf(1.0, _ease_out(u2) * 1.5))
+		var p2 := _lerp_pose(from, s, minf(1.0, _ease_out(u2) * 1.5))
 		if shape == "spin":
 			p2["spin"] = 1080.0 * u2
 		return p2
 	var rt := t - su - ac
+	if f.whiff_t > 0:
+		if rt <= f.whiff_t:
+			# 헛침: 뻗은 채로 앞으로 쏠려 멈춰 있다 (역공을 받는 틈)
+			var wp := _lerp_pose(s, fo, 0.2)
+			wp["chest"] = wp["chest"] + Vector3(5.0 + 3.0 * sin(time * 8.0), 0, 0)
+			wp["head"] = wp["head"] + Vector3(6.0, 0, 0)
+			return wp
+		rt -= f.whiff_t
 	var hold := maxi(2, int(rc * 0.45))
 	var p3: Dictionary
 	if rt <= hold:
@@ -499,6 +512,25 @@ func _attack_pose(f) -> Dictionary:
 	if shape == "spin":
 		p3["spin"] = 1080.0
 	return p3
+
+
+## 엇엇박 준비: 엇박처럼 감았다가(앞 70%) 뻗기 시작한 순간(brake) 브레이크 — 반쯤 뻗은 채 온몸에 힘이 걸려 떨며
+## 반 박자 버틴다. 판정이 시작되면 그 자리에서 쭉 찌른다
+func _brake_pose(t: int, brake: int, w: Dictionary, s: Dictionary, held: Dictionary) -> Dictionary:
+	var coil := maxf(1.0, brake * 0.7)
+	if t < coil:
+		return _lerp_pose(guard_pose, w, _ease_out(float(t) / coil))
+	if t < brake:
+		return _lerp_pose(w, held, (t - coil) / maxf(1.0, brake - coil))
+	var q := sin(time * 70.0)
+	var p := held.duplicate()
+	p["chest"] = p["chest"] + Vector3(3.0 * q, 0, 2.5 * q)
+	p["head"] = p["head"] + Vector3(2.0 * q, 0, 0)
+	p["sh_r"] = p["sh_r"] + Vector3(4.0 * q, 0, 0)
+	p["sh_l"] = p["sh_l"] + Vector3(-4.0 * q, 0, 0)
+	p["kn_r"] = float(p["kn_r"]) + 5.0 * q
+	p["kn_l"] = float(p["kn_l"]) - 4.0 * q
+	return p
 
 
 ## 리천식 삼연타 판정 동안: 한 대마다 오른손 · 왼손 · 오른손을 번갈아 내지르고(앞 1/3) 반쯤 거둔다. 셋째 대는 더 깊이
@@ -511,8 +543,8 @@ func _triple_pose(mv: Dictionary, ta: int) -> Dictionary:
 	var e := minf(1.0, u * 3.0) if u < 0.34 else 1.0 - 0.6 * (u - 0.34) / 0.66
 	var p := _lerp_pose(keys[0], keys[1], e)
 	if k == hits - 1:
-		p["root_fwd"] = float(p["root_fwd"]) + 0.12 * e
-		p["chest"] = p["chest"] + Vector3(8, 0, 0) * e
+		p["root_fwd"] = float(p["root_fwd"]) + 0.2 * e
+		p["chest"] = p["chest"] + Vector3(12, 0, 0) * e
 	return p
 
 
@@ -566,6 +598,10 @@ func _mirror(p: Dictionary) -> Dictionary:
 func _update_flash(f) -> void:
 	var on: bool = f.flash > 0 and (f.flash / 2) % 2 == 0
 	var col := Color(0.12, 0.1, 0.09) if on else Color(0, 0, 0)
+	if f.state == "attack" and int(f.move["brake"]) > 0 and f.t >= int(f.move["brake"]) \
+			and f.t <= int(f.move["startup"]) + 2:
+		var k := 0.6 + 0.4 * sin(time * 38.0)
+		col = Color(0.34 * k, 0.07 * k, 0.03 * k)       # 엇엇박 브레이크: 온몸이 붉게 달아오른다(부하)
 	for m in mats:
 		m.emission = col
 

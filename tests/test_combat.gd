@@ -204,9 +204,63 @@ func test_offbeat2_spends_all_and_self_cost() -> void:
 	check(h.state == "attack" and h.move["name"] == "s_offbeat2", "엇엇박 찌르기 (%s)" % h.move.get("name", ""))
 	check(h.gauge < 1.0, "게이지를 전부 쓴다 (%s)" % h.gauge)
 	_run(d, 45)
-	check(_events(d, "feint").size() == 2, "두 번 멈칫한다 (%d)" % _events(d, "feint").size())
+	check(_events(d, "brake").size() == 1, "엇박처럼 나가다 브레이크 한 번 (%d)" % _events(d, "brake").size())
 	check(is_equal_approx(b.hp, b.hp_max * (1.0 - 0.6)), "6칸 = 최대 체력 60%% (boss hp %s)" % b.hp)
 	check(is_equal_approx(h.hp, h.hp_max * 0.8), "맞히면 내 체력 1/5 를 잃는다 (hero hp %s)" % h.hp)
+
+
+func test_offbeat_hit_stuns() -> void:
+	var d := _close(1.4)
+	var h = d["hero"]
+	var b = d["boss"]
+	_learn(d)
+	h.skill_idx = h.skill_index("offbeat")
+	_tick(d, {"skill": true})
+	_run(d, 22)
+	var stuns := _events(d, "stun")
+	check(stuns.size() == 1 and int(stuns[0][3]) == 60, "엇박에 맞으면 기절 — 백도찬(윗급) 1초 (%s)" % [stuns])
+	check(b.state == "stun", "기절 상태 (%s)" % b.state)
+
+
+func test_offbeat_whiff_leaves_opening() -> void:
+	var d := _close(4.0)                                    # 닿지 않는 거리 — 헛친다
+	var h = d["hero"]
+	_learn(d)
+	h.skill_idx = h.skill_index("offbeat")
+	_tick(d, {"skill": true})
+	var mv: Dictionary = h.move
+	_run(d, Moves.total(mv) + 2)
+	check(not _events(d, "whiff").is_empty(), "헛침 신호")
+	check(h.state == "attack" and h.in_recovery(), "헛치면 회수 뒤에도 뻗은 채 멈춰 있다 (state %s)" % h.state)
+	_tick(d, {"roll": true})
+	check(h.state == "attack", "헛친 동안은 구르기로도 못 끊는다 (state %s)" % h.state)
+	_run(d, int(mv["whiff"]))
+	check(h.state != "attack", "헛침 %d프레임 뒤 풀린다 (state %s)" % [int(mv["whiff"]), h.state])
+
+
+func test_offbeat2_beats_offbeat() -> void:
+	var d := _close(1.6)
+	var h = d["hero"]
+	var b = d["boss"]
+	_learn(d)
+	d["world"].phase = 2
+	h.gauge = 5.0 * Skills.BAR
+	h.skill_idx = h.skill_index("offbeat2")
+	_tick(d, {}, {"use": "s_offbeat"})                     # 백도찬 엇박(판정 17)
+	for i in 6:
+		_tick(d)
+	_tick(d, {"skill": true})                              # 김신 엇엇박으로 맞받음(판정 27 — 늦다)
+	_run(d, 50)
+	check(not _events(d, "clash").is_empty(), "엇박이 엇엇박에 부딪힘")
+	check(is_equal_approx(h.hp, h.hp_max * 0.8), "엇박은 닿지 않고 김신은 엇엇박 반동만 (hero hp %s)" % h.hp)
+	check(b.hp < b.hp_max * 0.6, "엇엇박이 들어간다 (boss hp %s)" % b.hp)
+
+
+func test_offbeat_rev_light_recovery() -> void:
+	var rev := Moves.get_move("s_offbeat_rev")
+	var ob := Moves.get_move("s_offbeat")
+	check(Moves.total(rev) < Moves.total(ob) and int(rev["whiff"]) == 0, "반대발은 회수가 짧고 헛쳐도 안 멈춘다")
+	check(int(rev["stun_rel"][1]) < int(ob["stun_rel"][1]), "반대발은 기절도 짧다")
 
 
 func test_offbeat_rev_half() -> void:
@@ -225,12 +279,12 @@ func test_kick_stuns_boss_one_second() -> void:
 	var d := _close(0.8)
 	var h = d["hero"]
 	var b = d["boss"]
-	h.skill_idx = h.skill_index("kickarts")                 # 각법 내려찍기: 준비 12 → 판정 13
+	h.skill_idx = h.skill_index("kickarts")                 # 각법 내려찍기: 준비 14 → 판정 15
 	_tick(d, {"skill": true})
-	_run(d, 14)
+	_run(d, 16)
 	check(b.state == "stun", "각법에 맞으면 기절 (state %s)" % b.state)
 	check(b.hold_t == 60, "같은 급 · 윗급에게는 1초 (%d)" % b.hold_t)
-	_run(d, 75)                                             # 역경직 10 + 기절 60
+	_run(d, 75)                                             # 역경직 12 + 기절 60
 	check(b.state != "stun", "1초 뒤 풀린다 (state %s)" % b.state)
 
 
@@ -241,7 +295,7 @@ func test_kick_breaking_posture_is_stagger_not_stun() -> void:
 	b.posture = b.posture_max - 5.0
 	h.skill_idx = h.skill_index("kickarts")
 	_tick(d, {"skill": true})
-	_run(d, 14)
+	_run(d, 16)
 	check(b.state == "stagger", "같은 대에 체간이 다 차면 빈틈 (state %s)" % b.state)
 	check(_events(d, "stun").is_empty(), "빈틈이면 '기절!' 이 뜨지 않는다")
 

@@ -38,6 +38,8 @@ var d: Dictionary = {}
 var seed_now := 1
 var frames := 0
 var fps_log_ms := 0
+var later_msg: Array = []                # 조금 뒤에 띄울 가운데 알림 [제목, 부제, 초]
+var later_t := 0.0
 var mode_t := 0
 var fights := 0
 var results: Array = []
@@ -273,9 +275,13 @@ func _after_tick() -> void:
 				fx.hit(e[2], heavy)
 				_play(str(mv2["hit_sfx"]), -2.0)
 				var no := int(mv2.get("hit_no", 0))
+				if str(mv2["shape"]) == "axe":
+					cam.punch_zoom(0.88)                 # 각법: 내려찍힌 쪽으로 화면이 눌린다
 				if no > 0:
-					# 리천식 삼연타: 한 대마다 번호, 셋째는 크게
+					# 리천식 삼연타: 한 대마다 번호 · 충격 고리, 셋째는 크게
 					var last := no >= int(mv2["hits"])
+					var ap: Node3D = hero_p if e[1] == d["boss"] else boss_p
+					fx.impact(e[2], ap.yaw, last)
 					fx.pop(e[2] + Vector3(0, 0.25 + no * 0.1, 0) + cam.global_basis.x * (no - 2) * 0.3, "%d%s" % [no, "!" if last else ""],
 						Color(1.0, 0.8, 0.45) if last else Color(1.0, 0.95, 0.8), 80 if last else 56, 0.6)
 					if last:
@@ -291,6 +297,20 @@ func _after_tick() -> void:
 				fx.pop(e[2] + Vector3(0, 0.75, 0), "%s — %d%%" % [kind_name, roundi(float(e[3]) * 100.0)],
 					Color(0.75, 0.9, 1.0), 72, 1.2)
 				cam.punch_zoom(0.8 if str(e[4]) == "offbeat2" else 0.85)
+			"brake":
+				fx.strain(e[1])
+				_play("wind", -2.0, 0.55)
+				_play("swing", -8.0, 0.6)
+				cam.punch_zoom(0.95)
+			"whiff":
+				fx.pop(Vector3(e[1].pos.x, 2.3, e[1].pos.y), "헛침", Color(0.72, 0.75, 0.82), 48, 0.8)
+				_play("miss", -4.0, 0.8)
+			"clash":
+				# 엇박이 엇엇박에 부딪힘 — 브레이크로 박자를 흘려 엇엇박이 이긴다
+				fx.spark(e[2], Color(0.7, 0.85, 1.0), 26, 6.0, 0.35)
+				fx.pop(e[2] + Vector3(0, 0.6, 0), "엇엇박 — 박자를 뺏었다", Color(1.0, 0.6, 0.45), 52, 1.1)
+				_play("guard", -2.0, 0.7)
+				cam.punch_zoom(0.9)
 			"self_cost":
 				fx.pop(Vector3(e[1].pos.x, 2.1, e[1].pos.y), "-%d" % roundi(float(e[2])), Color(1.0, 0.47, 0.43), 52, 0.9)
 			"first_offbeat":
@@ -329,7 +349,12 @@ func _after_tick() -> void:
 				boss_p.remove_glasses()
 				_play("wind", -2.0, 0.8)
 				cam.punch_zoom(0.85)
-				hud.message("안경을 벗는다", "백도찬 2차 · 전력 — 엇박이 섞인다", 2.4)
+				var msg2 := ["안경을 벗는다", "백도찬 2차 · 전력 — 엇박이 섞인다", 2.4]
+				if w.events.any(func(x): return x[0] == "lethal"):
+					later_msg = msg2                     # 엇박 % 글자와 겹치지 않게 조금 뒤에 (run #10)
+					later_t = 1.1
+				else:
+					hud.message(msg2[0], msg2[1], msg2[2])
 			"ko":
 				_play("ko", 0.0)
 	w.events.clear()
@@ -355,6 +380,11 @@ func _end_fight(result: String) -> void:
 func _process(dt: float) -> void:
 	if d.is_empty():
 		return
+	if later_t > 0.0:
+		later_t -= dt
+		if later_t <= 0.0 and not later_msg.is_empty():
+			hud.message(later_msg[0], later_msg[1], later_msg[2])
+			later_msg = []
 	var frozen: bool = d["world"].hitstop > 0 and (mode == "fight" or mode == "demo")
 	hero_p.update_from(d["hero"], dt, frozen)
 	boss_p.update_from(d["boss"], dt, frozen)

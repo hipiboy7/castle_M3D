@@ -45,6 +45,13 @@ func decide() -> Dictionary:
 			return it
 		if kind == "unblock" and left <= 7:
 			answered = foe.attack_id
+			# 백도찬 엇박엔 엇엇박으로 맞받는다(부딪히면 엇엇박이 이긴다) — 게이지가 되면 반쯤은
+			var ob2: int = me.skill_index("offbeat2")
+			if str(foe.move["lethal"]) == "offbeat" and ob2 >= 0 and me.can_act() and me.can_pay(me.skills[ob2]) \
+					and rng.randf() < 0.5:
+				me.skill_idx = ob2
+				it["skill"] = true
+				return it
 			if rng.randf() < skill:
 				var side := Vector2(-to.y, to.x) * (1.0 if rng.randf() < 0.5 else -1.0)
 				it["roll"] = true

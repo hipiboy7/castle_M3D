@@ -100,7 +100,17 @@ func decide() -> Dictionary:
 			it["move"] = (away + side).normalized()
 			queue.clear()
 			return it
-	# 2-2. 엇박 찌르기 (첫 번은 체력 90% 이하에서 꼭, 그 뒤 쿨다운마다)
+	# 2-2. 김신이 엇박 계열을 헛치고 뻗은 채 멈춰 있으면 곧바로 벤다 (헛침의 대가)
+	if foe.state == "attack" and foe.whiff_t > 0:
+		queue.clear()
+		if d < 1.5:
+			it["use"] = "b_slash1"
+		elif d < 2.5:
+			it["use"] = "b_thrust"
+		else:
+			it["move"] = it["face"]
+		return it
+	# 2-3. 엇박 찌르기 (첫 번은 체력 90% 이하에서 꼭, 그 뒤 쿨다운마다)
 	if _offbeat(it, d):
 		return it
 	# 3. 김신이 공격을 시작하면(정면 · 사거리 안 · 시작 2프레임 안) 확률로 칼날 쳐내기
@@ -170,6 +180,7 @@ func _offbeat(it: Dictionary, d: float) -> bool:
 		return false
 	it["use"] = "s_offbeat"
 	offbeat_cd = int(Skills.BAEK_OFFBEAT["cd"][phase - 1])
+	cooldown = maxi(cooldown, 110)          # 맞혀서 김신이 기절해도 몰아치지 않고 내려다본다 ("재주를 좀 더 부려 보거라")
 	offbeat_shown = true
 	if forced:
 		demo = "active"
