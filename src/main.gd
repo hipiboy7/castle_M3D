@@ -15,16 +15,23 @@ const Cam = preload("res://src/view/camera_rig.gd")
 const Hud = preload("res://src/ui/hud.gd")
 const Touch = preload("res://src/ui/touch_ui.gd")
 
-# 외형: castle_M `castle_m/data/looks.py` 의 kimshin · 백도찬 색을 3D 조명에 맞게 조금 밝힘(검정이 밤에 묻히지 않게)
+# 외형(3층 · 이 판 소유): castle_common `canon/characters.json` 의 look 글(conf ai — 원작 화별 판독을 합친 것, 연출에만)을
+# 관절 인형으로 옮겼다(2026-11-05 사용자 "김신과 백도찬도 캐릭터에 맞게 외형 바꿔졌으면"). 색은 3D 밤 조명에 맞게 조금 밝힘.
+#  김신: 키 크고 어깨 넓은 근육질 · 검은 올백 + 앞머리 몇 가닥 · 가는 눈 · 왼뺨 흉터 · 귀 검은 스터드 · 턱 수염 그늘 ·
+#        검은 정장 · 흰 셔츠 · 검은 넥타이 · 옷깃 금 배지 · 은 버클 검은 벨트 · 톱니 등날 군용 단검(역수 · 정수)
+#  백도찬(6장 부두 — 대표 차림, 사용자 2026-11-05): 뒤로 넘긴 밝은 갈색 머리(2차에 가닥이 흘러내림) · 빛 반사로 하얀 테 없는
+#        직사각 안경 · 각진 턱 · 근육질 거구 · 소매 걷은 흰 셔츠 · 등에서 X 자 갈색 가죽 어깨 홀스터(왼 겨드랑이 권총) ·
+#        검은 벨트 · 바지 · 구두 · 갈색 손잡이 가는 단도 · 귀 검은 피어싱
 const LOOKS := {
 	"kim": {"suit": Color(0.16, 0.16, 0.2), "pants": Color(0.13, 0.13, 0.17), "shirt": Color(0.93, 0.93, 0.94),
 		"tie": Color(0.09, 0.09, 0.12), "skin": Color(0.91, 0.77, 0.65), "hair": Color(0.11, 0.11, 0.15),
-		"hair_style": "short", "glasses": false, "big": false, "weapon_r": "gerber", "weapon_l": "gerber",
-		"guard": "kim"},
-	"baek": {"suit": Color(0.23, 0.23, 0.27), "pants": Color(0.19, 0.19, 0.23), "shirt": Color(0.9, 0.9, 0.93),
-		"tie": Color(0.17, 0.17, 0.22), "skin": Color(0.89, 0.75, 0.63), "hair": Color(0.1, 0.1, 0.12),
-		"hair_style": "parted", "glasses": true, "big": true, "weapon_r": "sashimi", "weapon_l": "",
-		"guard": "baek"},
+		"hair_style": "slick_fringe", "glasses": false, "big": false, "scale": 1.03, "shoulder": 1.1, "eye_h": 0.007,
+		"scar": true, "piercing": true, "badge": Color(0.95, 0.75, 0.25), "buckle": Color(0.82, 0.84, 0.88),
+		"weapon_r": "combat", "weapon_l": "combat", "guard": "kim"},
+	"baek": {"outfit": "shirt", "suit": Color(0.9, 0.9, 0.92), "pants": Color(0.11, 0.11, 0.13), "shirt": Color(0.92, 0.92, 0.94),
+		"skin": Color(0.89, 0.75, 0.63), "hair": Color(0.62, 0.44, 0.27), "hair_style": "slick", "glasses": true,
+		"big": true, "scale": 1.08, "wide": 1.12, "jaw": true, "piercing": true, "holster": Color(0.45, 0.27, 0.14),
+		"buckle": Color(0.2, 0.2, 0.22), "weapon_r": "sashimi", "weapon_l": "", "guard": "baek"},
 }
 const SFX := ["knife", "swing", "slash", "hit", "hit_heavy", "kick", "guard", "counter", "miss", "ko", "wind", "step",
 	"shine", "fall"]

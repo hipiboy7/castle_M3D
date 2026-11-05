@@ -69,6 +69,7 @@ func setup(lk: Dictionary) -> void:
 func _build() -> void:
 	var lk := look
 	var big: bool = lk.get("big", false)
+	var shirt_only: bool = lk.get("outfit", "suit") == "shirt"   # 정장 없이 셔츠(소매 걷음) — 백도찬 부두 차림
 	var suit := _mat(lk["suit"], 0.74, 0.45)
 	var pants := _mat(lk["pants"], 0.78, 0.4)
 	var shirt := _mat(lk["shirt"], 0.85, 0.2)
@@ -76,46 +77,79 @@ func _build() -> void:
 	var hair := _mat(lk["hair"], 0.42, 0.35)
 	var shoe := _mat(Color(0.05, 0.05, 0.06), 0.35, 0.3)
 	var eye := _mat(Color(0.07, 0.05, 0.05), 0.5, 0.0)
-	var wide := 1.08 if big else 1.0
+	var dark := _mat(Color(0.04, 0.04, 0.05), 0.4, 0.1)
+	var top := shirt if shirt_only else suit                    # 몸통 · 위팔 겉감
+	var wide: float = lk.get("wide", 1.08 if big else 1.0)      # 몸 너비(거구 · 어깨 넓음)
+	var sh_wide: float = lk.get("shoulder", wide)               # 어깨 너비만 따로(김신 — 어깨 넓은 근육질)
 
 	J["fall"] = _node(self, Vector3.ZERO)
 	J["roll"] = _node(J["fall"], Vector3(0, ROLL_PIVOT, 0))
 	J["body"] = _node(J["roll"], Vector3(0, -ROLL_PIVOT, 0))
-	J["body"].scale = Vector3.ONE * (1.06 if big else 1.0)
+	J["body"].scale = Vector3.ONE * float(lk.get("scale", 1.06 if big else 1.0))
 	J["hips"] = _node(J["body"], Vector3(0, PELVIS_H, 0))
 	_mesh(J["hips"], _capsule(0.125, 0.36), pants, Vector3(0, -0.03, 0), Vector3(0, 0, 90), Vector3(1, wide, 0.8))
+	# 검은 벨트 + 버클 (김신 은 버클 · 백도찬 검은 벨트)
+	_mesh(J["hips"], _cyl(0.142, 0.142, 0.036), dark, Vector3(0, 0.055, 0), Vector3.ZERO, Vector3(1.02 * wide, 1, 0.76))
+	if lk.get("buckle") != null:
+		_mesh(J["hips"], _box(Vector3(0.05, 0.034, 0.012)), _mat(lk["buckle"], 0.22, 0.1, 0.9), Vector3(0, 0.055, -0.11))
 	J["spine"] = _node(J["hips"], Vector3(0, 0.02, 0))
-	_mesh(J["spine"], _capsule(0.13, 0.32), suit, Vector3(0, 0.12, 0), Vector3.ZERO, Vector3(1.12 * wide, 1, 0.74))
+	_mesh(J["spine"], _capsule(0.13, 0.32), top, Vector3(0, 0.12, 0), Vector3.ZERO, Vector3(1.12 * wide, 1, 0.74))
 	J["chest"] = _node(J["spine"], Vector3(0, CHEST_UP, 0))
-	_mesh(J["chest"], _cyl(0.2 * wide, 0.15 * wide, 0.34), suit, Vector3(0, 0.05, 0), Vector3.ZERO, Vector3(1, 1, 0.6))
-	_mesh(J["chest"], _capsule(0.082, 0.48 * wide), suit, Vector3(0, 0.15, 0), Vector3(0, 0, 90), Vector3(1, 1, 0.78))
-	# 셔츠 V · 넥타이 · 깃 (앞은 -Z)
-	_mesh(J["chest"], _box(Vector3(0.1, 0.2, 0.012)), shirt, Vector3(0, 0.12, -0.118))
-	_mesh(J["chest"], _cyl(0.062, 0.066, 0.04), shirt, Vector3(0, 0.205, -0.004))
-	if lk.get("tie") != null:
-		_mesh(J["chest"], _box(Vector3(0.036, 0.24, 0.014)), _mat(lk["tie"], 0.5, 0.2), Vector3(0, 0.085, -0.127))
+	_mesh(J["chest"], _cyl(0.2 * sh_wide, 0.15 * wide, 0.34), top, Vector3(0, 0.05, 0), Vector3.ZERO, Vector3(1, 1, 0.6))
+	_mesh(J["chest"], _capsule(0.082, 0.48 * sh_wide), top, Vector3(0, 0.15, 0), Vector3(0, 0, 90), Vector3(1, 1, 0.78))
+	# 앞은 -Z
+	if shirt_only:
+		# 셔츠: 단추 줄 · 열린 깃(목 V) · 깃
+		_mesh(J["chest"], _box(Vector3(0.008, 0.24, 0.01)), _mat(lk["shirt"].darkened(0.18), 0.8, 0.0), Vector3(0, 0.06, -0.122))
+		_mesh(J["chest"], _box(Vector3(0.05, 0.06, 0.012)), skin, Vector3(0, 0.18, -0.112))
+		_mesh(J["chest"], _cyl(0.064, 0.07, 0.045), shirt, Vector3(0, 0.205, -0.004))
+	else:
+		# 정장: 셔츠 V · 넥타이 · 깃
+		_mesh(J["chest"], _box(Vector3(0.1, 0.2, 0.012)), shirt, Vector3(0, 0.12, -0.118))
+		_mesh(J["chest"], _cyl(0.062, 0.066, 0.04), shirt, Vector3(0, 0.205, -0.004))
+		if lk.get("tie") != null:
+			_mesh(J["chest"], _box(Vector3(0.036, 0.24, 0.014)), _mat(lk["tie"], 0.5, 0.2), Vector3(0, 0.085, -0.127))
+	if lk.get("badge") != null:                                  # 옷깃 금 배지 (왼쪽 가슴)
+		_mesh(J["chest"], _cyl(0.014, 0.014, 0.008), _mat(lk["badge"], 0.2, 0.2, 0.9), Vector3(-0.085, 0.16, -0.122), Vector3(90, 0, 0))
+	if lk.get("holster") != null:
+		_holster(J["chest"], _mat(lk["holster"], 0.7, 0.15), dark, wide)
 	J["neck"] = _node(J["chest"], Vector3(0, NECK_UP, 0))
-	_mesh(J["neck"], _cyl(0.047, 0.05, 0.12), skin, Vector3(0, 0.03, 0))
+	_mesh(J["neck"], _cyl(0.047 * wide, 0.05 * wide, 0.12), skin, Vector3(0, 0.03, 0))
 	J["head"] = _node(J["neck"], Vector3(0, HEAD_UP, 0))
 	_mesh(J["head"], _sphere(0.105, 0.232), skin, Vector3(0, 0, 0))
 	_mesh(J["head"], _box(Vector3(0.022, 0.036, 0.022)), skin, Vector3(0, -0.012, -0.104))     # 코
+	if lk.get("jaw", false):                                     # 각진 턱
+		_mesh(J["head"], _box(Vector3(0.13, 0.05, 0.1)), skin, Vector3(0, -0.07, -0.035))
+	# 턱 수염 그늘 (둘 다) — 턱 앞쪽만 조금 어둡게
+	_mesh(J["head"], _sphere(0.092, 0.1), _mat(lk["skin"].darkened(0.2), 0.8, 0.0), Vector3(0, -0.068, -0.03), Vector3.ZERO, Vector3(1, 1, 0.9))
+	var eye_h: float = lk.get("eye_h", 0.011)                   # 김신 가는 눈
 	for sx in [-1.0, 1.0]:
 		_mesh(J["head"], _sphere(0.022, 0.044), skin, Vector3(0.103 * sx, -0.004, 0.006))     # 귀
-		_mesh(J["head"], _box(Vector3(0.021, 0.011, 0.012)), eye, Vector3(0.037 * sx, 0.008, -0.096))
+		_mesh(J["head"], _box(Vector3(0.024, eye_h, 0.012)), eye, Vector3(0.037 * sx, 0.008, -0.096))
+		if lk.get("piercing", false):                            # 귀 검은 스터드
+			_mesh(J["head"], _sphere(0.007, 0.014), dark, Vector3(0.112 * sx, -0.024, 0.0))
+	if lk.get("scar", false):                                    # 왼뺨 흉터
+		_mesh(J["head"], _box(Vector3(0.006, 0.046, 0.006)), _mat(lk["skin"].darkened(0.35).lerp(Color(0.6, 0.2, 0.2), 0.3), 0.7, 0.0),
+			Vector3(-0.06, -0.03, -0.088), Vector3(0, -30, 18))
 	_hair(J["head"], hair, str(lk.get("hair_style", "short")))
 	if lk.get("glasses", false):
 		glasses = _glasses(J["head"])
 	# 팔 · 다리
 	for side in ["r", "l"]:
 		var sx := 1.0 if side == "r" else -1.0
-		var sh := _node(J["chest"], Vector3(sx * SHOULDER_W * wide, SHOULDER_UP, 0))
+		var sh := _node(J["chest"], Vector3(sx * SHOULDER_W * sh_wide, SHOULDER_UP, 0))
 		J["sh_" + side] = sh
-		_mesh(sh, _sphere(0.072, 0.144), suit, Vector3.ZERO)
-		_mesh(sh, _capsule(0.058 * wide, 0.34), suit, Vector3(0, -UPPER_ARM * 0.5, 0))
+		_mesh(sh, _sphere(0.072 * sh_wide, 0.144 * sh_wide), top, Vector3.ZERO)
+		_mesh(sh, _capsule(0.058 * wide, 0.34), top, Vector3(0, -UPPER_ARM * 0.5, 0))
 		var el := _node(sh, Vector3(0, -UPPER_ARM, 0))
 		J["el_" + side] = el
-		_mesh(el, _capsule(0.048 * wide, 0.29), suit, Vector3(0, -FOREARM * 0.5, 0))
-		_mesh(el, _cyl(0.05, 0.05, 0.028), shirt, Vector3(0, -FOREARM + 0.028, 0))            # 소맷부리
+		if shirt_only:
+			# 소매 걷음: 아래팔은 맨살, 팔꿈치 아래에 걷어 올린 소매 뭉치
+			_mesh(el, _capsule(0.046 * wide, 0.29), skin, Vector3(0, -FOREARM * 0.5, 0))
+			_mesh(el, _cyl(0.058 * wide, 0.056 * wide, 0.06), shirt, Vector3(0, -0.035, 0))
+		else:
+			_mesh(el, _capsule(0.048 * wide, 0.29), suit, Vector3(0, -FOREARM * 0.5, 0))
+			_mesh(el, _cyl(0.05, 0.05, 0.028), shirt, Vector3(0, -FOREARM + 0.028, 0))            # 소맷부리
 		var hand := _node(el, Vector3(0, -FOREARM, 0))
 		J["hand_" + side] = hand
 		_mesh(hand, _sphere(0.046, 0.1), skin, Vector3(0, -0.044, -0.004), Vector3.ZERO, Vector3(0.82, 1, 1))
@@ -144,8 +178,29 @@ func _build() -> void:
 	add_child(tele)
 
 
+## 머리 모양: slick_fringe(김신 — 짧게 뒤로 넘긴 올백 + 이마로 떨어진 앞머리 몇 가닥) · slick(백도찬 — 뒤로 넘긴 머리, 2차에
+## 가닥이 흘러내린다 — loose_hair()) · parted · short. 외형 근거는 castle_common canon/characters.json look(conf ai — 연출용)
+var loose: Node3D = null
+
+
 func _hair(head: Node3D, m: Material, style: String) -> void:
-	if style == "parted":
+	if style == "slick_fringe" or style == "slick":
+		# 뒤로 넘긴 머리: 정수리 · 뒤통수를 덮고 앞이마 선은 높게, 앞쪽이 살짝 솟는다
+		_mesh(head, _sphere(0.109, 0.2), m, Vector3(0, 0.052, 0.03), Vector3.ZERO, Vector3(1.0, 0.66, 1.0))
+		_mesh(head, _sphere(0.09, 0.1), m, Vector3(0, 0.1, -0.035), Vector3(-10, 0, 0), Vector3(1.0, 0.7, 1.05))
+		for k in 3:                                              # 뒤로 빗은 결
+			_mesh(head, _box(Vector3(0.012, 0.01, 0.16)), m, Vector3(-0.04 + 0.04 * k, 0.118, 0.01), Vector3(8, 0, 0))
+		if style == "slick_fringe":
+			for k in 3:                                          # 앞머리 몇 가닥 (이마로)
+				_mesh(head, _box(Vector3(0.01, 0.07, 0.008)), m, Vector3(-0.028 + 0.022 * k, 0.05, -0.1),
+					Vector3(-12, 0, -10 + 12 * k))
+		else:
+			loose = _node(head, Vector3.ZERO)                    # 백도찬: 싸우면 흘러내리는 가닥 (2차에 보인다)
+			for k in 2:
+				_mesh(loose, _box(Vector3(0.01, 0.075, 0.008)), m, Vector3(-0.022 + 0.04 * k, 0.045, -0.1),
+					Vector3(-14, 0, 8 - 20 * k))
+			loose.visible = false
+	elif style == "parted":
 		_mesh(head, _sphere(0.108, 0.2), m, Vector3(0, 0.05, 0.022), Vector3.ZERO, Vector3(1.0, 0.66, 1.02))
 		_mesh(head, _box(Vector3(0.11, 0.03, 0.17)), m, Vector3(0.034, 0.088, -0.004), Vector3(0, 0, -12))
 		_mesh(head, _box(Vector3(0.16, 0.03, 0.04)), m, Vector3(-0.01, 0.072, -0.086), Vector3(-24, 0, -8))
@@ -154,24 +209,33 @@ func _hair(head: Node3D, m: Material, style: String) -> void:
 		_mesh(head, _box(Vector3(0.15, 0.036, 0.05)), m, Vector3(0, 0.07, -0.084), Vector3(-22, 0, 0))
 
 
+## 백도찬 안경: 테 없는(은테) 직사각 — 알이 빛을 받아 하얗게 눈을 가린다(canon look)
 func _glasses(head: Node3D) -> Node3D:
 	var g := _node(head, Vector3.ZERO)
-	var frame := _mat(Color(0.12, 0.12, 0.15), 0.3, 0.0, 0.7)
+	var frame := _mat(Color(0.75, 0.77, 0.8), 0.25, 0.0, 0.85)
+	var lens := _mat(Color(0.97, 0.98, 1.0), 0.08, 0.6)
 	for sx in [-1.0, 1.0]:
-		var ring := TorusMesh.new()
-		ring.inner_radius = 0.016
-		ring.outer_radius = 0.021
-		ring.rings = 12
-		ring.ring_segments = 6
-		_mesh(g, ring, frame, Vector3(0.038 * sx, 0.01, -0.103), Vector3(90, 0, 0))
-		_mesh(g, _box(Vector3(0.005, 0.005, 0.09)), frame, Vector3(0.06 * sx, 0.012, -0.062))
-	_mesh(g, _box(Vector3(0.03, 0.005, 0.006)), frame, Vector3(0, 0.014, -0.106))
+		_mesh(g, _box(Vector3(0.036, 0.022, 0.004)), lens, Vector3(0.039 * sx, 0.009, -0.106))
+		_mesh(g, _box(Vector3(0.004, 0.004, 0.09)), frame, Vector3(0.06 * sx, 0.014, -0.062))
+	_mesh(g, _box(Vector3(0.02, 0.004, 0.005)), frame, Vector3(0, 0.014, -0.108))
 	return g
 
 
+## 2차(전력): 안경을 벗고, 뒤로 넘긴 머리 가닥이 흘러내린다
 func remove_glasses() -> void:
 	if glasses != null:
 		glasses.visible = false
+	if loose != null:
+		loose.visible = true
+
+
+## 백도찬 어깨 홀스터: 등에서 X 자로 걸친 갈색 가죽 끈 + 앞쪽 어깨끈 + 왼 겨드랑이 권총집 · 권총 손잡이
+func _holster(chest: Node3D, leather: Material, dark: Material, wide: float) -> void:
+	for sx in [-1.0, 1.0]:
+		_mesh(chest, _box(Vector3(0.036, 0.34, 0.012)), leather, Vector3(0, 0.08, 0.121), Vector3(0, 0, 32 * sx))     # 등 X
+		_mesh(chest, _box(Vector3(0.03, 0.17, 0.012)), leather, Vector3(0.118 * sx * wide, 0.12, -0.112), Vector3(0, 0, -14 * sx))
+	_mesh(chest, _box(Vector3(0.05, 0.12, 0.07)), leather, Vector3(-0.19 * wide, 0.0, -0.01))       # 권총집 (왼 겨드랑이)
+	_mesh(chest, _box(Vector3(0.032, 0.055, 0.04)), dark, Vector3(-0.19 * wide, 0.075, 0.018), Vector3(-20, 0, 0))
 
 
 func _attach(hand: Node3D, kind: String, dir: Vector3) -> Node3D:
@@ -184,10 +248,22 @@ func _attach(hand: Node3D, kind: String, dir: Vector3) -> Node3D:
 	return w
 
 
-## 칼 (칼날이 +Y). gerber: 김신 거버 Mark II — 양날 창끝 · 고무 손잡이 / sashimi: 백도찬 — 길고 가는 외날 · 나무 손잡이
+## 칼 (칼날이 +Y). combat: 김신 — 톱니 등날 군용 단검(canon look, 검은 손잡이 · 외날 · 등에 톱니) / gerber: 거버 Mark II —
+## 양날 창끝 · 고무 손잡이(전 그림) / sashimi: 백도찬 — 길고 가는 외날 · 갈색 손잡이
 func _knife(kind: String) -> Node3D:
 	var root := Node3D.new()
 	var steel := _mat(Color(0.86, 0.88, 0.92), 0.16, 0.0, 0.95)
+	if kind == "combat":
+		_mesh(root, _cyl(0.014, 0.013, 0.11), _mat(Color(0.08, 0.08, 0.09), 0.85, 0.0), Vector3(0, -0.01, 0))
+		_mesh(root, _box(Vector3(0.06, 0.012, 0.02)), _mat(Color(0.3, 0.3, 0.33), 0.3, 0.0, 0.8), Vector3(0, 0.05, 0))
+		_mesh(root, _box(Vector3(0.03, 0.15, 0.005)), steel, Vector3(0, 0.13, 0))
+		var tip := PrismMesh.new()
+		tip.size = Vector3(0.03, 0.05, 0.005)
+		tip.left_to_right = 0.0
+		_mesh(root, tip, steel, Vector3(0, 0.23, 0))
+		for k in 4:                                              # 등날 톱니
+			_mesh(root, _box(Vector3(0.008, 0.008, 0.005)), steel, Vector3(-0.017, 0.09 + 0.022 * k, 0), Vector3(0, 0, 45))
+		return root
 	if kind == "sashimi":
 		_mesh(root, _cyl(0.012, 0.012, 0.12), _mat(Color(0.45, 0.3, 0.17), 0.8, 0.0), Vector3(0, -0.01, 0))
 		_mesh(root, _box(Vector3(0.026, 0.25, 0.004)), steel, Vector3(0, 0.175, 0))
