@@ -5,7 +5,8 @@
     py -3.12 tools/ci.py watch RUN_ID [초]        끝날 때까지 기다렸다가 status 를 찍는다 (성공 0 · 실패 1)
     py -3.12 tools/ci.py fetch RUN_ID 폴더 [이름..] 아티팩트를 받아 풀기 (이름 없으면 20MB 넘는 APK 는 뺀다)
     py -3.12 tools/ci.py log JOB_ID 파일           잡 로그(글) 저장
-    py -3.12 tools/ci.py dispatch [브랜치]          workflow_dispatch 로 다시 돌리기 (기본 impl-draft1)
+    py -3.12 tools/ci.py dispatch [브랜치] [--emulator]  workflow_dispatch 로 다시 돌리기 (기본 impl-draft1).
+                                                  --emulator 면 에뮬레이터 점검까지(push 에는 build 만 돈다)
     py -3.12 tools/ci.py cancel RUN_ID [--force]   취소 (!cancelled() 가 아닌 always() 단계는 --force 라야 멈춘다)
 
 Git Bash 에서 부를 때는 경로 바뀜을 막는다: MSYS_NO_PATHCONV=1. 아티팩트 · 로그 내려받기는 GitHub 가 돌려주는
@@ -136,8 +137,10 @@ def main(a):
             f.write(download(f"/repos/{REPO}/actions/jobs/{a[1]}/logs"))
         print("저장", a[2])
     elif cmd == "dispatch":
+        pos = [x for x in a[1:] if not x.startswith("--")]
         st, _ = call("POST", f"/repos/{REPO}/actions/workflows/{WORKFLOW}/dispatches",
-                     {"ref": a[1] if len(a) > 1 else "impl-draft1"})
+                     {"ref": pos[0] if pos else "impl-draft1",
+                      "inputs": {"emulator": "--emulator" in a}})
         print("HTTP", st, "(204 = 시작함 — 몇 초 뒤 runs 로 id 확인)")
     elif cmd == "cancel":
         st, _ = call("POST", f"/repos/{REPO}/actions/runs/{a[1]}/{'force-cancel' if '--force' in a else 'cancel'}", {})

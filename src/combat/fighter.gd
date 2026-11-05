@@ -5,7 +5,7 @@ extends RefCounted
 ## 좌표: pos 는 바닥 평면 (x, z) 미터. z 는 화면 아래(카메라 쪽)로 커진다.
 
 const Moves = preload("res://src/data/moves.gd")
-const Skills = preload("res://src/data/skills.gd")
+const Common = preload("res://src/data/common.gd")
 
 const ROLL_T := 20
 const ROLL_IFRAMES := Vector2i(2, 14)
@@ -24,7 +24,8 @@ const BODY_R := 0.3
 const POSTURE_REGEN := 0.22      # 체간 회복(프레임당), 마지막 체간 피해 뒤 REGEN_AFTER 부터
 const REGEN_AFTER := 90
 
-var name := ""
+var name := ""                   # 화면 이름 (characters.json name)
+var char_id := ""                # 인물 id (characters.json — kimshin · baekdochan)
 var team := 0
 var is_boss := false
 var pos := Vector2.ZERO
@@ -70,8 +71,8 @@ var move_vec := Vector2.ZERO     # 지난 프레임 움직인 방향 (그림용)
 var flash := 0
 var events: Array = []           # world 가 모아 가는 연출 신호
 
-# 기술(스킬) — src/data/skills.gd. 게이지는 점수(한 칸 = Skills.BAR), 보스는 게이지 없이 패턴으로 쓴다(gauge_max 0)
-var rank := 0
+# 기술(스킬) — src/data/skills.gd · common.gd. 게이지는 점수(한 칸 = common bar_points), 보스는 게이지 없이 패턴으로 쓴다(gauge_max 0)
+var rank := ""                   # 등급 이름 (ranks.json ladder — "내성 상위" 등)
 var skills: Array = []
 var skill_idx := 0
 var gauge := 0.0
@@ -346,11 +347,11 @@ func _try_skill() -> bool:
 		events.append(["no_gauge", self])
 		return false
 	if float(sk["cost"]) < 0.0:
-		skill_paid = gauge / Skills.BAR                 # 엇엇박: 게이지 전부
+		skill_paid = gauge / Common.bar_points()        # 엇엇박: 게이지 전부
 		gauge = 0.0
 	else:
 		skill_paid = float(sk["cost"])
-		gauge -= skill_paid * Skills.BAR
+		gauge -= skill_paid * Common.bar_points()
 	start_move(str(sk["move"]))
 	events.append(["skill", self, sk])
 	return true
@@ -364,8 +365,8 @@ func current_skill() -> Dictionary:
 func can_pay(sk: Dictionary) -> bool:
 	var cost := float(sk["cost"])
 	if cost < 0.0:
-		return gauge + 0.001 >= Skills.ALL_MIN_BARS * Skills.BAR
-	return gauge + 0.001 >= cost * Skills.BAR
+		return gauge + 0.001 >= Common.all_min_bars() * Common.bar_points()
+	return gauge + 0.001 >= cost * Common.bar_points()
 
 
 ## 기술 목록에서 id 의 자리 (없으면 -1)
@@ -376,10 +377,10 @@ func skill_index(id: String) -> int:
 	return -1
 
 
-## 기술 게이지 채우기 (kind: Skills.GAIN 의 종류)
+## 기술 게이지 채우기 (kind: common rules.json gauge.gain 의 종류 — hit · parry · guard · taken · finisher · ko · dodge)
 func gain(kind: String, k := 1.0) -> void:
 	if gauge_max > 0.0:
-		gauge = clampf(gauge + float(Skills.GAIN.get(kind, 0.0)) * k * gauge_rate, 0.0, gauge_max)
+		gauge = clampf(gauge + Common.gain_points(kind) * k * gauge_rate, 0.0, gauge_max)
 
 
 func _start_parry() -> void:
@@ -412,13 +413,15 @@ func take_posture(v: float) -> void:
 	last_posture_hit = clock
 
 
-func get_hit(mv: Dictionary, from_dir: Vector2) -> void:
+func get_hit(mv: Dictionary, from_dir: Vector2, att_rank := "") -> void:
 	flash = 8
 	vel = from_dir * float(mv["knockback"])
 	if state == "stagger" or state == "down" or state == "dead":
 		return
 	if is_boss and float(mv["posture"]) < poise:
 		return                                   # 버팀: 피해만 받고 움찔하지 않는다
+	if rank != "" and att_rank != "" and not mv["knockdown"] and Common.shrugs_off(rank, att_rank):
+		return                                   # 한참 아랫급의 공격에는 움찔하지 않는다 (common shrugs_off, 넘어뜨리기 빼고)
 	hold_t = int(mv["hitstun"])
 	set_state("hitstun")
 

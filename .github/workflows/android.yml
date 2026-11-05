@@ -1,15 +1,18 @@
 # 캐슬 M 3D 초안 — 검증 · APK · 화면 찍기 · 에뮬레이터 점검
 #  build    : Godot(고정 버전) + 안드로이드 템플릿 → scripts/verify.py(가져오기 · 테스트 · 자동 결투) → APK(arm64 + x86_64 한 파일)
-#             → 가상 화면(xvfb + 소프트웨어 OpenGL)에서 PC 1280x720 · 폰 2340x1080 스크린샷
+#             → APK 안에 공통 데이터(data/common/*.json)가 들었는지 → 가상 화면(xvfb + 소프트웨어 OpenGL)에서 폰 2340x1080 스크린샷
 #  emulator : APK 를 x86_64 API 34 에뮬레이터에 설치 · 실행 → 데모 스크린샷 · logcat 오류 · FPS (scripts/emu_check.sh)
+#             — 수동 실행(workflow_dispatch 입력 emulator)과 태그 push 때만(개발 규격 1 · 9절, 사용자 2026-11-04). push 에는 build 만
 #  서명: android/debug.keystore (castle_M 과 같은 고정 디버그 키, 패키지 이름이 달라 서로 덮어쓰지 않는다)
 name: android
 
 on:
   push:
     branches: [main, "impl-*"]
+    tags: ["*"]                       # 태그(마일스톤)는 경로 필터 없이 돌고 에뮬레이터까지
     paths:
       - "src/**"
+      - "data/**"
       - "assets/**"
       - "tests/**"
       - "project.godot"
@@ -19,6 +22,11 @@ on:
       - "scripts/**"
       - ".github/workflows/android.yml"
   workflow_dispatch:
+    inputs:
+      emulator:
+        description: "에뮬레이터 점검까지 (약 5 ~ 8분 더)"
+        type: boolean
+        default: false
 
 env:
   GODOT_VERSION: 4.7.2-stable
@@ -94,6 +102,17 @@ jobs:
           ls -la build
           test -f build/castle_m3d.apk
 
+      # 공통 데이터는 시작할 때 읽는다(src/data/common.gd) — APK 에 json 5개가 있고 시험 전용 cases 는 없어야 한다
+      - name: APK 에 공통 데이터(json)가 들었나
+        run: |
+          set -e
+          unzip -l build/castle_m3d.apk | grep "data/common/" || true
+          for f in characters progression ranks rules skills; do
+            unzip -l build/castle_m3d.apk | grep -q "data/common/$f.json" || { echo "::error::APK 에 data/common/$f.json 이 없다"; exit 1; }
+          done
+          if unzip -l build/castle_m3d.apk | grep -q "data/common/cases/"; then echo "::error::시험 전용 cases 가 APK 에 들었다"; exit 1; fi
+          echo "APK 에 공통 데이터 json 5개 · cases 없음"
+
       - uses: actions/upload-artifact@v7
         with:
           name: castle_m3d-apk
@@ -127,6 +146,7 @@ jobs:
 
   emulator:
     needs: build
+    if: ${{ startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.emulator) }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

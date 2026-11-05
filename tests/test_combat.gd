@@ -8,6 +8,7 @@ const Fighter = preload("res://src/combat/fighter.gd")
 const Moves = preload("res://src/data/moves.gd")
 const World = preload("res://src/combat/world.gd")
 const Skills = preload("res://src/data/skills.gd")
+const Common = preload("res://src/data/common.gd")
 
 var failures: Array = []
 
@@ -177,7 +178,7 @@ func test_offbeat_pierces_parry_lethal() -> void:
 	var g0: float = h.gauge
 	_tick(d, {"skill": true})
 	check(h.state == "attack" and h.move["name"] == "s_offbeat", "기술 버튼 → 엇박 찌르기 (%s)" % h.move.get("name", ""))
-	check(is_equal_approx(g0 - h.gauge, 4.0 * Skills.BAR - Skills.PASSIVE * h.gauge_rate), "4칸을 쓴다 (%s)" % (g0 - h.gauge))
+	check(is_equal_approx(g0 - h.gauge, 4.0 * Common.bar_points() - Common.passive_per_frame() * h.gauge_rate), "4칸을 쓴다 (%s)" % (g0 - h.gauge))
 	for i in 8:
 		_tick(d)
 	_tick(d, {}, {"parry": true, "parry_held": true})       # 보스가 판정 전에 쳐내기를 들어도
@@ -185,7 +186,7 @@ func test_offbeat_pierces_parry_lethal() -> void:
 		_tick(d, {}, {"parry_held": true})
 	check(not _events(d, "pierce").is_empty(), "엇박은 막기 · 쳐내기를 뚫는다")
 	check(_events(d, "parry").is_empty(), "엇박은 쳐내지지 않는다")
-	var want: float = b.hp_max * (1.0 - Skills.lethal_fraction("offbeat", b.rank, h.rank))
+	var want: float = b.hp_max * (1.0 - Common.lethal_fraction("offbeat", b.rank, h.rank))
 	check(is_equal_approx(b.hp, want), "아랫급(내성 상위)이 톱에게: 체력 1/3 × 2/3 (boss hp %s, 기대 %s)" % [b.hp, want])
 
 
@@ -196,10 +197,10 @@ func test_offbeat2_spends_all_and_self_cost() -> void:
 	d["world"].phase = 2                                    # 1차 바닥(55%)에 막히지 않게
 	_learn(d)
 	h.skill_idx = h.skill_index("offbeat2")
-	h.gauge = 4.0 * Skills.BAR
+	h.gauge = 4.0 * Common.bar_points()
 	_tick(d, {"skill": true})
 	check(h.state != "attack" and not _events(d, "no_gauge").is_empty(), "엇엇박은 5칸이 안 되면 못 쓴다")
-	h.gauge = 6.0 * Skills.BAR
+	h.gauge = 6.0 * Common.bar_points()
 	_tick(d, {"skill": true})
 	check(h.state == "attack" and h.move["name"] == "s_offbeat2", "엇엇박 찌르기 (%s)" % h.move.get("name", ""))
 	check(h.gauge < 1.0, "게이지를 전부 쓴다 (%s)" % h.gauge)
@@ -244,7 +245,7 @@ func test_offbeat2_beats_offbeat() -> void:
 	var b = d["boss"]
 	_learn(d)
 	d["world"].phase = 2
-	h.gauge = 5.0 * Skills.BAR
+	h.gauge = 5.0 * Common.bar_points()
 	h.skill_idx = h.skill_index("offbeat2")
 	_tick(d, {}, {"use": "s_offbeat"})                     # 백도찬 엇박(판정 17)
 	for i in 6:
@@ -260,7 +261,7 @@ func test_offbeat_rev_light_recovery() -> void:
 	var rev := Moves.get_move("s_offbeat_rev")
 	var ob := Moves.get_move("s_offbeat")
 	check(Moves.total(rev) < Moves.total(ob) and int(rev["whiff"]) == 0, "반대발은 회수가 짧고 헛쳐도 안 멈춘다")
-	check(int(rev["stun_rel"][1]) < int(ob["stun_rel"][1]), "반대발은 기절도 짧다")
+	check(int(rev["stun_3d"][1]) < int(ob["stun_3d"][1]), "반대발은 기절도 짧다")
 
 
 func test_offbeat_rev_half() -> void:
@@ -384,3 +385,73 @@ func test_bot_fights_boss() -> void:
 	var r := Duel.simulate(3, 3600)
 	check(r["boss_hp"] < Duel.BOSS["hp"], "봇이 1분 안에 보스에게 피해를 준다 %s" % r)
 	check(r["stats"]["parries"] > 0, "봇이 흰 ! 를 보고 쳐낸다 %s" % r)
+
+
+## S1 공통 받기: 결투의 2층 값이 공통 데이터에서 온다 — 김신 등급은 진행(6장 백도찬전 앞 = 내성 상위), 게이지 10칸 ·
+## 배율 4.988(fast_rank_k 2배 포함, 어긋남 ④), 비용 = skill_cost, 이름 = skills.json · characters.json
+func test_duel_values_from_common() -> void:
+	var d := Duel.make(1)
+	var h = d["hero"]
+	var b = d["boss"]
+	check(h.char_id == "kimshin" and h.name == "김신" and b.char_id == "baekdochan" and b.name == "백도찬", "인물 id · 이름")
+	check(h.rank == "내성 상위" and b.rank == "톱", "등급 (%s · %s)" % [h.rank, b.rank])
+	check(is_equal_approx(h.gauge_max, 10.0 * Common.bar_points()), "게이지 10칸 (%s)" % h.gauge_max)
+	check(absf(h.gauge_rate - 4.988) < 1e-9, "차는 배율 4.988 (%s)" % h.gauge_rate)
+	var got := []
+	for sk in h.skills:
+		got.append([sk["id"], sk["name"], sk["cost"]])
+	check(got == [["kickarts", "각법", 1.0], ["triple", "리천식 삼연타", 1.0]],
+		"처음 기술 — 동작이 있는 것만(스텝 · 촌경 빠짐) %s" % [got])
+	_learn(d)
+	got = []
+	for sk in h.skills:
+		got.append([sk["id"], sk["name"], sk["cost"]])
+	check(got.slice(0, 3) == [["offbeat2", "엇엇박 찌르기", -1.0], ["offbeat", "엇박 찌르기", 4.0], ["offbeat_rev", "반대발 엇박 찌르기", 2.0]],
+		"엇박 습득 — rank_order 순 · 비용 공식 %s" % [got])
+	check(Moves.get_move("s_offbeat2")["lethal"] == "offbeat2" and is_equal_approx(Moves.get_move("s_offbeat2")["self_cost"], 0.2),
+		"엇엇박 효과는 skills.json effects 에서")
+
+
+## 어긋남 ①: 등급 차 강함 — 보통 공격 피해 × rank_damage_k, 한참 아랫급의 공격에는 움찔하지 않는다(shrugs_off).
+## 이 결투(1등급 차)에서는 1.0 이라, 등급을 바꿔 연결만 본다
+func test_rank_gap_damage_and_armor() -> void:
+	var d := _close()
+	var h = d["hero"]
+	var b = d["boss"]
+	h.rank = "재앙"
+	b.rank = "외성 하위"                                     # 7등급 차 → 2.5배 · 0.58배 · 김신은 움찔 안 함
+	_tick(d, {"attack": true})
+	_run(d, 30)
+	var k_up := Common.rank_damage_k("재앙", "외성 하위")
+	check(is_equal_approx(b.hp, b.hp_max - 7.0 * k_up), "윗급의 베기 = 7 × %s (boss hp %s)" % [k_up, b.hp])
+	var d2 := _close(0.9)
+	d2["hero"].rank = "재앙"
+	d2["boss"].rank = "외성 하위"
+	_tick(d2, {}, {"use": "b_slash1"})
+	var flinch := false
+	for i in 15 + World.LATE_PARRY + 4:
+		_tick(d2)
+		flinch = flinch or d2["hero"].state == "hitstun"
+	var k_down := Common.rank_damage_k("외성 하위", "재앙")
+	check(is_equal_approx(d2["hero"].hp, d2["hero"].hp_max - 9.0 * k_down), "아랫급의 베기 = 9 × %s (hero hp %s)" % [k_down, d2["hero"].hp])
+	check(not flinch, "한참 아랫급에게 맞아도 움찔하지 않는다")
+
+
+## 어긋남 ⑤: 구르기로 피하면 게이지가 찬다 (gauge.gain.dodge × 배율)
+func test_dodge_gains_gauge() -> void:
+	var d := _close(1.0)
+	var h = d["hero"]
+	_tick(d, {}, {"use": "b_thrust"})                       # 판정 17 ~ 20
+	for i in 14:
+		_tick(d)
+	var g0: float = h.gauge
+	_tick(d, {"roll": true, "move": Vector2(0, 1)})         # 판정 때 구르기 무적 초반(아직 사거리 안)
+	var dodged := false
+	for i in 30:
+		_tick(d)
+		dodged = dodged or not _events(d, "dodge").is_empty()
+		if dodged:
+			break
+	check(dodged, "피함 신호")
+	var want: float = Common.gain_points("dodge") * h.gauge_rate
+	check(h.gauge - g0 >= want - 0.001, "피하면 %s 이상 찬다 (%s)" % [want, h.gauge - g0])

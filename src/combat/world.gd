@@ -1,12 +1,15 @@
 extends RefCounted
 ## 결투 판정 — 공격 판정 · 구르기 무적 · 칼날 쳐내기(늦은 쳐내기) · 막기 · 체간 · 빈틈 · 제압 · 역경직 · 페이즈 ·
-## 기술(엇박 관통 · 엇박 피해 · 기절 · 삼연타) · 기술 게이지.
-## castle_M `castle_m/action/combat.py` 와 P2 설계서 8.3절(보스 규칙)의 수치를 초안 크기로 옮겼다.
+## 기술(엇박 관통 · 엇박 피해 · 기절 · 삼연타) · 기술 게이지 · 등급 차 강함.
+## 2층 규칙(엇박 피해 lethal_fraction · 기절 stun_sec · 등급 차 rank_damage_k · shrugs_off · 게이지 얻는 양)은 공통 데이터
+## (src/data/common.gd) 함수로 — castle_M `castle_m/action/combat.py` 와 같은 자리에서 부른다.
+## 3층(쳐내기 휘청 · 막기 배율 · 제압 상한 · 2차 바닥 · 역경직)은 castle_M combat.py 와 P2 설계서 8.3절의 수치를 초안 크기로 옮겼다.
 ## 순수 로직이라 테스트(tests/test_combat.gd)와 자동 플레이(--autoplay)가 그림 없이 돌린다.
 
 const Fighter = preload("res://src/combat/fighter.gd")
 const Moves = preload("res://src/data/moves.gd")
 const Skills = preload("res://src/data/skills.gd")
+const Common = preload("res://src/data/common.gd")
 
 const PARRY_HITSTOP := 9
 const PARRY_SHAKE := 4
@@ -66,7 +69,7 @@ func tick() -> void:
 		return
 	for f in fighters:
 		f.tick()
-		f.gauge = minf(f.gauge_max, f.gauge + Skills.PASSIVE * f.gauge_rate)
+		f.gauge = minf(f.gauge_max, f.gauge + Common.passive_per_frame() * f.gauge_rate)
 		for e in f.events:
 			events.append(e)
 		f.events.clear()
@@ -155,7 +158,16 @@ func _resolve(a, d) -> void:
 	if d.iframes():
 		stats["dodges"] += 1
 		events.append(["dodge", d, at])
+		d.gain("dodge")                          # 구르기로 피하면 게이지 (common gauge.gain.dodge)
 		return
+	# 등급 차 강함: 보통 공격의 피해 · 체간 × rank_damage_k(치는 쪽, 맞는 쪽) — 엇박 계열은 빼고(castle_M combat.py 와 같게).
+	# 이 결투(내성 상위 ↔ 톱, 1등급 차)는 1.0
+	if str(mv["lethal"]) == "":
+		var rk := Common.rank_damage_k(a.rank, d.rank)
+		if rk != 1.0:
+			mv = mv.duplicate()
+			mv["damage"] = float(mv["damage"]) * rk
+			mv["posture"] = float(mv["posture"]) * rk
 	# 엇박 · 반대발 엇박이 엇엇박을 치면 무조건 엇엇박이 이긴다 — 브레이크로 박자를 흘려 닿지 않는다(헛침), 엇엇박은 그대로
 	if d.state == "attack" and str(d.move["lethal"]) == "offbeat2" and str(mv["lethal"]) in ["offbeat", "offbeat_rev"]:
 		events.append(["clash", d, at, a])
@@ -180,7 +192,7 @@ func _resolve(a, d) -> void:
 		d.gain("guard")
 		if d.posture >= d.posture_max:
 			_stagger(d)
-		_check_hp(d)
+		_check_hp(d, a)
 		return
 	if parryable and not mv["guard_break"] and not d.is_boss and d.can_act() and _faces(d, a) and LATE_PARRY > 0:
 		pending.append([a, d, mv, at, LATE_PARRY])
@@ -204,20 +216,20 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 		stats["hits"] += 1
 		events.append(["finish", d, at, a])
 		a.gain("finisher")
-		_check_hp(d)
+		_check_hp(d, a)
 		return
 	var lethal := str(mv["lethal"])
 	if lethal != "":
-		# 엇박 계열: 맞는 쪽 등급에 따라 최대 체력의 몇 분의 몇 (김신 내성 상위 → 백도찬 톱 엇박: 1/3 × 2/3,
-		# 백도찬 → 김신: 1/2), 엇엇박은 쓴 칸 / 10
-		var frac := Skills.lethal_fraction(lethal, d.rank, a.rank, a.skill_paid)
+		# 엇박 계열: 맞는 쪽 등급에 따라 최대 체력의 몇 분의 몇 (common lethal_fraction — 김신 내성 상위 → 백도찬 톱 엇박:
+		# 1/3 × 2/3, 백도찬 → 김신: 1/2), 엇엇박은 쓴 칸 / 10, 외성 상위 이하는 즉사
+		var frac := Common.lethal_fraction(lethal, d.rank, a.rank, a.skill_paid)
 		dmg = d.hp_max * frac
 		shake = maxi(shake, 6)
 		events.append(["lethal", d, at, frac, lethal])
 		stats["boss_offbeats" if a.is_boss else "offbeats"] += 1
 	d.hp -= dmg
 	d.take_posture(float(mv["posture"]))
-	d.get_hit(mv, push)
+	d.get_hit(mv, push, a.rank)
 	if float(mv["self_cost"]) > 0.0:
 		# 엇엇박: 맞히면 쓴 사람도 체력 1/5 를 잃는다 (쓰러지지는 않는다)
 		var cost: float = a.hp_max * float(mv["self_cost"])
@@ -229,18 +241,18 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 	hitstop = maxi(hitstop, int(mv["hitstop"]))
 	shake = maxi(shake, int(mv["shake"]))
 	events.append(["hit", d, at, mv])
-	a.gain("hit", Skills.SKILL_HIT_K if mv["skill"] else 1.0)
+	a.gain("hit", Common.skill_hit_k() if mv["skill"] else 1.0)
 	d.gain("taken")
 	if d.posture >= d.posture_max and d.state != "stagger" and d.state != "down":
 		_stagger(d)
 	# 기절은 빈틈(체간 무너짐) 다음에 본다 — 같은 대에 체간이 다 차면 빈틈이 이긴다(폰 리뷰 2026-10-26: 빈틈이 뜨면서
 	# "기절!" 도 뜨던 것). 빈틈 · 넘어짐 중이면 기절이 걸리지 않는다(run #8 에서 글자만 떴다)
-	var stun := Skills.stun_frames(mv, a.rank, d.rank)
+	var stun := Skills.stun_frames(mv, a.rank, d.rank)          # common stun_sec → 없으면 3D 덧붙임 stun_3d
 	if stun > 0 and d.hp > 0.0:
 		d.get_stun(stun)
 		if d.state == "stun":
 			events.append(["stun", d, at, stun])
-	_check_hp(d)
+	_check_hp(d, a)
 
 
 ## 이번 한 대의 기술 값 — 리천식 삼연타는 맞은 순서(1 ~ hits)를 "hit_no" 로 달고, 셋째 대는 넉백 · 멈춤 · 흔들림을 크게
@@ -255,7 +267,7 @@ func _hit_move(a) -> Dictionary:
 	var m2: Dictionary = mv.duplicate()
 	m2["hit_no"] = no
 	if no < int(mv["hits"]):
-		m2["stun_rel"] = []                       # 기절은 셋째 대만
+		m2["stun_off"] = true                     # 기절은 셋째 대만
 	else:
 		m2["knockback"] = float(mv["knockback"]) * TRIPLE_LAST["knockback_k"]
 		m2["hitstop"] = TRIPLE_LAST["hitstop"]
@@ -294,7 +306,7 @@ func _stagger(f) -> void:
 	events.append(["stagger", f])
 
 
-func _check_hp(d) -> void:
+func _check_hp(d, a = null) -> void:
 	if d.hp_floor > 0.0:
 		d.hp = maxf(d.hp, d.hp_max * d.hp_floor)
 	if d.is_boss and phase == 1 and d.hp <= d.hp_max * PHASE2_AT:
@@ -306,6 +318,8 @@ func _check_hp(d) -> void:
 	if d.hp <= 0.0:
 		d.die()
 		events.append(["ko", d])
+		if a != null:
+			a.gain("ko")                          # 쓰러뜨리면 게이지 (common gauge.gain.ko — 1:1 은 판이 끝나 화면엔 안 보인다)
 		over = "lose" if not d.is_boss else "win"
 		hitstop = maxi(hitstop, 30)
 

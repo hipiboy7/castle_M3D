@@ -1,64 +1,70 @@
 extends RefCounted
-## 기술(스킬) · 기술 게이지 · 엇박 계열 피해 · 기절 — castle_M `castle_m/action/skills.py` 에서 3D 초안에 필요한 만큼 옮겼다
-## (2026-10-26, castle_M 커밋 0a85410). 엇박 계열 · 습득 순서는 castle_common `data/skills.json` · `data/progression.json`.
-## 등급은 이 결투의 두 사람만: 김신 내성 상위 · 백도찬 톱 (castle_M `castle_m/data/roster.py` RANKS 순서 번호).
-## 값을 바꿀 때는 castle_common · castle_M 쪽이 원본이다(상류 → 하류).
+## 이 판(3D 초안) 소유 기술 값 + 공통 데이터(src/data/common.gd)를 이 결투에 맞게 부르는 얇은 층.
+## 2층(등급 · 게이지 · 비용 · 엇박 피해 · 기절 초 · 습득)은 전부 common 에서 읽는다 — 여기 숫자를 다시 적지 않는다
+## (S1 공통 받기, 2026-11-04 — 전에는 castle_M `skills.py` 에서 손으로 옮긴 값이었다).
+## 여기 남는 것은 3층(이 판 소유): 기술 id → 동작 표 · 처음 게이지 · 백도찬 엇박 패턴, 그리고 3D 덧붙임 기절(moves.gd stun_3d).
 
-const RANK := {"내성 하위": 10, "내성 중위": 11, "내성 상위": 12, "톱": 13, "재앙": 14}
-const TOP_RANK := 14             # 재앙 — 엇박 비용 기준
+const Common = preload("res://src/data/common.gd")
 
-const BAR := 100.0
-const MAX_BARS := 10             # 엇엇박 피해 = 쓴 칸 / 이것
-const ALL_MIN_BARS := 5          # 엇엇박: 이만큼 차 있어야 쓰고, 게이지를 전부 쓴다
-const OFFBEAT_BASE := 2          # 엇박 비용 = 2 + (재앙 - 쓰는 사람 등급) — 재앙 2 · 톱 3 · 내성 상위 4
-const GAIN := {"hit": 6.0, "parry": 18.0, "guard": 4.0, "taken": 5.0, "finisher": 14.0}
-const PASSIVE := 0.03            # 싸우는 동안 프레임마다
-const SKILL_HIT_K := 0.3         # 기술 동작으로 맞힌 것은 이만큼만 찬다(기술로 기술을 무한히 잇지 않게)
-const LOWER_RANK_K := 2.0 / 3.0  # 아랫급이 윗급에 엇박 · 반대발 엇박을 쓰면
-const OFFBEAT_FRACTION := {14: 1.0 / 6.0, 13: 1.0 / 3.0, 12: 1.0 / 2.0, 11: 2.0 / 3.0, 10: 5.0 / 6.0}
-const LETHAL_SCALE := {"offbeat": 1.0, "offbeat_rev": 0.5}
+const HERO_ID := "kimshin"
+const BOSS_ID := "baekdochan"
+## 이 결투 = 6장 인천항 김신 대 백도찬 (progression.json). 김신의 등급 · 기술은 이 사건 앞까지의 진행으로 정한다
+## (castle_M `DUELS["baekdochan"].hero_events` 와 같은 시점 — 구스타프를 이겨 내성 상위)
+const DUEL_EVENT := "duel_offbeat:baekdochan"
 
-## 김신 — 내성 상위: 10칸, 차는 배율 (1 + 0.06 × 12) × (0.5 + 기술 95 / 100) = 2.494 (roster.py gauge_rate)
-const KIM := {"rank": 12, "bars": 10, "rate": 2.494}
-## 처음 게이지: 초안은 4칸으로 시작해 기술을 바로 써 볼 수 있게 한다 — 본편은 1칸 (잠정)
+## 기술 id(castle_common skills.json) → 이 판 동작(moves.gd). 여기 없는 기술은 이 판에 동작이 없어 고를 수 없다
+## (김신 처음 기술 중 vanish_step 좌우로 사라지는 스텝 · inch 촌경 — 받은 데이터에는 있다)
+const MOVE_OF := {"kickarts": "s_kick", "triple": "s_triple", "offbeat": "s_offbeat", "offbeat2": "s_offbeat2",
+	"offbeat_rev": "s_offbeat_rev"}
+
+## 처음 게이지: 초안은 4칸으로 시작해 기술을 바로 써 볼 수 있게 한다 — 본편은 1칸 (3층 · 잠정)
 const KIM_START_BARS := 4.0
 
-## 고를 수 있는 기술 (화면 '기술 바꾸기'로 돈다). cost 칸, -1 = 엇엇박(ALL_MIN_BARS 칸 이상일 때 게이지 전부)
-const KIM_SKILLS := [
-	{"id": "kickarts", "name": "각법 내려찍기", "move": "s_kick", "cost": 1.0},
-	{"id": "triple", "name": "리천식 삼연타", "move": "s_triple", "cost": 1.0},
-]
-## 백도찬이 엇박을 쓰는 것을 보고 얻는다 (progression.json 'duel_offbeat:baekdochan' — 엇박 · 엇엇박 · 반대발 엇박).
-## 목록 맨 앞에 rank_order 순서로 붙는다
-const KIM_LEARN := [
-	{"id": "offbeat2", "name": "엇엇박 찌르기", "move": "s_offbeat2", "cost": -1.0},
-	{"id": "offbeat", "name": "엇박 찌르기", "move": "s_offbeat", "cost": 4.0},
-	{"id": "offbeat_rev", "name": "반대발 엇박", "move": "s_offbeat_rev", "cost": 2.0},
-]
-
-## 백도찬 엇박 (castle_M `castle_m/data/bosses.py` · `duels.py`): 체력 90% 이하에서 처음(그때까지 체력은 80% 아래로
-## 안 내려간다), 그 뒤 쿨다운마다. 첫 엇박에 맞은 김신은 체력 25% 아래로 안 내려간다(보여 주는 한 방)
+## 백도찬 엇박 (castle_M `castle_m/data/bosses.py` · `duels.py`, 3층 보스 패턴): 체력 90% 이하에서 처음(그때까지 체력은
+## 80% 아래로 안 내려간다), 그 뒤 쿨다운마다. 첫 엇박에 맞은 김신은 체력 25% 아래로 안 내려간다(보여 주는 한 방)
 const BAEK_OFFBEAT := {"first_hp": 0.9, "hold_hp": 0.8, "cd": [1200, 720], "demo_floor": 0.25, "slowmo": 40}
 
 
-static func offbeat_cost(rank: int) -> float:
-	return float(OFFBEAT_BASE + TOP_RANK - rank)
+## 고를 수 있는 기술 한 칸 — 이름은 skills.json, 비용은 skill_cost(쓰는 사람 등급). cost -1 = 전부(all_min_bars 칸 이상일 때)
+static func entry(id: String, rank: String) -> Dictionary:
+	var c = Common.skill_cost(id, rank)
+	return {"id": id, "name": str(Common.skill(id)["name"]), "move": MOVE_OF[id], "cost": -1.0 if c == null else float(c)}
 
 
-## 엇박 계열 피해: 맞는 쪽 최대 체력의 몇 분의 몇 (외성 상위 이하는 즉사 — 이 결투에는 없다)
-## offbeat2: 쓴 칸 / MAX_BARS (2/3 규칙 없음). offbeat · offbeat_rev: 등급 비율 × LETHAL_SCALE, 아랫급이 쓰면 × 2/3
-static func lethal_fraction(kind: String, target_rank: int, user_rank: int, paid_bars := 0.0) -> float:
-	if kind == "offbeat2":
-		return clampf(paid_bars / MAX_BARS, 0.0, 1.0)
-	var frac: float = OFFBEAT_FRACTION.get(target_rank, 1.0) * float(LETHAL_SCALE.get(kind, 1.0))
-	if user_rank < target_rank:
-		frac *= LOWER_RANK_K
-	return minf(1.0, frac)
+## 아는 기술 id 목록 → 고를 수 있는 목록 (이 판에 동작이 있는 것만, 순서 그대로)
+static func entries(ids: Array, rank: String) -> Array:
+	var out: Array = []
+	for id in ids:
+		if MOVE_OF.has(id):
+			out.append(entry(id, rank))
+	return out
 
 
-## 기절 프레임: stun_rel = [아랫급에게, 같은 급 · 윗급에게] (각법 3초 · 1초, 삼연타 셋째 대는 그 절반)
-static func stun_frames(mv: Dictionary, att_rank: int, def_rank: int) -> int:
-	var rel: Array = mv["stun_rel"]
+## 진행 사건 하나로 새로 얻는 기술 id — 사건 앞 · 뒤 progress 의 차이를 can_learn 으로 거르고 rank_order 순
+## (duel_offbeat:baekdochan → 엇엇박 · 엇박 · 반대발 엇박)
+static func learned_at(char_id: String, event: String) -> Array:
+	var st := Common.stage_of(event)
+	var before: Array = Common.progress(char_id, Common.events_until(st))[1]
+	var after: Array = Common.progress(char_id, Common.events_until(st + 1))
+	var out: Array = []
+	for id in after[1]:
+		if not before.has(id) and Common.can_learn(id, after[0], char_id):
+			out.append(id)
+	out.sort_custom(func(a, b): return int(Common.skill(a).get("rank_order", 99)) < int(Common.skill(b).get("rank_order", 99)))
+	return out
+
+
+## 기절 프레임 (60 = 1초): common stun_sec(각법 stun_rel_sec · 옆차기 stun_rank) 이 먼저, 없으면 3D 덧붙임 stun_3d
+## [아랫급에게, 같은 급 · 윗급에게] — 엇박 계열 · 삼연타 셋째 대 기절은 3D 초안에서 먼저 시험하는 규칙(common 에 없다)
+static func stun_frames(mv: Dictionary, att_rank: String, def_rank: String) -> int:
+	if mv.get("stun_off", false):
+		return 0
+	var sid := str(mv["skill_id"])
+	if sid != "":
+		var sec := Common.stun_sec(sid, att_rank, def_rank)
+		if sec > 0.0:
+			return roundi(sec * 60.0)
+	var rel: Array = mv["stun_3d"]
 	if rel.is_empty():
 		return 0
-	return int(rel[0]) if att_rank > def_rank else int(rel[1])
+	return int(rel[0]) if Common.rank_gap(att_rank, def_rank) > 0 else int(rel[1])

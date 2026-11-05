@@ -1,7 +1,11 @@
 extends RefCounted
-## 기술 표 — 프레임(60프레임 = 1초) · 피해 · 체간 · 예고는 castle_M `castle_m/action/moves.py` 에서 그대로 옮겼다
-## (2026-10-26, castle_M 커밋 5ea02c3). 거리(reach · radius · lunge · side)는 픽셀 단위 원본을 PX 로 미터로 바꾼다.
-## 초안이라 김신 쌍칼 · 김신 기술 셋 · 백도찬 사시미만 옮긴다. 값을 바꿀 때는 castle_M 쪽이 원본이다(상류 → 하류).
+## 기술 표 — 프레임(60프레임 = 1초) · 피해 · 체간 · 예고 · 거리는 3층(이 판 소유). 처음 값은 castle_M `castle_m/action/moves.py`
+## (2026-10-26, castle_M 커밋 5ea02c3)에서 옮겼고 그 뒤 폰 리뷰로 바꿔 왔다. 거리(reach · radius · lunge · side)는 픽셀 단위
+## 원본을 PX 로 미터로 바꾼다. 초안이라 김신 쌍칼 · 김신 기술 · 백도찬 사시미만 있다.
+## 2층 효과(엇박 계열 피해 종류 lethal · 내 체력 self_cost · 각법 · 옆차기 기절 초)는 skill_id 로 공통 데이터
+## (src/data/common.gd — castle_common skills.json effects)에서 읽는다 — 여기 다시 적지 않는다(S1 공통 받기).
+
+const Common = preload("res://src/data/common.gd")
 
 const PX := 0.045                 # castle_M 1px → m (키 46px ≈ 1.8m 에서 몸 너비가 맞게 조금 크게)
 
@@ -11,9 +15,11 @@ const DEFAULTS := {
 	"hitstun": 16, "hitstop": 4, "knockdown": false, "posture": 10.0, "lunge": 0.0,
 	"next": "", "cancel": -1, "telegraph": "", "shape": "slash", "sfx": "swing", "hit_sfx": "hit",
 	"shake": 0, "hits": 1, "side": 0.0, "skill": false, "feints": [], "any_state": false, "hand": "R",      # hand: 치는 손 · 발 (R · L)
-	"guard_break": false, "lethal": "", "self_cost": 0.0, "stun_rel": [], "fx": "", "whiff": 0, "brake": 0,
-	# guard_break: 막기 · 쳐내기를 뚫는다 / lethal: 엇박 계열 피해 종류(src/data/skills.gd lethal_fraction) /
-	# self_cost: 맞혔을 때 쓴 사람이 잃는 체력(최대 체력 비율, 엇엇박 1/5) / stun_rel: 기절 [아랫급에게, 같은 급 · 윗급에게]
+	"guard_break": false, "skill_id": "", "stun_3d": [], "fx": "", "whiff": 0, "brake": 0,
+	# guard_break: 막기 · 쳐내기를 뚫는다 / skill_id: castle_common skills.json 의 기술 id — get_move 가 effects 에서
+	# lethal(엇박 계열 피해 종류, common lethal_fraction) · self_cost(맞혔을 때 쓴 사람이 잃는 체력 비율)를 채우고, 기절 초는
+	# skills.gd stun_frames 가 common stun_sec 로 본다 / stun_3d: **3D 덧붙임** 기절 프레임 [아랫급에게, 같은 급 · 윗급에게] —
+	# common 에 기절이 없는 기술에만(엇박 계열 · 삼연타 셋째 대, 폰 리뷰 2 · 3차에 3D 에서 먼저 시험 — castle_common_요청 1 ~ 4행)
 	# whiff: 아무도 못 맞히면 회수에 더하는 프레임(헛친 큰 동작) / brake: 엇엇박 브레이크가 걸리는 프레임(그때부터 판정 직전까지 버틴다)
 	# fx "triple": 리천식 삼연타 — 맞은 순서를 세어 셋째에 크게, 기절은 셋째 대만 (world.gd)
 }
@@ -42,28 +48,28 @@ const M := {
 	# 엇박 찌르기: 한 박자 멈칫(잔상)한 뒤 찌르는 팔 · 다리가 같은 쪽으로 깊고 길게 쭉 뻗는다
 	"s_offbeat": {"label": "엇박 찌르기", "startup": 16, "active": 4, "recovery": 18, "damage": 16, "reach": 19,
 		"radius": 9, "lunge": 26, "knockback": 4.2, "hitstop": 10, "posture": 45, "guard_break": true,
-		"shape": "offbeat", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 4, "skill": true, "lethal": "offbeat",
-		"feints": [6], "telegraph": "unblock", "stun_rel": [90, 60], "whiff": 30},
+		"shape": "offbeat", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 4, "skill": true, "skill_id": "offbeat",
+		"feints": [6], "telegraph": "unblock", "stun_3d": [90, 60], "whiff": 30},
 	# 엇엇박 찌르기: 엇박처럼 나가다 브레이크(brake 프레임) — 온몸에 부하가 걸린 채 반 박자 버티다 쭉 찌른다.
 	# 게이지 전부, 피해는 쓴 칸에 비례, 맞히면 내 체력 1/5. 엇박 · 반대발 엇박과 부딪히면 무조건 이긴다(world.gd)
 	"s_offbeat2": {"label": "엇엇박 찌르기", "startup": 26, "active": 5, "recovery": 18, "damage": 26, "reach": 21,
 		"radius": 10, "lunge": 30, "knockback": 5.0, "hitstop": 14, "posture": 80, "guard_break": true,
-		"shape": "offbeat", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 6, "skill": true, "lethal": "offbeat2",
-		"self_cost": 0.2, "brake": 10, "telegraph": "unblock", "stun_rel": [120, 90], "whiff": 36},
+		"shape": "offbeat", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 6, "skill": true, "skill_id": "offbeat2",
+		"brake": 10, "telegraph": "unblock", "stun_3d": [120, 90], "whiff": 36},
 	# 반대발 엇박: 디딤발을 바꿔(왼발 앞) 작게 찌른다 — 피해 · 기절이 적은 대신 회수가 짧고 헛쳐도 멈추지 않는다
 	"s_offbeat_rev": {"label": "반대발 엇박 찌르기", "startup": 13, "active": 4, "recovery": 9, "damage": 14,
 		"reach": 18, "radius": 9, "lunge": 16, "side": 6, "knockback": 3.0, "hitstop": 8, "posture": 30,
 		"guard_break": true, "shape": "offbeat_rev", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 2, "skill": true,
-		"lethal": "offbeat_rev", "feints": [5], "telegraph": "unblock", "stun_rel": [40, 24]},
-	# 각법: 다리를 머리 위까지 곧게 들어 올렸다가 바닥까지 내려찍는다 — 맞으면 아랫급 3초 · 같은 급 · 윗급 1초 기절
+		"skill_id": "offbeat_rev", "feints": [5], "telegraph": "unblock", "stun_3d": [40, 24]},
+	# 각법: 다리를 머리 위까지 곧게 들어 올렸다가 바닥까지 내려찍는다 — 기절은 common kickarts stun_rel_sec(아랫급 3초 · 같은 급 · 윗급 1초)
 	"s_kick": {"label": "각법 — 내려찍기", "startup": 14, "active": 3, "recovery": 16, "damage": 12, "reach": 13,
 		"radius": 10, "lunge": 6, "knockback": 0.8, "hitstop": 12, "posture": 22, "shape": "axe", "sfx": "kick",
-		"hit_sfx": "hit_heavy", "shake": 7, "skill": true, "stun_rel": [180, 60]},
+		"hit_sfx": "hit_heavy", "shake": 7, "skill": true, "skill_id": "kickarts"},
 	# 리천식 삼연타: 주먹 세 번(빠르게 — 판정 12프레임에 세 대) — 앞 두 대는 붙잡아 두고(넉백 작게) 셋째에 크게,
 	# 셋째 대에 각법의 절반만큼 기절 (기절은 3D 초안에서 먼저 — 폰 리뷰 2026-10-26, castle_M 반영은 그쪽 세션)
 	"s_triple": {"label": "리천식 삼연타", "startup": 3, "active": 12, "recovery": 14, "damage": 7, "reach": 14,
 		"radius": 9, "arc": 60, "lunge": 8, "knockback": 0.5, "hitstop": 6, "posture": 12, "hits": 3, "shape": "punch",
-		"sfx": "swing", "hit_sfx": "hit", "skill": true, "fx": "triple", "stun_rel": [90, 30]},
+		"sfx": "swing", "hit_sfx": "hit", "skill": true, "skill_id": "triple", "fx": "triple", "stun_3d": [90, 30]},
 	# 보스 — 백도찬 (사시미 나이프 파이팅). 패턴 · 박자는 src/combat/boss_ai.gd (castle_M P2 설계서 8.2절)
 	"b_slash1": {"label": "사시미 베기", "startup": 14, "active": 3, "recovery": 10, "damage": 9, "reach": 14, "radius": 10,
 		"arc": 70, "lunge": 5, "posture": 10, "telegraph": "parry", "shape": "slash", "sfx": "knife"},
@@ -84,26 +90,30 @@ const M := {
 		"hit_sfx": "hit_heavy"},
 	"b_sidekick": {"label": "백도찬식 옆차기", "startup": 20, "active": 3, "recovery": 16, "damage": 10, "reach": 14,
 		"radius": 9, "lunge": 30, "knockback": 5.5, "hitstop": 8, "posture": 20, "telegraph": "parry",
-		"shape": "sidekick", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 3, "skill": true},
+		"shape": "sidekick", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 3, "skill": true, "skill_id": "baek_sidekick"},
 	"b_vital": {"label": "백도찬식 찌르기", "startup": 10, "active": 3, "recovery": 18, "damage": 22, "reach": 18,
 		"radius": 7, "lunge": 14, "parryable": false, "knockback": 4.2, "hitstop": 12, "posture": 30,
 		"telegraph": "unblock", "shape": "thrust_low", "sfx": "slash", "hit_sfx": "hit_heavy", "shake": 5,
-		"skill": true, "any_state": true},
+		"skill": true, "skill_id": "baek_vital", "any_state": true},
 	"b_wide": {"label": "살아있는 건 전부 죽여라", "startup": 30, "active": 10, "recovery": 26, "damage": 14, "reach": 0,
 		"radius": 34, "parryable": false, "hits": 3, "knockback": 4.0, "hitstop": 6, "posture": 0,
-		"telegraph": "unblock", "shape": "spin", "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 4, "skill": true},
+		"telegraph": "unblock", "shape": "spin", "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 4, "skill": true,
+		"skill_id": "baek_wide"},
 }
 
 static var _cache := {}
 
 
-## 이름 → 기술 (기본값을 채우고 거리를 미터로 바꾼 사본, 한 번 만들어 둔다)
+## 이름 → 기술 (기본값을 채우고 거리를 미터로 바꾸고 2층 효과를 공통 데이터에서 채운 사본, 한 번 만들어 둔다)
 static func get_move(name: String) -> Dictionary:
 	if _cache.has(name):
 		return _cache[name]
 	var d: Dictionary = DEFAULTS.duplicate(true)
 	d.merge(M[name], true)
 	d["name"] = name
+	var fx: Dictionary = Common.skill(d["skill_id"]).get("effects", {}) if d["skill_id"] != "" else {}
+	d["lethal"] = str(fx.get("lethal", ""))
+	d["self_cost"] = float(fx.get("self_cost", 0.0))
 	for k in ["reach", "radius", "lunge", "side"]:
 		d[k] = float(d[k]) * PX
 	d["damage"] = float(d["damage"])

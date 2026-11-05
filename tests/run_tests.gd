@@ -2,7 +2,7 @@ extends SceneTree
 ## 테스트 실행기 (창 없음): <godot> --headless --path . -s res://tests/run_tests.gd
 ## 각 묶음(tests/test_*.gd)의 test_ 로 시작하는 함수를 부르고, 하나라도 실패하면 종료 코드 1.
 
-const SUITES := ["res://tests/test_combat.gd"]
+const SUITES := ["res://tests/test_common_cases.gd", "res://tests/test_combat.gd"]
 
 
 func _initialize() -> void:

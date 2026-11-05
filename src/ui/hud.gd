@@ -3,7 +3,7 @@ extends CanvasLayer
 ## 김신 기술 게이지(칸) · 고른 기술(이름 · 비용, 게이지가 모자라면 흐리게),
 ## 가운데 알림(시작 · 2차 · 승패), 아래 도움말. 색은 이 파일 머리 상수 한 곳.
 
-const Skills = preload("res://src/data/skills.gd")
+const Common = preload("res://src/data/common.gd")
 
 const COL_BG := Color(0.0, 0.0, 0.0, 0.55)
 const COL_HP_BOSS := Color(0.86, 0.22, 0.2)
@@ -13,12 +13,13 @@ const COL_TEXT := Color(0.95, 0.95, 0.97)
 const COL_DIM := Color(0.75, 0.78, 0.85, 0.85)
 const COL_GAUGE := Color(0.45, 0.8, 1.0)
 const COL_GAUGE_PART := Color(0.3, 0.5, 0.65)
-const GAUGE_SEGS := 10
 
 var root: Control
 var boss_hp: ColorRect
 var boss_post: ColorRect
 var boss_name: Label
+var hero_name: Label
+var _segs := 10                  # 게이지 칸 수 = common max_bars (김신 10칸)
 var hero_hp: ColorRect
 var hero_post: ColorRect
 var fps: Label
@@ -39,7 +40,7 @@ func setup() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
-	boss_name = _label("백도찬", 26, COL_TEXT)
+	boss_name = _label("", 26, COL_TEXT)            # 이름은 update_bars 가 characters.json name 으로
 	var bb := _bar(Vector2.ZERO, Vector2(_boss_w, 16))
 	boss_hp = bb[0]
 	boss_hp.color = COL_HP_BOSS
@@ -47,8 +48,9 @@ func setup() -> void:
 	boss_post = bp[0]
 	boss_post.color = COL_POSTURE
 	_boss_bg = [bb[1], bp[1]]
-	var hn := _label("김신", 22, COL_TEXT)
-	hn.position = Vector2(24, 16)
+	hero_name = _label("", 22, COL_TEXT)            # 이름은 update_bars 가 characters.json name 으로
+	hero_name.position = Vector2(24, 16)
+	_segs = int(Common.gauge()["max_bars"])
 	var hb := _bar(Vector2(24, 46), Vector2(_hero_w, 14))
 	hero_hp = hb[0]
 	hero_hp.color = COL_HP_HERO
@@ -56,8 +58,8 @@ func setup() -> void:
 	hero_post = hp2[0]
 	hero_post.color = COL_POSTURE
 	# 기술 게이지: 칸마다 하나 (김신 10칸), 아래에 고른 기술 · 비용
-	var seg_w := (_hero_w - 2.0 * (GAUGE_SEGS - 1)) / GAUGE_SEGS
-	for i in GAUGE_SEGS:
+	var seg_w := (_hero_w - 2.0 * (_segs - 1)) / _segs
+	for i in _segs:
 		var g := _bar(Vector2(24 + i * (seg_w + 2.0), 76), Vector2(seg_w, 9))
 		g[0].color = COL_GAUGE
 		_gauge.append(g[0])
@@ -123,7 +125,7 @@ func update_bars(hero, boss, phase: int, dt: float) -> void:
 	_fill(boss_post, boss.posture / boss.posture_max, _boss_w)
 	_fill(hero_hp, hero.hp / hero.hp_max, _hero_w)
 	_fill(hero_post, hero.posture / hero.posture_max, _hero_w)
-	var bars: float = hero.gauge / Skills.BAR
+	var bars: float = hero.gauge / Common.bar_points()
 	for i in _gauge.size():
 		var k := clampf(bars - i, 0.0, 1.0)
 		_gauge[i].size.x = maxf(0.0, (_seg_w - 4.0) * k)
@@ -132,10 +134,11 @@ func update_bars(hero, boss, phase: int, dt: float) -> void:
 	if not sk.is_empty():
 		var ok: bool = hero.can_pay(sk)
 		var cost := float(sk["cost"])
-		var cost_txt := "%d칸+ 전부" % Skills.ALL_MIN_BARS if cost < 0.0 else "%d칸" % roundi(cost)
+		var cost_txt := "%d칸+ 전부" % Common.all_min_bars() if cost < 0.0 else "%d칸" % roundi(cost)
 		skill_name.text = "기술: %s (%s)" % [sk["name"], cost_txt]
 		skill_name.add_theme_color_override("font_color", COL_TEXT if ok else COL_DIM)
-	boss_name.text = "백도찬" + ("   2차 · 전력" if phase == 2 else "")
+	boss_name.text = str(boss.name) + ("   2차 · 전력" if phase == 2 else "")
+	hero_name.text = str(hero.name)
 	fps.text = "FPS %d · %.1fms" % [Engine.get_frames_per_second(), Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0]
 	if _msg_t > 0.0:
 		_msg_t -= dt
