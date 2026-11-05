@@ -40,6 +40,7 @@ var tele: Label3D
 var weapon_r: Node3D = null
 var weapon_l: Node3D = null
 var victory := false
+var tele_y := 2.22
 var _last_state := ""
 
 
@@ -81,41 +82,49 @@ func _build() -> void:
 	var top := shirt if shirt_only else suit                    # 몸통 · 위팔 겉감
 	var wide: float = lk.get("wide", 1.08 if big else 1.0)      # 몸 너비(거구 · 어깨 넓음)
 	var sh_wide: float = lk.get("shoulder", wide)               # 어깨 너비만 따로(김신 — 어깨 넓은 근육질)
+	var depth: float = lk.get("depth", 1.0)                     # 몸통 두께(앞뒤) — 거구 · 근육질
+	var limb: float = lk.get("limb", 1.0)                       # 팔다리 굵기 — 막대처럼 보이지 않게(rc.2 폰 리뷰 6)
+	var head_k: float = lk.get("head", 1.0)                     # 머리 크기
+	var body_k: float = lk.get("scale", 1.06 if big else 1.0)
 
 	J["fall"] = _node(self, Vector3.ZERO)
 	J["roll"] = _node(J["fall"], Vector3(0, ROLL_PIVOT, 0))
 	J["body"] = _node(J["roll"], Vector3(0, -ROLL_PIVOT, 0))
-	J["body"].scale = Vector3.ONE * float(lk.get("scale", 1.06 if big else 1.0))
+	J["body"].scale = Vector3.ONE * body_k
 	J["hips"] = _node(J["body"], Vector3(0, PELVIS_H, 0))
-	_mesh(J["hips"], _capsule(0.125, 0.36), pants, Vector3(0, -0.03, 0), Vector3(0, 0, 90), Vector3(1, wide, 0.8))
+	# 몸통 겉모양은 관절 노드 밑의 '껍데기' 노드에 붙여 앞뒤 두께(depth)만 늘린다 — 관절 노드를 늘이면 팔다리가 찌그러진다
+	var hs := _shell(J["hips"], depth)
+	_mesh(hs, _capsule(0.125, 0.36), pants, Vector3(0, -0.03, 0), Vector3(0, 0, 90), Vector3(1, wide, 0.8))
 	# 검은 벨트 + 버클 (김신 은 버클 · 백도찬 검은 벨트)
-	_mesh(J["hips"], _cyl(0.142, 0.142, 0.036), dark, Vector3(0, 0.055, 0), Vector3.ZERO, Vector3(1.02 * wide, 1, 0.76))
+	_mesh(hs, _cyl(0.142, 0.142, 0.036), dark, Vector3(0, 0.055, 0), Vector3.ZERO, Vector3(1.02 * wide, 1, 0.76))
 	if lk.get("buckle") != null:
-		_mesh(J["hips"], _box(Vector3(0.05, 0.034, 0.012)), _mat(lk["buckle"], 0.22, 0.1, 0.9), Vector3(0, 0.055, -0.11))
+		_mesh(hs, _box(Vector3(0.05, 0.034, 0.012)), _mat(lk["buckle"], 0.22, 0.1, 0.9), Vector3(0, 0.055, -0.11))
 	J["spine"] = _node(J["hips"], Vector3(0, 0.02, 0))
-	_mesh(J["spine"], _capsule(0.13, 0.32), top, Vector3(0, 0.12, 0), Vector3.ZERO, Vector3(1.12 * wide, 1, 0.74))
+	_mesh(_shell(J["spine"], depth), _capsule(0.13, 0.32), top, Vector3(0, 0.12, 0), Vector3.ZERO, Vector3(1.12 * wide, 1, 0.74))
 	J["chest"] = _node(J["spine"], Vector3(0, CHEST_UP, 0))
-	_mesh(J["chest"], _cyl(0.2 * sh_wide, 0.15 * wide, 0.34), top, Vector3(0, 0.05, 0), Vector3.ZERO, Vector3(1, 1, 0.6))
-	_mesh(J["chest"], _capsule(0.082, 0.48 * sh_wide), top, Vector3(0, 0.15, 0), Vector3(0, 0, 90), Vector3(1, 1, 0.78))
+	var cs := _shell(J["chest"], depth)
+	_mesh(cs, _cyl(0.2 * sh_wide, 0.15 * wide, 0.34), top, Vector3(0, 0.05, 0), Vector3.ZERO, Vector3(1, 1, 0.6))
+	_mesh(cs, _capsule(0.082, 0.48 * sh_wide), top, Vector3(0, 0.15, 0), Vector3(0, 0, 90), Vector3(1, 1, 0.78))
 	# 앞은 -Z
 	if shirt_only:
 		# 셔츠: 단추 줄 · 열린 깃(목 V) · 깃
-		_mesh(J["chest"], _box(Vector3(0.008, 0.24, 0.01)), _mat(lk["shirt"].darkened(0.18), 0.8, 0.0), Vector3(0, 0.06, -0.122))
-		_mesh(J["chest"], _box(Vector3(0.05, 0.06, 0.012)), skin, Vector3(0, 0.18, -0.112))
-		_mesh(J["chest"], _cyl(0.064, 0.07, 0.045), shirt, Vector3(0, 0.205, -0.004))
+		_mesh(cs, _box(Vector3(0.008, 0.24, 0.01)), _mat(lk["shirt"].darkened(0.18), 0.8, 0.0), Vector3(0, 0.06, -0.122))
+		_mesh(cs, _box(Vector3(0.05, 0.06, 0.012)), skin, Vector3(0, 0.18, -0.112))
+		_mesh(cs, _cyl(0.064, 0.07, 0.045), shirt, Vector3(0, 0.205, -0.004))
 	else:
 		# 정장: 셔츠 V · 넥타이 · 깃
-		_mesh(J["chest"], _box(Vector3(0.1, 0.2, 0.012)), shirt, Vector3(0, 0.12, -0.118))
-		_mesh(J["chest"], _cyl(0.062, 0.066, 0.04), shirt, Vector3(0, 0.205, -0.004))
+		_mesh(cs, _box(Vector3(0.1, 0.2, 0.012)), shirt, Vector3(0, 0.12, -0.118))
+		_mesh(cs, _cyl(0.062, 0.066, 0.04), shirt, Vector3(0, 0.205, -0.004))
 		if lk.get("tie") != null:
-			_mesh(J["chest"], _box(Vector3(0.036, 0.24, 0.014)), _mat(lk["tie"], 0.5, 0.2), Vector3(0, 0.085, -0.127))
+			_mesh(cs, _box(Vector3(0.036, 0.24, 0.014)), _mat(lk["tie"], 0.5, 0.2), Vector3(0, 0.085, -0.127))
 	if lk.get("badge") != null:                                  # 옷깃 금 배지 (왼쪽 가슴)
-		_mesh(J["chest"], _cyl(0.014, 0.014, 0.008), _mat(lk["badge"], 0.2, 0.2, 0.9), Vector3(-0.085, 0.16, -0.122), Vector3(90, 0, 0))
+		_mesh(cs, _cyl(0.014, 0.014, 0.008), _mat(lk["badge"], 0.2, 0.2, 0.9), Vector3(-0.085, 0.16, -0.122), Vector3(90, 0, 0))
 	if lk.get("holster") != null:
-		_holster(J["chest"], _mat(lk["holster"], 0.7, 0.15), dark, wide)
+		_holster(cs, _mat(lk["holster"], 0.7, 0.15), dark, wide)
 	J["neck"] = _node(J["chest"], Vector3(0, NECK_UP, 0))
 	_mesh(J["neck"], _cyl(0.047 * wide, 0.05 * wide, 0.12), skin, Vector3(0, 0.03, 0))
 	J["head"] = _node(J["neck"], Vector3(0, HEAD_UP, 0))
+	J["head"].scale = Vector3.ONE * head_k
 	_mesh(J["head"], _sphere(0.105, 0.232), skin, Vector3(0, 0, 0))
 	_mesh(J["head"], _box(Vector3(0.022, 0.036, 0.022)), skin, Vector3(0, -0.012, -0.104))     # 코
 	if lk.get("jaw", false):                                     # 각진 턱
@@ -123,6 +132,12 @@ func _build() -> void:
 	# 턱 수염 그늘 (둘 다) — 턱 앞쪽만 조금 어둡게
 	_mesh(J["head"], _sphere(0.092, 0.1), _mat(lk["skin"].darkened(0.2), 0.8, 0.0), Vector3(0, -0.068, -0.03), Vector3.ZERO, Vector3(1, 1, 0.9))
 	var eye_h: float = lk.get("eye_h", 0.011)                   # 김신 가는 눈
+	# 눈썹 · 입 — 얼굴이 밋밋하지 않게(rc.2 폰 리뷰 6). brow_tilt: 눈썹 끝을 올린 각(김신 날카로운 눈매)
+	var brow_tilt: float = lk.get("brow_tilt", 6.0)
+	for sx in [-1.0, 1.0]:
+		_mesh(J["head"], _box(Vector3(0.034, 0.009, 0.012)), _mat(lk["hair"], 0.6, 0.0), Vector3(0.038 * sx, 0.03, -0.098),
+			Vector3(0, 0, brow_tilt * sx))
+	_mesh(J["head"], _box(Vector3(0.032, 0.005, 0.008)), _mat(lk["skin"].darkened(0.4), 0.7, 0.0), Vector3(0, -0.046, -0.097))
 	for sx in [-1.0, 1.0]:
 		_mesh(J["head"], _sphere(0.022, 0.044), skin, Vector3(0.103 * sx, -0.004, 0.006))     # 귀
 		_mesh(J["head"], _box(Vector3(0.024, eye_h, 0.012)), eye, Vector3(0.037 * sx, 0.008, -0.096))
@@ -139,26 +154,31 @@ func _build() -> void:
 		var sx := 1.0 if side == "r" else -1.0
 		var sh := _node(J["chest"], Vector3(sx * SHOULDER_W * sh_wide, SHOULDER_UP, 0))
 		J["sh_" + side] = sh
-		_mesh(sh, _sphere(0.072 * sh_wide, 0.144 * sh_wide), top, Vector3.ZERO)
-		_mesh(sh, _capsule(0.058 * wide, 0.34), top, Vector3(0, -UPPER_ARM * 0.5, 0))
+		_mesh(sh, _sphere(0.072 * sh_wide * limb, 0.144 * sh_wide * limb), top, Vector3.ZERO)          # 어깨(삼각근)
+		_mesh(sh, _capsule(0.058 * wide * limb, 0.34), top, Vector3(0, -UPPER_ARM * 0.5, 0))
+		_mesh(sh, _sphere(0.064 * wide * limb, 0.17), top, Vector3(0, -UPPER_ARM * 0.4, -0.01))       # 위팔 근육(이두)
 		var el := _node(sh, Vector3(0, -UPPER_ARM, 0))
 		J["el_" + side] = el
 		if shirt_only:
 			# 소매 걷음: 아래팔은 맨살, 팔꿈치 아래에 걷어 올린 소매 뭉치
-			_mesh(el, _capsule(0.046 * wide, 0.29), skin, Vector3(0, -FOREARM * 0.5, 0))
-			_mesh(el, _cyl(0.058 * wide, 0.056 * wide, 0.06), shirt, Vector3(0, -0.035, 0))
+			_mesh(el, _capsule(0.046 * wide * limb, 0.29), skin, Vector3(0, -FOREARM * 0.5, 0))
+			_mesh(el, _sphere(0.054 * wide * limb, 0.15), skin, Vector3(0, -FOREARM * 0.32, 0))          # 아래팔 근육(팔꿈치 쪽 굵게)
+			_mesh(el, _cyl(0.06 * wide * limb, 0.058 * wide * limb, 0.06), shirt, Vector3(0, -0.035, 0))
 		else:
-			_mesh(el, _capsule(0.048 * wide, 0.29), suit, Vector3(0, -FOREARM * 0.5, 0))
+			_mesh(el, _capsule(0.048 * wide * limb, 0.29), suit, Vector3(0, -FOREARM * 0.5, 0))
+			_mesh(el, _sphere(0.054 * wide * limb, 0.15), suit, Vector3(0, -FOREARM * 0.32, 0))
 			_mesh(el, _cyl(0.05, 0.05, 0.028), shirt, Vector3(0, -FOREARM + 0.028, 0))            # 소맷부리
 		var hand := _node(el, Vector3(0, -FOREARM, 0))
 		J["hand_" + side] = hand
-		_mesh(hand, _sphere(0.046, 0.1), skin, Vector3(0, -0.044, -0.004), Vector3.ZERO, Vector3(0.82, 1, 1))
+		_mesh(hand, _sphere(0.046 * sqrt(limb), 0.1 * sqrt(limb)), skin, Vector3(0, -0.044, -0.004), Vector3.ZERO, Vector3(0.82, 1, 1))
 		var th := _node(J["hips"], Vector3(sx * HIP_W * wide, -0.03, 0))
 		J["th_" + side] = th
-		_mesh(th, _capsule(0.083 * wide, 0.5), pants, Vector3(0, -THIGH * 0.5, 0))
+		_mesh(th, _capsule(0.083 * wide * limb, 0.5), pants, Vector3(0, -THIGH * 0.5, 0))
+		_mesh(th, _sphere(0.092 * wide * limb, 0.26), pants, Vector3(0, -THIGH * 0.3, 0))             # 허벅지 위쪽 굵게
 		var kn := _node(th, Vector3(0, -THIGH, 0))
 		J["kn_" + side] = kn
-		_mesh(kn, _capsule(0.062 * wide, 0.48), pants, Vector3(0, -SHIN * 0.5, 0))
+		_mesh(kn, _capsule(0.062 * wide * limb, 0.48), pants, Vector3(0, -SHIN * 0.5, 0))
+		_mesh(kn, _sphere(0.068 * wide * limb, 0.2), pants, Vector3(0, -SHIN * 0.28, 0.012))          # 종아리
 		var ft := _node(kn, Vector3(0, -SHIN, 0))
 		J["ft_" + side] = ft
 		_mesh(ft, _capsule(0.045, 0.26), shoe, Vector3(0, -0.012, -0.055), Vector3(90, 0, 0), Vector3(1.05, 1, 0.9))
@@ -175,6 +195,7 @@ func _build() -> void:
 	tele.no_depth_test = true
 	tele.position = Vector3(0, 2.22, 0)
 	tele.visible = false
+	tele_y = 2.22 + (body_k - 1.0) * 1.9                         # 큰 몸은 머리가 높다 — 예고 · 빈틈 글자를 그만큼 위로
 	add_child(tele)
 
 
@@ -185,14 +206,20 @@ var loose: Node3D = null
 
 func _hair(head: Node3D, m: Material, style: String) -> void:
 	if style == "slick_fringe" or style == "slick":
-		# 뒤로 넘긴 머리: 정수리 · 뒤통수를 덮고 앞이마 선은 높게, 앞쪽이 살짝 솟는다
-		_mesh(head, _sphere(0.109, 0.2), m, Vector3(0, 0.052, 0.03), Vector3.ZERO, Vector3(1.0, 0.66, 1.0))
-		# 앞쪽 살짝 솟은 부분 — 크게 두면 위에서 보는 카메라에 혹처럼 보인다(run #16), 빗은 결 줄도 뺐다
-		_mesh(head, _sphere(0.096, 0.1), m, Vector3(0, 0.082, -0.022), Vector3(-8, 0, 0), Vector3(1.0, 0.5, 1.0))
+		if style == "slick_fringe":
+			# 김신: 옆은 짧게(관자놀이 · 귀 위 살이 보이게 — 옆까지 덮으면 헬멧 같다, rc.2 폰 리뷰 6), 위는 뒤로 넘기고 뒤통수는 목덜미까지
+			_mesh(head, _sphere(0.108, 0.2), m, Vector3(0, 0.066, 0.026), Vector3.ZERO, Vector3(0.93, 0.6, 1.0))
+			_mesh(head, _sphere(0.098, 0.15), m, Vector3(0, 0.004, 0.05), Vector3.ZERO, Vector3(0.93, 1.0, 0.85))
+			_mesh(head, _sphere(0.09, 0.09), m, Vector3(0, 0.1, -0.03), Vector3(-8, 0, 0), Vector3(0.95, 0.55, 1.0))
+		else:
+			# 뒤로 넘긴 머리: 정수리 · 뒤통수를 덮고 앞이마 선은 높게, 앞쪽이 살짝 솟는다
+			_mesh(head, _sphere(0.109, 0.2), m, Vector3(0, 0.052, 0.03), Vector3.ZERO, Vector3(1.0, 0.66, 1.0))
+			# 앞쪽 살짝 솟은 부분 — 크게 두면 위에서 보는 카메라에 혹처럼 보인다(run #16), 빗은 결 줄도 뺐다
+			_mesh(head, _sphere(0.096, 0.1), m, Vector3(0, 0.082, -0.022), Vector3(-8, 0, 0), Vector3(1.0, 0.5, 1.0))
 		if style == "slick_fringe":
 			for k in 3:                                          # 앞머리 몇 가닥 (이마로)
-				_mesh(head, _box(Vector3(0.01, 0.07, 0.008)), m, Vector3(-0.028 + 0.022 * k, 0.05, -0.1),
-					Vector3(-12, 0, -10 + 12 * k))
+				_mesh(head, _box(Vector3(0.012, 0.075, 0.01)), m, Vector3(-0.03 + 0.024 * k, 0.05, -0.102),
+					Vector3(-14, 0, -12 + 12 * k))
 		else:
 			loose = _node(head, Vector3.ZERO)                    # 백도찬: 싸우면 흘러내리는 가닥 (2차에 보인다)
 			for k in 2:
@@ -281,6 +308,13 @@ func _knife(kind: String) -> Node3D:
 		blade.rings = 1
 		_mesh(root, blade, steel, Vector3(0, 0.14, 0), Vector3(0, 45, 0), Vector3(1, 1, 0.3))
 	return root
+
+
+## 몸통 겉모양 노드 — 앞뒤(z)만 depth 배. 관절 노드(위치 · 회전)는 그대로라 팔다리 길이 · 각도가 바뀌지 않는다
+func _shell(parent: Node3D, depth: float) -> Node3D:
+	var n := _node(parent, Vector3.ZERO)
+	n.scale = Vector3(1, 1, depth)
+	return n
 
 
 func _node(parent: Node3D, pos: Vector3) -> Node3D:
@@ -685,7 +719,7 @@ func _update_telegraph(f) -> void:
 	if f.state == "stagger" or f.state == "stun":
 		tele.visible = true
 		tele.text = "빈틈" if f.state == "stagger" else "기절"
-		tele.position = Vector3(0, 2.22, 0)
+		tele.position = Vector3(0, tele_y, 0)
 		tele.font_size = 64
 		tele.modulate = Color(1.0, 0.82, 0.3, 1.0)
 		tele.scale = Vector3.ONE
@@ -700,7 +734,7 @@ func _update_telegraph(f) -> void:
 	tele.visible = true
 	tele.text = "!"
 	tele.font_size = 96
-	tele.position = Vector3(0, 2.22, 0)
+	tele.position = Vector3(0, tele_y, 0)
 	var col := Color(1, 1, 1) if kind == "parry" else Color(1.0, 0.22, 0.18)
 	col.a = 0.5 if big and left % 2 == 1 else 1.0
 	tele.modulate = col

@@ -19,18 +19,21 @@ const Touch = preload("res://src/ui/touch_ui.gd")
 # 관절 인형으로 옮겼다(2026-11-05 사용자 "김신과 백도찬도 캐릭터에 맞게 외형 바꿔졌으면"). 색은 3D 밤 조명에 맞게 조금 밝힘.
 #  김신: 키 크고 어깨 넓은 근육질 · 검은 올백 + 앞머리 몇 가닥 · 가는 눈 · 왼뺨 흉터 · 귀 검은 스터드 · 턱 수염 그늘 ·
 #        검은 정장 · 흰 셔츠 · 검은 넥타이 · 옷깃 금 배지 · 은 버클 검은 벨트 · 톱니 등날 군용 단검(역수 · 정수)
+#  (rc.2 폰 리뷰 2026-11-05: 김신 '머리 · 얼굴 · 몸 비율이 이상함' → 옆머리 짧게 · 눈썹 · 입 · 머리 0.9 · 팔다리 굵게 · 몸통 두껍게,
+#   백도찬 '몸이 더 크고 두꺼워야 함. 특히 김신보다는 더' → 키 1.2 · 너비 1.3 · 두께 1.4 · 팔다리 1.45)
 #  백도찬(6장 부두 — 대표 차림, 사용자 2026-11-05): 뒤로 넘긴 밝은 갈색 머리(2차에 가닥이 흘러내림) · 빛 반사로 하얀 테 없는
 #        직사각 안경 · 각진 턱 · 근육질 거구 · 소매 걷은 흰 셔츠 · 등에서 X 자 갈색 가죽 어깨 홀스터(왼 겨드랑이 권총) ·
 #        검은 벨트 · 바지 · 구두 · 갈색 손잡이 가는 단도 · 귀 검은 피어싱
 const LOOKS := {
 	"kim": {"suit": Color(0.16, 0.16, 0.2), "pants": Color(0.13, 0.13, 0.17), "shirt": Color(0.93, 0.93, 0.94),
 		"tie": Color(0.09, 0.09, 0.12), "skin": Color(0.91, 0.77, 0.65), "hair": Color(0.11, 0.11, 0.15),
-		"hair_style": "slick_fringe", "glasses": false, "big": false, "scale": 1.03, "shoulder": 1.1, "eye_h": 0.007,
+		"hair_style": "slick_fringe", "glasses": false, "big": false, "scale": 1.04, "shoulder": 1.12, "eye_h": 0.007,
+		"depth": 1.1, "limb": 1.18, "head": 0.9, "brow_tilt": 12.0, "jaw": true,
 		"scar": true, "piercing": true, "badge": Color(0.95, 0.75, 0.25), "buckle": Color(0.82, 0.84, 0.88),
 		"weapon_r": "combat", "weapon_l": "combat", "guard": "kim"},
 	"baek": {"outfit": "shirt", "suit": Color(0.9, 0.9, 0.92), "pants": Color(0.11, 0.11, 0.13), "shirt": Color(0.92, 0.92, 0.94),
 		"skin": Color(0.89, 0.75, 0.63), "hair": Color(0.62, 0.44, 0.27), "hair_style": "slick", "glasses": true,
-		"big": true, "scale": 1.08, "wide": 1.12, "jaw": true, "piercing": true, "holster": Color(0.45, 0.27, 0.14),
+		"big": true, "scale": 1.2, "wide": 1.3, "depth": 1.4, "limb": 1.45, "head": 0.95, "jaw": true, "piercing": true, "holster": Color(0.45, 0.27, 0.14),
 		"buckle": Color(0.2, 0.2, 0.22), "weapon_r": "sashimi", "weapon_l": "", "guard": "baek"},
 }
 const SFX := ["knife", "swing", "slash", "hit", "hit_heavy", "kick", "guard", "counter", "miss", "ko", "wind", "step",
@@ -301,7 +304,7 @@ func _after_tick() -> void:
 				fx.pop(Vector3(e[1].pos.x, 2.35, e[1].pos.y), "게이지 부족", Color(0.75, 0.78, 0.85), 44, 0.7)
 			"lethal":
 				var kind_name: String = {"offbeat2": "엇엇박", "offbeat_rev": "반대발 엇박"}.get(str(e[4]), "엇박")
-				fx.pop(e[2] + Vector3(0, 0.75, 0), "%s — %d%%" % [kind_name, roundi(float(e[3]) * 100.0)],
+				fx.pop(e[2] + Vector3(0, 0.75, 0) - cam.global_basis.x * 0.9, "%s — %d%%" % [kind_name, roundi(float(e[3]) * 100.0)],   # 머리 위 '기절'(2.22)과 겹치지 않게 옆으로(rc.2 리뷰 5)
 					Color(0.75, 0.9, 1.0), 72, 1.2)
 				cam.punch_zoom(0.8 if str(e[4]) == "offbeat2" else 0.85)
 			"brake":
@@ -323,7 +326,7 @@ func _after_tick() -> void:
 			"first_offbeat":
 				hud.message("백도찬", "재주를 좀 더 부려 보거라. 아가야.", 2.2)
 			"learn":
-				hud.message("엇박을 보았다", "김신: 목숨.. 그따위 것에 얽매일 필요가 있었나?", 3.0)
+				hud.message("엇박을 보았다", "김신: 목숨.. 그따위 것에 얽매일 필요가 있었나?", 3.0, 1.2)   # '엇박 — %'(1.2초)가 사라진 뒤
 				fx.pop(Vector3(e[1].pos.x, 2.7, e[1].pos.y), str(e[2]), Color(0.75, 0.9, 1.0), 44, 2.0)
 				_play("shine", -2.0, 0.7)
 				_play("wind", -6.0, 1.2)
