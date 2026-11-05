@@ -1,5 +1,6 @@
 # castle_common 요청 — castle M 3D → castle_common (누적)
 
+> 정정 이력: 2026-11-05 (2) — 5 · 6 · 7행 지움: castle_common `ab9c8551`(답45 규격 확정)이 반영 — 문서 머리 `<마일스톤 id>_요구사항정의서`(5) · 디버그 키 커밋 유지 가능(6) · 4절 엔진 칸(7). 번호는 그대로 둔다(다른 문서가 1 ~ 4 · 8 ~ 13행을 가리킨다).
 > 정정 이력: 2026-11-05 — S1 공통 받기 뒤: 11행 확인 결과 · 13행 반영 현황 채움, 5행 castle_common `0ff47f5a`(규격 이름 `P{N}_요구사항정의서`) 메모.
 > 정정 이력: 2026-11-04 — 첫 작성(S0 조사 · `docs/기획_차이.md`). 양식은 castle_common `docs/개발규격/캐슬_게임공통.md` 3절. castle_common 이 반영하면 그 줄을 지운다.
 
@@ -13,9 +14,6 @@
 | 2 | - | `data/skills.json:offbeat2` | `effects.stun_rel_sec` | (없음) | 후보 `[2.0, 1.5]` — 1과 같음 | 3D 폰 리뷰 3차 · `s_offbeat2` [120, 90] | 언젠가 |
 | 3 | - | `data/skills.json:offbeat_rev` | `effects.stun_rel_sec` | (없음) | 후보 `[0.67, 0.4]` — 1과 같음 | 3D 폰 리뷰 3차 "상대 스턴도 적고" · `s_offbeat_rev` [40, 24] | 언젠가 |
 | 4 | - | `data/skills.json:triple` | `effects` 기절(셋째 대만) | (없음) | 후보 셋째 대 `[1.5, 0.5]` — 칸 이름(예: `stun_rel_sec` + `stun_hit: 3`)은 castle_common 이 정한다. 1과 같음 | 3D 폰 리뷰 2차(2026-10-26) "삼연타 맞고도 각법보다 1/2 정도 스턴 하자" · `s_triple` [90, 30] | 언젠가 |
-| 5 | - | `docs/개발규격/게임개발규격.md` 3절 | 산출물 파일 이름 | `docs/P{N}_계획_<Topic>.md` · 그러나 2절 "이름 · 번호는 기획서를 따른다" | 둘 중 하나로 — 기획서 마일스톤이 `S0 ~ S6` · `M0 ~ M6` 인 판에서 `P{N}` 을 쓸지 `S{N}` 을 쓸지 | 이 판은 이미 `P1_*`(3D 초안) 3장이 있고 다음이 S1 이다 — 이름이 갈린다. 2026-11-04 사용자는 `S1_계획` · `S1_테스트결과서` 로 정함. 그 뒤 castle_common `0ff47f5a` 가 규격 이름을 `P{N}_요구사항정의서_<Topic>.md` 로 바꿈 — 이 판은 사용자 답대로 두고 맞출지 다시 묻는다 | 다음 마일스톤 |
-| 6 | - | `docs/개발규격/게임개발규격.md` 7절 | 서명 키 | "서명 키(keystore)는 커밋하지 않는다" | (사용자가 '유지'로 정하면) "고정 **디버그** 키는 비공개 저장소에 커밋해도 된다 — release 키만 Secrets" 예외 한 줄 | 이 판 · castle_M 이 `android/debug.keystore` 를 의도적으로 커밋(CLAUDE.md 0절) — CI 가 만든 APK 를 폰에 덮어 설치하려면 같은 키여야 한다 | 다음 마일스톤 |
-| 7 | - | `docs/개발규격/캐슬_게임공통.md` 4절 | castle M 3D 줄 엔진 | Godot 4(초안) | Godot 4.7.2-stable · Compatibility 렌더러 | 이 판 CLAUDE.md 0절 · `project.godot` | 언젠가 |
 | 8 | - | `docs/기획서/03_castle_M3D_3D탑뷰.md` 1절 | 어긋남 ② 설명 | "김신 등급을 내성 상위로 박음(원작은 처음 내성 중위 → 구스타프 이긴 뒤 내성 상위)" | "6장 백도찬전 시점은 진행으로도 내성 상위라 **값은 맞다** — 진행에서 끌어내지 않고 박아 둔 것이 문제" | `ref/rules.py` `progress("kimshin", events_until(4))` = 내성 상위(2026-11-04) · castle_M `DUELS["baekdochan"].hero_events` = `beat:gustav` · `beat:komodo` | 언젠가 |
 | 9 | - | `docs/기획서/03_castle_M3D_3D탑뷰.md` 1절 | 어긋남 목록 | ①②③ | ④ 게이지 배율 절반 — `skills.gd` 2.494 ↔ 공통 `gauge_rate(내성 상위, 95)` 4.988(`fast_rank_k` 2배 빠짐) · ⑤ 얻는 양 `dodge` · `ko` 없음 을 더함 | `docs/기획_차이.md` 4절 · castle_M `roster.py:51` 에는 2배가 있다 | 다음 마일스톤 |
 | 10 | - | `docs/설계서_공통데이터.md` 1절 | castle M 3D 줄 '이미 어긋남' | 8 · 9 와 같은 문장 | 8 · 9 와 같게 | 〃 | 언젠가 |
