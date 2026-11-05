@@ -187,9 +187,8 @@ func _hair(head: Node3D, m: Material, style: String) -> void:
 	if style == "slick_fringe" or style == "slick":
 		# 뒤로 넘긴 머리: 정수리 · 뒤통수를 덮고 앞이마 선은 높게, 앞쪽이 살짝 솟는다
 		_mesh(head, _sphere(0.109, 0.2), m, Vector3(0, 0.052, 0.03), Vector3.ZERO, Vector3(1.0, 0.66, 1.0))
-		_mesh(head, _sphere(0.09, 0.1), m, Vector3(0, 0.1, -0.035), Vector3(-10, 0, 0), Vector3(1.0, 0.7, 1.05))
-		for k in 3:                                              # 뒤로 빗은 결
-			_mesh(head, _box(Vector3(0.012, 0.01, 0.16)), m, Vector3(-0.04 + 0.04 * k, 0.118, 0.01), Vector3(8, 0, 0))
+		# 앞쪽 살짝 솟은 부분 — 크게 두면 위에서 보는 카메라에 혹처럼 보인다(run #16), 빗은 결 줄도 뺐다
+		_mesh(head, _sphere(0.096, 0.1), m, Vector3(0, 0.082, -0.022), Vector3(-8, 0, 0), Vector3(1.0, 0.5, 1.0))
 		if style == "slick_fringe":
 			for k in 3:                                          # 앞머리 몇 가닥 (이마로)
 				_mesh(head, _box(Vector3(0.01, 0.07, 0.008)), m, Vector3(-0.028 + 0.022 * k, 0.05, -0.1),
