@@ -28,12 +28,12 @@ const LOOKS := {
 	"kim": {"suit": Color(0.16, 0.16, 0.2), "pants": Color(0.13, 0.13, 0.17), "shirt": Color(0.93, 0.93, 0.94),
 		"tie": Color(0.09, 0.09, 0.12), "skin": Color(0.91, 0.77, 0.65), "hair": Color(0.11, 0.11, 0.15),
 		"hair_style": "slick_fringe", "glasses": false, "big": false, "scale": 1.04, "shoulder": 1.12, "eye_h": 0.007,
-		"depth": 1.1, "limb": 1.18, "head": 0.9, "brow_tilt": 12.0, "jaw": true,
+		"depth": 1.1, "limb": 1.15, "head": 0.9, "brow_tilt": 12.0, "jaw": true,
 		"scar": true, "piercing": true, "badge": Color(0.95, 0.75, 0.25), "buckle": Color(0.82, 0.84, 0.88),
 		"weapon_r": "combat", "weapon_l": "combat", "guard": "kim"},
 	"baek": {"outfit": "shirt", "suit": Color(0.9, 0.9, 0.92), "pants": Color(0.11, 0.11, 0.13), "shirt": Color(0.92, 0.92, 0.94),
 		"skin": Color(0.89, 0.75, 0.63), "hair": Color(0.62, 0.44, 0.27), "hair_style": "slick", "glasses": true,
-		"big": true, "scale": 1.2, "wide": 1.3, "depth": 1.4, "limb": 1.45, "head": 0.95, "jaw": true, "piercing": true, "holster": Color(0.45, 0.27, 0.14),
+		"big": true, "scale": 1.2, "wide": 1.28, "depth": 1.35, "limb": 1.2, "head": 0.95, "jaw": true, "piercing": true, "holster": Color(0.45, 0.27, 0.14),
 		"buckle": Color(0.2, 0.2, 0.22), "weapon_r": "sashimi", "weapon_l": "", "guard": "baek"},
 }
 const SFX := ["knife", "swing", "slash", "hit", "hit_heavy", "kick", "guard", "counter", "miss", "ko", "wind", "step",
@@ -304,7 +304,7 @@ func _after_tick() -> void:
 				fx.pop(Vector3(e[1].pos.x, 2.35, e[1].pos.y), "게이지 부족", Color(0.75, 0.78, 0.85), 44, 0.7)
 			"lethal":
 				var kind_name: String = {"offbeat2": "엇엇박", "offbeat_rev": "반대발 엇박"}.get(str(e[4]), "엇박")
-				fx.pop(e[2] + Vector3(0, 0.75, 0) - cam.global_basis.x * 0.9, "%s — %d%%" % [kind_name, roundi(float(e[3]) * 100.0)],   # 머리 위 '기절'(2.22)과 겹치지 않게 옆으로(rc.2 리뷰 5)
+				fx.pop(e[2] + Vector3(0, 0.3, 0) - cam.global_basis.x * 1.4, "%s — %d%%" % [kind_name, roundi(float(e[3]) * 100.0)],   # 머리 위 '기절'(2.22)과 겹치지 않게 옆으로(rc.2 리뷰 5)
 					Color(0.75, 0.9, 1.0), 72, 1.2)
 				cam.punch_zoom(0.8 if str(e[4]) == "offbeat2" else 0.85)
 			"brake":
@@ -324,7 +324,7 @@ func _after_tick() -> void:
 			"self_cost":
 				fx.pop(Vector3(e[1].pos.x, 1.5, e[1].pos.y) - cam.global_basis.x * 0.5, "-%d" % roundi(float(e[2])), Color(1.0, 0.47, 0.43), 52, 0.9)
 			"first_offbeat":
-				hud.message("백도찬", "재주를 좀 더 부려 보거라. 아가야.", 2.2)
+				hud.message("백도찬", "재주를 좀 더 부려 보거라. 아가야.", 2.2, 1.2)   # 엇박 % · 기절 글자가 사라진 뒤(rc.2 리뷰 5)
 			"learn":
 				hud.message("엇박을 보았다", "김신: 목숨.. 그따위 것에 얽매일 필요가 있었나?", 3.0, 1.2)   # '엇박 — %'(1.2초)가 사라진 뒤
 				fx.pop(Vector3(e[1].pos.x, 2.7, e[1].pos.y), str(e[2]), Color(0.75, 0.9, 1.0), 44, 2.0)

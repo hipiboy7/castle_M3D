@@ -140,10 +140,11 @@ func update_bars(hero, boss, phase: int, dt: float) -> void:
 	boss_name.text = str(boss.name) + ("   2차 · 전력" if phase == 2 else "")
 	hero_name.text = str(hero.name)
 	fps.text = "FPS %d · %.1fms" % [Engine.get_frames_per_second(), Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0]
-	if _wait_t > 0.0:
-		_wait_t -= dt
-		if _wait_t <= 0.0:
-			message(_wait[0], _wait[1], _wait[2])
+	for q in _queue:
+		q[0] -= dt
+	if not _queue.is_empty() and _queue[0][0] <= 0.0 and _msg_t <= 0.0:
+		var q: Array = _queue.pop_front()
+		message(q[1], q[2], q[3])
 	if _msg_t > 0.0:
 		_msg_t -= dt
 		if _msg_t <= 0.0:
@@ -155,15 +156,14 @@ func _fill(r: ColorRect, k: float, w: float) -> void:
 	r.size.x = maxf(0.0, (w - 4.0) * clampf(k, 0.0, 1.0))
 
 
-## delay > 0 이면 그만큼 뒤에 띄운다 — 같은 순간 머리 위 글자(엇박 % · 기절)와 겹치지 않게(rc.2 폰 리뷰 5 "거슬려")
-var _wait_t := 0.0
-var _wait: Array = []
+## delay > 0 이면 줄을 세워 그만큼 뒤에, 앞 알림이 끝난 다음 차례로 띄운다 — 같은 순간 머리 위 글자(엇박 % · 기절)와
+## 겹치지 않게(rc.2 폰 리뷰 5 "거슬려"). delay 0 은 전처럼 바로(시작 · 2차 · 승패)
+var _queue: Array = []                    # [남은 기다림, 글, 작은 글, 보일 초]
 
 
 func message(text: String, small := "", secs := 2.0, delay := 0.0) -> void:
 	if delay > 0.0:
-		_wait_t = delay
-		_wait = [text, small, secs]
+		_queue.append([delay, text, small, secs])
 		return
 	msg.text = text
 	sub.text = small
