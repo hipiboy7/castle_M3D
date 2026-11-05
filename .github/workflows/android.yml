@@ -3,6 +3,8 @@
 #             → APK 안에 공통 데이터(data/common/*.json)가 들었는지 → 가상 화면(xvfb + 소프트웨어 OpenGL)에서 폰 2340x1080 스크린샷
 #  emulator : APK 를 x86_64 API 34 에뮬레이터에 설치 · 실행 → 데모 스크린샷 · logcat 오류 · FPS (scripts/emu_check.sh)
 #             — 수동 실행(workflow_dispatch 입력 emulator)과 태그 push 때만(개발 규격 1 · 9절, 사용자 2026-11-04). push 에는 build 만
+#  release  : 태그 push 때만 — build · emulator 가 통과하면 APK 를 GitHub Releases 에 붙인다(폰에 설치할 APK 는 여기 한 곳,
+#             '-' 가 든 태그는 프리릴리스). 가지 빌드의 아티팩트는 빌드 검사용이라 1일만 둔다(개발 규격 7절, 사용자 2026-11-05)
 #  서명: android/debug.keystore (castle_M 과 같은 고정 디버그 키, 패키지 이름이 달라 서로 덮어쓰지 않는다)
 name: android
 
@@ -95,12 +97,22 @@ jobs:
       - name: 검증 (가져오기 · 테스트 · 자동 결투 3판)
         run: python3 scripts/verify.py
 
+      # versionCode 는 늘 올린다(run 번호), versionName 은 태그(앞의 v 뺌) — 가지 빌드는 0.2.0-dev.<run 번호> (개발 규격 7절)
+      - name: 버전 (versionCode = run 번호 · versionName = 태그)
+        run: |
+          set -e
+          CODE=$GITHUB_RUN_NUMBER
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then NAME="${GITHUB_REF_NAME#v}"; else NAME="0.2.0-dev.$GITHUB_RUN_NUMBER"; fi
+          sed -i "s|^version/code=.*|version/code=$CODE|; s|^version/name=.*|version/name=\"$NAME\"|" export_presets.cfg
+          grep "^version/" export_presets.cfg
+
       - name: APK 내보내기
         run: |
           mkdir -p build
           "$GODOT" --headless --path . --export-debug "Android" build/castle_m3d.apk 2>&1 | tee build/export.log
           ls -la build
           test -f build/castle_m3d.apk
+          sha256sum build/castle_m3d.apk | tee build/castle_m3d.apk.sha256
 
       # 공통 데이터는 시작할 때 읽는다(src/data/common.gd) — APK 에 json 5개가 있고 시험 전용 cases 는 없어야 한다
       - name: APK 에 공통 데이터(json)가 들었나
@@ -116,8 +128,10 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: castle_m3d-apk
-          path: build/castle_m3d.apk
-          retention-days: 14
+          path: |
+            build/castle_m3d.apk
+            build/castle_m3d.apk.sha256
+          retention-days: 1
 
       # 소프트웨어 OpenGL 은 한 장에 약 0.44초(run #1: 2fps) — main.gd 가 찍을 프레임 바로 앞만 그리고 나머지는 로직만 돌린다.
       # always() 대신 !cancelled(): always() 단계는 run 을 취소해도 끝까지 돈다(run #1)
@@ -142,7 +156,7 @@ jobs:
           path: |
             shots/
             build/export.log
-          retention-days: 14
+          retention-days: 1
 
   emulator:
     needs: build
@@ -185,4 +199,32 @@ jobs:
         with:
           name: emulator
           path: emu/
-          retention-days: 14
+          retention-days: 1
+
+  release:
+    needs: [build, emulator]
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: castle_m3d-apk
+          path: apk
+
+      - name: GitHub Releases 에 APK 붙이기 (디버그 키 서명 — 같은 키라 폰에 덮어 설치된다)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          T="$GITHUB_REF_NAME"
+          F="castle_m3d-$T.apk"
+          cp apk/castle_m3d.apk "$F"
+          sha256sum "$F" | tee "$F.sha256"
+          ls -l "$F"
+          PRE=""
+          case "$T" in *-*) PRE="--prerelease" ;; esac
+          gh release create "$T" "$F" "$F.sha256" --repo "$GITHUB_REPOSITORY" --title "캐슬 M 3D $T" $PRE \
+            --notes "커밋 ${GITHUB_SHA::7} · run #$GITHUB_RUN_NUMBER · 고정 디버그 키 서명(덮어 설치 · 세이브 유지) · 비공개 — 폰 리뷰용"
