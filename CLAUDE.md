@@ -5,6 +5,7 @@
 **이 폴더에서 Claude Code 를 따로 열어 개발한다** — 3D 일은 이 폴더 세션에서, 2D 본편 일은 castle_M 폴더 세션에서(2026-10-26 사용자).
 이 문서만으로 일할 수 있게 썼다. 여기 없는 규칙은 개발 규격(받은 사본 `data/common/docs/개발규격/` — `캐슬_게임공통.md` · `게임개발규격.md`)의 해당 절을 찾아 읽는다(전체를 읽지 않는다). 우선순위: 사용자 답(기획서 00 결정 10 포함) → 이 문서 → 기획서(castle_common `docs/기획서/03`) → 규격.
 
+> 정정 이력: 2026-11-05 (4) — 폰에서 할 일은 GitHub 앱 → Releases → Latest 에서(사용자): 2절 · 3절, 릴리스는 Latest · 본문 `docs/폰확인.md`.
 > 정정 이력: 2026-11-05 (3) — 릴리스(규격 7절): 2절 리뷰는 릴리스 APK · 3절 태그 → release 잡 · versionCode · 아티팩트 1일, 5절 문서 이름 `S{N}_요구사항정의서`(사용자 "1~3 전부 추천대로").
 > 정정 이력: 2026-11-05 (2) — 확정 규격(castle_common `ab9c8551` · 답45) 반영: 0절 서명 키(유지 · 릴리스도 이 키) · 접는 폰 지원, 2절 창 없는 스크린샷을 이 판에서 안 하는 이유(`docs/기획_차이.md` 9-5).
 > 정정 이력: 2026-11-05 — S1 공통 받기: 개발 규격 반영(사용자 2026-11-04 "1~6 추천대로" — `docs/기획_차이.md` 9 · 10절). 0절 Android 전용 · PC판 없음(결정 10 — 옛 '모바일 우선 · PC 는 다음에'를 바꿈) · castle_common 은 읽기만 · 1 · 2층 원본 castle_common · 3층 이 판 소유 · 플랫폼 줄 · 사용자 폰 갤럭시 Z 폴드 4, 0-1절 castle_common 최신 확인 · git fetch, 2절 verify 공통 데이터 · 자산 출처, 3절 push 에는 build 만 · 에뮬레이터 수동 · 태그, 4절 출력 · 크레딧 상한 · 새 세션 · 토큰 ①~⑤, 5절 산출물 2장 · 자산 출처 목록 · id 참조.
@@ -48,14 +49,14 @@
 ## 2. 검증
 - 전체 검증: `py -3.12 scripts/verify.py` (약 20초 — 공통 데이터(도장 · castle_common 비교) · 자산 출처 · 가져오기 · 테스트(공통 cases 1,464줄 포함) · 자동 결투 3판. 출력에 ERROR · WARNING · Leaked 가 있으면 실패). 커밋 전에 반드시. 마일스톤 끝 · 태그 전에는 `--strict`(castle_common 이 앞서 있으면 실패)
 - **작업 서버에서는 화면 없는 전체 검증까지만**(결정 10 덧붙임 2 · 사용자 2026-10-20 "PC에서는 당분간 실행 없었으면 해"): 게임 창 · Android 빌드 · 에뮬레이터는 여기서 돌리지 않는다. Godot 는 `--headless` 로만(그림이 안 나온다). 규격 4 · 5절은 작업 서버의 '창 없는 그리기' 스크린샷을 허용하지만, Godot `--headless` 는 그리기를 끄고 이 서버(Windows)에는 가상 화면이 없어 그리려면 창을 띄우게 되므로 이 판은 하지 않는다(바꾸려면 사용자 확인). 화면 확인은 CI 가상 화면 스크린샷(`shots` 아티팩트) · 에뮬레이터 스크린샷(`emulator` 아티팩트)으로 — 받아서 직접 본다
-- **리뷰는 릴리스의 APK 로**(사용자는 PC 에서 플레이하지 않는다, 2026-10-19 · 규격 7절 2026-11-05): 폰에 설치할 APK 는 태그 → GitHub Releases 한 곳만 안내한다(마일스톤 확인은 프리릴리스 `v0.N.0-rc.M`). Actions 아티팩트는 빌드 검사용(1일)이라 받으라고 하지 않는다. 릴리스 주소 · APK 이름 · 크기 · sha256 을 테스트결과서에 적고 리뷰를 요청한다. 화면을 바꾼 묶음은 스크린샷을 `docs/screenshots/<마일스톤>/` 에 남기고 테스트결과서에 경로
+- **리뷰는 릴리스의 APK 로**(사용자는 PC 에서 플레이하지 않는다, 2026-10-19 · 규격 7절 2026-11-05): **폰에서 할 일은 모두 GitHub 앱 → `castle_M3D` → Releases → 맨 위(Latest)에서 바로 하게 한다**(사용자 2026-11-05 "url 치지 않고, github app 들어가서 바로 릴리즈 다운받게" · "앞으로 폰에서 해야할 것은 모두 github app > release 에서"). 그래서 ① 폰 리뷰가 필요하면 늘 태그를 올려 릴리스를 만든다(Actions 아티팩트 · 주소 링크로 안내하지 않는다) ② 릴리스는 프리릴리스로 두지 않고 **Latest** 로(태그 이름은 `v0.N.0-rc.M` 그대로 — 규격 7절 '프리릴리스'와 다름, 요청 14행) ③ 태그 전에 `docs/폰확인.md`(설치 · 1분 경로 · 이번에 볼 것)를 그 마일스톤에 맞게 고친다 — CI 가 릴리스 본문으로 붙인다. 사용자에게는 "GitHub 앱 → castle_M3D → Releases → 맨 위"로만 알린다. 릴리스 주소 · APK 이름 · 크기 · sha256 은 테스트결과서에. 화면을 바꾼 묶음은 스크린샷을 `docs/screenshots/<마일스톤>/` 에 남기고 테스트결과서에 경로
 - 마일스톤 보고(규격 9절): 되는 것 · 안 되는 것 · 시험 결과(CI 링크 · 출력 원문) · 스크린샷 · APK · 1분 플레이 경로와 폰 확인 목록 · 성능 실측 · 다음 계획 · 예상 비용
 
 ## 3. Git · 외부 서비스
 - 저장소 `hipiboy7/castle_M3D`(비공개, 2026-10-26 REST 로 만듦 — 사용자 확인 "둘 다 push 하고 Actions 돌려줘"). `main` 에 직접 작업하지 않는다(`impl-*` 브랜치, 병합 `--no-ff`, 브랜치 보존). 지금 브랜치 `impl-draft1`
 - commit · push 전에 `git fetch`(여러 서버 · PC 에서 일한다 — 규격 2-14)
 - **사람 확인이 필요한 일**: push(올라갈 커밋을 보여 주고), 태그 push, 저장소 공개 범위(비공개 유지), 릴리스, 이력 재작성 · 강제 push · 삭제, 비용이 드는 외부 호출. 커밋 금지: `.env` · 토큰 · 키(고정 디버그 키 `android/debug.keystore` 는 예외). `git add -A` 대신 경로를 적는다
-- Actions: `main` · `impl-*` push(경로 필터 — `src/` · `data/` · `assets/` · `tests/` · `scripts/` · 설정)에는 **build 만**(검증 · APK · APK 안 json 검사 · 폰 스크린샷, 캐시가 있으면 약 2 ~ 3분). **에뮬레이터 점검은 수동 실행(`tools/ci.py dispatch --emulator`)과 태그 push 때만**(약 5 ~ 8분 더 — 규격 1 · 9절, 사용자 2026-11-04). 태그 push 는 build → emulator → **release**(APK 를 GitHub Releases 에 — `-` 가 든 태그는 프리릴리스, 디버그 키 서명). `versionCode` = run 번호 · `versionName` = 태그(가지 빌드는 `0.2.0-dev.<run>`). 무료 분량(계정 전체 월 2,000분)을 castle_M 과 같이 쓴다. 아티팩트는 1일(빌드 검사용 — 남길 스크린샷은 바로 `docs/screenshots/` 로)
+- Actions: `main` · `impl-*` push(경로 필터 — `src/` · `data/` · `assets/` · `tests/` · `scripts/` · 설정)에는 **build 만**(검증 · APK · APK 안 json 검사 · 폰 스크린샷, 캐시가 있으면 약 2 ~ 3분). **에뮬레이터 점검은 수동 실행(`tools/ci.py dispatch --emulator`)과 태그 push 때만**(약 5 ~ 8분 더 — 규격 1 · 9절, 사용자 2026-11-04). 태그 push 는 build → emulator → **release**(APK 를 GitHub Releases 에 Latest 로, 본문 `docs/폰확인.md`, 디버그 키 서명). `versionCode` = run 번호 · `versionName` = 태그(가지 빌드는 `0.2.0-dev.<run>`). 무료 분량(계정 전체 월 2,000분)을 castle_M 과 같이 쓴다. 아티팩트는 1일(빌드 검사용 — 남길 스크린샷은 바로 `docs/screenshots/` 로)
 - GitHub API 는 `gh` 없이 GCM 토큰으로 REST — **`py -3.12 tools/ci.py`** (runs · status · watch · fetch · log · dispatch · cancel, 사용법은 파일 머리). 토큰을 파일 · 로그 · 커밋에 남기지 않는다. CI 를 기다릴 때는 `watch` 를 백그라운드로 돌리고 끝나면 이어서 본다
 
 ## 4. 사용자와 말하기 · 사용량 · 토큰 (castle_M CLAUDE.md 11절 · 규격 캐슬_게임공통 1절)

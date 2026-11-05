@@ -3,8 +3,9 @@
 #             → APK 안에 공통 데이터(data/common/*.json)가 들었는지 → 가상 화면(xvfb + 소프트웨어 OpenGL)에서 폰 2340x1080 스크린샷
 #  emulator : APK 를 x86_64 API 34 에뮬레이터에 설치 · 실행 → 데모 스크린샷 · logcat 오류 · FPS (scripts/emu_check.sh)
 #             — 수동 실행(workflow_dispatch 입력 emulator)과 태그 push 때만(개발 규격 1 · 9절, 사용자 2026-11-04). push 에는 build 만
-#  release  : 태그 push 때만 — build · emulator 가 통과하면 APK 를 GitHub Releases 에 붙인다(폰에 설치할 APK 는 여기 한 곳,
-#             '-' 가 든 태그는 프리릴리스). 가지 빌드의 아티팩트는 빌드 검사용이라 1일만 둔다(개발 규격 7절, 사용자 2026-11-05)
+#  release  : 태그 push 때만 — build · emulator 가 통과하면 APK 를 GitHub Releases 에 붙이고 **Latest** 로 둔다(폰은 GitHub 앱
+#             → Releases → 맨 위에서 바로 받는다 — 사용자 2026-11-05, 프리릴리스로 두지 않는다). 본문 = docs/폰확인.md(설치 ·
+#             1분 경로 · 이번에 볼 것). 가지 빌드의 아티팩트는 빌드 검사용이라 1일만 둔다(개발 규격 7절)
 #  서명: android/debug.keystore (castle_M 과 같은 고정 디버그 키, 패키지 이름이 달라 서로 덮어쓰지 않는다)
 name: android
 
@@ -209,6 +210,8 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v7          # 릴리스 본문 docs/폰확인.md
+
       - uses: actions/download-artifact@v8
         with:
           name: castle_m3d-apk
@@ -224,7 +227,11 @@ jobs:
           cp apk/castle_m3d.apk "$F"
           sha256sum "$F" | tee "$F.sha256"
           ls -l "$F"
-          PRE=""
-          case "$T" in *-*) PRE="--prerelease" ;; esac
-          gh release create "$T" "$F" "$F.sha256" --repo "$GITHUB_REPOSITORY" --title "캐슬 M 3D $T" $PRE \
-            --notes "커밋 ${GITHUB_SHA::7} · run #$GITHUB_RUN_NUMBER · 고정 디버그 키 서명(덮어 설치 · 세이브 유지) · 비공개 — 폰 리뷰용"
+          {
+            echo "커밋 \`${GITHUB_SHA::7}\` · run #$GITHUB_RUN_NUMBER · \`$F\` · 고정 디버그 키 서명(덮어 설치 · 세이브 유지) · 비공개"
+            echo ""
+            cat docs/폰확인.md
+            echo ""
+            echo "sha256 \`$(cut -d' ' -f1 "$F.sha256")\`"
+          } > notes.md
+          gh release create "$T" "$F" "$F.sha256" --repo "$GITHUB_REPOSITORY" --title "캐슬 M 3D $T" --latest --notes-file notes.md
