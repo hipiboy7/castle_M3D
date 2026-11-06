@@ -118,10 +118,9 @@ const PROFILES := {
 			"sweep_kick": [["cs_sweep", 6], ["cs_highkick", 0]], "pass_stab": [["cs_pass", 8], ["cs_stab", 0]]},
 		"weights": [[["pass", 2], ["stab", 2], ["sweep", 2], ["sweep_kick", 1], ["pass_stab", 1]]], "cd": [70, 50],
 		"near": 1.0, "far": 1.9, "engage": 2.1},
-	# 김재훈(029 대표실 · 아주 약함): 떨어져서 어둠 속 리볼버 연사(쏘고 나면 장전이 길다) — 붙으면 헛스윙 · 밀치기
+	# 김재훈(029 대표실 · 아주 약함 · 맨손 — 사용자 답 2026-11-06 '최하위, 맨손'. 원작 029 의 리볼버 연사는 뺐다): 헛스윙 · 밀치기
 	"jaehoon": {"patterns": {"swing": [["jh_swing", 0]], "shove_swing": [["jh_shove", 8], ["jh_swing", 0]]},
-		"weights": [[["swing", 2], ["shove_swing", 1]]], "cd": [100, 60], "near": 1.8, "far": 4.0, "engage": 1.9,
-		"ranged": ["jh_revolver", 2.1, 6.6, 330], "kite": true},
+		"weights": [[["swing", 2], ["shove_swing", 1]]], "cd": [100, 60], "near": 1.0, "far": 1.7, "engage": 1.9},
 	# 남궁혁(024-030 너클): 기술 책 '너클 낀 주먹 카운터' — 치기 시작하면 자주 맞받는다(counter) · 하이가드. 연타 · 원 궤적 훅 ·
 	# 휘두르는 발차기 · 날아차기 · 손목 잡고 무릎. 따돌리기 방(2장 6 — 쓰러뜨릴 수 없다)이라 2차는 없다
 	"namgung": {"patterns": {"jab": [["ng_jab", 0]], "jab_hook": [["ng_jab", 4], ["ng_hook", 0]], "hook": [["ng_hook", 0]],

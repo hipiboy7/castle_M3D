@@ -69,10 +69,10 @@ func test_p1_profiles_use_own_moves() -> void:
 		for k in ["cd", "near", "far", "engage"]:
 			check(prof.has(k), "%s 칸 %s" % [pid, k])
 	# 총잡이는 총을 쏘고, 맨손 · 칼잡이는 총이 없다
-	for pid in ["thug_revolver", "thug_uzi", "gunter", "jaehoon"]:
+	for pid in ["thug_revolver", "thug_uzi", "gunter"]:
 		check(EnemyAI.PROFILES[pid].has("ranged"), "%s 는 총" % pid)
 	for pid in ["thug", "thug_brute", "thug_pipe", "hyeokju", "seongjun", "daegeon", "manjae", "deoksu",
-			"iseul", "haseong_suit", "haseong_guard", "ojiin", "mincheol", "changseok", "namgung", "sintaejin"]:
+			"jaehoon", "iseul", "haseong_suit", "haseong_guard", "ojiin", "mincheol", "changseok", "namgung", "sintaejin"]:
 		check(not EnemyAI.PROFILES[pid].has("ranged"), "%s 는 총이 없다" % pid)
 	# 패턴이 서로 다르다(같은 표를 복사해 두지 않았다)
 	var seen := {}

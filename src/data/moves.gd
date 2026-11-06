@@ -464,10 +464,7 @@ const M := {
 	"cs_highkick": {"label": "칼 쥔 채 하이킥", "startup": 18, "active": 3, "recovery": 16, "damage": 11, "reach": 14, "radius": 10,
 		"arc": 60, "lunge": 6, "knockback": 3.6, "hitstop": 8, "posture": 18, "telegraph": "parry", "shape": "sidekick", "sfx": "kick",
 		"hit_sfx": "hit_heavy", "shake": 2},                                                                   # 019/116-121 오른발 하이킥을 연달아 머리 높이로
-	# 김재훈(jh_, 하성 대표 · 건달급 · 맨손 — 아주 약함, 029) — 어둠 속 리볼버 연사(헛방 · 장전이 길다) · 오른팔 헛스윙
-	"jh_revolver": {"label": "어둠 속 리볼버 연사", "startup": 30, "active": 12, "recovery": 40, "damage": 6, "reach": 150, "radius": 6,
-		"parryable": false, "hits": 3, "knockback": 1.0, "hitstop": 4, "posture": 8, "telegraph": "unblock", "shape": "shot",
-		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 3},                                                    # 029/048-053 '뒈져라' 쾅 탕 탕 → 공이 헛침 · 떨며 장전
+	# 김재훈(jh_, 하성 대표 · 건달급 · 맨손 — 아주 약함, 029) — 오른팔 헛스윙 · 밀치기(원작 리볼버 연사는 뺌 — 사용자 답 '맨손')
 	"jh_swing": {"label": "오른팔 헛스윙", "startup": 18, "active": 3, "recovery": 16, "damage": 6, "reach": 12, "radius": 10,
 		"arc": 90, "lunge": 4, "posture": 8, "telegraph": "parry", "shape": "punch", "sfx": "swing", "whiff": 12},   # 029/060-061 '붕'
 	"jh_shove": {"label": "밀치기", "startup": 14, "active": 3, "recovery": 14, "damage": 5, "reach": 11, "radius": 10,
