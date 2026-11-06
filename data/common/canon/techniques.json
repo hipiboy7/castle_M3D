@@ -1,0 +1,229 @@
+{
+  "_about": "0층 정사 — 원작에서 확인되는 사실만. refs(원본 위치) · conf(user · ai · guess) 필수. 1단계 승격(2026-10-27, tools/promote_canon.py) — 기술. id 는 data/skills.json 과 같다",
+  "techniques": [
+    {
+      "id": "offbeat2",
+      "name": "엇엇박 찌르기",
+      "users": ["kimshin"],
+      "src": "data/skills.json · characters.json 기술 책 — 사용자 2026-10-17 · 2026-10-19",
+      "refs": [],
+      "conf": "user"
+    },
+    {
+      "id": "offbeat",
+      "name": "엇박 찌르기",
+      "users": ["kimshin", "baekdochan"],
+      "src": "data/skills.json · characters.json 기술 책 — 사용자 2026-10-17 · 2026-10-19 · 1부 답5~7 (docs/1부답_2부반영거리.md · docs/인터뷰/2026-11-03_자산화_답변29.md)",
+      "refs": [],
+      "conf": "user",
+      "note": "= 백도찬식 찌르기(baek_vital)"
+    },
+    {
+      "id": "offbeat_rev",
+      "name": "반대발 엇박 찌르기",
+      "users": ["kimshin"],
+      "src": "data/skills.json · characters.json 기술 책 — 사용자 2026-10-19",
+      "refs": [],
+      "conf": "user"
+    },
+    {
+      "id": "offbeat_var",
+      "name": "엇박 변형",
+      "users": [],
+      "src": "data/skills.json · characters.json 기술 책 — 사용자 2026-10-19",
+      "refs": [],
+      "conf": "user"
+    },
+    {
+      "id": "kickarts",
+      "name": "각법",
+      "users": ["kimshin"],
+      "src": "data/skills.json · characters.json 기술 책 — Phase 2 리뷰 2026-10-26",
+      "refs": [],
+      "conf": "user"
+    },
+    {
+      "id": "vanish_step",
+      "name": "좌우로 사라지는 스텝",
+      "users": ["kimshin"],
+      "src": "data/skills.json · characters.json 기술 책 — Phase 2 리뷰 2026-10-26",
+      "refs": [],
+      "conf": "user"
+    },
+    {
+      "id": "inch",
+      "name": "촌경",
+      "users": ["kimshin"],
+      "src": "data/skills.json · characters.json 기술 책 — castle_M 에서 처음 넣은 기술 (2026-10-16)",
+      "refs": [],
+      "conf": "guess",
+      "note": "게임에서 먼저 넣은 기술 — 원작에 같은 이름 기술이 있는지 판독으로 확인"
+    },
+    {
+      "id": "triple",
+      "name": "리천식 삼연타",
+      "users": ["kimshin", "richeon"],
+      "src": "data/skills.json · characters.json 기술 책 — 2026-10-19 아홉 번째 답 · Phase 2 리뷰 2026-10-26",
+      "refs": [],
+      "conf": "user"
+    },
+    {
+      "id": "jin_original",
+      "name": "서진태 오리지널",
+      "users": ["jintae"],
+      "src": "data/skills.json · characters.json 기술 책 — 2026-10-19 아홉 번째 답",
+      "refs": [],
+      "conf": "user"
+    },
+    {
+      "id": "roulette",
+      "name": "러시안 룰렛",
+      "users": ["jintae"],
+      "src": "data/skills.json · characters.json 기술 책 — 사용자 2026-10-17",
+      "refs": [],
+      "conf": "user"
+    },
+    {
+      "id": "baek_sidekick",
+      "name": "백도찬식 옆차기",
+      "users": ["baekdochan"],
+      "src": "data/skills.json · characters.json 기술 책 — 사용자 2026-10-19 여덟 · 아홉 번째 답",
+      "refs": [],
+      "conf": "user"
+    },
+    {
+      "id": "baek_vital",
+      "name": "백도찬식 찌르기",
+      "users": ["baekdochan"],
+      "src": "data/skills.json · characters.json 기술 책 — 사용자 2026-10-19 여덟 · 아홉 번째 답 · 1부 답5~7 (docs/1부답_2부반영거리.md · docs/인터뷰/2026-11-03_자산화_답변29.md)",
+      "refs": [],
+      "conf": "user",
+      "note": "= 엇박 찌르기(offbeat) — 1 · 2부 모두 매우 중요. 1부 코모도의 파이톤의 칼은 어설픈 모방"
+    },
+    {
+      "id": "baek_wide",
+      "name": "살아있는 건 전부 죽여라",
+      "users": ["baekdochan"],
+      "src": "data/skills.json · characters.json 기술 책 — 사용자 2026-10-19 열 번째 답 (비용 잠정)",
+      "refs": [],
+      "conf": "user"
+    },
+    {
+      "id": "jesus_zone",
+      "name": "예수존 총격술",
+      "users": ["kimshin", "akila"],
+      "src": "data/skills.json · characters.json 기술 책 — 사용자 2026-10-20 열한 · 열두 번째 답",
+      "refs": [],
+      "conf": "user"
+    },
+    {
+      "id": "shingen_daegeuk",
+      "name": "대극 큰 호 베기",
+      "users": ["shingen"],
+      "src": "castle M 3D 요청 17(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 70차",
+      "refs": ["062/084-106", "098/035-047"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "shingen_dive",
+      "name": "낮은 파고들기",
+      "users": ["shingen"],
+      "src": "castle M 3D 요청 17(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 70차",
+      "refs": ["062/084-106", "098/035-047"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "shingen_frontkick",
+      "name": "앞차기",
+      "users": ["shingen"],
+      "src": "castle M 3D 요청 17(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 70차",
+      "refs": ["097/000-001", "099/028-030", "101/036-037"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "shingen_leap",
+      "name": "날아차기",
+      "users": ["shingen"],
+      "src": "castle M 3D 요청 17(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 70차",
+      "refs": ["101/042-044"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "hayabusa_arc",
+      "name": "하야부사식 큰 호 베기",
+      "users": ["hayabusa"],
+      "src": "castle M 3D 요청 17(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · 하향 원본 shingen_daegeuk · data/skills.json · 70차",
+      "refs": ["019/046-065", "098/024-031"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "hayabusa_low",
+      "name": "낮은 다리 베기",
+      "users": ["hayabusa"],
+      "src": "castle M 3D 요청 17(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · 하향 원본 shingen_dive · data/skills.json · 70차",
+      "refs": ["095/080@1287"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "g4_heelkick",
+      "name": "내려찍기 하이킥",
+      "users": ["gyeonghodaechoehuui4in"],
+      "src": "castle M 3D 요청 17(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · 하향 원본 majunyeong:구속복 하이킥 · data/skills.json · 70차",
+      "refs": ["002/101-103"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "g4_chop",
+      "name": "칼 내리찍기",
+      "users": ["gyeonghodaechoehuui4in"],
+      "src": "castle M 3D 요청 17(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · 하향 원본 majunyeong:칼 내리찍기 · data/skills.json · 70차",
+      "refs": ["033/057-060"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "g4_shot",
+      "name": "근거리 사격",
+      "users": ["gyeonghodaechoehuui4in"],
+      "src": "castle M 3D 요청 17(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · 하향 원본 majunyeong:근거리 소음기 연사 · data/skills.json · 70차",
+      "refs": ["045/082-086", "045/094", "058/039-045"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "guilhwa_headbutt",
+      "name": "들이받기",
+      "users": ["guilhwa"],
+      "src": "castle M 3D 요청 17(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 70차",
+      "refs": ["057/042-079", "109/019-020"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "guilhwa_forearm",
+      "name": "팔뚝 연타",
+      "users": ["guilhwa"],
+      "src": "castle M 3D 요청 17(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 70차",
+      "refs": ["057/042-079"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "keurisa_salsu",
+      "name": "살수(크리사)",
+      "users": ["keurisa"],
+      "src": "1부 판독 new_entities(work/pilot_p1/NNN.json) · 1부 canon 승격(work/pilot_p1/canon_p1.py — 2026-11-06)",
+      "refs": ["p1:056/034@1200", "p1:056/039@0", "p1:056/041@0"],
+      "conf": "ai",
+      "provisional": true,
+      "note": "크리사가 마지막에 쓰려던, 턱이 아니라 목젖을 노리는 손 기술 — 메드베디가 피우진에게 가르치겠다고 함 · 1부 판독 첫 화 p1:056"
+    }
+  ]
+}
