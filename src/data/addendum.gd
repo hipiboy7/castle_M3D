@@ -44,6 +44,20 @@ const CHARACTERS := {
 		"stats": {"힘": 50, "속도": 50, "기술": 40, "맷집": 50}, "skills": [],
 		"src": "3D 덧붙임 엑스트라(원작 057/042-079 중앙홀 난전의 경호대 정장 8인) — 등급 · 능력치는 이 판 후보",
 		"provisional": ["rank", "stats"]},
+	# ---- 0 · 1장 엑스트라(S5 묶음 2 · 3) — 이름 있는 인물(군터 · 김대건 · 윤덕수 · 강만재 · 김성준 · 김혁주)은 castle_common 72차에 있다.
+	# 이름 없는 사람들은 공통에 두지 않는다(3D 요청 19 와 같음 — 원작 근거는 canon fights.json mobs). 등급 · 능력치는 이 판 후보
+	"gunter_guard": {"id": "gunter_guard", "name": "군터 경호원", "rank": "건달급", "weapons": ["맨손", "총"],
+		"stats": {"힘": 44, "속도": 44, "기술": 34, "맷집": 42}, "skills": [],
+		"src": "3D 덧붙임 엑스트라(원작 fight:gunter mobs — 대머리 경호원 · 우지 든 장발 남자 · 포니테일 거구, p1:002/013-020)",
+		"provisional": ["rank", "stats"]},
+	"ds_member": {"id": "ds_member", "name": "DS 조직원", "rank": "건달급", "weapons": ["맨손", "칼"],
+		"stats": {"힘": 44, "속도": 44, "기술": 34, "맷집": 44}, "skills": [],
+		"src": "3D 덧붙임 엑스트라(원작 fight:kimhyeokju '정장 남자들' p1:003 · fight:jintae_ds 'DS 정장 무리' p1:019-020)",
+		"provisional": ["rank", "stats"]},
+	"ds_raider": {"id": "ds_raider", "name": "DS 습격조", "rank": "건달급", "weapons": ["맨손", "곤봉"],
+		"stats": {"힘": 46, "속도": 42, "기술": 32, "맷집": 46}, "skills": [],
+		"src": "3D 덧붙임 엑스트라(원작 fight:pyechajang 'DS 습격조(방망이 · 쇠파이프 · 복면)' p1:008-010)",
+		"provisional": ["rank", "stats"]},
 }
 
 ## 기술(1층 정체) — from: 하향의 원본 기술 · refs: 원작 화/컷

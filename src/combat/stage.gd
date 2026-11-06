@@ -1,9 +1,10 @@
 extends RefCounted
-## 방을 차례로 지나는 여러 사람 판(장 표 하나 = 장 하나 — 지금은 11장 호텔 캐슬: 층을 지나며 김신 · 피우진(교대)이 적 여럿과 싸운다). 순수 로직(노드 없음, 60프레임 고정,
+## 방을 차례로 지나는 여러 사람 판(장 표 하나 = 장 하나 — 0장 블라디보스토크(src/data/prologue.gd) · 1장 회암시(hoeam.gd) ·
+## 11장 호텔 캐슬(hotel.gd — 층을 지나며 김신 · 피우진(교대)이 적 여럿과 싸운다)). 조작하는 사람은 장 표 HEROES — 1명이면 교대 없음. 순수 로직(노드 없음, 60프레임 고정,
 ## 같은 시드면 같은 결과) — 게임(main.gd) · 시험 · 자동 플레이가 같은 것을 쓴다. 결투(duel.gd)와 같은 모양의 사전을 돌려준다:
 ## world · hero(지금 조작하는 사람) · boss(화면 위 큰 막대에 보일 적, 없으면 null) + kind "stage" · heroes · enemies · allies.
-## 방 · 역할 · 시점은 장 표(src/data/campaign.gd 가 장 id 로 고른다 — ch11 = src/data/hotel.gd), 1층(등급 · 능력치 · 기술)은 castle_common → 없으면 src/data/addendum.gd(3D 덧붙임).
-## 판 끝: 마지막 방(end)에 닿으면 win, 두 사람이 다 쓰러지면 lose(world.over). 신겐은 체력 yield_at 에서 길을 내준다(062).
+## 방 · 역할 · 시점은 장 표(src/data/campaign.gd 가 장 id 로 고른다 — ch0 prologue · ch1 hoeam · ch11 hotel), 1층(등급 · 능력치 · 기술)은 castle_common → 없으면 src/data/addendum.gd(3D 덧붙임).
+## 판 끝: 마지막 방(end)에 닿으면 win, 조작하는 사람이 다 쓰러지면 lose(world.over). 신겐은 체력 yield_at 에서 길을 내준다(062).
 ## 신호(world.events 에 더함): ["room", 방 번호] · ["line", 제목, 작은 글, 초] · ["swap", 새로 조작하는 사람] · ["yield", 적]
 
 const Fighter = preload("res://src/combat/fighter.gd")
@@ -86,6 +87,14 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 		f.hp_max *= 1.25
 		f.hp = f.hp_max
 		d["look_of"][f] = "g4_leader"                 # 그림: 희끗한 크루컷의 중심 인물(058/039-045)
+	# 방 표의 덧붙임(엑스트라 한 사람씩 다르게): look 외형 · ai 적 프로필 · name 화면 이름 · hp_k 체력 배율
+	if extra.has("look"):
+		d["look_of"][f] = str(extra["look"])
+	if extra.has("name"):
+		f.name = str(extra["name"])
+	if extra.has("hp_k"):
+		f.hp_max *= float(extra["hp_k"])
+		f.hp = f.hp_max
 	var i: int = d["enemies"].size() + d["allies"].size() + 1
 	if team == 1:
 		f.is_boss = true                              # 적 쪽: 공격 준비 동안 상대 쪽으로 몸을 오래 튼다 · 늦은 쳐내기 없음
@@ -95,7 +104,7 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 			d["yield"][f] = float(role["yield_at"])
 			f.hp_floor = float(role["yield_at"])      # 길을 내주기 전에는 이 밑으로 안 내려간다
 		var g: float = Addendum.derive(Addendum.stats_at(id, T.PERIOD))["guard"]
-		d["ais"][f] = EnemyAI.new(f, str(role["ai"]), _rng(int(d["seed"]) * 131 + int(d["room_i"]) * 17 + i), g)
+		d["ais"][f] = EnemyAI.new(f, str(extra.get("ai", role["ai"])), _rng(int(d["seed"]) * 131 + int(d["room_i"]) * 17 + i), g)
 		d["enemies"].append(f)
 	else:
 		f.moveset = role["moveset"]
@@ -195,9 +204,12 @@ static func step(d: Dictionary, human = null) -> void:
 	_after(d)
 
 
-## 교대: 다른 사람이 살아 있으면 조작을 넘긴다(지금 사람이 기술 · 맞음 중이어도 된다 — 넘겨받은 쪽은 봇이 이어 받는다)
+## 교대: 다른 사람이 살아 있으면 조작을 넘긴다(지금 사람이 기술 · 맞음 중이어도 된다 — 넘겨받은 쪽은 봇이 이어 받는다).
+## 조작하는 사람이 1명인 장(0 · 1장 김신)은 교대가 없다
 static func swap(d: Dictionary) -> bool:
-	var other: int = 1 - int(d["ctrl"])
+	if d["heroes"].size() < 2:
+		return false
+	var other: int = (int(d["ctrl"]) + 1) % d["heroes"].size()
 	if not d["heroes"][other].alive():
 		return false
 	d["ctrl"] = other

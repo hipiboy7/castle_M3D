@@ -186,6 +186,33 @@ const M := {
 	"s_sg_leap": {"label": "날아차기", "startup": 26, "active": 4, "recovery": 20, "damage": 20, "reach": 14, "radius": 11,
 		"lunge": 44, "parryable": false, "knockback": 6.0, "hitstop": 12, "posture": 30, "telegraph": "unblock",
 		"shape": "axe", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 6, "skill": true, "skill_id": "shingen_leap"},
+	# ---- 0 · 1장(S5 묶음 2 · 3) — 1부 처음 김신은 맨손(p1:014/025-027 '너 정도엔 필요 없다'), 서진태는 아군 봇(1장 1 · 4 방)
+	# 김신 맨손: 잽 → 잽 → 턱 쳐 올리기(002/016-017 · 014/027-030 어퍼컷) · 날아 차기 돌진(003/026-030) · 받아넘기며 반격 · 처박기
+	"kf_jab": {"label": "잽", "startup": 4, "active": 3, "recovery": 9, "damage": 6, "reach": 12, "radius": 9,
+		"lunge": 3, "next": "kf_jab2", "cancel": 7, "posture": 7, "shape": "punch", "sfx": "swing"},
+	"kf_jab2": {"label": "주먹", "startup": 4, "active": 3, "recovery": 10, "damage": 7, "reach": 13, "radius": 9,
+		"lunge": 4, "next": "kf_upper", "cancel": 8, "posture": 9, "shape": "punch", "sfx": "swing", "hand": "L"},
+	"kf_upper": {"label": "턱 쳐 올리기", "startup": 6, "active": 4, "recovery": 15, "damage": 12, "reach": 12, "radius": 10,
+		"arc": 60, "lunge": 6, "knockback": 3.4, "hitstop": 7, "posture": 18, "shape": "punch", "sfx": "kick",
+		"hit_sfx": "hit_heavy", "shake": 2},
+	"kf_dash": {"label": "날아 차기", "startup": 6, "active": 5, "recovery": 14, "damage": 11, "reach": 14, "radius": 9,
+		"lunge": 28, "knockback": 3.8, "hitstop": 6, "posture": 16, "shape": "sidekick", "sfx": "kick", "hit_sfx": "hit_heavy"},
+	"kf_counter": {"label": "받아넘기며 치기", "startup": 2, "active": 3, "recovery": 10, "damage": 15, "reach": 13, "radius": 11,
+		"arc": 80, "lunge": 6, "posture": 24, "hitstop": 7, "shape": "punch", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 2},
+	"kf_finisher": {"label": "처박기", "startup": 3, "active": 4, "recovery": 18, "damage": 40, "reach": 14, "radius": 10,
+		"lunge": 8, "knockback": 4.0, "hitstop": 16, "posture": 0, "shape": "punch", "sfx": "kick", "hit_sfx": "hit_heavy",
+		"shake": 6},
+	# 서진태(1장 아군) — 빠른 주먹 · 발(003 '드루와' · 006 하이킥). 아군 AI 로만 나온다
+	"j_jab": {"label": "주먹", "startup": 4, "active": 3, "recovery": 9, "damage": 6, "reach": 12, "radius": 9,
+		"lunge": 4, "next": "j_kick", "cancel": 7, "posture": 7, "shape": "punch", "sfx": "swing"},
+	"j_kick": {"label": "하이킥", "startup": 7, "active": 4, "recovery": 15, "damage": 11, "reach": 14, "radius": 10,
+		"arc": 70, "lunge": 4, "knockback": 3.4, "hitstop": 7, "posture": 16, "shape": "sidekick", "sfx": "kick",
+		"hit_sfx": "hit_heavy", "shake": 2},
+	"j_dash": {"label": "날아 차기", "startup": 6, "active": 5, "recovery": 14, "damage": 10, "reach": 14, "radius": 9,
+		"lunge": 26, "knockback": 3.8, "hitstop": 6, "posture": 16, "shape": "sidekick", "sfx": "kick", "hit_sfx": "hit_heavy"},
+	"j_finisher": {"label": "내려찍기", "startup": 4, "active": 4, "recovery": 18, "damage": 30, "reach": 14, "radius": 10,
+		"lunge": 8, "knockback": 4.6, "hitstop": 14, "posture": 0, "shape": "axe", "sfx": "kick", "hit_sfx": "hit_heavy",
+		"shake": 5},
 }
 
 static var _cache := {}

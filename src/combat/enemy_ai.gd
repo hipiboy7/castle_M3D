@@ -28,6 +28,18 @@ const PROFILES := {
 		"weights": [[["slash3", 4], ["daegeuk", 2], ["dive", 1], ["kick", 1], ["slash_kick", 1]],
 			[["slash3", 2], ["daegeuk", 2], ["dive", 2], ["kick", 1], ["leap", 2], ["slash_kick", 1], ["stab_daegeuk", 2]]],
 		"cd": [34, 30], "near": 1.4, "far": 2.4, "engage": 2.6, "phase2": {"dmg_k": 1.15, "cd_k": 0.7, "guard_add": 0.1}},
+	# ---- 0 · 1장(S5 묶음 2 · 3) — 뼈대: 자리만(패턴은 다음 커밋에서 canon fights 국면으로)
+	"thug": {"patterns": {"baton": [["c_baton", 0]], "punch2": [["c_punch", 10], ["c_baton", 0]]}, "weights": [[["baton", 2], ["punch2", 1]]], "cd": [80, 60], "near": 1.0, "far": 1.7, "engage": 1.9},
+	"thug_brute": {"patterns": {"baton": [["c_baton", 0]], "punch2": [["c_punch", 10], ["c_baton", 0]]}, "weights": [[["baton", 2], ["punch2", 1]]], "cd": [80, 60], "near": 1.0, "far": 1.7, "engage": 1.9},
+	"thug_pipe": {"patterns": {"baton": [["c_baton", 0]], "punch2": [["c_punch", 10], ["c_baton", 0]]}, "weights": [[["baton", 2], ["punch2", 1]]], "cd": [80, 60], "near": 1.0, "far": 1.7, "engage": 1.9},
+	"hyeokju": {"patterns": {"baton": [["c_baton", 0]], "punch2": [["c_punch", 10], ["c_baton", 0]]}, "weights": [[["baton", 2], ["punch2", 1]]], "cd": [80, 60], "near": 1.0, "far": 1.7, "engage": 1.9},
+	"seongjun": {"patterns": {"baton": [["c_baton", 0]], "punch2": [["c_punch", 10], ["c_baton", 0]]}, "weights": [[["baton", 2], ["punch2", 1]]], "cd": [80, 60], "near": 1.0, "far": 1.7, "engage": 1.9},
+	"daegeon": {"patterns": {"baton": [["c_baton", 0]], "punch2": [["c_punch", 10], ["c_baton", 0]]}, "weights": [[["baton", 2], ["punch2", 1]]], "cd": [80, 60], "near": 1.0, "far": 1.7, "engage": 1.9},
+	"manjae": {"patterns": {"baton": [["c_baton", 0]], "punch2": [["c_punch", 10], ["c_baton", 0]]}, "weights": [[["baton", 2], ["punch2", 1]]], "cd": [80, 60], "near": 1.0, "far": 1.7, "engage": 1.9},
+	"deoksu": {"patterns": {"baton": [["c_baton", 0]], "punch2": [["c_punch", 10], ["c_baton", 0]]}, "weights": [[["baton", 2], ["punch2", 1]]], "cd": [80, 60], "near": 1.0, "far": 1.7, "engage": 1.9},
+	"thug_revolver": {"patterns": {"baton": [["c_baton", 0]], "punch2": [["c_punch", 10], ["c_baton", 0]]}, "weights": [[["baton", 2], ["punch2", 1]]], "cd": [80, 60], "near": 1.0, "far": 1.7, "engage": 1.9, "ranged": ["t_shot", 2.6, 6.5, 260]},
+	"thug_uzi": {"patterns": {"baton": [["c_baton", 0]], "punch2": [["c_punch", 10], ["c_baton", 0]]}, "weights": [[["baton", 2], ["punch2", 1]]], "cd": [80, 60], "near": 1.0, "far": 1.7, "engage": 1.9, "ranged": ["t_shot", 2.6, 6.5, 260]},
+	"gunter": {"patterns": {"baton": [["c_baton", 0]], "punch2": [["c_punch", 10], ["c_baton", 0]]}, "weights": [[["baton", 2], ["punch2", 1]]], "cd": [80, 60], "near": 1.0, "far": 1.7, "engage": 1.9, "ranged": ["t_shot", 2.6, 6.5, 260]},
 }
 
 var me
@@ -48,7 +60,7 @@ var phase := 1
 
 func _init(enemy, profile_id: String, r: RandomNumberGenerator, guard := 0.3) -> void:
 	me = enemy
-	prof = PROFILES[profile_id]
+	prof = PROFILES.get(profile_id, PROFILES["guard"])     # 표에 없는 프로필은 경호원(시험 test_campaign 이 장 표의 ai 가 다 있는지 본다)
 	rng = r
 	guard_rate = guard
 	cooldown = 40 + rng.randi_range(0, 60)                  # 여럿이 같은 박자로 시작하지 않게

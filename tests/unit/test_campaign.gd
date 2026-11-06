@@ -9,6 +9,9 @@ const EnemyAI = preload("res://src/combat/enemy_ai.gd")
 const Looks = preload("res://src/view/looks.gd")
 const Lines = preload("res://src/data/lines.gd")
 const Hotel = preload("res://src/data/hotel.gd")
+const Hoeam = preload("res://src/data/hoeam.gd")
+const Hotel3d = preload("res://src/view/hotel3d.gd")
+const Town3d = preload("res://src/view/town3d.gd")
 
 
 func _has_event(ev: String) -> bool:
@@ -29,11 +32,12 @@ func test_chapter_list() -> void:
 		check(c["kind"] in ["duel", "stage", "soon"], "장 종류 %s %s" % [id, c["kind"]])
 		var t = Campaign.title(id)
 		check(t is Array and t.size() == 2 and str(t[0]) != "", "장 이름 · 한 줄(lines.json chapters.%s)" % id)
-	check(Campaign.playable_ids() == ["ch6", "ch11"], "지금 할 수 있는 장 = 6 · 11장 %s" % [Campaign.playable_ids()])
-	check(not Campaign.playable("ch0") and Campaign.playable("ch11") and not Campaign.playable("nope"), "준비 중 · 없는 장은 못 한다")
+	check(Campaign.playable_ids() == ["ch0", "ch1", "ch6", "ch11"], "지금 할 수 있는 장 = 0 · 1 · 6 · 11장 %s" % [Campaign.playable_ids()])
+	check(Campaign.playable("ch0") and Campaign.playable("ch11") and not Campaign.playable("nope"), "만든 장은 할 수 있고 없는 장은 못 한다")
+	check(Campaign.view("ch0") == "town" and Campaign.view("ch1") == "town" and Campaign.view("ch11") == "hotel", "무대 그림 이름")
 	check(Campaign.from_mode("duel") == "ch6" and Campaign.from_mode("stage") == "ch11" and Campaign.from_mode("ch11") == "ch11",
 		"옛 실행 인자 --mode duel|stage 도 장 id 로")
-	check(Campaign.from_mode("ch0") == "" and Campaign.from_mode("x") == "", "못 하는 장 · 없는 이름은 빈칸")
+	check(Campaign.from_mode("ch1") == "ch1" and Campaign.from_mode("x") == "", "장 id 는 그대로 · 없는 이름은 빈칸")
 	check(Campaign.table("ch11") != null and Campaign.table("ch6") == null, "여러 사람 판만 장 표가 있다")
 	check(Campaign.kind("ch6") == "duel" and Campaign.kind("ch11") == "stage" and Campaign.kind("nope") == "", "장 종류")
 
@@ -42,11 +46,17 @@ func test_chapter_list() -> void:
 func test_chapter_data_ids_exist() -> void:
 	for id in Campaign.playable_ids():
 		var c := Campaign.chapter(id)
-		check(_has_event(str(c["event"])), "%s 진행 사건 %s 이 progression.json 에" % [id, c["event"]])
+		# 장이 끝날 때의 진행 사건(프롤로그처럼 없을 수 있다 — 그때 장 표 시점은 다음 사건 앞)
+		check(str(c["event"]) == "" or _has_event(str(c["event"])), "%s 진행 사건 %s 이 progression.json 에" % [id, c["event"]])
 		var T = Campaign.table(id)
 		if T == null:
 			continue
-		check(str(T.EVENT) == str(c["event"]), "%s 장 표의 사건이 장 목록과 같다" % id)
+		check(_has_event(str(T.EVENT)), "%s 장 표 시점 사건 %s 이 progression.json 에" % [id, T.EVENT])
+		check(str(c["event"]) == "" or str(T.EVENT) == str(c["event"]), "%s 장 표의 사건이 장 목록과 같다" % id)
+		var themes: Array = Hotel3d.THEMES          # (삼항식으로 고르면 정적 분석이 첫 쪽 상수를 읽는다 — if 로)
+		if Campaign.view(id) == "town":
+			themes = Town3d.THEMES
+		var looks: Array = []                       # 방 표 덧붙임의 외형 · AI(엑스트라 한 사람씩 — stage.gd _npc)
 		check(Lines.at(T.LINES + ".start") != null, "%s 첫 글 %s.start" % [id, T.LINES])
 		for h in T.HEROES:
 			check(T.ROLES.has(h) and T.ROLES[h].has("moveset"), "%s 사람 %s 역할 · 동작 묶음" % [id, h])
@@ -55,8 +65,14 @@ func test_chapter_data_ids_exist() -> void:
 		for room in T.ROOMS:
 			check(Lines.at("%s.rooms.%s.enter" % [T.LINES, room["id"]]) != null, "%s 방 %s 들어서는 글" % [id, room["id"]])
 			check(room["heroes"].size() >= T.HEROES.size(), "%s 방 %s 사람 자리" % [id, room["id"]])
+			check(themes.has(str(room["theme"])), "%s 방 %s 무대 %s 를 그림이 그린다" % [id, room["id"], room["theme"]])
 			for a in room["allies"] + room["enemies"]:
 				ids.append(a[0])
+				if a.size() > 2:
+					if a[2].has("look"):
+						looks.append(str(a[2]["look"]))
+					if a[2].has("ai"):
+						check(EnemyAI.PROFILES.has(str(a[2]["ai"])), "%s 방 %s 덧붙임 AI %s" % [id, room["id"], a[2]["ai"]])
 			var boss := str(room.get("boss", ""))
 			check(boss == "" or room["enemies"].any(func(e): return e[0] == boss), "%s 방 %s 보스 %s 가 그 방 적" % [id, room["id"], boss])
 		for cid in ids:
@@ -70,6 +86,8 @@ func test_chapter_data_ids_exist() -> void:
 					check(Moves.M.has(role["moveset"][k]), "%s 인물 %s 동작 %s" % [id, cid, role["moveset"][k]])
 			elif not T.HEROES.has(cid):
 				check(EnemyAI.PROFILES.has(str(role.get("ai", ""))), "%s 적 %s AI 프로필 %s" % [id, cid, role.get("ai")])
+		for lk in looks:
+			check(Looks.LOOKS.has(lk), "%s 덧붙임 외형 %s" % [id, lk])
 
 
 func test_save_fresh_and_roundtrip() -> void:
@@ -103,20 +121,25 @@ func test_save_old_broken_newer() -> void:
 
 func test_next_chapter_and_unlock() -> void:
 	var s := Save.fresh()
-	check(Save.next_chapter(s) == "ch6", "처음 이어하기 = 할 수 있는 첫 장(6장)")
+	check(Save.next_chapter(s) == "ch0", "처음 이어하기 = 할 수 있는 첫 장(프롤로그)")
+	Save.record_clear(s, "ch0", 2000)
+	check(Save.next_chapter(s) == "ch1", "프롤로그를 깨면 1장")
+	Save.record_clear(s, "ch1", 9000)
 	Save.record_clear(s, "ch6", 3000)
 	check(Save.next_chapter(s) == "ch11", "6장을 깨면 11장")
 	Save.record_clear(s, "ch11", 9000)
 	s["last"] = "ch6"
 	check(Save.next_chapter(s) == "ch6", "다 깨면 마지막으로 한 장")
-	s["last"] = "ch0"
-	check(Save.next_chapter(s) == "ch6", "마지막 장이 못 하는 장이면 첫 장")
+	s["last"] = "nope"
+	check(Save.next_chapter(s) == "ch0", "마지막 장이 못 하는 장이면 첫 장")
 	var t := Save.fresh()
-	check(Save.unlocked(t, "ch6") and not Save.unlocked(t, "ch0"), "첫 장은 열림 · 준비 중은 잠김")
+	check(Save.unlocked(t, "ch0") and not Save.unlocked(t, "nope"), "첫 장은 열림 · 없는 장은 잠김")
 	check(Save.unlocked(t, "ch11") == Campaign.OPEN_ALL, "11장은 시험판(OPEN_ALL)이면 처음부터 열림")
-	check(Save.unlocked_by_order(t, "ch11") == false, "차례 규칙만으로는 6장을 깨야 11장")
-	Save.record_clear(t, "ch6", 1)
-	check(Save.unlocked_by_order(t, "ch11"), "6장을 깨면 11장이 열린다")
+	check(Save.unlocked_by_order(t, "ch1") == false, "차례 규칙만으로는 프롤로그를 깨야 1장")
+	Save.record_clear(t, "ch0", 1)
+	check(Save.unlocked_by_order(t, "ch1"), "프롤로그를 깨면 1장이 열린다")
+	Save.record_clear(t, "ch1", 1)
+	check(Save.unlocked_by_order(t, "ch6"), "1장을 깨면 6장이 열린다")
 
 
 ## 게임 속도(사용자 2026-11-06 "싸움이 너무 느린데 게임 속도를 더 빨리 할 수 있는 버튼") — 세이브에 남는 고르기
@@ -138,5 +161,7 @@ func test_stages_of_chapter() -> void:
 	check(int(st[3]["room"]) == 3 and str(st[3]["title"]).contains("회장실"), "넷째 = 회장실 앞 %s" % st[3])
 	var d6 := Campaign.stages("ch6")
 	check(d6.size() == 1 and int(d6[0]["room"]) == 0 and str(d6[0]["title"]) != "", "결투 장은 스테이지 하나 %s" % [d6])
-	check(Campaign.stages("ch0").is_empty() and Campaign.stages("nope").is_empty(), "준비 중 · 없는 장은 스테이지 없음")
+	check(Campaign.stages("nope").is_empty(), "없는 장은 스테이지 없음")
+	var s1 := Campaign.stages("ch1")
+	check(s1.size() == Hoeam.ROOMS.size() and str(s1[0]["title"]) != "", "1장 스테이지 = 방 %d %s" % [Hoeam.ROOMS.size(), s1])
 

@@ -6,7 +6,7 @@ extends Node3D
 ## (combat/stage.gd + 장 표 — 11장 호텔 캐슬). 처음 화면 = 이어하기 + 장 카드(src/ui/title_menu.gd), 깬 장은 세이브(src/data/save.gd
 ## — user://save.json. 창 없는 실행은 --save 경로를 줄 때만 읽고 쓴다: 점검이 사람 세이브를 건드리지 않고 늘 같은 결과).
 ##
-## 실행 인자(-- 뒤에): --autoplay 봇이 김신(끝나면 다음 시드로 다시) · --mode 장 id(ch6 · ch11 — 옛 이름 duel · stage 도 됨, 기본 ch6)
+## 실행 인자(-- 뒤에): --autoplay 봇이 김신(끝나면 다음 시드로 다시) · --mode 장 id(ch0 · ch1 · ch6 · ch11 — 옛 이름 duel · stage 도 됨, 기본 ch6)
 ##   --seconds N N초(게임 시간) 뒤 결과를 찍고 끝 · --seed S · --shots 폴더:프레임,프레임 그 프레임 화면을 PNG 로
 ##   --touch PC 에서도 터치 버튼 · --room N stage 를 N번 방부터 · --crowd N 28층에 경호원 N명 더(성능 점검)
 ##   --art puppet|a|b 그림(김신 · 신겐만 — a = GLB 툰 모델(기본 · #9 결정) · b = 도트 빌보드). 처음 화면 '그림' 버튼 · 3 키로도 바꾼다
@@ -31,6 +31,9 @@ const PuppetDot = preload("res://src/view/puppet_dot.gd")
 const ART_NAMES := {"puppet": "관절 인형", "a": "A · GLB 툰 모델", "b": "B · 도트 빌보드"}
 const Arena = preload("res://src/view/arena3d.gd")
 const Hotel3d = preload("res://src/view/hotel3d.gd")
+const Town3d = preload("res://src/view/town3d.gd")
+## 장 무대 그림(campaign.gd CHAPTERS view) → 그림 클래스 — 모두 build(theme, bounds, detail) 를 갖는다(LSP)
+const VIEWS := {"hotel": Hotel3d, "town": Town3d}
 const Fx = preload("res://src/view/fx3d.gd")
 const Cam = preload("res://src/view/camera_rig.gd")
 const Sound = preload("res://src/view/sound.gd")
@@ -238,7 +241,7 @@ func _build_stage_view() -> void:
 		pup[f].queue_free()
 	pup.clear()
 	if kind == "stage":
-		arena = Hotel3d.new()
+		arena = VIEWS[Campaign.view(chapter)].new()
 		arena.process_mode = Node.PROCESS_MODE_PAUSABLE
 		add_child(arena)
 		arena.build(str(d["room"]["theme"]), d["room"]["bounds"], not headless)
@@ -281,6 +284,11 @@ func _markers() -> void:
 		pup[f].set_marker(col)
 
 
+## 교대 버튼 · 짝 막대: 조작하는 사람이 둘 이상인 여러 사람 판만(0 · 1장은 김신 혼자)
+func _can_swap() -> bool:
+	return kind == "stage" and d.has("heroes") and d["heroes"].size() > 1
+
+
 func _look_of(f) -> String:
 	if kind == "duel":
 		return "kim" if f == d["hero"] else "baek"
@@ -309,7 +317,7 @@ func _start(m: String) -> void:
 	mode_t = 0
 	fights += 1
 	touch.show_pause = m == "fight"
-	touch.show_swap = m == "fight" and kind == "stage"
+	touch.show_swap = m == "fight" and _can_swap()
 	touch.show_art = false
 	touch.show_fight = true
 	menu.visible = false
@@ -522,7 +530,7 @@ func _set_menu(on: bool) -> void:
 	touch.take_edges()
 	touch.show_fight = not on
 	touch.show_pause = not on
-	touch.show_swap = not on and kind == "stage"
+	touch.show_swap = not on and _can_swap()
 	if on:
 		menu_ch = chapter
 		hud.message("", "", 0.0)                    # 가운데 알림(시작 글 등)이 메뉴 카드 밑으로 비치지 않게
@@ -776,8 +784,8 @@ func _process(dt: float) -> void:
 	if d.is_empty():
 		return
 	var partner = null
-	if kind == "stage":
-		partner = d["heroes"][1 - int(d["ctrl"])]
+	if _can_swap():
+		partner = d["heroes"][(int(d["ctrl"]) + 1) % d["heroes"].size()]
 	var phase: int = d["boss"].phase if d["boss"] != null else 1
 	if paused or menu_open:
 		hud.update_bars(d["hero"], d["boss"], phase, 0.0, partner)     # 접기 · 펴기에 자리만 다시 잡는다

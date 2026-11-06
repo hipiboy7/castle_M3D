@@ -222,7 +222,7 @@ def step_coverage(g):
 
 FLOW_EVENTS = "400:back,500:press,700:hide,760:show,800:press,900:back,960:back"
 MENU_EVENTS = "30:press,120:menu,150:menupick_ch11,180:menupick_room3,400:menu,430:menupick_resume"
-MENU_WANT = ["STAGE ch6 room=0", "MODE title", "STAGE ch6 room=0", "MODE fight", "MENU on", "MENU off", "STAGE ch11 room=3",
+MENU_WANT = ["STAGE ch0 room=0", "MODE title", "STAGE ch0 room=0", "MODE fight", "MENU on", "MENU off", "STAGE ch11 room=3",
              "MODE fight", "MENU on", "MENU off"]
 FLOW_WANT = ["MODE title", "MODE demo", "MODE title", "MODE fight", "PAUSE on", "PAUSE off", "PAUSE on", "PAUSE off", "MODE title"]
 

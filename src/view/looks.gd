@@ -58,19 +58,35 @@ const LOOKS := {
 		"tie": Color(0.5, 0.14, 0.1), "skin": Color(0.72, 0.52, 0.36), "hair": Color(0.95, 0.95, 0.96), "hair_style": "spiky",
 		"beard": true, "eye_h": 0.007, "big": true, "scale": 1.18, "wide": 1.25, "depth": 1.3, "limb": 1.3, "head": 0.95,
 		"jaw": true, "weapon_r": "tachi", "weapon_l": "tanto", "grip_l": "fwd", "guard": "long"},
+	# ---- 0 · 1장(S5 묶음 2 · 3) — 뼈대: 자리만(외형은 다음 커밋에서 canon look 글로)
+	"gunter_suit": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	"gunter_bald": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.04, "limb": 1.1, "weapon_r": "pistol", "weapon_l": "", "guard": "box"},
+	"gunter_uzi": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "pistol", "weapon_l": "", "guard": "box"},
+	"gunter_brute": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": true, "scale": 1.14, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	"gunter": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.0, "limb": 1.1, "weapon_r": "pistol", "weapon_l": "", "guard": "box"},
+	"ds_suit": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	"ds_raider": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "baton", "weapon_l": "", "guard": "box"},
+	"jintae": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	"kimhyeokju": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.0, "limb": 1.1, "weapon_r": "tanto", "weapon_l": "", "guard": "box"},
+	"kimseongjun": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.04, "limb": 1.1, "weapon_r": "tanto", "weapon_l": "", "guard": "box"},
+	"kimdaegeon": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": true, "scale": 1.12, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	"gangmanjae": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": true, "scale": 1.16, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	"yundeoksu": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": true, "scale": 1.2, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	"kim_bare": {"suit": Color(0.16, 0.16, 0.2), "pants": Color(0.13, 0.13, 0.17), "shirt": Color(0.93, 0.93, 0.94), "tie": Color(0.09, 0.09, 0.12), "skin": Color(0.91, 0.77, 0.65), "hair": Color(0.11, 0.11, 0.15), "hair_style": "slick_fringe", "glasses": false, "big": false, "scale": 1.04, "shoulder": 1.12, "eye_h": 0.007, "depth": 1.1, "limb": 1.15, "head": 0.9, "brow_tilt": 12.0, "jaw": true, "scar": true, "piercing": true, "badge": Color(0.95, 0.75, 0.25), "buckle": Color(0.82, 0.84, 0.88), "weapon_r": "", "weapon_l": "", "guard": "box"},
 }
 
 ## 그림 A · B 가 있는 인물(S3 — 김신 · 신겐, 기획서 03 5절 '시험 범위 2명')
 const ART := {
 	"kim": {"glb": "res://assets/models/kimshin_a.glb", "dots": "res://assets/sprites/kimshin_b"},
 	"shingen": {"glb": "res://assets/models/shingen_a.glb", "dots": "res://assets/sprites/shingen_b"},
+	"kim_bare": {"glb": "res://assets/models/kimshin_a.glb", "dots": "res://assets/sprites/kimshin_b"},   # 0 · 1장 맨손 김신 — 몸은 같은 GLB, 무기만 없음
 }
 
 
 ## 외형 이름 → 표. "<이름>_a" · "<이름>_b" 는 그 인물 외형 + 그림 A(GLB) · B(도트) 자리
 static func look(name: String) -> Dictionary:
 	var base := name.trim_suffix("_a").trim_suffix("_b")
-	var lk: Dictionary = LOOKS[base].duplicate()
+	var lk: Dictionary = LOOKS.get(base, LOOKS["guard"]).duplicate()     # 표에 없는 외형은 경호원(시험 test_campaign 이 본다)
 	if base == name:
 		return lk
 	if ART.has(base):
