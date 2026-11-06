@@ -16,6 +16,7 @@
   3. 자동 결투  godot --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 --seed S  (시드 1 · 2 · 3,
                게임 전체 — 무대 · 인형 · 연출 · 화면 표시까지 돌려 멈춤 · 스크립트 오류가 없는지)
   3. 11장 자동 판  같은 명령에 --mode stage (시드 1 · 2, 150초 — 호텔 캐슬 5방 · 여럿 · 교대 · 방 넘김 · 무대 다시 만들기)
+  3. 그림 A · B   --art a · b(GLB 툰 모델 · 도트 빌보드, 김신 · 신겐)로 신겐 방 20초 · 성능 판 --crowd 30 20초 — 오류 없이 도는지
   4. 흐름       ① 일시정지 앞뒤가 같은 판 — seed 1 40초 와 42초 + 600 프레임에 2초 멈춤(--events 600:pause,720:resume)의 결과가 같다
                ② 뒤로 버튼 · 앱 내려감 — 처음 화면 → 데모 → 뒤로 → 처음 → 누름 → 결투 → 내려감(멈춤) → 누름(계속) → 뒤로(멈춤) →
                뒤로(처음 화면) 순서가 --trace 줄에 나온다 (src/ui/nav.gd · main.gd _back · _app_hidden)
@@ -279,6 +280,13 @@ def main():
         results.append(run(f"11장 자동 판 seed {seed} · 150초",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
                             "--seconds", "150", "--seed", str(seed)], stage_ok))
+    for art in ("a", "b"):
+        results.append(run(f"그림 {art.upper()} (11장 회장실 앞 · 20초)",
+                           [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
+                            "--room", "3", "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))
+    results.append(run("성능 판 (28층 · 경호원 35명 · 20초)",
+                       [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
+                        "--crowd", "30", "--seconds", "20"], lambda out: (("RESULT" in out), "")))
     results.append(step_flow(g))
     n_ok = sum(results)
     print(f"verify: {n_ok}/{len(results)} 통과 · {time.time() - t0:.0f}초 — {'OK' if n_ok == len(results) else 'FAIL'}")

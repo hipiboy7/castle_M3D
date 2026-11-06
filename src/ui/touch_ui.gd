@@ -26,6 +26,14 @@ var show_swap := false:
 	set(v):
 		show_swap = v
 		queue_redraw()
+var show_fight := true:         # 싸움 버튼(베기 · 쳐내기 · 구르기 · 기술 · 바꾸기) — 처음 화면에서는 숨긴다
+	set(v):
+		show_fight = v
+		queue_redraw()
+var show_art := false:
+	set(v):
+		show_art = v
+		queue_redraw()
 var last_tap := Vector2(-1, -1)  # 마지막으로 누른 자리(처음 화면에서 왼쪽 · 오른쪽 고르기)
 var _last_safe := Rect2()
 # at: "br" 안전 영역 오른쪽 아래 기준(기본) · "tr" 오른쪽 위 기준. pause 는 show_pause 일 때만 보이고 눌린다
@@ -37,6 +45,8 @@ var buttons := [
 	{"id": "skill_next", "label": "바꾸기", "r": 44.0, "off": Vector2(-440, -330)},
 	{"id": "pause", "label": "멈춤", "r": 34.0, "off": Vector2(-56, 92), "at": "tr"},
 	{"id": "swap", "label": "교대", "r": 44.0, "off": Vector2(-450, -190)},
+	{"id": "art", "label": "그림", "r": 44.0, "off": Vector2(70, 200), "at": "tl"},
+	{"id": "bench", "label": "성능", "r": 44.0, "off": Vector2(70, 310), "at": "tl"},
 ]
 
 
@@ -56,6 +66,8 @@ func _btn_pos(b: Dictionary) -> Vector2:
 	var sa := SafeArea.rect(get_viewport())
 	if b.get("at", "br") == "tr":
 		return Vector2(sa.end.x, sa.position.y) + b["off"]
+	if b.get("at", "br") == "tl":
+		return sa.position + b["off"]
 	return sa.end + b["off"]
 
 
@@ -65,7 +77,9 @@ func _active(b: Dictionary) -> bool:
 			return show_pause
 		"swap":
 			return show_swap
-	return true
+		"art", "bench":
+			return show_art
+	return show_fight
 
 
 func _input(e: InputEvent) -> void:
@@ -126,7 +140,9 @@ func any_touch() -> bool:
 
 func _draw() -> void:
 	var font := get_theme_default_font()
-	if _stick_idx != -1:
+	if not show_fight:
+		pass
+	elif _stick_idx != -1:
 		draw_arc(_center, STICK_R, 0, TAU, 48, COL_RING, 4.0)
 		draw_circle(_knob, 44.0, COL_KNOB)
 	else:

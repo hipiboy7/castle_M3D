@@ -665,13 +665,19 @@ func _locomotion(f, dt: float) -> Dictionary:
 	return p
 
 
-func _attack_pose(f) -> Dictionary:
-	var mv: Dictionary = f.move
+## 동작 → 자세 모양 이름(되베기 · 왼손 주먹 · 왼손 총은 쪽을 붙인다) — 도트 시트 칸 이름도 이것(tools/make_sprites.gd · puppet_dot.gd)
+func shape_key(mv: Dictionary) -> String:
 	var shape := str(mv["shape"])
 	if shape == "slash_back":
-		shape = "slash_back_L" if str(mv["hand"]) == "L" and weapon_l != null else "slash_back_R"
-	elif (shape == "punch" or shape == "shot") and str(mv["hand"]) == "L" and str(mv["fx"]) != "triple":
-		shape += "_L"                                  # 왼손 주먹(스트레이트 · 팔꿈치) · 왼손 총
+		return "slash_back_L" if str(mv["hand"]) == "L" and weapon_l != null else "slash_back_R"
+	if (shape == "punch" or shape == "shot") and str(mv["hand"]) == "L" and str(mv["fx"]) != "triple":
+		return shape + "_L"                            # 왼손 주먹(스트레이트 · 팔꿈치) · 왼손 총
+	return shape
+
+
+func _attack_pose(f) -> Dictionary:
+	var mv: Dictionary = f.move
+	var shape := shape_key(mv)
 	var keys: Array = shape_keys.get(shape, shape_keys["slash"])
 	var w: Dictionary = keys[0]
 	var s: Dictionary = keys[1]

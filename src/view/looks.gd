@@ -59,3 +59,24 @@ const LOOKS := {
 		"beard": true, "eye_h": 0.007, "big": true, "scale": 1.18, "wide": 1.25, "depth": 1.3, "limb": 1.3, "head": 0.95,
 		"jaw": true, "weapon_r": "tachi", "weapon_l": "tanto", "grip_l": "fwd", "guard": "long"},
 }
+
+## 그림 A · B 가 있는 인물(S3 — 김신 · 신겐, 기획서 03 5절 '시험 범위 2명')
+const ART := {
+	"kim": {"glb": "res://assets/models/kimshin_a.glb", "dots": "res://assets/sprites/kimshin_b"},
+	"shingen": {"glb": "res://assets/models/shingen_a.glb", "dots": "res://assets/sprites/shingen_b"},
+}
+
+
+## 외형 이름 → 표. "<이름>_a" · "<이름>_b" 는 그 인물 외형 + 그림 A(GLB) · B(도트) 자리
+static func look(name: String) -> Dictionary:
+	var base := name.trim_suffix("_a").trim_suffix("_b")
+	var lk: Dictionary = LOOKS[base].duplicate()
+	if base == name:
+		return lk
+	if ART.has(base):
+		lk.merge(ART[base], true)
+	return lk
+
+
+static func has_art(name: String) -> bool:
+	return ART.has(name)

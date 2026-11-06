@@ -7,6 +7,7 @@ extends Node3D
 ## 실행 인자(-- 뒤에): --autoplay 봇이 김신(끝나면 다음 시드로 다시) · --mode duel|stage 자동 판 종류(기본 duel)
 ##   --seconds N N초(게임 시간) 뒤 결과를 찍고 끝 · --seed S · --shots 폴더:프레임,프레임 그 프레임 화면을 PNG 로
 ##   --touch PC 에서도 터치 버튼 · --room N stage 를 N번 방부터 · --crowd N 28층에 경호원 N명 더(성능 점검)
+##   --art puppet|a|b 그림(김신 · 신겐만 — a = GLB 툰 모델 · b = 도트 빌보드, 기획서 03 5절). 처음 화면 '그림' 버튼 · 3 키로도 바꾼다
 ##   --safe L,T,R,B 안전 영역 여백(기준 화면 단위 — 노치 · 제스처 바 흉내) · --trace 흐름 줄(MODE · PAUSE)을 창 없이도 찍는다
 ##   --events 프레임:동작,… 그 프레임에 동작을 흉내 — back(뒤로 버튼) · press(아무 버튼) · pause · resume(일시정지 버튼) ·
 ##            hide · show(앱이 내려감 · 돌아옴) · swap(교대). scripts/verify.py '흐름' 단계가 쓴다
@@ -18,6 +19,9 @@ const Stage = preload("res://src/combat/stage.gd")
 const Hotel = preload("res://src/data/hotel.gd")
 const Lines = preload("res://src/data/lines.gd")
 const Puppet = preload("res://src/view/puppet3d.gd")
+const PuppetGlb = preload("res://src/view/puppet_glb.gd")
+const PuppetDot = preload("res://src/view/puppet_dot.gd")
+const ART_NAMES := {"puppet": "관절 인형", "a": "A · GLB 툰 모델", "b": "B · 도트 빌보드"}
 const Arena = preload("res://src/view/arena3d.gd")
 const Hotel3d = preload("res://src/view/hotel3d.gd")
 const Fx = preload("res://src/view/fx3d.gd")
@@ -35,7 +39,7 @@ const SHOT_WARMUP := 3          # --shots: 찍을 프레임 바로 앞 몇 프�
 const MINI_Y := 2.45            # 적 머리 위 작은 막대 높이(m, 몸 크기만큼 더)
 
 var args := {"autoplay": false, "seconds": 0.0, "seed": 1, "shots": [], "shot_dir": "", "touch": false, "trace": false,
-	"events": {}, "mode": "duel", "room": 0, "crowd": 0}
+	"events": {}, "mode": "duel", "room": 0, "crowd": 0, "art": "puppet"}
 var paused := false
 var _fake_press := false
 var _fake_swap := false
@@ -117,6 +121,9 @@ func _parse_args() -> void:
 			"--crowd":
 				i += 1
 				args["crowd"] = int(a[i])
+			"--art":
+				i += 1
+				args["art"] = a[i]
 			"--safe":
 				i += 1
 				var v := a[i].split(",")
@@ -147,7 +154,7 @@ func _setup_input() -> void:
 		"left": [KEY_A, KEY_LEFT], "right": [KEY_D, KEY_RIGHT], "up": [KEY_W, KEY_UP], "down": [KEY_S, KEY_DOWN],
 		"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_L, KEY_C],
 		"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B], "pause": [KEY_ESCAPE, KEY_P], "swap": [KEY_TAB, KEY_Q],
-		"pick_duel": [KEY_1], "pick_stage": [KEY_2],
+		"pick_duel": [KEY_1], "pick_stage": [KEY_2], "art": [KEY_3], "bench": [KEY_4],
 	}
 	for act in keys:
 		if not InputMap.has_action(act):
@@ -188,10 +195,17 @@ func _build_stage_view() -> void:
 		add_child(arena)
 		arena.build(not headless)
 	for f in d["world"].fighters:
-		var p = Puppet.new()
+		var lname := _look_of(f)
+		var art := str(args["art"])
+		var p
+		if art != "puppet" and Looks.has_art(lname):
+			p = PuppetGlb.new() if art == "a" else PuppetDot.new()   # 그림 바꿔 끼우기 — 판정은 그대로(LSP)
+			lname += "_" + art
+		else:
+			p = Puppet.new()
 		p.process_mode = Node.PROCESS_MODE_PAUSABLE
 		add_child(p)
-		p.setup(Looks.LOOKS[_look_of(f)])
+		p.setup(Looks.look(lname))
 		p.update_from(f, 0.0, false)
 		pup[f] = p
 	_markers()
@@ -225,10 +239,12 @@ func _enter_title() -> void:
 	mode_t = 0
 	touch.show_pause = false
 	touch.show_swap = false
+	touch.show_art = true
+	touch.show_fight = false
 	var t = Lines.at("title")
 	hud.message(str(t["text"]), str(t["sub"]), 9999.0)
 	hud.set_choices("◀ 6장 · 인천항 부두\n김신 대 백도찬", "11장 · 호텔 캐슬 ▶\n김신 · 피우진 교대")
-	hud.set_hint(str(t["hint"]))
+	hud.set_hint(str(t["hint"]) + " · 그림: " + ART_NAMES[str(args["art"])])
 	_trace("MODE title frame=%d" % frames)
 	snd.song("boss")
 
@@ -239,6 +255,8 @@ func _start(m: String) -> void:
 	fights += 1
 	touch.show_pause = m == "fight"
 	touch.show_swap = m == "fight" and kind == "stage"
+	touch.show_art = false
+	touch.show_fight = true
 	hud.set_choices("", "")
 	_trace("MODE %s frame=%d" % [m, frames])      # 에뮬레이터 점검(scripts/emu_check.sh)이 logcat 에서 데모 시작을 기다린다
 	if m == "demo":
@@ -339,6 +357,17 @@ func _pressed_anything() -> bool:
 
 ## 처음 화면 고르기: 1 · 2 키 · 화면 왼쪽 / 오른쪽 누르기(터치 · 마우스) · 그 밖의 버튼은 6장. 고르지 않았으면 ""
 func _title_pick() -> String:
+	if Input.is_action_just_pressed("art") or touch.peek_edge("art"):
+		touch.take_edges()
+		var order := ["puppet", "a", "b"]
+		args["art"] = order[(order.find(str(args["art"])) + 1) % order.size()]
+		_build_stage_view()
+		hud.set_hint(str(Lines.at("title")["hint"]) + " · 그림: " + ART_NAMES[str(args["art"])])
+		mode_t = 0
+		return ""
+	if Input.is_action_just_pressed("bench") or touch.peek_edge("bench"):
+		touch.take_edges()
+		return "bench"
 	if Input.is_action_just_pressed("pick_stage"):
 		return "stage"
 	if Input.is_action_just_pressed("pick_duel"):
@@ -373,7 +402,14 @@ func _physics_process(_dt: float) -> void:
 	match mode:
 		"title":
 			var pick := _title_pick()
-			if pick != "":
+			if pick == "bench":
+				# 성능 점검(#9 기준 '적 30명'): 28층에 경호원 30명을 더 세우고 봇 데모 — 오른쪽 위 FPS 를 본다
+				args["crowd"] = 30
+				_new_run("stage")
+				args["crowd"] = 0
+				_start("demo")
+				hud.message("성능 점검", "28층 · 적 %d명 — 오른쪽 위 FPS" % d["enemies"].size(), 4.0)
+			elif pick != "":
 				_new_run(pick)
 				_start("fight")
 			elif mode_t > DEMO_AFTER:

@@ -28,3 +28,9 @@
 | `music/boss.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` | 결투 (`src/main.gd` `_music`) |
 | `music/gameover.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` | 짐 (`src/main.gd` `_music`) |
 | `music/victory.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` | 이김 (`src/main.gd` `_music`) |
+| `models/kimshin_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06, 외형은 castle_common canon look 글 — conf ai) | 그림 A 김신 (`src/view/puppet_glb.gd`, `--art a`) |
+| `models/shingen_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06, 〃) | 그림 A 사사키 신겐 |
+| `sprites/kimshin_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` 가 `models/kimshin_a.glb` 를 8방향으로 그려 도트로 줄임 | 그림 B 김신 (`src/view/puppet_dot.gd`, `--art b`) |
+| `sprites/kimshin_b.json` | 〃 — 도트 시트 칸 이름 · 크기 | 그림 B 김신 |
+| `sprites/shingen_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/shingen_a.glb`) | 그림 B 사사키 신겐 |
+| `sprites/shingen_b.json` | 〃 | 그림 B 사사키 신겐 |
