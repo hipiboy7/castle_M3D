@@ -21,6 +21,8 @@ func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	var out := str(args[0]) if args.size() > 0 else "user://looks_shots"
 	var names: Array = args.slice(1) if args.size() > 1 else Looks.LOOKS.keys()
+	if names == ["--art"]:                     # 그림 A 가 있는 이름 전부(장 이름 + 명부) — <이름>_a
+		names = Looks.art_names().map(func(n): return str(n) + "_a")
 	DirAccess.make_dir_recursive_absolute(out)
 	var vp := SubViewport.new()
 	vp.size = Vector2i(W, H)
@@ -41,7 +43,7 @@ func _run() -> void:
 	vp.add_child(sun)
 	var cam := Camera3D.new()
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	cam.size = 2.4
+	cam.size = 2.7
 	vp.add_child(cam)
 	for n in names:
 		var name := str(n)
@@ -51,7 +53,7 @@ func _run() -> void:
 			vp.add_child(p)
 			p.setup(Looks.look(name))
 			var d := Vector3(sin(deg_to_rad(yaw)), 0.15, -cos(deg_to_rad(yaw))).normalized()   # 인형 앞은 -Z
-			cam.look_at_from_position(Vector3(0, 1.05, 0) + d * 10.0, Vector3(0, 1.05, 0), Vector3.UP)
+			cam.look_at_from_position(Vector3(0, 1.15, 0) + d * 10.0, Vector3(0, 1.15, 0), Vector3.UP)
 			for i in 4:
 				await process_frame
 			shots.append(vp.get_texture().get_image())

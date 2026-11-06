@@ -237,21 +237,72 @@ const ART := {
 	"kimjaehoon": {"glb": "res://assets/models/kimjaehoon_a.glb", "dots": "res://assets/sprites/kimjaehoon_b"},
 	"insu": {"glb": "res://assets/models/insu_a.glb", "dots": "res://assets/sprites/insu_b"},
 	"gangchangseok": {"glb": "res://assets/models/gangchangseok_a.glb", "dots": "res://assets/sprites/gangchangseok_b"},
+	# 전인물 외형(2026-11-06) — 장 표에 쓰이는데 그림이 없던 이름(6장 백도찬 · 11장 호텔 캐슬 · 0 · 1장 DS 정장)
+	"baek": {"glb": "res://assets/models/baekdochan_a.glb", "dots": "res://assets/sprites/baekdochan_b"},
+	"woojin": {"glb": "res://assets/models/woojin_a.glb", "dots": "res://assets/sprites/woojin_b"},
+	"guilhwa": {"glb": "res://assets/models/guilhwa_a.glb", "dots": "res://assets/sprites/guilhwa_b"},
+	"hayabusa": {"glb": "res://assets/models/hayabusa_a.glb", "dots": "res://assets/sprites/hayabusa_b"},
+	"guard": {"glb": "res://assets/models/castle_guard_a.glb", "dots": "res://assets/sprites/castle_guard_b"},
+	"g4": {"glb": "res://assets/models/castle_g4_a.glb", "dots": "res://assets/sprites/castle_g4_b"},
+	"g4_leader": {"glb": "res://assets/models/castle_g4_leader_a.glb", "dots": "res://assets/sprites/castle_g4_leader_b"},
+	"ds_suit": {"glb": "res://assets/models/ds_member_a.glb", "dots": "res://assets/sprites/ds_member_b"},
 }
+## 명부(roster — 장 표에 아직 안 쓰는 looks.json 인물, looks_common ROSTER) 그림 자리. APK 에서 뺀다(export_presets.cfg exclude_filter
+## assets/roster/*) — 편집기 · 시험 · 도구에서만 있고, 폰에서는 has_art 가 거짓이라 관절 인형으로 그린다
+const ROSTER_DIR := "res://assets/roster"
+
+
+## 그림 A · B 자리(장 이름 ART + 명부). 없으면 빈 표
+static func art_of(name: String) -> Dictionary:
+	if ART.has(name):
+		return ART[name]
+	if LooksCommon.ROSTER.has(name):
+		return {"glb": "%s/models/%s_a.glb" % [ROSTER_DIR, name], "dots": "%s/sprites/%s_b" % [ROSTER_DIR, name]}
+	return {}
+
+
+## 그림을 만드는 이름 전부(make_models · make_sprites · shot_looks) — 장 이름 다음에 명부
+static func art_names() -> Array:
+	var out: Array = ART.keys()
+	out.append_array(LooksCommon.ROSTER.keys())
+	return out
 
 
 ## 외형 이름 → 표. "<이름>_a" · "<이름>_b" 는 그 인물 외형 + 그림 A(GLB) · B(도트) 자리
 static func look(name: String) -> Dictionary:
 	var base := name.trim_suffix("_a").trim_suffix("_b")
 	var lk: Dictionary = LOOKS.get(base, LOOKS["guard"]).duplicate()     # 표에 없는 외형은 경호원(시험 test_campaign 이 본다)
+	if not LOOKS.has(base) and LooksCommon.ROSTER.has(base):   # 명부 인물 — 키 · 체격 · 무기 기본값(looks.json build · weapons)
+		lk.merge(LooksCommon.ROSTER[base], true)
 	if LooksCommon.BY_NAME.has(base):        # 원작 조각 대조 겉모습(castle_common data/looks.json — 사용자 답58)
 		lk.merge(LooksCommon.BY_NAME[base], true)
 	if base == name:
 		return lk
-	if ART.has(base):
-		lk.merge(ART[base], true)
+	lk.merge(art_of(base), true)
 	return lk
 
 
+## 그림 A · B 가 있는가 — 명부 그림은 APK 에 없으니 파일이 있을 때만(폰에서는 관절 인형)
 static func has_art(name: String) -> bool:
-	return ART.has(name)
+	if ART.has(name):
+		return true
+	return LooksCommon.ROSTER.has(name) and ResourceLoader.exists(str(art_of(name)["glb"]))
+
+
+## 흉터 색: 살빛을 크게 어둡게 + 갈색 쪽(붉은 기 없이) — 가는 선이 살빛에 묻히지 않게
+static func scar_col(lk: Dictionary) -> Color:
+	return (lk["skin"] as Color).darkened(0.5).lerp(Color(0.25, 0.14, 0.12), 0.3)
+
+
+## 아주 짙은 머리(검정에 가까운 색)는 툰 그늘 · 외곽선과 섞여 검은 덩어리로 보인다 — 밝기 아래 한계 + 푸른 기(만화의 검은 머리 표현)
+static func hair_lift(c: Color) -> Color:
+	var lum := 0.3 * c.r + 0.59 * c.g + 0.11 * c.b
+	if lum >= 0.17:
+		return c
+	var d := 0.17 - lum
+	return Color(c.r + d * 0.92, c.g + d * 0.96, c.b + d * 1.2)
+
+
+## looks.json id(canon 인물 id) → 외형 이름(대표 차림). 없으면 ""
+static func name_of(cid: String) -> String:
+	return str(LooksCommon.ID_NAME.get(cid, ""))

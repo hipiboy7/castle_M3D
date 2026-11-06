@@ -1195,20 +1195,60 @@
       },
       "periods": [
         {
-          "chapters": ["10", "11"],
-          "label": "2부 경호대 · 호텔 무렵 — 회베이지 재킷 · 짙은 티 · 검은 장갑",
+          "chapters": ["8"],
+          "label": "2부 006 — 붉은 줄 초록 트레이닝 재킷 · 회색 티 · 운동화(006/056)",
+          "refs": ["006/056"],
+          "diff": {
+            "outfit": {
+              "outer": {"kind": "track_jacket", "color": "#437667", "pattern": "plain"},
+              "shirt": {"kind": "tshirt", "color": "#cbcbcb"},
+              "shoes": {"kind": "sneakers", "color": null}
+            }
+          }
+        },
+        {
+          "chapters": ["10"],
+          "label": "2부 048 경호대 주차장 — 베이지 롱코트 · 짙은 상의 · 검은 장갑(048/075)",
+          "refs": ["048/072", "048/075"],
+          "diff": {
+            "outfit": {
+              "outer": {"kind": "long_coat", "color": "#9d9781", "pattern": "plain"},
+              "shirt": {"kind": "tshirt", "color": "#191c24"},
+              "pants": {"kind": "slacks", "color": "#28272d"},
+              "gloves": "#16161e"
+            }
+          }
+        },
+        {
+          "chapters": ["11"],
+          "label": "2부 063 호텔 — 앞 연 베이지 재킷 · 짙은 티 · 짙은 바지 · 검은 장갑(063/065)",
           "refs": ["063/065"],
           "diff": {
             "outfit": {
               "outer": {
                 "kind": "suit_jacket",
-                "color": "#37363c",
+                "color": "#9d9781",
                 "pattern": "plain",
-                "kind_note": "앞 연 회베이지 재킷(어두운 컷 값 — 10장 canon 은 베이지 롱코트)"
+                "kind_note": "063/065 는 어두운 복도라 재킷이 #37363c 로 재짐 — 같은 베이지를 048/075 중립광 값으로"
               },
               "shirt": {"kind": "tshirt", "color": "#191c24"},
               "pants": {"kind": "slacks", "color": "#28272d"},
               "gloves": "#16161e"
+            }
+          }
+        },
+        {
+          "chapters": ["12"],
+          "label": "2부 104~126 — 짙은 녹갈색 가죽 코트 · 흰 셔츠 · 장갑(108/030 — 밤 조명)",
+          "refs": ["108/030", "105/022-042"],
+          "diff": {
+            "outfit": {
+              "outer": {
+                "kind": "long_coat",
+                "color": "#3c3f45",
+                "pattern": "plain",
+                "kind_note": "가죽 코트 — 108/030 밤 푸른빛 값(canon 짙은 녹갈색)"
+              }
             }
           }
         }
@@ -1218,11 +1258,11 @@
         "stance": "high",
         "note": "맨손 막싸움(canon) — 12장엔 진압 방패 둘. 본 조각에선 싸움 동작 못 봄"
       },
-      "refs": ["p1:100/052", "063/065"],
+      "refs": ["p1:100/052", "063/065", "006/056", "048/072", "048/075", "063/065@650", "108/030"],
       "ref_image": "work/looks/ref/choedalcheon.png",
       "profile": "sources/character_profile/골드_최달천.jpg",
       "conf": "ai",
-      "note": "1부 6장 이후 갈색 가죽 장갑(p1:100 이후), 2부 8장 초록 트레이닝 재킷(006), 12장 녹갈색 가죽 코트 · 붉은 장갑 · 방패(105 · 108)는 조각 미확인 — canon 글만. 바지 · 구두(1부)는 컷 밖. p1:100/013 오른쪽의 검은 정장 턱수염 거구도 최달천일 수 있으나 이름 확인 못 해 seen 에 안 넣음."
+      "note": "1부 6장 이후 갈색 가죽 장갑(p1:100 이후), 2부 8장 초록 트레이닝 재킷(006), 12장 녹갈색 가죽 코트 · 붉은 장갑 · 방패(105 · 108)는 조각 미확인 — canon 글만. 바지 · 구두(1부)는 컷 밖. p1:100/013 오른쪽의 검은 정장 턱수염 거구도 최달천일 수 있으나 이름 확인 못 해 seen 에 안 넣음. · 75차 C7: 10 · 11장을 한 시기로 묶고 '회베이지'라 적고도 어두운 회색 #37363c 를 넣어 옷이 섞여 보였음 → 10장 롱코트 · 11장 재킷을 나누고 베이지 #9d9781(048/075), 8장 초록 트레이닝 재킷(006/056) · 12장 가죽 코트(108/030) 시기를 더함 — 3 · 4 · 6장은 base(흰 와이셔츠) 그대로"
     },
     {
       "id": "choehyeokjin",
@@ -1301,7 +1341,7 @@
           "hair_len": "short",
           "hair_color": "#2e1e23",
           "hair_note": "짙은 적갈색 — 밝은 곳은 붉은 갈색 · 옆 · 뒤 짧고 위를 단정히 뒤로 넘김(앞머리 없음)",
-          "skin": "#948488",
+          "skin": "#e6d9d1",
           "eyes": "narrow",
           "brows": "thin",
           "jaw": "square",
@@ -1333,7 +1373,7 @@
         ],
         "weapons": [{"name": "맨손", "kind": "fists", "length": null, "grip": null, "hands": "both"}],
         "signature": ["콧등에서 교차하는 X자 사선 흉터", "적갈색 올백", "쓰리피스 + 버건디 넥타이 + 금배지"],
-        "color_from": "007/146 · 007/148(푸른 조명) · p1:117/028(머리 · 피부)"
+        "color_from": "007/146 · 007/148(푸른 조명 — 옷) · p1:117/028(머리 · 피부 — 중립광)"
       },
       "periods": [
         {
@@ -1400,12 +1440,14 @@
         "p1:117/020-034",
         "p1:117/028",
         "p1:061/050",
-        "127/042"
+        "127/042",
+        "p1:117/028@640",
+        "006/175@400"
       ],
       "ref_image": "work/looks/ref/choeminuk.png",
       "profile": "sources/character_profile/캐슬홀딩스_최민욱.jpg",
       "conf": "ai",
-      "note": "2부 컷은 대부분 푸른 · 어두운 조명 — 피부 · 머리 색은 p1:117/028(실내 백색광)에서 뽑음. 신발 색은 확인 못 함. 젊은 시절 재킷 · 캡 색은 뒷모습만 봐서 null."
+      "note": "2부 컷은 대부분 푸른 · 어두운 조명 — 피부 · 머리 색은 p1:117/028(실내 백색광)에서 뽑음. 신발 색은 확인 못 함. 젊은 시절 재킷 · 캡 색은 뒷모습만 봐서 null. · 75차 C6: 피부 #948488 은 그늘 · 푸른 조명 값이었음 → 중립광 p1:117/028 빛 받은 뺨 · 이마 #e6d9d1(006/175 도 #e7dad1)"
     },
     {
       "id": "deumiteuri",
@@ -2916,6 +2958,19 @@
               {"kind": "holster", "where": "back_x", "color": "#695744", "note": "등에서 X자로 엇갈린 갈색 멜빵 · 칼집"}
             ]
           }
+        },
+        {
+          "chapters": ["12"],
+          "label": "2부 074~081 습격 · 스카이브리지 — 짙은 남색(후드) 롱코트 · 흰 셔츠 · 오른귀 금속 귀걸이 둘(080/044)",
+          "refs": ["080/044", "074/042-046"],
+          "diff": {
+            "head": {
+              "piercings": [
+                {"where": "right_ear", "kind": "stud", "color": null, "note": "금속 귀걸이 둘(색은 선에 묻혀 못 뽑음)"}
+              ]
+            },
+            "outfit": {"outer": {"kind": "long_coat", "color": "#282936", "pattern": "plain"}}
+          }
         }
       ],
       "fight": {
@@ -2923,11 +2978,20 @@
         "stance": "mid",
         "note": "양손 단도 — 2부(044)는 역수로 쥠(canon) · 카드 특기: 사시미 플레이"
       },
-      "refs": ["p1:024/039-059", "p1:024/045", "p1:099/004-035", "p1:099/011", "p1:099/014", "033/043-049"],
+      "refs": [
+        "p1:024/039-059",
+        "p1:024/045",
+        "p1:099/004-035",
+        "p1:099/011",
+        "p1:099/014",
+        "033/043-049",
+        "p1:026/010",
+        "080/044"
+      ],
       "ref_image": "work/looks/ref/hwangbomincheol.png",
       "profile": "sources/character_profile/하성_황보민철.jpg",
       "conf": "ai",
-      "note": "신발 색 확인 못 함. 2부 12장(074 · 080) 후드 우비 · 롱코트 차림은 이 몫에서 안 봄."
+      "note": "신발 색 확인 못 함. 2부 12장(074 · 080) 후드 우비 · 롱코트 차림은 이 몫에서 안 봄. · 75차 C7: base(검은 정장 — 3 · 4 · 9 · 10 · 13장) · 2 · 6장 싸움 차림(흰 셔츠 · 멜빵 — p1:026/010 · p1:099/011)은 각각 맞음 → 그대로, 12장 남색 롱코트 시기를 더함(080/044)"
     },
     {
       "id": "hyeonseok",
@@ -3613,29 +3677,35 @@
         },
         {
           "chapters": ["8"],
-          "label": "010~014 — 남색 벨벳풍 정장 · 흰 셔츠 · 풀린 붉은 넥타이 → 재킷 벗고 흰 셔츠 · 검은 멜빵 (조각 안 봄 · canon 글)",
-          "refs": ["010/005-008", "011/000-045"],
-          "diff": {"outfit": {"shirt": {"kind": "dress_shirt", "color": "#f0f0f0"}, "tie": "#a02020"}}
+          "label": "010~014 — 남색 벨벳풍 정장 · 흰 셔츠 · 풀린 붉은 넥타이 → 재킷 벗고 흰 셔츠 · 검은 멜빵 · 남색 바지(011/010)",
+          "refs": ["010/005-008", "011/010"],
+          "diff": {
+            "outfit": {
+              "shirt": {"kind": "dress_shirt", "color": "#f0f0f0"},
+              "tie": "#a02020",
+              "pants": {"kind": "slacks", "color": "#101623"}
+            }
+          }
         },
         {
           "chapters": ["10"],
-          "label": "035~039 — 버건디 롱코트 · 짙은 회색 터틀넥 (조각 안 봄 · canon 글)",
-          "refs": ["035/149", "039/063-064"],
+          "label": "035~039 — 버건디(적갈) 롱코트 · 짙은 회색 터틀넥 · 검은 바지(037/078 · 039/063)",
+          "refs": ["037/078", "039/063"],
           "diff": {
             "outfit": {
-              "outer": {"kind": "long_coat", "color": null},
-              "shirt": {"kind": "turtleneck", "color": null},
+              "outer": {"kind": "long_coat", "color": "#7c605c"},
+              "shirt": {"kind": "turtleneck", "color": "#2c2b2f"},
               "pants": {"kind": "slacks", "color": "#141414"}
             }
           }
         }
       ],
       "fight": {"style": ["kick", "knife", "street"], "stance": "high", "note": "096/001 공중 발차기로 방패를 침"},
-      "refs": ["056/056", "096/001"],
+      "refs": ["056/056", "096/001", "011/010", "037/078", "039/063"],
       "ref_image": "work/looks/ref/ipildo.png",
       "profile": null,
       "conf": "ai",
-      "note": "대표(남색 정장) 컷은 096/001 하나뿐이고 붉은 조명 — 정장 · 셔츠 색 믿음 낮음. 바지 색 null."
+      "note": "대표(남색 정장) 컷은 096/001 하나뿐이고 붉은 조명 — 정장 · 셔츠 색 믿음 낮음. 바지 색 null. · 75차 C7: 10장 롱코트 · 터틀넥 색이 null 이라 base 남색과 섞여 그려졌음 → 037/078 · 039/063 값으로 채움, 8장 남색 바지 더함(011/010). 11장(056 베이지 정장) · base(남색) 는 맞음"
     },
     {
       "id": "iriwon",
@@ -4777,12 +4847,12 @@
       "periods": [
         {
           "chapters": ["4"],
-          "label": "회색 정장 시기 — 회색(올리브빛) 정장 · 카키 셔츠 (canon 글 · 미확인)",
-          "refs": ["p1:061/018-036"],
+          "label": "회색 정장 시기 — 올리브빛 회색 정장 · 카키 셔츠 깃 풂(p1:061)",
+          "refs": ["p1:061/020", "p1:061/031"],
           "diff": {
             "outfit": {
-              "outer": {"color": null},
-              "shirt": {"kind": "open_shirt", "color": null},
+              "outer": {"color": "#6a6f6e"},
+              "shirt": {"kind": "open_shirt", "color": "#534b49"},
               "shoes": {"kind": "dress", "color": "#111111"}
             }
           }
@@ -4793,11 +4863,20 @@
         "stance": "mid",
         "note": "맨주먹 · 근접 난타. 마지막 대결엔 윗옷을 주먹에 감고 단검(canon 글) · 카드 특기: 맨주먹 격투"
       },
-      "refs": ["p1:007/007", "p1:007/009", "p1:061/025", "p1:061/030", "p1:012/005"],
+      "refs": [
+        "p1:007/007",
+        "p1:007/009",
+        "p1:061/025",
+        "p1:061/030",
+        "p1:012/005",
+        "p1:061/020",
+        "p1:061/031",
+        "p1:079/004@6900"
+      ],
       "ref_image": "work/looks/ref/kimdaegeon.png",
       "profile": "sources/character_profile/김대건.jpg",
       "conf": "ai",
-      "note": "4장 회색 정장 색은 직접 못 봐 null. 6장 이후는 영정 · 회상 · 환영뿐이라 base 로 그린다. · base 수염 없음 — 대표 컷은 말끔(턱 밑 빗금은 음영 · 뺨 · 턱 자국은 흉터 — 74차 원작 대조(서브에이전트 — L3 검토 review_2d) B11)"
+      "note": "6장 이후는 영정 · 회상 · 환영뿐이라 base 로 그린다. · base 수염 없음 — 대표 컷은 말끔(턱 밑 빗금은 음영 · 뺨 · 턱 자국은 흉터 — 74차 원작 대조(서브에이전트 — L3 검토 review_2d) B11) · 75차 C2: 안경 없음이 맞음 — 선글라스는 p1:019(058) · p1:079/004@6900 · p1:082 상징 컷 같은 몇 장면뿐(p1:007/007 · p1:061/020 · 031 맨눈) → glasses null 그대로. 4장 정장 · 셔츠 색 채움(p1:061/031)"
     },
     {
       "id": "kimgyeongbae",
@@ -7866,21 +7945,24 @@
       "periods": [
         {
           "chapters": ["8"],
-          "label": "2부 앞쪽 — 남색 세로줄 정장 (조각 안 봄 · canon 글)",
-          "refs": ["006/064-087"],
+          "label": "2부 앞쪽 — 남색 세로줄 정장 · 연청 셔츠 · 짙은 넥타이(006/072)",
+          "refs": ["006/072"],
           "diff": {
             "outfit": {
-              "outer": {"kind": "suit_jacket", "color": null, "pattern": "pinstripe"},
-              "shirt": {"kind": "dress_shirt", "color": null}
+              "outer": {"kind": "suit_jacket", "color": "#2d2c3b", "pattern": "pinstripe"},
+              "shirt": {"kind": "dress_shirt", "color": "#d5e4e8"}
             }
           }
         },
         {
           "chapters": ["10"],
-          "label": "황보민철전 — 밝은 회색 정장 · 전기 곤봉 (얼굴만 봄)",
-          "refs": ["044/046-056"],
+          "label": "황보민철전 — 밝은 회색 정장 · 세로줄 셔츠 · 녹색 넥타이 · 전기 곤봉(044/048)",
+          "refs": ["044/048"],
           "diff": {
-            "outfit": {"outer": {"kind": "suit_jacket", "color": null, "pattern": "plain"}},
+            "outfit": {
+              "outer": {"kind": "suit_jacket", "color": "#caccc7", "pattern": "plain"},
+              "tie": "#a1b89b"
+            },
             "weapons": [
               {"name": "전기 곤봉", "kind": "baton", "length": "medium", "grip": "forward", "hands": "right"}
             ]
@@ -7892,11 +7974,11 @@
         "stance": "mid",
         "note": "싸우는 컷은 안 봄 — canon 글(전기 곤봉 · 소음기 권총 · 쇠꼬챙이)"
       },
-      "refs": ["006/070", "006/075", "p1:110/063", "044/050"],
+      "refs": ["006/070", "006/075", "p1:110/063", "044/050", "006/072", "044/048"],
       "ref_image": "work/looks/ref/sainjin.png",
       "profile": "sources/character_profile/캐슬홀딩스_사인진.jpg",
       "conf": "ai",
-      "note": "옆 부하들보다 머리 하나 크고 어깨가 넓음(p1:110/063) — rel 값은 눈대중. 신발 · 2부 정장 색 조각은 못 봄. 얼굴 흉터(080 이후) 조각 안 봄."
+      "note": "옆 부하들보다 머리 하나 크고 어깨가 넓음(p1:110/063) — rel 값은 눈대중. 신발 · 12장(080 이후) 정장 색 조각은 못 봄. 얼굴 흉터(080 이후) 조각 안 봄. · 75차 C2: 안경 안 씀(p1:110/063 · 006/072 · 044/048 — 화별 판독에도 안경 없음) → null 그대로 · 넥타이는 base · 모든 시기에 있음(데이터 맞음 — 판이 방탄조끼 위 넥타이를 안 그린 것). 8 · 10장 정장 색 · 10장 녹색 넥타이 채움"
     },
     {
       "id": "scaledanjang",
@@ -9509,27 +9591,13 @@
         "signature": ["긴 생머리", "교복 카키 조끼 + 넥타이"],
         "color_from": "p1:027/012 · p1:027/010(조끼) · p1:025/148(머리 · 피부)"
       },
-      "periods": [
-        {
-          "chapters": ["2"],
-          "label": "1부 025 — 사복(흰 블라우스 · 갈색 치마)",
-          "refs": ["p1:025/148"],
-          "diff": {
-            "outfit": {
-              "outer": {"kind": "none", "color": null},
-              "shirt": {"kind": "dress_shirt", "color": "#aeabb1", "kind_note": "흰 블라우스(그늘 값)"},
-              "tie": null,
-              "pants": {"kind": "skirt", "color": "#6f5e57"}
-            }
-          }
-        }
-      ],
+      "periods": [],
       "fight": {"style": [], "stance": null, "note": "싸우지 않는 인물(여학생)"},
       "refs": ["p1:027/010", "p1:027/012", "p1:025/148"],
       "ref_image": "work/looks/ref/yusehui.png",
       "profile": null,
       "conf": "ai",
-      "note": "전신 컷을 못 봐 치마 색 · 신발은 null(p1:027/008 원경에 작게만 나옴). 조각이 대부분 밤 · 푸른 조명."
+      "note": "전신 컷을 못 봐 치마 색 · 신발은 null(p1:027/008 원경에 작게만 나옴). 조각이 대부분 밤 · 푸른 조명. · 75차 C2: 넥타이가 빠진 까닭은 데이터 — 사복 시기를 chapters [\"2\"] 로 두어, 유세희가 나오는 유일한 장(2장)에서 교복 base 를 늘 덮어 넥타이 · 조끼를 지웠음. 2장 대표는 교복(p1:027/007-034 — canon 대표 차림)이라 그 시기를 뺌. 사복(p1:025/148 — 흰 블라우스 #aeabb1(그늘) · 갈색 치마 #6f5e57 · 넥타이 · 조끼 없음)은 장 단위로 나눌 수 없어 여기 글로만 남김."
     },
     {
       "id": "yuwoosung",

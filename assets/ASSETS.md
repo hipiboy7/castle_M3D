@@ -1,5 +1,6 @@
 # 자산 출처 목록 — castle M 3D 초안
 
+> 정정 이력: 2026-11-06 — 전인물 외형: 장 이름 8명 그림 A · B 줄 + 명부(roster) 무리 줄(첫 칸에 `*` — verify 가 무리로 맞춘다, APK 에서 뺌).
 > 정정 이력: 2026-11-05 — 첫 작성(S1 · 개발 규격 `게임개발규격.md` 6절). `scripts/verify.py` '자산 출처' 줄이 `assets/` 의 파일(`.import` 빼고)과 이 표의 첫 칸을 맞춰 본다 — 새 자산을 넣으면 여기 한 줄.
 
 - 원작 컷 · 원작 그림을 쓴 자산은 **없다**(인물 · 무대는 코드로 만든 3D 관절 인형 · 도형 — `src/view/`)
@@ -84,3 +85,30 @@
 | `sprites/gangchangseok_b.json` | 〃 | 그림 B 강창석 |
 | `sprites/kimshin_p1_blade_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/kimshin_p1_a.glb` + 군용 단검) | 그림 B 김신 2장(1부 차림 · 칼) |
 | `sprites/kimshin_p1_blade_b.json` | 〃 | 그림 B 김신 2장 |
+| `models/baekdochan_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06 전인물 외형, 외형은 castle_common `data/looks.json` 3478228 — 원작 조각 대조 · conf ai) | 그림 A 백도찬(6장) |
+| `models/woojin_a.glb` | 〃 | 그림 A 피우진(11장) |
+| `models/guilhwa_a.glb` | 〃 | 그림 A 구일화(11장) |
+| `models/hayabusa_a.glb` | 〃 | 그림 A 하야부사(11장) |
+| `models/castle_guard_a.glb` | 〃 | 그림 A 캐슬 경호원(11장 엑스트라) |
+| `models/castle_g4_a.glb` | 〃 | 그림 A 경호대 최후의 4인(11장) |
+| `models/castle_g4_leader_a.glb` | 〃 | 그림 A 경호대 최후의 4인 리더(11장) |
+| `models/ds_member_a.glb` | 〃 | 그림 A DS 씨큐리티 정장(0 · 1장 엑스트라) |
+| `sprites/baekdochan_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/baekdochan_a.glb`) | 그림 B 백도찬(6장) |
+| `sprites/baekdochan_b.json` | 〃 | 그림 B 백도찬(6장) |
+| `sprites/woojin_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/woojin_a.glb`) | 그림 B 피우진(11장) |
+| `sprites/woojin_b.json` | 〃 | 그림 B 피우진(11장) |
+| `sprites/guilhwa_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/guilhwa_a.glb`) | 그림 B 구일화(11장) |
+| `sprites/guilhwa_b.json` | 〃 | 그림 B 구일화(11장) |
+| `sprites/hayabusa_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/hayabusa_a.glb`) | 그림 B 하야부사(11장) |
+| `sprites/hayabusa_b.json` | 〃 | 그림 B 하야부사(11장) |
+| `sprites/castle_guard_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/castle_guard_a.glb`) | 그림 B 캐슬 경호원(11장 엑스트라) |
+| `sprites/castle_guard_b.json` | 〃 | 그림 B 캐슬 경호원(11장 엑스트라) |
+| `sprites/castle_g4_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/castle_g4_a.glb`) | 그림 B 경호대 최후의 4인(11장) |
+| `sprites/castle_g4_b.json` | 〃 | 그림 B 경호대 최후의 4인(11장) |
+| `sprites/castle_g4_leader_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/castle_g4_leader_a.glb`) | 그림 B 경호대 최후의 4인 리더(11장) |
+| `sprites/castle_g4_leader_b.json` | 〃 | 그림 B 경호대 최후의 4인 리더(11장) |
+| `sprites/ds_member_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/ds_member_a.glb`) | 그림 B DS 씨큐리티 정장(0 · 1장 엑스트라) |
+| `sprites/ds_member_b.json` | 〃 | 그림 B DS 씨큐리티 정장(0 · 1장 엑스트라) |
+| `roster/models/*_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06 전인물 외형 — 명부 인물 = castle_common `data/looks.json` 의 장 표에 아직 안 쓰는 인물, 이름 = looks.json id · `src/view/looks_common.gd` ROSTER). **APK 에서 뺀다**(`export_presets.cfg` exclude_filter `assets/roster/*`) | 그림 A 명부 인물(편집기 · 시험 · 도구만 — 폰은 관절 인형) |
+| `roster/sprites/*_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`roster/models/<이름>_a.glb`) · APK 에서 뺀다 | 그림 B 명부 인물 |
+| `roster/sprites/*_b.json` | 〃 — 도트 시트 칸 이름 · 크기 | 그림 B 명부 인물 |

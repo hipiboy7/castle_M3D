@@ -6,6 +6,7 @@ extends Node3D
 ## 나중에 ArtCraft · Mixamo GLB 캐릭터로 바꿀 때는 같은 update_from(f, dt, frozen) 을 가진 그림으로 바꿔 끼운다.
 
 const P = preload("res://src/view/poses.gd")
+const Looks = preload("res://src/view/looks.gd")
 const Fighter = preload("res://src/combat/fighter.gd")
 const FONT = preload("res://assets/fonts/Galmuri11-Bold.ttf")
 
@@ -83,7 +84,7 @@ func _build() -> void:
 	var pants := _mat(lk["pants"], 0.78, 0.4)
 	var shirt := _mat(lk["shirt"], 0.85, 0.2)
 	var skin := _mat(lk["skin"], 0.62, 0.25)
-	var hair := _mat(lk["hair"], 0.42, 0.35)
+	var hair := _mat(Looks.hair_lift(lk["hair"]), 0.42, 0.35)   # 아주 짙은 머리는 밝기 아래 한계(검은 덩어리 방지)
 	var shoe := _mat(lk.get("shoe", Color(0.05, 0.05, 0.06)), 0.35, 0.3)
 	var eye := _mat(lk.get("eye_col", Color(0.07, 0.05, 0.05)), 0.5, 0.0)
 	var dark := _mat(Color(0.04, 0.04, 0.05), 0.4, 0.1)
@@ -277,11 +278,9 @@ func _face(lk: Dictionary, skin: Material, eye: Material, dark: Material, hair: 
 		if lk.get("piercing", false):                            # 귀 검은 스터드
 			_mesh(J["head"], _sphere(0.007, 0.014), dark, Vector3(0.112 * sx, -0.024, 0.0))
 	var sc = lk.get("scar", false)
-	if sc is String:
-		_scar(J["head"], str(sc), _mat(lk["skin"].darkened(0.35).lerp(Color(0.6, 0.2, 0.2), 0.3), 0.7, 0.0))
-	elif sc:                                                     # 왼뺨 흉터
-		_mesh(J["head"], _box(Vector3(0.006, 0.046, 0.006)), _mat(lk["skin"].darkened(0.35).lerp(Color(0.6, 0.2, 0.2), 0.3), 0.7, 0.0),
-			Vector3(-0.06, -0.03, -0.088), Vector3(0, -30, 18))
+	if sc is String or sc:                                       # 흉터 — 가는 짙은 선(붉게 섞으면 볼터치처럼 번졌다), + 로 여럿
+		for kind in (str(sc) if sc is String else "cheek_l").split("+"):
+			_scar(J["head"], kind, _mat(Looks.scar_col(lk), 0.7, 0.0))
 	_hair(J["head"], hair, str(lk.get("hair_style", "short")))
 	if lk.get("hat") != null:
 		_hat(J["head"], str(lk["hat"]), _mat(lk.get("hat_col", Color(0.2, 0.2, 0.22)), 0.9, 0.2))
@@ -316,7 +315,12 @@ func _face(lk: Dictionary, skin: Material, eye: Material, dark: Material, hair: 
 ## 흉터 자리: nose — 콧등에서 왼뺨 광대로 내려가는 사선 + 입술 아래 ~ 턱 세로(김대건) · brow — 이마에서 눈썹으로(군터) ·
 ## double — 왼뺨 사선 두 줄(강만재)
 func _scar(head: Node3D, kind: String, m: Material) -> void:
-	if kind == "nose":
+	if kind == "cheek_l" or kind == "cheek_r":                    # 뺨 사선 한 줄(인물 자기 쪽 — 왼뺨 -x)
+		var sx := -1.0 if kind == "cheek_l" else 1.0
+		_mesh(head, _box(Vector3(0.005, 0.046, 0.005)), m, Vector3(0.06 * sx, -0.03, -0.088), Vector3(0, -30 * sx, 18 * sx))
+	elif kind == "chin":                                         # 입술 아래 ~ 턱 세로
+		_mesh(head, _box(Vector3(0.005, 0.03, 0.005)), m, Vector3(0.012, -0.072, -0.088), Vector3(16, 0, 0))
+	elif kind == "nose":
 		_mesh(head, _box(Vector3(0.007, 0.075, 0.007)), m, Vector3(-0.028, -0.004, -0.1), Vector3(0, -20, 58))
 		_mesh(head, _box(Vector3(0.006, 0.03, 0.006)), m, Vector3(0.012, -0.072, -0.088), Vector3(16, 0, 0))
 	elif kind == "brow":
@@ -338,6 +342,20 @@ func _hat(head: Node3D, kind: String, m: Material) -> void:
 	elif kind == "bucket":
 		_mesh(head, _cyl(0.1, 0.112, 0.09), m, Vector3(0, 0.1, 0.01))
 		_mesh(head, _cyl(0.118, 0.16, 0.03), m, Vector3(0, 0.055, 0.01))                                      # 처진 챙
+	elif kind == "headband" or kind == "bandana":                # 이마 띠(라텔) — 위아래 밝은 단으로 검은 머리와 갈라 보이게
+		_mesh(head, _cyl(0.118, 0.118, 0.04), m, Vector3(0, 0.045, 0.006), Vector3(-10, 0, 0), Vector3(1, 1, 1.04))
+		for dy in [-0.021, 0.021]:
+			_mesh(head, _cyl(0.12, 0.12, 0.005), _mat(Color(0.62, 0.62, 0.66), 0.8, 0.0), Vector3(0, 0.045 + dy, 0.006), Vector3(-10, 0, 0),
+				Vector3(1, 1, 1.04))
+	elif kind == "cap" or kind == "helmet":                      # 모자 · 헬멧: 머리통 + (모자는) 앞 챙
+		_mesh(head, _sphere(0.118, 0.2), m, Vector3(0, 0.07, 0.012), Vector3(-6, 0, 0), Vector3(1.02, 0.66, 1.04))
+		if kind == "cap":
+			_mesh(head, _box(Vector3(0.15, 0.01, 0.08)), m, Vector3(0, 0.06, -0.12), Vector3(8, 0, 0))
+	elif kind == "fedora":                                       # 중절모: 몸통 + 둘레 챙
+		_mesh(head, _cyl(0.09, 0.1, 0.08), m, Vector3(0, 0.13, 0.01))
+		_mesh(head, _cyl(0.17, 0.17, 0.012), m, Vector3(0, 0.085, 0.01))
+	elif kind == "hood":                                         # 후드: 머리 뒤 · 옆 · 위
+		_mesh(head, _sphere(0.13, 0.27), m, Vector3(0, 0.02, 0.04), Vector3.ZERO, Vector3(1.05, 1.0, 0.95))
 
 
 ## 눈만 뚫린 복면(DS 습격조 — p1:008 '검은 복면(눈만 뚫림)'): 머리 전체를 덮고 눈 자리만 살색 띠
@@ -407,8 +425,8 @@ func _hair(head: Node3D, m: Material, style: String) -> void:
 		_mesh(head, _sphere(0.094, 0.1), m, Vector3(0, 0.078, -0.03), Vector3(-6, 0, 0), Vector3(1.0, 0.48, 1.0))
 	elif style == "bald":
 		pass                                                     # 대머리(군터 경호원) — 머리털 없음
-	elif style == "long":
-		# 어깨까지 오는 장발(우지 든 남자): 가운데 가르마 + 옆 · 뒤로 늘어진 머리
+	elif style == "long" or style == "bob":
+		# 어깨까지 오는 장발(우지 든 남자) · 턱선 단발(bob — 인형은 같은 모양): 가운데 가르마 + 옆 · 뒤로 늘어진 머리
 		_mesh(head, _sphere(0.109, 0.2), m, Vector3(0, 0.05, 0.022), Vector3.ZERO, Vector3(1.02, 0.68, 1.02))
 		_mesh(head, _sphere(0.09, 0.2), m, Vector3(0, -0.04, 0.07), Vector3(8, 0, 0), Vector3(1.0, 1.0, 0.6))
 		for sx in [-1.0, 1.0]:

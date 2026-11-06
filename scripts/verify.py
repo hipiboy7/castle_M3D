@@ -29,6 +29,7 @@
                뒤로(처음 화면) 순서가 --trace 줄에 나온다 (src/ui/nav.gd · main.gd _back · _app_hidden)
 출력에 SCRIPT ERROR · ERROR: · WARNING: · Leaked 가 하나라도 있으면 실패.
 """
+import fnmatch
 import glob
 import hashlib
 import json
@@ -159,7 +160,11 @@ def step_assets():
         rel = os.path.relpath(p, ASSETS).replace(os.sep, "/")
         if os.path.isfile(p) and not rel.endswith(".import") and rel != "ASSETS.md":
             files.add(rel)
-    missing, stale = sorted(files - listed), sorted(listed - files)
+    # 줄 첫 칸에 * 가 있으면 무리 줄(명부 그림 roster/models/*_a.glb 처럼 같은 도구가 만든 파일 여럿 — 2026-11-06 전인물 외형)
+    pats = {x for x in listed if "*" in x}
+    hit = {x for x in files for q in pats if fnmatch.fnmatchcase(x, q)}
+    missing = sorted(files - listed - hit)
+    stale = sorted((listed - pats - files) | {q for q in pats if not any(fnmatch.fnmatchcase(x, q) for x in files)})
     ok = not missing and not stale
     msg = f"파일 {len(files)}개 출처 있음" if ok else (
         (f"출처 없는 파일: {', '.join(missing)}" if missing else "") + (f" · 목록에만 있음: {', '.join(stale)}" if stale else ""))

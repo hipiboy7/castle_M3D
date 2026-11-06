@@ -35,7 +35,30 @@ const ATTACKS := {
 	"sintaejin": KNIFE, "hwangbomincheol": KNIFE, "gangchangseok": KNIFE, "kimjaehoon": GUN,
 	"namgunghyuk": FISTS, "iseul": FISTS, "insu": FISTS,
 	"ojiin": ["hy_slash1", "hy_slash2", "hy_thrust", "k_thrust", "w_jab", "j_kick"],
+	# 전인물 외형(2026-11-06) — 장 표 이름은 그 인물 동작, 명부 인물은 무기 갈래로(_by_weapon)
+	"baek": ["b_slash1", "b_slash2", "b_thrust", "b_sidekick", "b_wide", "b_vital", "b_counter"],
+	"woojin": ["w_jab", "w_straight", "w_hook", "w_dash", "w_finisher"],
+	"guilhwa": ["gu_jab", "gu_elbow", "gu_dash", "gu_finisher", "s_gu_headbutt", "s_gu_forearm"],
+	"hayabusa": ["hy_slash1", "hy_slash2", "hy_thrust", "s_hy_arc", "s_hy_low"],
+	"guard": ["c_baton", "c_punch", "w_jab", "j_kick"],
+	"g4": ["g4_slash", "g4_thrust", "s_g4_chop", "s_g4_heel", "t_shot"],
+	"g4_leader": ["g4_slash", "g4_thrust", "s_g4_chop", "s_g4_heel", "t_shot"],
+	"ds_suit": FISTS,
 }
+const SWORD := ["hy_slash1", "hy_slash2", "hy_thrust", "k_thrust", "w_jab", "j_kick"]
+const GUNS := ["pistol", "revolver", "uzi"]
+
+
+## 명부 인물 자세 — 오른손 무기 갈래(총 · 긴 칼 · 짧은 칼 · 맨손)
+static func _by_weapon(lk: Dictionary) -> Array:
+	var w := str(lk.get("weapon_r", ""))
+	if w in GUNS:
+		return GUN
+	if w in ["katana", "tachi", "pipe", "bat"]:
+		return SWORD
+	if w == "" or w == "knuckles" or w == "baton":
+		return FISTS
+	return KNIFE
 
 var vp: SubViewport
 var cam: Camera3D
@@ -76,8 +99,8 @@ func _run() -> void:
 	vp.add_child(env)
 	var only := OS.get_cmdline_user_args()
 	var done := {}
-	for id in Looks.ART:
-		var dots := str(Looks.ART[id]["dots"])
+	for id in Looks.art_names():
+		var dots := str(Looks.art_of(id)["dots"])
 		if done.has(dots) or (not only.is_empty() and not only.has(id)):
 			continue
 		done[dots] = true
@@ -111,8 +134,8 @@ func _sheet(id: String) -> void:
 			await process_frame
 			var img := vp.get_texture().get_image()
 			sheet.blit_rect(_dot(img, cell), Rect2i(0, 0, cell, cell), Vector2i(c * cell, k * cell))
-	DirAccess.make_dir_recursive_absolute("res://assets/sprites")
 	var base := str(lk["dots"])
+	DirAccess.make_dir_recursive_absolute(base.get_base_dir())
 	sheet.save_png(ProjectSettings.globalize_path(base + ".png"))
 	var meta := {"frames": names, "dirs": 8, "cell": cell, "world_h": world_h, "look_y": LOOK_Y,
 		"made_by": "tools/make_sprites.gd", "source": str(lk["glb"])}
@@ -145,7 +168,7 @@ func _poses(p, id: String) -> Dictionary:
 	f.t = 30
 	out["down"] = p._target_pose(f, 0.0)
 	f.state = "attack"
-	for entry in ATTACKS.get(id, FISTS):
+	for entry in ATTACKS.get(id, _by_weapon(p.look)):
 		var parts: PackedStringArray = str(entry).split("@")
 		var mv := Moves.get_move(parts[0])
 		if parts.size() > 1:
