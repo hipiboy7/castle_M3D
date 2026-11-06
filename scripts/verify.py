@@ -15,6 +15,9 @@
                테스트를 다시 돌린다(이 저장소 소스는 그대로). A ≥ 90% · B ≥ 70%(CLAUDE.md 2-1절) — 모자라면 실패
   3. 자동 결투  godot --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 --seed S  (시드 1 · 2 · 3,
                게임 전체 — 무대 · 인형 · 연출 · 화면 표시까지 돌려 멈춤 · 스크립트 오류가 없는지)
+  4. 흐름       ① 일시정지 앞뒤가 같은 판 — seed 1 40초 와 42초 + 600 프레임에 2초 멈춤(--events 600:pause,720:resume)의 결과가 같다
+               ② 뒤로 버튼 · 앱 내려감 — 처음 화면 → 데모 → 뒤로 → 처음 → 누름 → 결투 → 내려감(멈춤) → 누름(계속) → 뒤로(멈춤) →
+               뒤로(처음 화면) 순서가 --trace 줄에 나온다 (src/ui/nav.gd · main.gd _back · _app_hidden)
 출력에 SCRIPT ERROR · ERROR: · WARNING: · Leaked 가 하나라도 있으면 실패.
 """
 import glob
@@ -54,8 +57,13 @@ def godot():
 
 def run(name, cmd, check_out=None, timeout=600):
     t0 = time.time()
-    p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                       timeout=timeout)
+    try:
+        p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                           stdin=subprocess.DEVNULL, timeout=timeout)
+    except subprocess.TimeoutExpired as e:
+        out = (e.stdout or b"").decode("utf-8", "replace") if isinstance(e.stdout, bytes) else (e.stdout or "")
+        print(f"[FAIL] {name} — {timeout}초 안에 끝나지 않았다\n" + "\n".join("     " + ln for ln in out.strip().splitlines()[-25:]))
+        return False
     out = (p.stdout or "") + (p.stderr or "")
     dt = time.time() - t0
     bad = BAD.findall(out)
@@ -184,7 +192,7 @@ def step_coverage(g):
             funcs[rel] = (grade, names)
     out_json = os.path.join(dst, "cov.json")
     p = subprocess.run([g, "--headless", "--path", dst, "-s", "res://tests/run_tests.gd", "--", "--cov", out_json],
-                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600)
+                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600, stdin=subprocess.DEVNULL)
     if not os.path.exists(out_json):
         print(f"[FAIL] 커버리지 — 결과 파일이 없다\n" + "\n".join("     " + ln for ln in (p.stdout + p.stderr).splitlines()[-15:]))
         return False
@@ -203,6 +211,36 @@ def step_coverage(g):
     return ok
 
 
+FLOW_EVENTS = "400:back,500:press,700:hide,760:show,800:press,900:back,960:back"
+FLOW_WANT = ["MODE title", "MODE demo", "MODE title", "MODE fight", "PAUSE on", "PAUSE off", "PAUSE on", "PAUSE off", "MODE title"]
+
+
+def step_flow(g):
+    base = [g, "--headless", "--fixed-fps", "60", "--path", "."]
+    got = {}
+
+    def grab(key, extra):
+        def chk(out):
+            m = re.search(r"^RESULT (.*)$", out, re.M)
+            got[key] = (json.loads(m.group(1)) if m else None, re.findall(r"^(MODE \w+|PAUSE \w+)", out, re.M))
+            return m is not None, ""
+        return run(f"흐름 {key}", base + ["--"] + extra, chk, timeout=300)
+    ok = grab("멈춤 없음", ["--autoplay", "--seconds", "40", "--seed", "1"])
+    ok &= grab("2초 멈춤", ["--autoplay", "--seconds", "42", "--seed", "1", "--trace", "--events", "600:pause,720:resume"])
+    ok &= grab("뒤로 · 내려감", ["--seconds", "16", "--trace", "--events", FLOW_EVENTS])
+    if not ok:
+        return False
+    a, b = got["멈춤 없음"][0], got["2초 멈춤"][0]
+    same = a["last"] == b["last"] and a["fights"] == b["fights"] and a["wins"] == b["wins"]
+    seq = got["뒤로 · 내려감"][1]
+    seq_ok = seq == FLOW_WANT
+    good = same and seq_ok and got["2초 멈춤"][1].count("PAUSE on") == 1
+    msg = ("멈춘 앞뒤 같은 판" if same else f"멈춘 판이 다르다 {a['last']} / {b['last']}") + " · " + \
+        ("뒤로 · 내려감 순서 맞음" if seq_ok else f"순서가 다르다: {seq}")
+    print(f"[{'ok' if good else 'FAIL'}] 흐름 — {msg}")
+    return good
+
+
 def main():
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")      # 윈도우 콘솔(cp1252)에서 한글 출력에 죽지 않게
@@ -214,14 +252,14 @@ def main():
     results = [step_common(strict), step_assets()]
     if not os.path.isdir(os.path.join(ROOT, ".godot", "imported")):
         # 새로 받은 저장소(CI): 첫 가져오기는 프로젝트 글꼴을 가져오기 전에 읽으려 해 ERROR 를 낸다(run #1) — 한 번 돌리고 다시 본다
-        p = subprocess.run([g, "--headless", "--path", ".", "--import"], cwd=ROOT, capture_output=True, timeout=600)
+        p = subprocess.run([g, "--headless", "--path", ".", "--import"], cwd=ROOT, capture_output=True, timeout=600, stdin=subprocess.DEVNULL)
         print(f"[..] 첫 가져오기 (종료 코드 {p.returncode}, 출력은 다음 가져오기에서 본다)")
     results.append(run("가져오기", [g, "--headless", "--path", ".", "--import"]))
 
     def tests_ok(out):
         m = re.search(r"tests: (\d+) passed, (\d+) failed", out)
         return (m is not None and m.group(2) == "0"), (m.group(0) if m else "결과 줄 없음")
-    results.append(run("테스트", [g, "--headless", "--path", ".", "-s", "res://tests/run_tests.gd"], tests_ok))
+    results.append(run("테스트", [g, "--headless", "--path", ".", "-s", "res://tests/run_tests.gd"], tests_ok, timeout=180))
     results.append(step_coverage(g))
     for seed in (1, 2, 3):
         def auto_ok(out):
@@ -230,6 +268,7 @@ def main():
         results.append(run(f"자동 결투 seed {seed} · 90초",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--seconds", "90",
                             "--seed", str(seed)], auto_ok))
+    results.append(step_flow(g))
     n_ok = sum(results)
     print(f"verify: {n_ok}/{len(results)} 통과 · {time.time() - t0:.0f}초 — {'OK' if n_ok == len(results) else 'FAIL'}")
     return 0 if n_ok == len(results) else 1

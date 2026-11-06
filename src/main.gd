@@ -4,6 +4,9 @@ extends Node3D
 ##
 ## 실행 인자(-- 뒤에): --autoplay 봇이 김신(끝나면 다음 시드로 다시) · --seconds N N초(게임 시간) 뒤 결과를 찍고 끝
 ##   --seed S · --shots 폴더:프레임,프레임 그 프레임 화면을 PNG 로 · --touch PC 에서도 터치 버튼
+##   --safe L,T,R,B 안전 영역 여백(기준 화면 단위 — 노치 · 제스처 바 흉내) · --trace 흐름 줄(MODE · PAUSE)을 창 없이도 찍는다
+##   --events 프레임:동작,… 그 프레임에 동작을 흉내 — back(뒤로 버튼) · press(아무 버튼) · pause · resume(일시정지 버튼) ·
+##            hide · show(앱이 내려감 · 돌아옴). scripts/verify.py '흐름' 단계가 쓴다
 ## 창 없이 점검: <godot> --headless --fixed-fps 60 --path . -- --autoplay --seconds 90
 ## 첫 화면에서 6초 동안 아무것도 안 누르면 데모(봇 대 백도찬) — 에뮬레이터 스크린샷도 이것을 찍는다.
 
@@ -14,6 +17,8 @@ const Fx = preload("res://src/view/fx3d.gd")
 const Cam = preload("res://src/view/camera_rig.gd")
 const Hud = preload("res://src/ui/hud.gd")
 const Touch = preload("res://src/ui/touch_ui.gd")
+const Nav = preload("res://src/ui/nav.gd")
+const SafeArea = preload("res://src/ui/safe_area.gd")
 
 # 외형(3층 · 이 판 소유): castle_common `canon/characters.json` 의 look 글(conf ai — 원작 화별 판독을 합친 것, 연출에만)을
 # 관절 인형으로 옮겼다(2026-11-05 사용자 "김신과 백도찬도 캐릭터에 맞게 외형 바꿔졌으면"). 색은 3D 밤 조명에 맞게 조금 밝힘.
@@ -41,7 +46,10 @@ const SFX := ["knife", "swing", "slash", "hit", "hit_heavy", "kick", "guard", "c
 const DEMO_AFTER := 360
 const SHOT_WARMUP := 3          # --shots: 찍을 프레임 바로 앞 몇 프레임만 그린다
 
-var args := {"autoplay": false, "seconds": 0.0, "seed": 1, "shots": [], "shot_dir": "", "touch": false}
+var args := {"autoplay": false, "seconds": 0.0, "seed": 1, "shots": [], "shot_dir": "", "touch": false, "trace": false,
+	"events": {}}
+var paused := false
+var _fake_press := false
 var headless := false
 var mode := "title"
 var d: Dictionary = {}
@@ -67,14 +75,18 @@ var music: AudioStreamPlayer
 
 func _ready() -> void:
 	headless = DisplayServer.get_name() == "headless"
+	process_mode = Node.PROCESS_MODE_ALWAYS        # 일시정지(get_tree().paused) 중에도 본체 · 화면 표시 · 터치는 돈다 — 무대 · 인형 · 연출 · 소리는 멈춘다
 	_parse_args()
 	_setup_input()
 	arena = Arena.new()
+	arena.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(arena)
 	arena.build(not headless)
 	fx = Fx.new()
+	fx.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(fx)
 	cam = Cam.new()
+	cam.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(cam)
 	cam.current = true
 	hud = Hud.new()
@@ -102,6 +114,17 @@ func _parse_args() -> void:
 				args["autoplay"] = true
 			"--touch":
 				args["touch"] = true
+			"--trace":
+				args["trace"] = true
+			"--safe":
+				i += 1
+				var v := a[i].split(",")
+				SafeArea.test_insets = Vector4(float(v[0]), float(v[1]), float(v[2]), float(v[3]))
+			"--events":
+				i += 1
+				for ev in a[i].split(","):
+					var kv := ev.split(":")
+					args["events"][int(kv[0])] = kv[1]
 			"--seconds":
 				i += 1
 				args["seconds"] = float(a[i])
@@ -122,7 +145,7 @@ func _setup_input() -> void:
 	var keys := {
 		"left": [KEY_A, KEY_LEFT], "right": [KEY_D, KEY_RIGHT], "up": [KEY_W, KEY_UP], "down": [KEY_S, KEY_DOWN],
 		"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_L, KEY_C],
-		"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B],
+		"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B], "pause": [KEY_ESCAPE, KEY_P],
 	}
 	for act in keys:
 		if not InputMap.has_action(act):
@@ -138,10 +161,12 @@ func _setup_audio() -> void:
 		sfx[n] = load("res://assets/sfx/%s.wav" % n)
 	for i in 8:
 		var p := AudioStreamPlayer.new()
+		p.process_mode = Node.PROCESS_MODE_PAUSABLE
 		add_child(p)
 		players.append(p)
 	music = AudioStreamPlayer.new()
 	music.volume_db = -9.0
+	music.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(music)
 
 
@@ -172,9 +197,11 @@ func _new_duel() -> void:
 		boss_p.queue_free()
 	d = Duel.make(seed_now)
 	hero_p = Puppet.new()
+	hero_p.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(hero_p)
 	hero_p.setup(LOOKS["kim"])
 	boss_p = Puppet.new()
+	boss_p.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(boss_p)
 	boss_p.setup(LOOKS["baek"])
 	hero_p.update_from(d["hero"], 0.0, false)
@@ -185,6 +212,8 @@ func _new_duel() -> void:
 func _enter_title() -> void:
 	mode = "title"
 	mode_t = 0
+	touch.show_pause = false
+	_trace("MODE title frame=%d" % frames)
 	hud.message("캐슬 M · 3D 초안", "인천항 제3부두. 백도찬, 기다려라.", 9999.0)
 	hud.set_hint("화면을 누르면 시작 · 가만히 두면 데모")
 	_music("boss")
@@ -194,8 +223,8 @@ func _start(m: String) -> void:
 	mode = m
 	mode_t = 0
 	fights += 1
-	if not headless:
-		print("MODE %s frame=%d" % [m, frames])    # 에뮬레이터 점검(scripts/emu_check.sh)이 logcat 에서 데모 시작을 기다린다
+	touch.show_pause = m == "fight"
+	_trace("MODE %s frame=%d" % [m, frames])      # 에뮬레이터 점검(scripts/emu_check.sh)이 logcat 에서 데모 시작을 기다린다
 	if m == "demo":
 		hud.message("데모", "봇이 예고만 보고 싸운다 — 누르면 직접", 2.5)
 		hud.set_hint("데모 · 누르면 직접 싸우기")
@@ -206,7 +235,81 @@ func _start(m: String) -> void:
 		_music("boss")
 
 
+func _trace(line: String) -> void:
+	if not headless or args["trace"]:
+		print(line)
+
+
+## 일시정지 — 로직(Duel.step)을 멈추고 무대 · 인형 · 연출 · 소리(PAUSABLE)를 세운다. 화면 표시 · 터치는 돈다
+func _set_paused(on: bool) -> void:
+	if on == paused:
+		return
+	paused = on
+	get_tree().paused = on
+	_trace("PAUSE %s frame=%d" % ["on" if on else "off", frames])
+	hud.set_dim(on)
+	if on:
+		hud.message("일시정지", "누르면 계속 · 뒤로 버튼 = 처음 화면", 9999.0)
+	else:
+		hud.message("계속", "", 0.6)
+
+
+## Android 뒤로 버튼(project.godot quit_on_go_back=false) · 흐름은 src/ui/nav.gd
+func _back() -> void:
+	match Nav.on_back(mode, paused):
+		"pause":
+			_set_paused(true)
+		"title":
+			_set_paused(false)
+			_new_duel()
+			_enter_title()
+		"quit":
+			get_tree().quit(0)
+
+
+## 앱이 내려가면(홈 · 전화 · 화면 끔) 소리를 끄고, 사람이 싸우는 중이면 멈춘다. 돌아오면 소리만 켠다(멈춤은 사람이 푼다)
+func _app_hidden(hidden: bool) -> void:
+	AudioServer.set_bus_mute(0, hidden)
+	if hidden and Nav.pause_on_hide(mode, paused):
+		_set_paused(true)
+
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_WM_GO_BACK_REQUEST:
+			_back()
+		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT:
+			if not headless and args["events"].is_empty():
+				_app_hidden(true)
+		NOTIFICATION_APPLICATION_RESUMED, NOTIFICATION_APPLICATION_FOCUS_IN:
+			if not headless and args["events"].is_empty():
+				_app_hidden(false)
+
+
+## --events: 그 프레임의 흉내 동작
+func _scripted() -> void:
+	if not args["events"].has(frames):
+		return
+	_trace("EVENT %s frame=%d" % [args["events"][frames], frames])
+	match args["events"][frames]:
+		"back":
+			_back()
+		"press":
+			_fake_press = true
+		"pause":
+			_set_paused(true)
+		"resume":
+			_set_paused(false)
+		"hide":
+			_app_hidden(true)
+		"show":
+			_app_hidden(false)
+
+
 func _pressed_anything() -> bool:
+	if _fake_press:
+		_fake_press = false
+		return true
 	return Input.is_action_just_pressed("attack") or Input.is_action_just_pressed("roll") \
 		or Input.is_action_just_pressed("parry") or not touch.take_edges().is_empty() \
 		or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
@@ -214,6 +317,19 @@ func _pressed_anything() -> bool:
 
 func _physics_process(_dt: float) -> void:
 	frames += 1
+	_scripted()
+	if paused:
+		# 멈춤: 아무 버튼(또는 일시정지 버튼 · Esc)이면 계속. 로직 · mode_t 는 세지 않는다(멈춘 앞뒤가 같은 판 — verify '흐름')
+		var e: Dictionary = touch.take_edges()
+		if not e.is_empty() or _pressed_anything() or Input.is_action_just_pressed("pause"):   # 새로 누른 것만(멈춤 버튼을 누르고 있는 손은 아님)
+			_set_paused(false)
+		_shots()
+		_check_seconds()
+		return
+	if mode == "fight" and (Input.is_action_just_pressed("pause") or touch.peek_edge("pause")):
+		touch.take_edges()
+		_set_paused(true)
+		return
 	mode_t += 1
 	match mode:
 		"title":
@@ -244,6 +360,10 @@ func _physics_process(_dt: float) -> void:
 		print("FPS_LOG fps=%d process_ms=%.1f frame=%d mode=%s screen=%s" % [Engine.get_frames_per_second(),
 			Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, frames, mode,
 			str(get_viewport().get_visible_rect().size)])
+	_check_seconds()
+
+
+func _check_seconds() -> void:
 	if float(args["seconds"]) > 0.0 and frames >= int(float(args["seconds"]) * 60.0):
 		_finish_run()
 
@@ -389,6 +509,9 @@ func _end_fight(result: String) -> void:
 
 func _process(dt: float) -> void:
 	if d.is_empty():
+		return
+	if paused:
+		hud.update_bars(d["hero"], d["boss"], d["world"].phase, 0.0)     # 접기 · 펴기에 자리만 다시 잡는다
 		return
 	if later_t > 0.0:
 		later_t -= dt

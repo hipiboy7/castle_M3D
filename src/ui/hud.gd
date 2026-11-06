@@ -4,6 +4,7 @@ extends CanvasLayer
 ## 가운데 알림(시작 · 2차 · 승패), 아래 도움말. 색은 이 파일 머리 상수 한 곳.
 
 const Common = preload("res://src/data/common.gd")
+const SafeArea = preload("res://src/ui/safe_area.gd")
 
 const COL_BG := Color(0.0, 0.0, 0.0, 0.55)
 const COL_HP_BOSS := Color(0.86, 0.22, 0.2)
@@ -33,6 +34,8 @@ var _boss_bg: Array = []
 var _gauge: Array = []
 var _seg_w := 28.0
 var skill_name: Label
+var dim: ColorRect
+var _hero_nodes: Array = []      # [노드, 안전 영역 왼쪽 위에서의 자리] — 김신 쪽 묶음(이름 · 막대 · 게이지 · 기술)
 
 
 func setup() -> void:
@@ -40,6 +43,12 @@ func setup() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
+	dim = ColorRect.new()                           # 일시정지 덮개 (set_dim)
+	dim.color = Color(0, 0, 0, 0.45)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dim.visible = false
+	root.add_child(dim)
 	boss_name = _label("", 26, COL_TEXT)            # 이름은 update_bars 가 characters.json name 으로
 	var bb := _bar(Vector2.ZERO, Vector2(_boss_w, 16))
 	boss_hp = bb[0]
@@ -66,6 +75,10 @@ func setup() -> void:
 	_seg_w = seg_w
 	skill_name = _label("", 20, COL_TEXT)
 	skill_name.position = Vector2(24, 88)
+	for n in [hero_name, hb[1], hp2[1], skill_name]:
+		_hero_nodes.append([n, n.position])
+	for g in _gauge:
+		_hero_nodes.append([g.get_parent(), g.get_parent().position])
 	fps = _label("", 18, COL_DIM)
 	msg = _label("", 54, COL_TEXT)
 	msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -79,17 +92,20 @@ func setup() -> void:
 	_layout()
 
 
-## 화면 크기(폰은 가로로 더 넓다)에 맞춰 자리를 다시 잡는다
+## 화면 크기(폰은 가로로 더 넓다 · 접는 폰은 실행 중 바뀐다)와 안전 영역(노치 · 제스처 바)에 맞춰 자리를 다시 잡는다
 func _layout() -> void:
-	var v := root.get_viewport_rect().size
-	var cx := v.x * 0.5
-	boss_name.position = Vector2(cx - _boss_w * 0.5, 14)
-	_boss_bg[0].position = Vector2(cx - _boss_w * 0.5, 48)
-	_boss_bg[1].position = Vector2(cx - _boss_w * 0.5, 68)
-	fps.position = Vector2(v.x - 240, 16)
-	msg.position = Vector2(cx - 500, v.y * 0.5 - 150)
-	sub.position = Vector2(cx - 500, v.y * 0.5 - 70)
-	hint.position = Vector2(cx - 500, v.y - 46)
+	var sa := SafeArea.rect(root.get_viewport())
+	var cx := sa.position.x + sa.size.x * 0.5
+	var top := sa.position.y
+	boss_name.position = Vector2(cx - _boss_w * 0.5, top + 14)
+	_boss_bg[0].position = Vector2(cx - _boss_w * 0.5, top + 48)
+	_boss_bg[1].position = Vector2(cx - _boss_w * 0.5, top + 68)
+	fps.position = Vector2(sa.end.x - 240, top + 16)
+	msg.position = Vector2(cx - 500, sa.position.y + sa.size.y * 0.5 - 150)
+	sub.position = Vector2(cx - 500, sa.position.y + sa.size.y * 0.5 - 70)
+	hint.position = Vector2(cx - 500, sa.end.y - 46)
+	for hn in _hero_nodes:
+		hn[0].position = sa.position + hn[1]
 
 
 func _label(text: String, size: int, col: Color) -> Label:
@@ -168,6 +184,10 @@ func message(text: String, small := "", secs := 2.0, delay := 0.0) -> void:
 	msg.text = text
 	sub.text = small
 	_msg_t = secs
+
+
+func set_dim(on: bool) -> void:
+	dim.visible = on
 
 
 func set_hint(text: String) -> void:

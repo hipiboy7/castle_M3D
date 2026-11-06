@@ -1,6 +1,7 @@
 extends Control
 ## 터치 조작 — 왼쪽 절반 어디든 누르면 그 자리가 스틱 가운데(따라오는 스틱), 오른쪽 아래 버튼: 베기 · 쳐내기(누르고 있기) · 구르기 ·
-## 기술 · 기술 바꾸기(고른 기술 이름 · 게이지는 hud.gd).
+## 기술 · 기술 바꾸기(고른 기술 이름 · 게이지는 hud.gd), 오른쪽 위 '멈춤'(결투 중에만 — main.gd show_pause).
+## 자리는 안전 영역(src/ui/safe_area.gd — 노치 · 제스처 바를 뺀 곳) 기준, 매 프레임 다시 읽는다(접는 폰).
 ## main.gd 가 매 프레임 stick · take_edges() · held() 로 읽는다(키보드와 같은 동작 이름 — castle_M engine/input.py 와 같은 생각).
 
 const COL_RING := Color(1, 1, 1, 0.28)
@@ -9,6 +10,7 @@ const COL_BTN := Color(0.05, 0.06, 0.09, 0.55)
 const COL_BTN_ON := Color(0.95, 0.8, 0.35, 0.6)
 const COL_LABEL := Color(1, 1, 1, 0.9)
 const STICK_R := 110.0
+const SafeArea = preload("res://src/ui/safe_area.gd")
 
 var stick := Vector2.ZERO
 var _stick_idx := -1
@@ -16,12 +18,19 @@ var _center := Vector2.ZERO
 var _knob := Vector2.ZERO
 var _pressed := {}
 var _edges := {}
+var show_pause := false:
+	set(v):
+		show_pause = v
+		queue_redraw()
+var _last_safe := Rect2()
+# at: "br" 안전 영역 오른쪽 아래 기준(기본) · "tr" 오른쪽 위 기준. pause 는 show_pause 일 때만 보이고 눌린다
 var buttons := [
 	{"id": "attack", "label": "베기", "r": 82.0, "off": Vector2(-150, -150)},
 	{"id": "parry", "label": "쳐내기", "r": 64.0, "off": Vector2(-300, -100)},
 	{"id": "roll", "label": "구르기", "r": 64.0, "off": Vector2(-120, -320)},
 	{"id": "skill", "label": "기술", "r": 60.0, "off": Vector2(-300, -270)},
 	{"id": "skill_next", "label": "바꾸기", "r": 44.0, "off": Vector2(-440, -330)},
+	{"id": "pause", "label": "멈춤", "r": 34.0, "off": Vector2(-56, 92), "at": "tr"},
 ]
 
 
@@ -30,8 +39,22 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
+func _process(_dt: float) -> void:
+	var sa := SafeArea.rect(get_viewport())
+	if sa != _last_safe:
+		_last_safe = sa
+		queue_redraw()
+
+
 func _btn_pos(b: Dictionary) -> Vector2:
-	return get_viewport_rect().size + b["off"]
+	var sa := SafeArea.rect(get_viewport())
+	if b.get("at", "br") == "tr":
+		return Vector2(sa.end.x, sa.position.y) + b["off"]
+	return sa.end + b["off"]
+
+
+func _active(b: Dictionary) -> bool:
+	return show_pause or b["id"] != "pause"
 
 
 func _input(e: InputEvent) -> void:
@@ -41,12 +64,14 @@ func _input(e: InputEvent) -> void:
 		if e.pressed:
 			var hit := false
 			for b in buttons:
-				if e.position.distance_to(_btn_pos(b)) <= b["r"] * 1.3:
+				if _active(b) and e.position.distance_to(_btn_pos(b)) <= b["r"] * 1.3:
 					_pressed[b["id"]] = e.index
 					_edges[b["id"]] = true
 					hit = true
-			if not hit and e.position.x < get_viewport_rect().size.x * 0.5 and _stick_idx == -1:
+			var sa := SafeArea.rect(get_viewport())
+			if not hit and e.position.x < sa.position.x + sa.size.x * 0.5 and _stick_idx == -1:
 				_stick_idx = e.index
+				_edges["stick"] = true                  # 새로 누름(멈춤 풀기에 쓴다)
 				_center = e.position
 				_knob = e.position
 				stick = Vector2.ZERO
@@ -74,6 +99,10 @@ func take_edges() -> Dictionary:
 	return e
 
 
+func peek_edge(id: String) -> bool:
+	return _edges.has(id)
+
+
 func held(id: String) -> bool:
 	return _pressed.has(id)
 
@@ -88,13 +117,16 @@ func _draw() -> void:
 		draw_arc(_center, STICK_R, 0, TAU, 48, COL_RING, 4.0)
 		draw_circle(_knob, 44.0, COL_KNOB)
 	else:
-		var c := Vector2(190, get_viewport_rect().size.y - 190)
+		var sa := SafeArea.rect(get_viewport())
+		var c := Vector2(sa.position.x + 190, sa.end.y - 190)
 		draw_arc(c, STICK_R, 0, TAU, 48, Color(1, 1, 1, 0.14), 3.0)
 		draw_string(font, c + Vector2(-46, 8), "이동", HORIZONTAL_ALIGNMENT_CENTER, 92, 24, Color(1, 1, 1, 0.35))
 	for b in buttons:
+		if not _active(b):
+			continue
 		var p := _btn_pos(b)
 		var on := _pressed.has(b["id"])
 		draw_circle(p, b["r"], COL_BTN_ON if on else COL_BTN)
 		draw_arc(p, b["r"], 0, TAU, 48, Color(1, 1, 1, 0.35), 3.0)
 		var w: float = b["r"] * 2.0
-		draw_string(font, p + Vector2(-b["r"], 9), b["label"], HORIZONTAL_ALIGNMENT_CENTER, w, 26, COL_LABEL)
+		draw_string(font, p + Vector2(-b["r"], 9), b["label"], HORIZONTAL_ALIGNMENT_CENTER, w, 22 if b["r"] < 40.0 else 26, COL_LABEL)

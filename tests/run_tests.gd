@@ -25,7 +25,12 @@ func _initialize() -> void:
 			if not (fname.begins_with("test_") and fname.ends_with(".gd")):
 				continue
 			var path: String = dir + "/" + fname
-			var suite = load(path).new()
+			var scr = load(path)
+			if scr == null or not scr.can_instantiate():
+				df += 1                              # 문법 오류 등 — 멈추지 않고 실패로 센다(아니면 quit 에 못 닿아 끝나지 않는다)
+				print("FAIL %s: 불러오지 못함" % path.trim_prefix("res://tests/"))
+				continue
+			var suite = scr.new()
 			for m in suite.get_method_list():
 				var n: String = m["name"]
 				if not n.begins_with("test_"):
