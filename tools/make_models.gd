@@ -26,7 +26,7 @@ func _initialize() -> void:
 			continue
 		done[path] = true
 		var t0 := Time.get_ticks_msec()
-		var err := _make(Looks.LOOKS[id], path)
+		var err := _make(Looks.look(id), path)      # 원작 대조 겉모습(looks_common)을 덮은 표
 		print("MODEL %s %s %dms" % [path, "ok" if err == OK else "error %d" % err, Time.get_ticks_msec() - t0])
 	quit(0)
 

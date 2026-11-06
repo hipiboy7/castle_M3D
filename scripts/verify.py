@@ -9,6 +9,7 @@
                다르면 실패). 옆에 castle_common(환경 변수 CASTLE_COMMON, 없으면 이 저장소 옆 폴더)이 있으면 그 파일과
                같은지 — 다르면 알림(--strict 는 실패), 없으면(CI) 건너뛴다. castle_M scripts/verify.py 3-1 과 같은 방식
   0. 자산 출처    assets/ 의 파일(.import 빼고)이 모두 assets/ASSETS.md 에 있고, 목록에만 있는 파일이 없다(개발 규격 6절)
+  0-1. 외형 생성물  tools/looks_from_common.py --check (castle_common looks.json → src/view/looks_common.gd)
   1. 가져오기   godot --headless --path . --import  (스크립트 문법 · 자원 가져오기)
   2. 테스트     godot --headless --path . -s res://tests/run_tests.gd  (tests/unit · tests/integration)
   2. 커버리지   함수 단위 — .tools/cov/ 에 src · tests · data 사본을 만들고 A · B 등급 파일의 함수 머리마다 표시 줄을 넣어
@@ -133,6 +134,16 @@ def step_common(strict):
     else:
         msg += " · castle_common 폴더 없음 — 비교 건너뜀"
     print(f"[{'ok' if ok else 'FAIL'}] 공통 데이터 ({time.time() - t0:.1f}s) — {msg}")
+    return ok
+
+
+def step_looks():
+    """원작 대조 겉모습 생성물(src/view/looks_common.gd)이 받은 data/common/looks.json · looks.gd 와 맞는지 (castle_common 73차 · 답58)."""
+    t0 = time.time()
+    p = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "looks_from_common.py"), "--check"], cwd=ROOT,
+                       capture_output=True, text=True, timeout=60)
+    ok = p.returncode == 0
+    print(f"[{'ok' if ok else 'FAIL'}] 외형 생성물 ({time.time() - t0:.1f}s) — {(p.stdout + p.stderr).strip()}")
     return ok
 
 
@@ -288,7 +299,7 @@ def main():
     strict = "--strict" in sys.argv[1:]
     g = godot()
     t0 = time.time()
-    results = [step_common(strict), step_assets()]
+    results = [step_common(strict), step_assets(), step_looks()]
     if not os.path.isdir(os.path.join(ROOT, ".godot", "imported")):
         # 새로 받은 저장소(CI): 첫 가져오기는 프로젝트 글꼴을 가져오기 전에 읽으려 해 ERROR 를 낸다(run #1) — 한 번 돌리고 다시 본다
         p = subprocess.run([g, "--headless", "--path", ".", "--import"], cwd=ROOT, capture_output=True, timeout=600, stdin=subprocess.DEVNULL)

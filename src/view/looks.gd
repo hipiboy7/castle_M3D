@@ -11,6 +11,8 @@ extends RefCounted
 #  백도찬(6장 부두 — 대표 차림, 사용자 2026-11-05): 뒤로 넘긴 밝은 갈색 머리(2차에 가닥이 흘러내림) · 빛 반사로 하얀 테 없는
 #        직사각 안경 · 각진 턱 · 근육질 거구 · 소매 걷은 흰 셔츠 · 등에서 X 자 갈색 가죽 어깨 홀스터(왼 겨드랑이 권총) ·
 #        검은 벨트 · 바지 · 구두 · 갈색 손잡이 가는 단도 · 귀 검은 피어싱
+const LooksCommon = preload("res://src/view/looks_common.gd")
+
 const LOOKS := {
 	"kim": {"suit": Color(0.16, 0.16, 0.2), "pants": Color(0.13, 0.13, 0.17), "shirt": Color(0.93, 0.93, 0.94),
 		"tie": Color(0.09, 0.09, 0.12), "skin": Color(0.91, 0.77, 0.65), "hair": Color(0.11, 0.11, 0.15),
@@ -166,6 +168,8 @@ const ART := {
 static func look(name: String) -> Dictionary:
 	var base := name.trim_suffix("_a").trim_suffix("_b")
 	var lk: Dictionary = LOOKS.get(base, LOOKS["guard"]).duplicate()     # 표에 없는 외형은 경호원(시험 test_campaign 이 본다)
+	if LooksCommon.BY_NAME.has(base):        # 원작 조각 대조 겉모습(castle_common data/looks.json — 사용자 답58)
+		lk.merge(LooksCommon.BY_NAME[base], true)
 	if base == name:
 		return lk
 	if ART.has(base):
