@@ -1,0 +1,237 @@
+# 캐슬 M 3D 초안 — 검증 · APK · 화면 찍기 · 에뮬레이터 점검
+#  build    : Godot(고정 버전) + 안드로이드 템플릿 → scripts/verify.py(가져오기 · 테스트 · 자동 결투) → APK(arm64 + x86_64 한 파일)
+#             → APK 안에 공통 데이터(data/common/*.json)가 들었는지 → 가상 화면(xvfb + 소프트웨어 OpenGL)에서 폰 2340x1080 스크린샷
+#  emulator : APK 를 x86_64 API 34 에뮬레이터에 설치 · 실행 → 데모 스크린샷 · logcat 오류 · FPS (scripts/emu_check.sh)
+#             — 수동 실행(workflow_dispatch 입력 emulator)과 태그 push 때만(개발 규격 1 · 9절, 사용자 2026-11-04). push 에는 build 만
+#  release  : 태그 push 때만 — build · emulator 가 통과하면 APK 를 GitHub Releases 에 붙이고 **Latest** 로 둔다(폰은 GitHub 앱
+#             → Releases → 맨 위에서 바로 받는다 — 사용자 2026-11-05, 프리릴리스로 두지 않는다). 본문 = docs/폰확인.md(설치 ·
+#             1분 경로 · 이번에 볼 것). 가지 빌드의 아티팩트는 빌드 검사용이라 1일만 둔다(개발 규격 7절)
+#  서명: android/debug.keystore (castle_M 과 같은 고정 디버그 키, 패키지 이름이 달라 서로 덮어쓰지 않는다)
+name: android
+
+on:
+  push:
+    branches: [main, "impl-*"]
+    tags: ["*"]                       # 태그(마일스톤)는 경로 필터 없이 돌고 에뮬레이터까지
+    paths:
+      - "src/**"
+      - "data/**"
+      - "assets/**"
+      - "tests/**"
+      - "project.godot"
+      - "main.tscn"
+      - "export_presets.cfg"
+      - "icon.svg"
+      - "scripts/**"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+    inputs:
+      emulator:
+        description: "에뮬레이터 점검까지 (약 5 ~ 8분 더)"
+        type: boolean
+        default: false
+
+env:
+  GODOT_VERSION: 4.7.2-stable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GODOT_ANDROID_KEYSTORE_DEBUG_PATH: ${{ github.workspace }}/android/debug.keystore
+      GODOT_ANDROID_KEYSTORE_DEBUG_USER: androiddebugkey
+      GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Godot · 템플릿 캐시
+        uses: actions/cache@v6
+        with:
+          path: ~/godot-cache
+          key: godot-${{ env.GODOT_VERSION }}-android
+
+      - name: Godot · 안드로이드 템플릿 설치
+        run: |
+          set -e
+          V=$GODOT_VERSION
+          mkdir -p ~/godot-cache && cd ~/godot-cache
+          if [ ! -f "Godot_v${V}_linux.x86_64" ]; then
+            curl -sSLo g.zip "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_linux.x86_64.zip"
+            unzip -q g.zip && rm g.zip
+          fi
+          if [ ! -d android_templates ]; then
+            curl -sSLo t.tpz "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_export_templates.tpz"
+            mkdir -p android_templates
+            unzip -q -j t.tpz 'templates/android_*' 'templates/version.txt' -d android_templates
+            rm t.tpz
+          fi
+          T="$HOME/.local/share/godot/export_templates/${V/-/.}"
+          mkdir -p "$T" && cp android_templates/* "$T/"
+          ls -la "$T"
+          echo "GODOT=$HOME/godot-cache/Godot_v${V}_linux.x86_64" >> "$GITHUB_ENV"
+
+      - name: 안드로이드 내보내기 설정 (SDK · JDK · 고정 디버그 키)
+        run: |
+          set -e
+          mkdir -p ~/.config/godot
+          for f in editor_settings-4.tres editor_settings-4.7.tres; do
+            {
+              echo '[gd_resource type="EditorSettings" format=3]'
+              echo ''
+              echo '[resource]'
+              echo "export/android/android_sdk_path = \"$ANDROID_HOME\""
+              echo "export/android/java_sdk_path = \"$JAVA_HOME\""
+              echo "export/android/debug_keystore = \"$GITHUB_WORKSPACE/android/debug.keystore\""
+              echo 'export/android/debug_keystore_user = "androiddebugkey"'
+              echo 'export/android/debug_keystore_pass = "android"'
+            } > ~/.config/godot/$f
+          done
+          cat ~/.config/godot/editor_settings-4.7.tres
+          keytool -list -keystore android/debug.keystore -storepass android -alias androiddebugkey | head -3
+
+      - name: 검증 (가져오기 · 테스트 · 자동 결투 3판)
+        run: python3 scripts/verify.py
+
+      # versionCode 는 늘 올린다(run 번호), versionName 은 태그(앞의 v 뺌) — 가지 빌드는 0.2.0-dev.<run 번호> (개발 규격 7절)
+      - name: 버전 (versionCode = run 번호 · versionName = 태그)
+        run: |
+          set -e
+          CODE=$GITHUB_RUN_NUMBER
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then NAME="${GITHUB_REF_NAME#v}"; else NAME="0.2.0-dev.$GITHUB_RUN_NUMBER"; fi
+          sed -i "s|^version/code=.*|version/code=$CODE|; s|^version/name=.*|version/name=\"$NAME\"|" export_presets.cfg
+          grep "^version/" export_presets.cfg
+
+      - name: APK 내보내기
+        run: |
+          mkdir -p build
+          "$GODOT" --headless --path . --export-debug "Android" build/castle_m3d.apk 2>&1 | tee build/export.log
+          ls -la build
+          test -f build/castle_m3d.apk
+          sha256sum build/castle_m3d.apk | tee build/castle_m3d.apk.sha256
+
+      # 공통 데이터는 시작할 때 읽는다(src/data/common.gd) — APK 에 json 5개가 있고 시험 전용 cases 는 없어야 한다
+      - name: APK 에 공통 데이터(json)가 들었나
+        run: |
+          set -e
+          unzip -l build/castle_m3d.apk | grep "data/common/" || true
+          for f in characters progression ranks rules skills; do
+            unzip -l build/castle_m3d.apk | grep -q "data/common/$f.json" || { echo "::error::APK 에 data/common/$f.json 이 없다"; exit 1; }
+          done
+          if unzip -l build/castle_m3d.apk | grep -q "data/common/cases/"; then echo "::error::시험 전용 cases 가 APK 에 들었다"; exit 1; fi
+          echo "APK 에 공통 데이터 json 5개 · cases 없음"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: castle_m3d-apk
+          path: |
+            build/castle_m3d.apk
+            build/castle_m3d.apk.sha256
+          retention-days: 1
+
+      # 소프트웨어 OpenGL 은 한 장에 약 0.44초(run #1: 2fps) — main.gd 가 찍을 프레임 바로 앞만 그리고 나머지는 로직만 돌린다.
+      # always() 대신 !cancelled(): always() 단계는 run 을 취소해도 끝까지 돈다(run #1)
+      - name: 화면 찍기 (가상 화면 · 소프트웨어 OpenGL — PC 1280x720 · 폰 2340x1080)
+        if: ${{ !cancelled() }}
+        timeout-minutes: 15
+        run: |
+          # Godot(X11)가 dlopen 으로 여는 X 라이브러리 + Mesa 소프트웨어 OpenGL(llvmpipe)
+          sudo apt-get update -q && sudo apt-get install -y -q xvfb libgl1 libgl1-mesa-dri libglx-mesa0 libegl1 \
+            libx11-6 libxcursor1 libxinerama1 libxrandr2 libxi6 libxext6 libxrender1 libxkbcommon0 > /dev/null
+          # 모바일 우선(2026-10-26 사용자) — 폰 화면만 찍는다. PC 화면(1280x720)은 PC 판을 시작할 때 다시 넣는다
+          mkdir -p shots/phone
+          timeout 420 xvfb-run -a -s "-screen 0 2340x1080x24" "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy \
+            --resolution 2340x1080 --fixed-fps 60 -- --autoplay --touch --seed 2 --seconds 42 \
+            --shots "$PWD/shots/phone:300,420,600,900,1200,1650,2100,2460" 2>&1 | grep --line-buffered -vE "^\s*$" || true
+          ls -la shots/phone
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: shots
+          path: |
+            shots/
+            build/export.log
+          retention-days: 1
+
+  emulator:
+    needs: build
+    if: ${{ startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.emulator) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: castle_m3d-apk
+          path: apk
+
+      - name: KVM 켜기
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          sudo udevadm settle || true
+          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then echo "KVM 사용 가능"; else echo "::error::/dev/kvm 을 쓸 수 없다"; exit 1; fi
+
+      # castle_M 과 같은 에뮬레이터(pixel_6 = 가로 2400x1080 · 2코어 · 3GB) — FPS 를 2D 판과 견준다 (castle_M 보류 결정 #7 · #9)
+      - name: 에뮬레이터에서 설치 · 실행 · 스크린샷
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          cores: 2
+          ram-size: 3072M
+          emulator-boot-timeout: 900
+          emulator-options: -no-window -gpu swangle_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+          disable-animations: true
+          script: bash scripts/emu_check.sh
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: emulator
+          path: emu/
+          retention-days: 1
+
+  release:
+    needs: [build, emulator]
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7          # 릴리스 본문 docs/폰확인.md
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: castle_m3d-apk
+          path: apk
+
+      - name: GitHub Releases 에 APK 붙이기 (디버그 키 서명 — 같은 키라 폰에 덮어 설치된다)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          T="$GITHUB_REF_NAME"
+          F="castle_m3d-$T.apk"
+          cp apk/castle_m3d.apk "$F"
+          sha256sum "$F" | tee "$F.sha256"
+          ls -l "$F"
+          {
+            echo "커밋 \`${GITHUB_SHA::7}\` · run #$GITHUB_RUN_NUMBER · \`$F\` · 고정 디버그 키 서명(덮어 설치 · 세이브 유지) · 비공개"
+            echo ""
+            cat docs/폰확인.md
+            echo ""
+            echo "sha256 \`$(cut -d' ' -f1 "$F.sha256")\`"
+          } > notes.md
+          gh release create "$T" "$F" "$F.sha256" --repo "$GITHUB_REPOSITORY" --title "캐슬 M 3D $T" --latest --notes-file notes.md

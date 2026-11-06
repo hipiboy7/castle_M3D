@@ -1,0 +1,100 @@
+extends Control
+## 터치 조작 — 왼쪽 절반 어디든 누르면 그 자리가 스틱 가운데(따라오는 스틱), 오른쪽 아래 버튼: 베기 · 쳐내기(누르고 있기) · 구르기 ·
+## 기술 · 기술 바꾸기(고른 기술 이름 · 게이지는 hud.gd).
+## main.gd 가 매 프레임 stick · take_edges() · held() 로 읽는다(키보드와 같은 동작 이름 — castle_M engine/input.py 와 같은 생각).
+
+const COL_RING := Color(1, 1, 1, 0.28)
+const COL_KNOB := Color(1, 1, 1, 0.45)
+const COL_BTN := Color(0.05, 0.06, 0.09, 0.55)
+const COL_BTN_ON := Color(0.95, 0.8, 0.35, 0.6)
+const COL_LABEL := Color(1, 1, 1, 0.9)
+const STICK_R := 110.0
+
+var stick := Vector2.ZERO
+var _stick_idx := -1
+var _center := Vector2.ZERO
+var _knob := Vector2.ZERO
+var _pressed := {}
+var _edges := {}
+var buttons := [
+	{"id": "attack", "label": "베기", "r": 82.0, "off": Vector2(-150, -150)},
+	{"id": "parry", "label": "쳐내기", "r": 64.0, "off": Vector2(-300, -100)},
+	{"id": "roll", "label": "구르기", "r": 64.0, "off": Vector2(-120, -320)},
+	{"id": "skill", "label": "기술", "r": 60.0, "off": Vector2(-300, -270)},
+	{"id": "skill_next", "label": "바꾸기", "r": 44.0, "off": Vector2(-440, -330)},
+]
+
+
+func _ready() -> void:
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func _btn_pos(b: Dictionary) -> Vector2:
+	return get_viewport_rect().size + b["off"]
+
+
+func _input(e: InputEvent) -> void:
+	if not visible:
+		return
+	if e is InputEventScreenTouch:
+		if e.pressed:
+			var hit := false
+			for b in buttons:
+				if e.position.distance_to(_btn_pos(b)) <= b["r"] * 1.3:
+					_pressed[b["id"]] = e.index
+					_edges[b["id"]] = true
+					hit = true
+			if not hit and e.position.x < get_viewport_rect().size.x * 0.5 and _stick_idx == -1:
+				_stick_idx = e.index
+				_center = e.position
+				_knob = e.position
+				stick = Vector2.ZERO
+		else:
+			if e.index == _stick_idx:
+				_stick_idx = -1
+				stick = Vector2.ZERO
+			for id in _pressed.keys():
+				if _pressed[id] == e.index:
+					_pressed.erase(id)
+		queue_redraw()
+	elif e is InputEventScreenDrag and e.index == _stick_idx:
+		var d: Vector2 = e.position - _center
+		if d.length() > STICK_R:
+			_center += d.normalized() * (d.length() - STICK_R)
+			d = e.position - _center
+		_knob = e.position
+		stick = d / STICK_R
+		queue_redraw()
+
+
+func take_edges() -> Dictionary:
+	var e := _edges
+	_edges = {}
+	return e
+
+
+func held(id: String) -> bool:
+	return _pressed.has(id)
+
+
+func any_touch() -> bool:
+	return not _pressed.is_empty() or _stick_idx != -1
+
+
+func _draw() -> void:
+	var font := get_theme_default_font()
+	if _stick_idx != -1:
+		draw_arc(_center, STICK_R, 0, TAU, 48, COL_RING, 4.0)
+		draw_circle(_knob, 44.0, COL_KNOB)
+	else:
+		var c := Vector2(190, get_viewport_rect().size.y - 190)
+		draw_arc(c, STICK_R, 0, TAU, 48, Color(1, 1, 1, 0.14), 3.0)
+		draw_string(font, c + Vector2(-46, 8), "이동", HORIZONTAL_ALIGNMENT_CENTER, 92, 24, Color(1, 1, 1, 0.35))
+	for b in buttons:
+		var p := _btn_pos(b)
+		var on := _pressed.has(b["id"])
+		draw_circle(p, b["r"], COL_BTN_ON if on else COL_BTN)
+		draw_arc(p, b["r"], 0, TAU, 48, Color(1, 1, 1, 0.35), 3.0)
+		var w: float = b["r"] * 2.0
+		draw_string(font, p + Vector2(-b["r"], 9), b["label"], HORIZONTAL_ALIGNMENT_CENTER, w, 26, COL_LABEL)

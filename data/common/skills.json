@@ -1,0 +1,136 @@
+{
+  "_about": "기술 정체(1층) + 등급 · 게이지와 얽힌 효과(2층). cost: 고정 칸(기본 1) / cost_k > 0 이면 엇박 비용 × cost_k / cost_all 이면 all_min_bars 칸 이상일 때 전부. effects: lethal(엇박 계열 · 예수존 피해 규칙) · self_cost(맞히면 잃는 내 체력 비율) · stun_rel_sec([아랫급에게, 같은 급 · 윗급에게] 기절 초) · stun_rank + stun_rank_sec(그 등급 이하 기절 초) · immune_lower(마무리까지 아랫급에게 무적). 첫 동작 · 프레임은 판별(3층). 뜻은 rules/기술.md. castle_M c339c6d 에서 옮김 (2026-10-26)",
+  "skills": [
+    {
+      "id": "offbeat2",
+      "name": "엇엇박 찌르기",
+      "cost_all": true,
+      "owner": "kimshin",
+      "rank_order": 1,
+      "weapons": ["칼", "쌍칼", "칼/총"],
+      "effects": {"lethal": "offbeat2", "self_cost": 0.2},
+      "desc": "두 번 멈칫한 뒤 찌른다. 5칸 이상 · 게이지 전부 · 피해는 쓴 칸에 비례(10칸 즉사) · 내 체력 1/5",
+      "src": "사용자 2026-10-17 · 2026-10-19"
+    },
+    {
+      "id": "offbeat",
+      "name": "엇박 찌르기",
+      "cost_k": 1.0,
+      "owner": "kimshin",
+      "rank_order": 2,
+      "min_rank": "내성 하위",
+      "weapons": ["칼", "쌍칼", "칼/총"],
+      "effects": {"lethal": "offbeat"},
+      "desc": "한 박자 멈췄다가 찌른다. 상대 등급에 따라 체력 1/3 ~ 즉사. 막기·쳐내기를 뚫는다",
+      "src": "사용자 2026-10-17 · 2026-10-19"
+    },
+    {
+      "id": "offbeat_rev",
+      "name": "반대발 엇박 찌르기",
+      "cost_k": 0.5,
+      "owner": "kimshin",
+      "rank_order": 3,
+      "weapons": ["칼", "쌍칼", "칼/총"],
+      "only": ["kimshin"],
+      "effects": {"lethal": "offbeat_rev"},
+      "desc": "발을 바꿔 디디며 찌른다. 엇박의 절반 효과(즉사 없음)",
+      "src": "사용자 2026-10-19"
+    },
+    {
+      "id": "offbeat_var",
+      "name": "엇박 변형",
+      "cost_k": 0.5,
+      "owner": "kimshin",
+      "rank_order": 4,
+      "weapons": ["칼", "쌍칼", "칼/총"],
+      "only": ["pyoyoung", "mahakyoung", "ryujihak"],
+      "effects": {"lethal": "offbeat_var"},
+      "desc": "옆으로 비틀어 찌른다. 엇박의 절반 효과(즉사 없음)",
+      "src": "사용자 2026-10-19"
+    },
+    {
+      "id": "kickarts",
+      "name": "각법",
+      "owner": "kimshin",
+      "effects": {"stun_rel_sec": [3.0, 1.0]},
+      "desc": "다리를 위로 들어 올렸다 내려찍는다. 맞으면 기절 — 아랫급 3초 · 같은 급 · 윗급 1초",
+      "src": "Phase 2 리뷰 2026-10-26"
+    },
+    {
+      "id": "vanish_step",
+      "name": "좌우로 사라지는 스텝",
+      "owner": "kimshin",
+      "effects": {"immune_lower": true},
+      "desc": "좌우로 사라지며(무적) 비켜 들어가 옆을 벤다. 아랫급에게는 옆베기까지 끝까지 무적",
+      "src": "Phase 2 리뷰 2026-10-26"
+    },
+    {
+      "id": "inch",
+      "name": "촌경",
+      "owner": "kimshin",
+      "weapons": ["맨손"],
+      "desc": "한 치 거리에서 내지르는 일격. 가드를 뚫고 날려 버린다",
+      "src": "castle_M 에서 처음 넣은 기술 (2026-10-16)"
+    },
+    {
+      "id": "triple",
+      "name": "리천식 삼연타",
+      "owner": "richeon",
+      "desc": "상대의 방심을 이용해 주먹으로 세 번. 총 · 칼/총을 들었으면 총을 내줘 상대가 잡는 사이 세게 친다(총을 잃는다)",
+      "src": "2026-10-19 아홉 번째 답 · Phase 2 리뷰 2026-10-26"
+    },
+    {
+      "id": "jin_original",
+      "name": "서진태 오리지널",
+      "owner": "jintae",
+      "weapons": ["칼", "쌍칼", "칼/총"],
+      "desc": "돌진해 난도질 6번 → 마무리 베기",
+      "src": "2026-10-19 아홉 번째 답"
+    },
+    {
+      "id": "roulette",
+      "name": "러시안 룰렛",
+      "cost": 0,
+      "owner": "jintae",
+      "passive": true,
+      "desc": "(패시브) 나와 같거나 높은 등급이 기술로 나를 치면 같은 피해를 그대로 돌려준다",
+      "src": "사용자 2026-10-17"
+    },
+    {
+      "id": "baek_sidekick",
+      "name": "백도찬식 옆차기",
+      "cost": 2.0,
+      "owner": "baekdochan",
+      "effects": {"stun_rank": "외성 중위", "stun_rank_sec": 5.0},
+      "desc": "옆차기. 맞으면 밀려나고, 외성 중위 이하는 5초 기절",
+      "src": "사용자 2026-10-19 여덟 · 아홉 번째 답"
+    },
+    {
+      "id": "baek_vital",
+      "name": "백도찬식 찌르기",
+      "owner": "baekdochan",
+      "weapons": ["칼", "쌍칼", "칼/총"],
+      "desc": "코어가 무너진 상태에서도 힘이 실린 급소 찌르기 — 빈틈 · 움찔 중에도 쓴다. 못 막는다",
+      "src": "사용자 2026-10-19 여덟 · 아홉 번째 답"
+    },
+    {
+      "id": "baek_wide",
+      "name": "살아있는 건 전부 죽여라",
+      "cost": 3.0,
+      "owner": "baekdochan",
+      "weapons": ["칼", "쌍칼", "칼/총"],
+      "desc": "주위를 세 번 휩쓸어 벤다. 못 막는다 — 백도찬이 전력일 때만 나온다",
+      "src": "사용자 2026-10-19 열 번째 답 (비용 잠정)"
+    },
+    {
+      "id": "jesus_zone",
+      "name": "예수존 총격술",
+      "cost": 3.0,
+      "owner": "akila",
+      "weapons": ["총", "칼/총"],
+      "effects": {"lethal": "jesus"},
+      "desc": "예수존(총 사거리보다 좁은 둘레) 안의 상대를 남들 한 번 쏠 틈에 세 발 맞힌다 — 셋이면 한 발씩, 하나면 세 발. 외성 하위 밑은 즉사, 외성 하위 90% · 중위 80% · 상위 70% · 내성 하위 50% · 중위 45% · 상위 40% · 톱 30%",
+      "src": "사용자 2026-10-20 열한 · 열두 번째 답"
+    }
+  ]
+}

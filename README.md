@@ -12,7 +12,15 @@ py -3.12 scripts/verify.py        # 가져오기 · 테스트 · 자동 결투 3
 ```
 
 APK 와 화면은 GitHub Actions 가 만든다(`.github/workflows/android.yml`): `build` 잡의 `castle_m3d-apk`(폰 · 에뮬레이터 겸용 APK)와
-`shots`(PC · 폰 크기 스크린샷), `emulator` 잡의 `emulator`(에뮬레이터 스크린샷 · logcat · FPS).
+`shots`(PC · 폰 크기 스크린샷), `emulator` 잡의 `emulator`(에뮬레이터 스크린샷 · logcat · FPS). run 확인 · 아티팩트 받기:
+
+```
+py -3.12 tools/ci.py runs                       # 최근 run
+py -3.12 tools/ci.py status                     # 가장 최근 run 의 잡 · 실패 단계 · 아티팩트 링크
+py -3.12 tools/ci.py fetch <run id> <폴더> shots  # 스크린샷 받기
+```
+
+Claude Code 는 이 폴더에서 따로 연다(2D 본편은 castle_M 폴더에서). 규칙은 `CLAUDE.md`.
 
 ## 조작
 
@@ -30,5 +38,6 @@ APK 와 화면은 GitHub Actions 가 만든다(`.github/workflows/android.yml`):
 
 - `src/combat/` 판정 · AI (순수 로직, 테스트 `tests/test_combat.gd`) — 수치 원본은 castle_M `castle_m/action/moves.py`
 - `src/view/` 3D 관절 인형 · 무대 · 연출 · 카메라, `src/ui/` 화면 표시 · 터치, `src/main.gd` 본체
-- 문서: `docs/P1_요구사항정의서_3D초안.md` · `docs/P1_설계서_3D초안.md` · `docs/P1_테스트결과서_3D초안.md`, 작업 규칙 `CLAUDE.md`
+- 문서: `docs/P1_요구사항정의서_3D초안.md` · `docs/P1_설계서_3D초안.md` · `docs/P1_테스트결과서_3D초안.md` · `docs/트러블슈팅.md`, 스크린샷 `docs/screenshots/P1/`, 작업 규칙 `CLAUDE.md`
+- `tools/ci.py` GitHub Actions 도우미(토큰은 Git Credential Manager 에서, 화면에 안 찍음)
 - 소리 · 음악은 castle_M `tools/gen_sfx.py` · `tools/music.py` 생성물을 복사했다. 글꼴 Galmuri11 Bold(SIL OFL 1.1, `assets/fonts/LICENSE.txt`)
