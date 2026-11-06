@@ -12,6 +12,14 @@ extends RefCounted
 const EVENT := "beat:yundeoksu"
 const PERIOD := "p1"
 
+## 원작 근거(castle_common canon — 장 데이터 검사 tests/unit/test_campaign.gd 가 id 가 canon 에 있는지 본다): 방 id →
+## fight(canon fights.json 대결 id, 싸움 없는 방은 "") · place(canon locations.json 장소 id)
+const CANON := {
+	"vlad_corridor": {"fight": "fight:gunter", "place": "vladivostok"},
+	"gunter_suite": {"fight": "fight:gunter", "place": "vladivostok"},
+	"vlad_night": {"fight": "", "place": "vladivostok"},
+}
+
 const HEROES := ["kimshin"]          # 김신 혼자 — 교대 없음
 const LINES := "ch0"                 # data/story/lines.json ch0
 const CROWD_ID := "gunter_guard"

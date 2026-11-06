@@ -11,6 +11,16 @@ extends RefCounted
 const EVENT := "raid:castle_hotel"
 const PERIOD := "hwajin"
 
+## 원작 근거(castle_common canon — 장 데이터 검사 tests/unit/test_campaign.gd 가 id 가 canon 에 있는지 본다): 방 id →
+## fight(canon fights.json 대결 id, 싸움 없는 방은 "") · place(canon locations.json 장소 id)
+const CANON := {
+	"hall28": {"fight": "fight:baekui_tower", "place": "castle_hotel"},
+	"hall71": {"fight": "fight:baekui_tower", "place": "castle_hotel"},
+	"corridor71": {"fight": "fight:baekui_tower", "place": "castle_hotel"},
+	"office_door": {"fight": "fight:kimshin_shingen", "place": "castle_hotel"},
+	"office": {"fight": "", "place": "castle_hotel"},
+}
+
 ## 장 표 칸(src/data/campaign.gd 가 장 id ch11 로 이 표를 고르고, src/combat/stage.gd 가 읽는다)
 const HEROES := ["kimshin", "woojin"]   # 조작하는 사람(교대 차례) — 둘 다 ROLES 에 moveset
 const LINES := "ch11"                    # data/story/lines.json 의 이 장 글 — <LINES>.start · .rooms.<방 id>.<때> · .down

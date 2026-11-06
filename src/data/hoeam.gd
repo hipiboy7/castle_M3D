@@ -19,6 +19,17 @@ extends RefCounted
 const EVENT := "beat:yundeoksu"      # 시점: 윤덕수를 이기기 전(김신 내성 중위 · 처음 기술)
 const PERIOD := "p1"
 
+## 원작 근거(castle_common canon — 장 데이터 검사 tests/unit/test_campaign.gd 가 id 가 canon 에 있는지 본다): 방 id →
+## fight(canon fights.json 대결 id, 싸움 없는 방은 "") · place(canon locations.json 장소 id)
+const CANON := {
+	"site_alley": {"fight": "fight:kimhyeokju", "place": "hoeamsi"},
+	"junkyard": {"fight": "fight:pyechajang", "place": "bujinpyechajang"},
+	"junkyard_dusk": {"fight": "fight:kimdaegeon_pyechajang", "place": "bujinpyechajang"},
+	"street": {"fight": "fight:jintae_ds", "place": "hoeamsi"},
+	"street_center": {"fight": "fight:yundeoksu", "place": "hoeamsi"},
+	"street_end": {"fight": "", "place": "hoeamsi"},
+}
+
 const HEROES := ["kimshin"]          # 김신 혼자 — 교대 없음(서진태는 아군 봇)
 const LINES := "ch1"
 const CROWD_ID := "ds_member"

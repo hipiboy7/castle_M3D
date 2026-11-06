@@ -16,9 +16,10 @@
   3. 자동 결투  godot --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 --seed S  (시드 1 · 2 · 3,
                게임 전체 — 무대 · 인형 · 연출 · 화면 표시까지 돌려 멈춤 · 스크립트 오류가 없는지)
   3. 11장 자동 판  같은 명령에 --mode stage (시드 1 · 2, 150초 — 호텔 캐슬 5방 · 여럿 · 교대 · 방 넘김 · 무대 다시 만들기)
+  3. 0 · 1장 자동 판  --mode ch0 (120초 — 프롤로그를 봇이 한 번은 깬다) · --mode ch1 (360초 — 회암시 6방 · 1인 판 · 아군 서진태)
   3. 리플레이    11장 seed 2 판의 입력 기록(--save-replay .tools/replay_stage2.json)을 다른 프로세스에서 --replay 로 다시 돌려
                끝 · 중간 해시(60프레임마다)가 같은지(src/combat/replay.gd — 결정성 · 멀티 ④ 바탕)
-  3. 그림 A · B   --art a · b(GLB 툰 모델 · 도트 빌보드, 김신 · 신겐)로 신겐 방 20초 · 성능 판 --crowd 30 20초 — 오류 없이 도는지
+  3. 그림 A · B   --art a · b(GLB 툰 모델 · 도트 빌보드)로 11장 신겐 방 · 1장 윤덕수 방 20초 · 성능 판 --crowd 30 20초 — 오류 없이 도는지
   4. 세이브     --save .tools/save_check.json 으로 처음 화면 그림 버튼(--events 60:art) → 파일 art=b → 다음 실행이 그것을 읽는다
   4. 흐름       ⓪ 게임 속도 ×1.5(--events 1:speed)도 ×1 과 같은 판(로직 프레임 열이 같다 — 1초에 도는 수만 다름)
                ① 일시정지 앞뒤가 같은 판 — seed 1 40초 와 42초 + 600 프레임에 2초 멈춤(--events 600:pause,720:resume)의 결과가 같다
@@ -317,6 +318,18 @@ def main():
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
                             "--seconds", "150", "--seed", str(seed)]
                            + (["--save-replay", REPLAY_FILE] if seed == 2 else []), stage_ok))
+    for ch, secs, need_win in (("ch0", 120, True), ("ch1", 360, False)):
+        def p1_ok(out, need_win=need_win):
+            m = re.search(r"^RESULT (.*)$", out, re.M)
+            if m is None:
+                return False, "RESULT 줄 없음"
+            r = json.loads(m.group(1))
+            last = r["last"]
+            ok = r.get("wins", 0) >= 1 or not need_win
+            return ok, f"이김 {r.get('wins', 0)} · 끝 판 {last['over'] or 'time'} · 방 {last['room']} · {last['times']}"
+        results.append(run(f"{ch[2:]}장 자동 판 seed 1 · {secs}초",
+                           [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", ch,
+                            "--seconds", str(secs), "--seed", "1"], p1_ok))
     if os.path.exists(os.path.join(ROOT, REPLAY_FILE)):
         def replay_ok(out):
             m = re.search(r"^REPLAY (.*)$", out, re.M)
@@ -330,6 +343,10 @@ def main():
         results.append(run(f"그림 {art.upper()} (11장 회장실 앞 · 20초)",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
                             "--room", "3", "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))
+    for art in ("a", "b"):
+        results.append(run(f"그림 {art.upper()} (1장 윤덕수 방 · 20초)",
+                           [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "ch1",
+                            "--room", "4", "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))
     results.append(run("성능 판 (28층 · 경호원 35명 · 20초)",
                        [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
                         "--crowd", "30", "--seconds", "20"], lambda out: (("RESULT" in out), "")))

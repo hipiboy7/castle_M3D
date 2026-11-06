@@ -16,6 +16,9 @@ const Common = preload("res://src/data/common.gd")
 ## 시기 키 — 11장(호텔 캐슬) = hwajin(화진 전 무렵), 12장 교회전 = church
 const PERIOD_CH11 := "hwajin"
 
+## 이름 없는 엑스트라(인물 표 · canon 에 없다 — 장 데이터 검사가 canon 인물 id 를 보지 않는 것)
+const EXTRAS := ["castle_guard", "gunter_guard", "ds_member", "ds_raider"]
+
 const CHARACTERS := {
 	"shingen": {"id": "shingen", "name": "사사키 신겐", "rank": "내성 상위", "weapons": ["맨손", "칼", "대도"],
 		"stats": {"힘": 88, "속도": 80, "기술": 85, "맷집": 90},

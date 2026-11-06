@@ -115,7 +115,7 @@ jobs:
           test -f build/castle_m3d.apk
           sha256sum build/castle_m3d.apk | tee build/castle_m3d.apk.sha256
 
-      # 공통 데이터는 시작할 때 읽는다(src/data/common.gd) — APK 에 json 5개가 있고 시험 전용 cases 는 없어야 한다
+      # 공통 데이터는 시작할 때 읽는다(src/data/common.gd) — APK 에 json 5개가 있고 시험 전용 cases · canon(장 데이터 검사용 0층, 14MB)은 없어야 한다
       - name: APK 에 공통 데이터(json)가 들었나
         run: |
           set -e
@@ -124,7 +124,8 @@ jobs:
             unzip -l build/castle_m3d.apk | grep -q "data/common/$f.json" || { echo "::error::APK 에 data/common/$f.json 이 없다"; exit 1; }
           done
           if unzip -l build/castle_m3d.apk | grep -q "data/common/cases/"; then echo "::error::시험 전용 cases 가 APK 에 들었다"; exit 1; fi
-          echo "APK 에 공통 데이터 json 5개 · cases 없음"
+          if unzip -l build/castle_m3d.apk | grep -q "data/common/canon/"; then echo "::error::검사 전용 canon 이 APK 에 들었다"; exit 1; fi
+          echo "APK 에 공통 데이터 json 5개 · cases · canon 없음"
 
       - uses: actions/upload-artifact@v7
         with:

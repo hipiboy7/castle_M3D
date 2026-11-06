@@ -165,3 +165,72 @@ func test_stages_of_chapter() -> void:
 	var s1 := Campaign.stages("ch1")
 	check(s1.size() == Hoeam.ROOMS.size() and str(s1[0]["title"]) != "", "1장 스테이지 = 방 %d %s" % [Hoeam.ROOMS.size(), s1])
 
+
+
+## canon 읽기(장 데이터 검사 전용 — data/common/canon/ 은 APK 에 안 들어간다: export_presets.cfg exclude_filter)
+func _canon_ids(file: String, key: String) -> Dictionary:
+	var j = JSON.parse_string(FileAccess.get_file_as_string("res://data/common/canon/%s.json" % file))
+	var out := {}
+	for e in (j[key] if j is Dictionary else j):
+		out[str(e["id"])] = e
+	return out
+
+
+## 장 데이터의 원작 id 검사(castle_common 요청 21 — 장 데이터의 무대 · 인물 · 대결 id · 대사 refs 가 canon 에 있다):
+## 방마다 CANON 칸(fight · place) · 방 사람(엑스트라 빼고)은 canon 인물 · 대결의 사람 중 하나는 방에 있다 · 대사 refs 의 화가 있다
+func test_chapter_canon_ids() -> void:
+	var fights := _canon_ids("fights", "fights")
+	var places := _canon_ids("locations", "locations")
+	var people := _canon_ids("characters", "characters")
+	check(fights.size() > 100 and places.size() > 50 and people.size() > 100, "canon 을 읽었다 %d · %d · %d" % [fights.size(), places.size(), people.size()])
+	for id in Campaign.playable_ids():
+		var T = Campaign.table(id)
+		if T == null:
+			continue
+		for room in T.ROOMS:
+			var rid := str(room["id"])
+			check(T.CANON.has(rid), "%s 방 %s 원작 근거(CANON)" % [id, rid])
+			var cn: Dictionary = T.CANON.get(rid, {})
+			var fid := str(cn.get("fight", ""))
+			check(places.has(str(cn.get("place", ""))), "%s 방 %s 장소 %s 가 canon 에" % [id, rid, cn.get("place")])
+			check(fid == "" or fights.has(fid), "%s 방 %s 대결 %s 가 canon 에" % [id, rid, fid])
+			check(fid != "" or room["enemies"].is_empty(), "%s 방 %s 적이 있으면 대결 id 가 있다" % [id, rid])
+			var who: Array = T.HEROES.duplicate()
+			for a in room["allies"] + room["enemies"]:
+				who.append(a[0])
+			for cid in who:
+				check(Addendum.EXTRAS.has(cid) or people.has(cid), "%s 방 %s 인물 %s 가 canon 에(엑스트라가 아니면)" % [id, rid, cid])
+			if fid != "" and fights.has(fid):
+				var actors: Array = fights[fid]["actors"]
+				check(who.any(func(c): return actors.has(c)), "%s 방 %s 의 사람 중 하나는 대결 %s 의 사람 %s" % [id, rid, fid, actors])
+	_check_refs(Lines.all(), "lines")
+
+
+## 대사 refs("056/039-040" · "p1:014/025-027")의 화가 canon episodes 에 있다
+func _check_refs(v, path: String) -> void:
+	if v is Dictionary:
+		for k in v:
+			if str(k) == "refs":
+				for r in v[k]:
+					check(_ep_exists(str(r)), "%s refs %s 의 화가 canon 에" % [path, r])
+			else:
+				_check_refs(v[k], path + "." + str(k))
+	elif v is Array:
+		for x in v:
+			if x is Array and x.size() > 0 and x.all(func(e): return e is String and _is_ref(e)):
+				for r in x:
+					check(_ep_exists(str(r)), "%s refs %s 의 화가 canon 에" % [path, r])
+			else:
+				_check_refs(x, path)
+
+
+func _is_ref(s: String) -> bool:
+	return RegEx.create_from_string("^(p1:)?\\d{3}(/[\\d@\\-]+)?$").search(s) != null
+
+
+func _ep_exists(r: String) -> bool:
+	var m := RegEx.create_from_string("^(p1:)?(\\d{3})").search(r)
+	if m == null:
+		return false
+	var f := ("p1_" if m.get_string(1) != "" else "") + m.get_string(2)
+	return FileAccess.file_exists("res://data/common/canon/episodes/%s.json" % f)
