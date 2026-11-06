@@ -76,8 +76,8 @@ const ROOMS := [
 			["ds_member", Vector2(3.6, 2.0)], ["ds_member", Vector2(4.6, -1.6)], ["gangmanjae", Vector2(4.4, 0.6)]],
 		"boss": "gangmanjae"},
 	{"id": "street_center", "theme": "hoeam_street", "bounds": Rect2(-6.0, -2.8, 12.0, 5.6),
-		"heroes": [Vector2(-3.6, 0.2)], "allies": [],
-		"enemies": [["yundeoksu", Vector2(2.6, 0.0)]], "boss": "yundeoksu"},
+		"heroes": [Vector2(-2.4, 1.4)], "allies": [],                   # 중앙선(z = 0)을 사이에 두고 마주 선다(p1:020/000-005)
+		"enemies": [["yundeoksu", Vector2(1.8, -1.4)]], "boss": "yundeoksu"},
 	{"id": "street_end", "theme": "hoeam_street", "bounds": Rect2(-5.0, -2.4, 10.0, 4.8),
 		"heroes": [Vector2(-1.6, 0.4)], "allies": [], "enemies": [], "boss": "", "end": true},
 ]
