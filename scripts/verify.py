@@ -16,6 +16,8 @@
   3. 자동 결투  godot --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 --seed S  (시드 1 · 2 · 3,
                게임 전체 — 무대 · 인형 · 연출 · 화면 표시까지 돌려 멈춤 · 스크립트 오류가 없는지)
   3. 11장 자동 판  같은 명령에 --mode stage (시드 1 · 2, 150초 — 호텔 캐슬 5방 · 여럿 · 교대 · 방 넘김 · 무대 다시 만들기)
+  3. 리플레이    11장 seed 2 판의 입력 기록(--save-replay .tools/replay_stage2.json)을 다른 프로세스에서 --replay 로 다시 돌려
+               끝 · 중간 해시(60프레임마다)가 같은지(src/combat/replay.gd — 결정성 · 멀티 ④ 바탕)
   3. 그림 A · B   --art a · b(GLB 툰 모델 · 도트 빌보드, 김신 · 신겐)로 신겐 방 20초 · 성능 판 --crowd 30 20초 — 오류 없이 도는지
   4. 흐름       ① 일시정지 앞뒤가 같은 판 — seed 1 40초 와 42초 + 600 프레임에 2초 멈춤(--events 600:pause,720:resume)의 결과가 같다
                ② 뒤로 버튼 · 앱 내려감 — 처음 화면 → 데모 → 뒤로 → 처음 → 누름 → 결투 → 내려감(멈춤) → 누름(계속) → 뒤로(멈춤) →
@@ -40,9 +42,10 @@ COMMON_SRC = os.environ.get("CASTLE_COMMON") or os.path.join(os.path.dirname(ROO
 ASSETS = os.path.join(ROOT, "assets")
 # CLAUDE.md 2-1절 TDD 등급 — 함수 단위 커버리지를 재는 파일 (main.gd 흐름은 노드가 있어 자동 결투 단계가 본다)
 COV_FILES = {
-    "A": ["src/data/common.gd", "src/data/skills.gd", "src/data/moves.gd", "src/data/addendum.gd", "src/data/lines.gd", "src/combat/world.gd", "src/combat/fighter.gd"],
+    "A": ["src/data/common.gd", "src/data/skills.gd", "src/data/moves.gd", "src/data/addendum.gd", "src/data/lines.gd", "src/combat/world.gd", "src/combat/fighter.gd", "src/combat/replay.gd"],
     "B": ["src/combat/duel.gd", "src/combat/boss_ai.gd", "src/combat/bot.gd", "src/combat/stage.gd", "src/combat/enemy_ai.gd"],
 }
+REPLAY_FILE = ".tools/replay_stage2.json"
 COV_MIN = {"A": 0.90, "B": 0.70}
 FUNC_RE = re.compile(r"^(\s*)(?:static\s+)?func\s+(\w+)\s*\(")
 BAD = re.compile(r"SCRIPT ERROR|^ERROR:|^WARNING:|Leaked|Parse Error", re.M)
@@ -279,7 +282,17 @@ def main():
             return True, f"{last['over'] or 'time'} · 방 {last['room']} · 넘은 방 {last['cleared']} · {last['times']}"
         results.append(run(f"11장 자동 판 seed {seed} · 150초",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
-                            "--seconds", "150", "--seed", str(seed)], stage_ok))
+                            "--seconds", "150", "--seed", str(seed)]
+                           + (["--save-replay", REPLAY_FILE] if seed == 2 else []), stage_ok))
+    if os.path.exists(os.path.join(ROOT, REPLAY_FILE)):
+        def replay_ok(out):
+            m = re.search(r"^REPLAY (.*)$", out, re.M)
+            return (m is not None and m.group(1).startswith("ok=true")), (m.group(1)[:100] if m else "REPLAY 줄 없음")
+        results.append(run("리플레이 (11장 seed 2 기록 → 다른 프로세스에서 재생)",
+                           [g, "--headless", "--path", ".", "--", "--replay", REPLAY_FILE], replay_ok))
+    else:
+        print(f"[FAIL] 리플레이 — {REPLAY_FILE} 가 안 생겼다")
+        results.append(False)
     for art in ("a", "b"):
         results.append(run(f"그림 {art.upper()} (11장 회장실 앞 · 20초)",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",

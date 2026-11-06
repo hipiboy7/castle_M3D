@@ -5,6 +5,7 @@
 **이 폴더에서 Claude Code 를 따로 열어 개발한다** — 3D 일은 이 폴더 세션에서, 2D 본편 일은 castle_M 폴더 세션에서(2026-10-26 사용자).
 이 문서만으로 일할 수 있게 썼다. 여기 없는 규칙은 개발 규격(받은 사본 `data/common/docs/개발규격/` — `캐슬_게임공통.md` · `게임개발규격.md`)의 해당 절을 찾아 읽는다(전체를 읽지 않는다). 우선순위: 사용자 답(기획서 00 결정 10 포함) → 이 문서 → 기획서(castle_common `docs/기획서/03`) → 규격.
 
+> 정정 이력: 2026-11-06 (5) — 1절 · 2-1절 replay(입력 리플레이 · 상태 해시).
 > 정정 이력: 2026-11-06 (4) — 리눅스 이전: 0절 개발 환경 실제 값 · 명령 `python3.11` · 2절 작업 서버 스크린샷(xvfb).
 > 정정 이력: 2026-11-06 (3) — 문서 최소화(사용자 "불필요한 문서작업은 다 없애자"): 5절 다시 씀 · 0-1절 4 · 2절 기록 줄.
 > 정정 이력: 2026-11-06 (2) — 2-1절 새로: agentic-sdlc 골격 2 · 3 · 5 · 13절(SOLID · TDD 등급 · 하드코딩 금지 · 도메인 품질)을 옮겨 적음 — 사용자 "현재 개발이 SOLID, TDD 기반 등 agentic-sdlc를 따르도록 되어있어?" → 따르지 않던 것을 적고 맞춤(`docs/기획_차이.md` 9-6).
@@ -40,7 +41,7 @@
 대화는 세션이 끝나면 사라진다. 이어받는 데 필요한 사실은 전부 저장소(이 문서 · 문서 · history · 커밋)에 둔다.
 
 ## 1. 구조
-- `src/combat/` 순수 로직(fighter · world · boss_ai · bot · duel(6장) · stage(11장 호텔 캐슬 — 방 · 여럿 · 교대) · enemy_ai(적 프로필)) — 노드 없음, 60프레임 고정, 같은 시드면 같은 결과. 시험 `tests/unit/`(A) · `tests/integration/`(B) · 공통 `tests/helpers.gd`
+- `src/combat/` 순수 로직(fighter · world · boss_ai · bot · duel(6장) · stage(11장 호텔 캐슬 — 방 · 여럿 · 교대) · enemy_ai(적 프로필) · replay(입력 기록 · 상태 해시 — 판 끝마다 `user://replay_last.json`, `--replay 경로` 로 재생)) — 노드 없음, 60프레임 고정, 같은 시드면 같은 결과. 시험 `tests/unit/`(A) · `tests/integration/`(B) · 공통 `tests/helpers.gd`
 - `src/data/common.gd` 공통 데이터 읽기 + 규칙 함수(castle_common `ref/rules.py` 와 같은 이름 · 인자, 시험 `tests/unit/test_common_cases.gd`), `skills.gd` 이 판의 기술 값(id → 동작 · 3층) · `moves.gd` 동작 표(3층) · `addendum.gd` **3D 덧붙임 1층**(castle_common 에 아직 없는 인물 · 기술 — 사용자 답 2026-11-06, 요청 16 ~ 19행) · `hotel.gd` 11장 방 · 역할(3층) · `lines.gd` 대사(`data/story/lines.json`)
 - `data/common/` 받은 사본(sync 가 쓴다 — json 5개는 APK 에 들어가고 `cases/` · `docs/` 는 안 들어간다)
 - `src/view/` 그림(puppet3d 관절 인형 · poses 각도 표 · looks 외형 표 · arena3d 부두 · hotel3d 호텔 층 · fx3d 연출 · event_fx 신호 → 연출 · sound · camera_rig) — 로직 상태를 읽기만 한다
@@ -74,7 +75,7 @@
 
   - 배치: A → `tests/unit/`, B → `tests/integration/`(`tests/run_tests.gd` 가 두 폴더를 돈다)
   - 커버리지: GDScript 는 줄 단위 도구가 없다 — **함수 단위**(A · B 파일의 함수 중 시험이 부르는 비율)를 verify '커버리지' 줄이 잰다(`.tools/cov/` 사본에 표시 줄을 넣어 돌림 · 기준 밑이면 실패 · 파일 목록 `scripts/verify.py` `COV_FILES`)
-  - 입력 리플레이 · 상태 해시(같은 입력 기록이면 같은 해시)는 멀티 ④ 의 바탕 — S2 에서 넣는다
+  - 입력 리플레이 · 상태 해시(같은 입력 기록이면 같은 해시)는 멀티 ④ 의 바탕 — `src/combat/replay.gd`(2026-11-06). 사람 입력은 양자화해서 판에 넣고, 봇도 입력(intent)으로만 움직인다(판 상태를 직접 바꾸지 않는다)
 - **하드코딩 금지**: 경로는 상대(`res://` · `../castle_common`), 환경마다 다른 값은 환경 변수(`GODOT` · `CASTLE_COMMON`), 비밀 없음(디버그 키는 0절 예외). 도메인 상수는 그 파일 머리 `const` 한 곳, 3층 조정 값은 표. 대사는 `data/story/lines.json`(원작 인용은 refs 화/컷). 재현성 값(시드)은 고정
 - **도메인 품질**(골격 13절): 판정 결정성(60Hz 고정 · 시드 하나) · 받은 공통 데이터는 손대지 않음(도장 — verify) · 자산 출처(`assets/ASSETS.md` — verify) · 원작 신뢰도(canon `conf: ai` 는 연출에만, 근거 주석에 표시) · 성능 예산(`docs/성능.md` — 실기 FPS, 다음 단계) · 세이브는 아직 없음(생기면 형식 버전 · 옛 세이브 시험)
 

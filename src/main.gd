@@ -9,6 +9,8 @@ extends Node3D
 ##   --touch PC 에서도 터치 버튼 · --room N stage 를 N번 방부터 · --crowd N 28층에 경호원 N명 더(성능 점검)
 ##   --art puppet|a|b 그림(김신 · 신겐만 — a = GLB 툰 모델 · b = 도트 빌보드, 기획서 03 5절). 처음 화면 '그림' 버튼 · 3 키로도 바꾼다
 ##   --safe L,T,R,B 안전 영역 여백(기준 화면 단위 — 노치 · 제스처 바 흉내) · --trace 흐름 줄(MODE · PAUSE)을 창 없이도 찍는다
+##   --save-replay 경로 --seconds 로 끝날 때 마지막 판의 입력 기록을 저장 · --replay 경로 기록을 창 없이 다시 돌려 해시를 견주고 끝
+##     (combat/replay.gd — 판이 끝날 때마다 user://replay_last.json 에도 남긴다: 폰에서 생긴 버그를 그대로 재현)
 ##   --events 프레임:동작,… 그 프레임에 동작을 흉내 — back(뒤로 버튼) · press(아무 버튼) · pause · resume(일시정지 버튼) ·
 ##            hide · show(앱이 내려감 · 돌아옴) · swap(교대). scripts/verify.py '흐름' 단계가 쓴다
 ## 창 없이 점검: <godot> --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 [--mode stage]
@@ -16,6 +18,7 @@ extends Node3D
 
 const Duel = preload("res://src/combat/duel.gd")
 const Stage = preload("res://src/combat/stage.gd")
+const Replay = preload("res://src/combat/replay.gd")
 const Hotel = preload("res://src/data/hotel.gd")
 const Lines = preload("res://src/data/lines.gd")
 const Puppet = preload("res://src/view/puppet3d.gd")
@@ -37,9 +40,10 @@ const SafeArea = preload("res://src/ui/safe_area.gd")
 const DEMO_AFTER := 360
 const SHOT_WARMUP := 3          # --shots: 찍을 프레임 바로 앞 몇 프레임만 그린다
 const MINI_Y := 2.45            # 적 머리 위 작은 막대 높이(m, 몸 크기만큼 더)
+const REPLAY_LAST := "user://replay_last.json"
 
 var args := {"autoplay": false, "seconds": 0.0, "seed": 1, "shots": [], "shot_dir": "", "touch": false, "trace": false,
-	"events": {}, "mode": "duel", "room": 0, "crowd": 0, "art": "puppet"}
+	"events": {}, "mode": "duel", "room": 0, "crowd": 0, "art": "puppet", "replay": "", "save_replay": ""}
 var paused := false
 var _fake_press := false
 var _fake_swap := false
@@ -48,6 +52,7 @@ var mode := "title"
 var kind := "duel"              # 지금 판 종류 (duel · stage)
 var demos := 0
 var d: Dictionary = {}
+var rec: Dictionary = {}        # 지금 판의 입력 기록(combat/replay.gd)
 var seed_now := 1
 var frames := 0
 var fps_log_ms := 0
@@ -68,6 +73,9 @@ func _ready() -> void:
 	headless = DisplayServer.get_name() == "headless"
 	process_mode = Node.PROCESS_MODE_ALWAYS        # 일시정지(get_tree().paused) 중에도 본체 · 화면 표시 · 터치는 돈다 — 무대 · 인형 · 연출 · 소리는 멈춘다
 	_parse_args()
+	if str(args["replay"]) != "":
+		_play_replay(str(args["replay"]))
+		return
 	_setup_input()
 	fx = Fx.new()
 	fx.process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -133,6 +141,12 @@ func _parse_args() -> void:
 				for ev in a[i].split(","):
 					var kv := ev.split(":")
 					args["events"][int(kv[0])] = kv[1]
+			"--replay":
+				i += 1
+				args["replay"] = a[i]
+			"--save-replay":
+				i += 1
+				args["save_replay"] = a[i]
 			"--seconds":
 				i += 1
 				args["seconds"] = float(a[i])
@@ -169,10 +183,13 @@ func _setup_input() -> void:
 # 판 · 무대 · 인형
 func _new_run(k: String) -> void:
 	kind = k
+	var opts := {}
 	if kind == "stage":
-		d = Stage.make(seed_now, {"room": int(args["room"]), "crowd": int(args["crowd"])})
+		opts = {"room": int(args["room"]), "crowd": int(args["crowd"])}
+		d = Stage.make(seed_now, opts)
 	else:
 		d = Duel.make(seed_now)
+	rec = Replay.start(kind, seed_now, opts)
 	_build_stage_view()
 	d["world"].events = d["world"].events.filter(func(e): return e[0] != "room")   # 첫 방은 위에서 이미 그렸다
 
@@ -423,7 +440,8 @@ func _physics_process(_dt: float) -> void:
 				return
 			# 슬로모션(백도찬 첫 엇박): 로직을 두 화면에 한 번만 돌린다
 			if d["world"].slowmo <= 0 or frames % 2 == 1:
-				var it = null if mode == "demo" else _player_intent()
+				var it = null if mode == "demo" else Replay.quantize(_player_intent())   # 양자화한 입력으로 돌려야 재생이 같다
+				Replay.add(rec, d, it)
 				if kind == "stage":
 					Stage.step(d, it)
 				else:
@@ -488,6 +506,7 @@ func _after_tick() -> void:
 func _end_fight(result: String) -> void:
 	mode = "result"
 	mode_t = 0
+	_save_replay(REPLAY_LAST)
 	touch.show_swap = false
 	results.append(_summary())
 	var key := "ch6" if kind == "duel" else "ch11"
@@ -568,6 +587,8 @@ func _shots() -> void:
 
 
 func _finish_run() -> void:
+	if str(args["save_replay"]) != "":
+		_save_replay(str(args["save_replay"]))
 	results.append(_summary())
 	var wins := 0
 	for r in results:
@@ -576,3 +597,28 @@ func _finish_run() -> void:
 	print("RESULT ", JSON.stringify({"frames": frames, "fights": fights, "wins": wins, "last": results[-1]}))
 	set_physics_process(false)
 	get_tree().quit(0)
+
+
+func _save_replay(path: String) -> void:
+	if rec.is_empty() or (rec["hash"] != 0 and path == REPLAY_LAST):
+		return                                     # 이미 끝낸 기록(결과 화면에서 다시 부름)
+	Replay.finish(rec, d)
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	if f == null:
+		print("REPLAY_SAVE error %d %s" % [FileAccess.get_open_error(), path])
+		return
+	f.store_string(JSON.stringify(rec))
+	f.close()
+	print("REPLAY_SAVE %s frames=%d hash=%d" % [path, rec["inputs"].size(), rec["hash"]])
+
+
+## --replay: 기록을 다시 돌려 끝 · 중간 해시를 견준다 → REPLAY ok=… 줄을 찍고 끝(같으면 0, 다르면 1)
+func _play_replay(path: String) -> void:
+	set_physics_process(false)
+	set_process(false)
+	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var out := {"ok": false, "error": "기록을 못 읽음 " + path, "frames": 0, "hash": 0}
+	if data is Dictionary:
+		out = Replay.play(data)
+	print("REPLAY ok=%s frames=%d hash=%d %s" % [str(out["ok"]), out["frames"], out["hash"], out["error"]])
+	get_tree().quit(0 if out["ok"] else 1)

@@ -64,7 +64,7 @@ func decide() -> Dictionary:
 			var ob2: int = me.skill_index("offbeat2")
 			if str(src.move["lethal"]) == "offbeat" and ob2 >= 0 and me.can_act() and me.can_pay(me.skills[ob2]) \
 					and rng.randf() < 0.5:
-				me.skill_idx = ob2
+				it["skill_pick"] = ob2
 				it["skill"] = true
 				return it
 			if rng.randf() < skill:
@@ -76,7 +76,7 @@ func decide() -> Dictionary:
 	skill_cd -= 1
 	var sk := _pick_skill(d)
 	if sk >= 0:
-		me.skill_idx = sk                        # '기술 바꾸기'를 그만큼 누른 것과 같다
+		it["skill_pick"] = sk                    # '기술 바꾸기'를 그만큼 누른 것과 같다 — 봇도 입력(intent)으로만 움직인다(리플레이 · 멀티)
 		it["skill"] = true
 		skill_cd = 240
 		return it

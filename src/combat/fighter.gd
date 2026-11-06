@@ -174,8 +174,17 @@ func buffer_inputs() -> void:
 		buf_roll = ROLL_BUFFER
 	if intent.get("skill", false):
 		buf_skill = ATTACK_BUFFER
-	if intent.get("skill_next", false) and not skills.is_empty():
+	_pick_skill_input()
+
+
+## 기술 고르기 입력: skill_next(다음으로 한 칸) · skill_pick(번호로 바로 — 봇)
+func _pick_skill_input() -> void:
+	if skills.is_empty():
+		return
+	if intent.get("skill_next", false):
 		skill_idx = (skill_idx + 1) % skills.size()
+	if intent.has("skill_pick") and int(intent["skill_pick"]) >= 0:
+		skill_idx = clampi(int(intent["skill_pick"]), 0, skills.size() - 1)
 
 
 func _decay_buffers() -> void:
@@ -195,8 +204,7 @@ func tick() -> void:
 		counter_ready -= 1
 	if flick_t > 0:
 		flick_t -= 1
-	if intent.get("skill_next", false) and not skills.is_empty():
-		skill_idx = (skill_idx + 1) % skills.size()
+	_pick_skill_input()
 	_decay_buffers()
 	# 빈틈 · 움찔 중에도 쓰는 기술 (백도찬식 찌르기 — Move.any_state)
 	var use: String = intent.get("use", "")
