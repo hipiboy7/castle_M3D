@@ -8,6 +8,7 @@ const Addendum = preload("res://src/data/addendum.gd")
 const EnemyAI = preload("res://src/combat/enemy_ai.gd")
 const Looks = preload("res://src/view/looks.gd")
 const Lines = preload("res://src/data/lines.gd")
+const Hotel = preload("res://src/data/hotel.gd")
 
 
 func _has_event(ev: String) -> bool:
@@ -127,4 +128,15 @@ func test_save_speed() -> void:
 	check(float(Save.parse('{"v": 1, "speed": 2}')["save"]["speed"]) == 2.0, "고른 속도는 남는다(JSON 정수 2 도)")
 	check(float(Save.parse('{"v": 1, "speed": 9}')["save"]["speed"]) == 1.0, "고를 수 없는 속도는 ×1")
 	check(Save.speed_label(1.0) == "×1" and Save.speed_label(1.5) == "×1.5" and Save.speed_label(2.0) == "×2", "버튼 글")
+
+
+## 스테이지 고르기(사용자 2026-11-06 "메뉴 · 선택 같은 거 … 스테이지 넘어갈 수 있게") — 장 안의 방 목록
+func test_stages_of_chapter() -> void:
+	var st := Campaign.stages("ch11")
+	check(st.size() == Hotel.ROOMS.size(), "11장 스테이지 = 방 다섯 %s" % [st])
+	check(int(st[0]["room"]) == 0 and str(st[0]["title"]) == "28층 중앙홀", "첫 스테이지 이름은 방 들어서는 글 %s" % st[0])
+	check(int(st[3]["room"]) == 3 and str(st[3]["title"]).contains("회장실"), "넷째 = 회장실 앞 %s" % st[3])
+	var d6 := Campaign.stages("ch6")
+	check(d6.size() == 1 and int(d6[0]["room"]) == 0 and str(d6[0]["title"]) != "", "결투 장은 스테이지 하나 %s" % [d6])
+	check(Campaign.stages("ch0").is_empty() and Campaign.stages("nope").is_empty(), "준비 중 · 없는 장은 스테이지 없음")
 

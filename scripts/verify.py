@@ -22,6 +22,7 @@
   4. 세이브     --save .tools/save_check.json 으로 처음 화면 그림 버튼(--events 60:art) → 파일 art=b → 다음 실행이 그것을 읽는다
   4. 흐름       ⓪ 게임 속도 ×1.5(--events 1:speed)도 ×1 과 같은 판(로직 프레임 열이 같다 — 1초에 도는 수만 다름)
                ① 일시정지 앞뒤가 같은 판 — seed 1 40초 와 42초 + 600 프레임에 2초 멈춤(--events 600:pause,720:resume)의 결과가 같다
+               ③ 싸움 중 메뉴(스테이지 고르기) — 6장 싸움 → 메뉴 → 11장 → 넷째 스테이지(회장실 앞)에서 시작 → 메뉴 → 계속
                ② 뒤로 버튼 · 앱 내려감 — 처음 화면 → 데모 → 뒤로 → 처음 → 누름 → 결투 → 내려감(멈춤) → 누름(계속) → 뒤로(멈춤) →
                뒤로(처음 화면) 순서가 --trace 줄에 나온다 (src/ui/nav.gd · main.gd _back · _app_hidden)
 출력에 SCRIPT ERROR · ERROR: · WARNING: · Leaked 가 하나라도 있으면 실패.
@@ -220,6 +221,9 @@ def step_coverage(g):
 
 
 FLOW_EVENTS = "400:back,500:press,700:hide,760:show,800:press,900:back,960:back"
+MENU_EVENTS = "30:press,120:menu,150:menupick_ch11,180:menupick_room3,400:menu,430:menupick_resume"
+MENU_WANT = ["STAGE ch6 room=0", "MODE title", "STAGE ch6 room=0", "MODE fight", "MENU on", "MENU off", "STAGE ch11 room=3",
+             "MODE fight", "MENU on", "MENU off"]
 FLOW_WANT = ["MODE title", "MODE demo", "MODE title", "MODE fight", "PAUSE on", "PAUSE off", "PAUSE on", "PAUSE off", "MODE title"]
 
 
@@ -230,13 +234,15 @@ def step_flow(g):
     def grab(key, extra):
         def chk(out):
             m = re.search(r"^RESULT (.*)$", out, re.M)
-            got[key] = (json.loads(m.group(1)) if m else None, re.findall(r"^(MODE \w+|PAUSE \w+)", out, re.M))
+            got[key] = (json.loads(m.group(1)) if m else None, re.findall(r"^(MODE \w+|PAUSE \w+)", out, re.M),
+                        re.findall(r"^(MODE \w+|MENU \w+|STAGE \w+ room=\d+)", out, re.M))
             return m is not None, ""
         return run(f"흐름 {key}", base + ["--"] + extra, chk, timeout=300)
     ok = grab("멈춤 없음", ["--autoplay", "--seconds", "40", "--seed", "1"])
     ok &= grab("2초 멈춤", ["--autoplay", "--seconds", "42", "--seed", "1", "--trace", "--events", "600:pause,720:resume"])
     ok &= grab("속도 ×1.5", ["--autoplay", "--seconds", "40", "--seed", "1", "--events", "1:speed"])
     ok &= grab("뒤로 · 내려감", ["--seconds", "16", "--trace", "--events", FLOW_EVENTS])
+    ok &= grab("메뉴 · 스테이지", ["--seconds", "12", "--trace", "--events", MENU_EVENTS])
     if not ok:
         return False
     a, b = got["멈춤 없음"][0], got["2초 멈춤"][0]
@@ -245,10 +251,13 @@ def step_flow(g):
     same_speed = all(c[k] == a[k] for k in ("frames", "fights", "wins", "last")) and c["draws"] < a["draws"] * 0.75
     seq = got["뒤로 · 내려감"][1]
     seq_ok = seq == FLOW_WANT
-    good = same and same_speed and seq_ok and got["2초 멈춤"][1].count("PAUSE on") == 1
+    menu_seq = got["메뉴 · 스테이지"][2]
+    menu_ok = menu_seq == MENU_WANT and got["메뉴 · 스테이지"][0]["last"].get("room") == "office_door"
+    good = same and same_speed and seq_ok and menu_ok and got["2초 멈춤"][1].count("PAUSE on") == 1
     msg = ("멈춘 앞뒤 같은 판" if same else f"멈춘 판이 다르다 {a['last']} / {b['last']}") + " · " + \
         ("속도 ×1.5 도 같은 판" if same_speed else f"속도를 바꾸니 판이 다르다 {c} / {a}") + " · " + \
-        ("뒤로 · 내려감 순서 맞음" if seq_ok else f"순서가 다르다: {seq}")
+        ("뒤로 · 내려감 순서 맞음" if seq_ok else f"순서가 다르다: {seq}") + " · " + \
+        ("메뉴로 11장 회장실 앞" if menu_ok else f"메뉴 순서가 다르다: {menu_seq}")
     print(f"[{'ok' if good else 'FAIL'}] 흐름 — {msg}")
     return good
 

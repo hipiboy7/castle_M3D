@@ -66,3 +66,19 @@ static func title(id: String):
 static func from_mode(m: String) -> String:
 	var id: String = MODE_ALIAS.get(m, m)
 	return id if playable(id) else ""
+
+
+## 장 안의 스테이지(싸움 중 메뉴로 바로 가는 자리) — [{"room": 방 번호, "title": 이름}]. 여러 사람 판 = 장 표의 방
+## (이름 = lines.json <LINES>.rooms.<방 id>.enter 의 첫 글), 결투 = 하나(장 이름), 준비 중 · 없는 장 = 없음
+static func stages(id: String) -> Array:
+	var out: Array = []
+	match kind(id):
+		"duel":
+			out.append({"room": 0, "title": str(title(id)[0])})
+		"stage":
+			var T = table(id)
+			for i in T.ROOMS.size():
+				var v = Lines.at("%s.rooms.%s.enter" % [T.LINES, T.ROOMS[i]["id"]])
+				out.append({"room": i, "title": str(v[0]) if v is Array else str(T.ROOMS[i]["id"])})
+	return out
+

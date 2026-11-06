@@ -40,6 +40,7 @@ const Hud = preload("res://src/ui/hud.gd")
 const Touch = preload("res://src/ui/touch_ui.gd")
 const Nav = preload("res://src/ui/nav.gd")
 const TitleMenu = preload("res://src/ui/title_menu.gd")
+const StageMenu = preload("res://src/ui/stage_menu.gd")
 const SafeArea = preload("res://src/ui/safe_area.gd")
 
 const DEMO_AFTER := 360
@@ -64,6 +65,11 @@ var save := {}                  # 세이브(src/data/save.gd) — save_path 가 
 var save_path := ""
 var last_win := false           # 결과 화면: 이겼으면 누르면 처음 화면(이어하기가 다음 장), 졌으면 다시
 var menu: Control
+var smenu: Control              # 싸움 중 메뉴 — 스테이지 고르기(src/ui/stage_menu.gd)
+var menu_open := false
+var menu_ch := ""               # 메뉴에서 고른 장(아래 줄 스테이지가 이 장의 것)
+var run_room := 0               # 이 판을 시작한 방(0 이 아니면 — 메뉴로 중간부터 — 깬 장으로 안 친다)
+var _fake_menu := ""
 var demos := 0
 var d: Dictionary = {}
 var rec: Dictionary = {}        # 지금 판의 입력 기록(combat/replay.gd)
@@ -106,6 +112,9 @@ func _ready() -> void:
 	menu.visible = false
 	touch = Touch.new()
 	hud.root.add_child(touch)
+	smenu = StageMenu.new()
+	hud.root.add_child(smenu)                       # 터치 버튼 위에 덮는다(열리면 싸움 버튼은 숨김)
+	smenu.visible = false
 	touch.visible = args["touch"] or DisplayServer.is_touchscreen_available()
 	snd = Sound.new()
 	add_child(snd)
@@ -191,7 +200,7 @@ func _setup_input() -> void:
 		"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_L, KEY_C],
 		"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B], "pause": [KEY_ESCAPE, KEY_P], "swap": [KEY_TAB, KEY_Q],
 		"pick_1": [KEY_1], "pick_2": [KEY_2], "art": [KEY_3], "bench": [KEY_4], "accept": [KEY_ENTER, KEY_KP_ENTER],
-		"speed": [KEY_F],
+		"speed": [KEY_F], "menu": [KEY_M],
 	}
 	for act in keys:
 		if not InputMap.has_action(act):
@@ -204,12 +213,15 @@ func _setup_input() -> void:
 
 # ----------------------------------------------------------------------
 # 판 · 무대 · 인형
-func _new_run(ch: String) -> void:
+## 판 만들기 — room: 시작 방(-1 = 실행 인자 --room, 메뉴의 스테이지 고르기는 그 방 번호)
+func _new_run(ch: String, room := -1) -> void:
 	chapter = ch
 	kind = Campaign.kind(ch)
+	run_room = int(args["room"]) if room < 0 else room
+	_trace("STAGE %s room=%d frame=%d" % [ch, run_room, frames])
 	var opts := {}
 	if kind == "stage":
-		opts = {"chapter": ch, "room": int(args["room"]), "crowd": int(args["crowd"])}
+		opts = {"chapter": ch, "room": run_room, "crowd": int(args["crowd"])}
 		d = Stage.make(seed_now, opts)
 	else:
 		d = Duel.make(seed_now)
@@ -338,7 +350,9 @@ func _set_paused(on: bool) -> void:
 
 ## Android 뒤로 버튼(project.godot quit_on_go_back=false) · 흐름은 src/ui/nav.gd
 func _back() -> void:
-	match Nav.on_back(mode, paused):
+	match Nav.on_back(mode, paused, menu_open):
+		"close_menu":
+			_set_menu(false)
 		"pause":
 			_set_paused(true)
 		"title":
@@ -352,7 +366,7 @@ func _back() -> void:
 ## 앱이 내려가면(홈 · 전화 · 화면 끔) 소리를 끄고, 사람이 싸우는 중이면 멈춘다. 돌아오면 소리만 켠다(멈춤은 사람이 푼다)
 func _app_hidden(hidden: bool) -> void:
 	AudioServer.set_bus_mute(0, hidden)
-	if hidden and Nav.pause_on_hide(mode, paused):
+	if hidden and not menu_open and Nav.pause_on_hide(mode, paused):      # 메뉴가 열려 있으면 이미 멈춰 있다
 		_set_paused(true)
 
 
@@ -393,6 +407,12 @@ func _scripted() -> void:
 		"speed":
 			save["speed"] = Save.next_speed(float(save["speed"]))
 			_apply_speed()
+		"menu":
+			if mode == "fight":
+				_set_menu(true)
+		var act:
+			if str(act).begins_with("menupick_"):           # menupick_ch11 · menupick_room3 · menupick_resume · menupick_title
+				_fake_menu = str(act).substr(9)
 
 
 func _pressed_anything() -> bool:
@@ -493,6 +513,80 @@ func _load_save() -> void:
 	_trace("SAVE %s art=%s cleared=%s" % [p["state"], save["art"], ",".join(save["cleared"].keys())])
 
 
+## 싸움 중 메뉴(스테이지 고르기) 열기 · 닫기 — 열린 동안 판은 멈춘다(무대 · 인형 · 연출 · 소리 PAUSABLE), 싸움 버튼은 숨긴다
+func _set_menu(on: bool) -> void:
+	if on == menu_open:
+		return
+	menu_open = on
+	get_tree().paused = on
+	touch.take_edges()
+	touch.show_fight = not on
+	touch.show_pause = not on
+	touch.show_swap = not on and kind == "stage"
+	if on:
+		menu_ch = chapter
+		hud.message("", "", 0.0)                    # 가운데 알림(시작 글 등)이 메뉴 카드 밑으로 비치지 않게
+		_fill_stage_menu()
+	smenu.visible = on
+	_trace("MENU %s frame=%d" % ["on" if on else "off", frames])
+
+
+func _fill_stage_menu() -> void:
+	var ml = Lines.at("menu")
+	smenu.heading = str(ml["heading"])
+	smenu.buttons = {"resume": str(ml["resume"]), "title": str(ml["title"])}
+	smenu.chapters = []
+	for id in Campaign.ids():
+		smenu.chapters.append({"id": id, "title": str(Campaign.title(id)[0]), "open": Save.unlocked(save, id)})
+	smenu.picked = menu_ch
+	var now := int(d.get("room_i", 0)) if kind == "stage" else 0
+	smenu.stages = []
+	for st in Campaign.stages(menu_ch):
+		st["now"] = menu_ch == chapter and int(st["room"]) == now
+		smenu.stages.append(st)
+	smenu.refresh()
+
+
+## 메뉴가 열린 동안의 입력: 카드 · 버튼 누름(터치 · 마우스), 1 · 2 키 = 첫째 · 둘째 스테이지, M · Esc = 계속, --events menupick_*
+func _menu_input() -> void:
+	var pick := ""
+	if _fake_menu != "":
+		var f := _fake_menu
+		_fake_menu = ""
+		pick = ("room:" + f.substr(4)) if f.begins_with("room") else ("ch:" + f if f.begins_with("ch") else f)
+	elif Input.is_action_just_pressed("menu") or Input.is_action_just_pressed("pause"):
+		pick = "resume"
+	else:
+		for k in 2:
+			if Input.is_action_just_pressed("pick_%d" % (k + 1)):
+				pick = "room:%d" % k
+		var e: Dictionary = touch.take_edges()
+		var at := Vector2(-1, -1)
+		if e.has("tap"):
+			at = touch.last_tap
+		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and not _mouse_was:
+			at = get_viewport().get_mouse_position()
+		_mouse_was = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+		if at.x >= 0.0:
+			pick = smenu.hit(at)
+	if pick.begins_with("ch:"):
+		var id := pick.substr(3)
+		if Save.unlocked(save, id):
+			menu_ch = id
+			_fill_stage_menu()
+	elif pick.begins_with("room:"):
+		var room := int(pick.substr(5))
+		_set_menu(false)
+		_new_run(menu_ch, room)
+		_start("fight")
+	elif pick == "resume":
+		_set_menu(false)
+	elif pick == "title":
+		_set_menu(false)
+		_new_run(Save.next_chapter(save))
+		_enter_title()
+
+
 ## 게임 속도: 싸우는 동안(데모 포함)만 — 물리 틱(= 로직 프레임 한 번, 판정은 60Hz 고정 한 칸)을 1초에 60 · 90 · 120 번으로 하고
 ## (Engine.time_scale 만으로는 틱 수가 안 늘어난다 — delta 만 커진다), time_scale 도 같이 올려 그림 · 연출 시간을 맞춘다.
 ## 판정 · 리플레이 · 시드 결과는 그대로(같은 로직 프레임 열 — verify '흐름'). 처음 화면 · 결과는 ×1
@@ -518,6 +612,11 @@ func _write_save() -> void:
 func _physics_process(_dt: float) -> void:
 	frames += 1
 	_scripted()
+	if menu_open:
+		_menu_input()
+		_shots()
+		_check_seconds()
+		return
 	if paused:
 		# 멈춤: 아무 버튼(또는 일시정지 버튼 · Esc)이면 계속. 로직 · mode_t 는 세지 않는다(멈춘 앞뒤가 같은 판 — verify '흐름')
 		var e: Dictionary = touch.take_edges()
@@ -529,6 +628,9 @@ func _physics_process(_dt: float) -> void:
 	if mode == "fight" and (Input.is_action_just_pressed("pause") or touch.peek_edge("pause")):
 		touch.take_edges()
 		_set_paused(true)
+		return
+	if mode == "fight" and (Input.is_action_just_pressed("menu") or touch.take_edge("menu")):
+		_set_menu(true)
 		return
 	if mode == "fight" and (Input.is_action_just_pressed("speed") or touch.take_edge("speed")):
 		save["speed"] = Save.next_speed(float(save["speed"]))
@@ -642,7 +744,7 @@ func _end_fight(result: String) -> void:
 	results.append(_summary())
 	var key: String = "ch6" if kind == "duel" else str(d["tbl"].LINES)
 	last_win = result == "win" and played
-	if last_win:
+	if last_win and run_room == 0:                     # 메뉴로 중간 스테이지부터 한 판은 깬 장으로 안 친다
 		Save.record_clear(save, chapter, int(d["world"].frame))
 		_write_save()
 	if result == "win":
@@ -677,7 +779,7 @@ func _process(dt: float) -> void:
 	if kind == "stage":
 		partner = d["heroes"][1 - int(d["ctrl"])]
 	var phase: int = d["boss"].phase if d["boss"] != null else 1
-	if paused:
+	if paused or menu_open:
 		hud.update_bars(d["hero"], d["boss"], phase, 0.0, partner)     # 접기 · 펴기에 자리만 다시 잡는다
 		return
 	evfx.tick_later(dt)

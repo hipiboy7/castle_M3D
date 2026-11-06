@@ -3,9 +3,11 @@ extends RefCounted
 ## tests/unit/test_ui_logic.gd. 개발 규격 게임개발규격 5절(뒤로 버튼 · 수명주기).
 
 
-## 뒤로 버튼: 결투 중이면 멈추고, 멈춘 화면 · 데모 · 결과에서는 처음 화면, 처음 화면에서는 끝낸다
-## 돌려주는 값: "pause" · "title" · "quit"
-static func on_back(mode: String, paused: bool) -> String:
+## 뒤로 버튼: 싸움 중 메뉴(스테이지 고르기)가 열려 있으면 닫고 계속, 결투 중이면 멈추고, 멈춘 화면 · 데모 · 결과에서는 처음 화면,
+## 처음 화면에서는 끝낸다. 돌려주는 값: "close_menu" · "pause" · "title" · "quit"
+static func on_back(mode: String, paused: bool, menu_open := false) -> String:
+	if menu_open:
+		return "close_menu"
 	if mode == "fight" and not paused:
 		return "pause"
 	if mode == "title":

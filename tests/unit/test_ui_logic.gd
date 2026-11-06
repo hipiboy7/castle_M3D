@@ -4,6 +4,7 @@ extends "res://tests/helpers.gd"
 const SafeArea = preload("res://src/ui/safe_area.gd")
 const Nav = preload("res://src/ui/nav.gd")
 const TitleMenu = preload("res://src/ui/title_menu.gd")
+const StageMenu = preload("res://src/ui/stage_menu.gd")
 
 
 func test_safe_insets_scale_to_view() -> void:
@@ -22,6 +23,7 @@ func test_back_button_flow() -> void:
 	check(Nav.on_back("demo", false) == "title", "데모에서 뒤로 = 처음 화면")
 	check(Nav.on_back("result", false) == "title", "결과에서 뒤로 = 처음 화면")
 	check(Nav.on_back("title", false) == "quit", "처음 화면에서 뒤로 = 끝내기")
+	check(Nav.on_back("fight", true, true) == "close_menu", "메뉴가 열려 있으면 뒤로 = 메뉴 닫고 계속")
 
 
 func test_app_hidden_pauses_only_fight() -> void:
@@ -43,4 +45,16 @@ func test_title_menu_layout() -> void:
 			if i > 0:
 				check(cards[i].position.x >= cards[i - 1].end.x, "카드 %d 가 앞 카드와 안 겹친다" % i)
 	check(TitleMenu.layout(Rect2(0, 0, 1280, 720), 0)["cards"].is_empty(), "카드가 없으면 빈 줄")
+
+
+## 싸움 중 메뉴(스테이지 고르기): 장 줄 · 스테이지 줄 · 계속 · 처음 화면 — 커버 · 펼친 화면에서 안전 영역 안 · 안 겹침
+func test_stage_menu_layout() -> void:
+	for sa in [Rect2(0, 0, 1280, 720), Rect2(44, 0, 1800, 700), Rect2(0, 0, 1280, 1067)]:
+		var L := StageMenu.layout(sa, 4, 5)
+		var all: Array = L["chapters"] + L["stages"] + [L["resume"], L["title"]]
+		check(L["chapters"].size() == 4 and L["stages"].size() == 5, "장 넷 · 스테이지 다섯")
+		for i in all.size():
+			check(sa.encloses(all[i]), "자리 %d 가 안전 영역 안 %s %s" % [i, sa, all[i]])
+			for k in range(i + 1, all.size()):
+				check(not all[i].intersects(all[k]), "자리 %d · %d 가 안 겹친다 %s" % [i, k, sa])
 
