@@ -1,6 +1,6 @@
 extends Control
 ## 터치 조작 — 왼쪽 절반 어디든 누르면 그 자리가 스틱 가운데(따라오는 스틱), 오른쪽 아래 버튼: 베기 · 쳐내기(누르고 있기) · 구르기 ·
-## 기술 · 기술 바꾸기(고른 기술 이름 · 게이지는 hud.gd), 오른쪽 위 '멈춤'(결투 중에만 — main.gd show_pause).
+## 기술 · 기술 바꾸기(고른 기술 이름 · 게이지는 hud.gd), 오른쪽 위 '멈춤' · 그 밑 '속도'(×1 · ×1.5 · ×2 — 결투 중에만, main.gd show_pause).
 ## 자리는 안전 영역(src/ui/safe_area.gd — 노치 · 제스처 바를 뺀 곳) 기준, 매 프레임 다시 읽는다(접는 폰).
 ## main.gd 가 매 프레임 stick · take_edges() · held() 로 읽는다(키보드와 같은 동작 이름 — castle_M engine/input.py 와 같은 생각).
 
@@ -44,6 +44,7 @@ var buttons := [
 	{"id": "skill", "label": "기술", "r": 60.0, "off": Vector2(-300, -270)},
 	{"id": "skill_next", "label": "바꾸기", "r": 44.0, "off": Vector2(-440, -330)},
 	{"id": "pause", "label": "멈춤", "r": 34.0, "off": Vector2(-56, 92), "at": "tr"},
+	{"id": "speed", "label": "×1", "r": 34.0, "off": Vector2(-56, 180), "at": "tr"},
 	{"id": "swap", "label": "교대", "r": 44.0, "off": Vector2(-450, -190)},
 	{"id": "art", "label": "그림", "r": 44.0, "off": Vector2(70, 200), "at": "tl"},
 	{"id": "bench", "label": "성능", "r": 44.0, "off": Vector2(70, 310), "at": "tl"},
@@ -73,7 +74,7 @@ func _btn_pos(b: Dictionary) -> Vector2:
 
 func _active(b: Dictionary) -> bool:
 	match str(b["id"]):
-		"pause":
+		"pause", "speed":
 			return show_pause
 		"swap":
 			return show_swap
@@ -128,6 +129,19 @@ func take_edges() -> Dictionary:
 
 func peek_edge(id: String) -> bool:
 	return _edges.has(id)
+
+
+## 한 버튼의 누름만 가져간다(같은 프레임의 다른 누름 — 베기 등 — 은 남긴다)
+func take_edge(id: String) -> bool:
+	return _edges.erase(id)
+
+
+## 속도 버튼 글(×1 · ×1.5 · ×2 — main.gd 가 고를 때마다)
+func set_speed_label(t: String) -> void:
+	for b in buttons:
+		if b["id"] == "speed":
+			b["label"] = t
+	queue_redraw()
 
 
 func held(id: String) -> bool:

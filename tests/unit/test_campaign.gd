@@ -116,3 +116,15 @@ func test_next_chapter_and_unlock() -> void:
 	check(Save.unlocked_by_order(t, "ch11") == false, "차례 규칙만으로는 6장을 깨야 11장")
 	Save.record_clear(t, "ch6", 1)
 	check(Save.unlocked_by_order(t, "ch11"), "6장을 깨면 11장이 열린다")
+
+
+## 게임 속도(사용자 2026-11-06 "싸움이 너무 느린데 게임 속도를 더 빨리 할 수 있는 버튼") — 세이브에 남는 고르기
+func test_save_speed() -> void:
+	check(float(Save.fresh()["speed"]) == 1.0, "새 세이브는 ×1")
+	check(Save.next_speed(1.0) == 1.5 and Save.next_speed(1.5) == 2.0 and Save.next_speed(2.0) == 1.0, "×1 → ×1.5 → ×2 → ×1")
+	check(Save.next_speed(7.0) == 1.0, "모르는 값 다음은 ×1")
+	check(float(Save.parse('{"v": 1, "cleared": {}}')["save"]["speed"]) == 1.0, "속도 칸이 없는 옛 세이브는 ×1")
+	check(float(Save.parse('{"v": 1, "speed": 2}')["save"]["speed"]) == 2.0, "고른 속도는 남는다(JSON 정수 2 도)")
+	check(float(Save.parse('{"v": 1, "speed": 9}')["save"]["speed"]) == 1.0, "고를 수 없는 속도는 ×1")
+	check(Save.speed_label(1.0) == "×1" and Save.speed_label(1.5) == "×1.5" and Save.speed_label(2.0) == "×2", "버튼 글")
+

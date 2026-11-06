@@ -20,7 +20,8 @@
                끝 · 중간 해시(60프레임마다)가 같은지(src/combat/replay.gd — 결정성 · 멀티 ④ 바탕)
   3. 그림 A · B   --art a · b(GLB 툰 모델 · 도트 빌보드, 김신 · 신겐)로 신겐 방 20초 · 성능 판 --crowd 30 20초 — 오류 없이 도는지
   4. 세이브     --save .tools/save_check.json 으로 처음 화면 그림 버튼(--events 60:art) → 파일 art=b → 다음 실행이 그것을 읽는다
-  4. 흐름       ① 일시정지 앞뒤가 같은 판 — seed 1 40초 와 42초 + 600 프레임에 2초 멈춤(--events 600:pause,720:resume)의 결과가 같다
+  4. 흐름       ⓪ 게임 속도 ×1.5(--events 1:speed)도 ×1 과 같은 판(로직 프레임 열이 같다 — 1초에 도는 수만 다름)
+               ① 일시정지 앞뒤가 같은 판 — seed 1 40초 와 42초 + 600 프레임에 2초 멈춤(--events 600:pause,720:resume)의 결과가 같다
                ② 뒤로 버튼 · 앱 내려감 — 처음 화면 → 데모 → 뒤로 → 처음 → 누름 → 결투 → 내려감(멈춤) → 누름(계속) → 뒤로(멈춤) →
                뒤로(처음 화면) 순서가 --trace 줄에 나온다 (src/ui/nav.gd · main.gd _back · _app_hidden)
 출력에 SCRIPT ERROR · ERROR: · WARNING: · Leaked 가 하나라도 있으면 실패.
@@ -234,15 +235,19 @@ def step_flow(g):
         return run(f"흐름 {key}", base + ["--"] + extra, chk, timeout=300)
     ok = grab("멈춤 없음", ["--autoplay", "--seconds", "40", "--seed", "1"])
     ok &= grab("2초 멈춤", ["--autoplay", "--seconds", "42", "--seed", "1", "--trace", "--events", "600:pause,720:resume"])
+    ok &= grab("속도 ×1.5", ["--autoplay", "--seconds", "40", "--seed", "1", "--events", "1:speed"])
     ok &= grab("뒤로 · 내려감", ["--seconds", "16", "--trace", "--events", FLOW_EVENTS])
     if not ok:
         return False
     a, b = got["멈춤 없음"][0], got["2초 멈춤"][0]
     same = a["last"] == b["last"] and a["fights"] == b["fights"] and a["wins"] == b["wins"]
+    c = got["속도 ×1.5"][0]
+    same_speed = all(c[k] == a[k] for k in ("frames", "fights", "wins", "last")) and c["draws"] < a["draws"] * 0.75
     seq = got["뒤로 · 내려감"][1]
     seq_ok = seq == FLOW_WANT
-    good = same and seq_ok and got["2초 멈춤"][1].count("PAUSE on") == 1
+    good = same and same_speed and seq_ok and got["2초 멈춤"][1].count("PAUSE on") == 1
     msg = ("멈춘 앞뒤 같은 판" if same else f"멈춘 판이 다르다 {a['last']} / {b['last']}") + " · " + \
+        ("속도 ×1.5 도 같은 판" if same_speed else f"속도를 바꾸니 판이 다르다 {c} / {a}") + " · " + \
         ("뒤로 · 내려감 순서 맞음" if seq_ok else f"순서가 다르다: {seq}")
     print(f"[{'ok' if good else 'FAIL'}] 흐름 — {msg}")
     return good

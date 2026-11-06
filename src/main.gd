@@ -47,6 +47,7 @@ const SHOT_WARMUP := 3          # --shots: 찍을 프레임 바로 앞 몇 프�
 const MINI_Y := 2.45            # 적 머리 위 작은 막대 높이(m, 몸 크기만큼 더)
 const REPLAY_LAST := "user://replay_last.json"
 const SAVE_PATH := "user://save.json"
+const BASE_TICKS := 60          # project.godot physics_ticks_per_second — 로직 한 칸 = 1/60 초(게임 속도 ×1)
 
 var args := {"autoplay": false, "seconds": 0.0, "seed": 1, "shots": [], "shot_dir": "", "touch": false, "trace": false,
 	"events": {}, "mode": "ch6", "room": 0, "crowd": 0, "art": "", "replay": "", "save_replay": "", "save": ""}
@@ -190,6 +191,7 @@ func _setup_input() -> void:
 		"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_L, KEY_C],
 		"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B], "pause": [KEY_ESCAPE, KEY_P], "swap": [KEY_TAB, KEY_Q],
 		"pick_1": [KEY_1], "pick_2": [KEY_2], "art": [KEY_3], "bench": [KEY_4], "accept": [KEY_ENTER, KEY_KP_ENTER],
+		"speed": [KEY_F],
 	}
 	for act in keys:
 		if not InputMap.has_action(act):
@@ -284,6 +286,7 @@ func _enter_title() -> void:
 	hud.message(str(t["text"]), str(t["sub"]), 9999.0)
 	_fill_menu()
 	menu.visible = true
+	_apply_speed()
 	hud.set_hint(str(t["hint"]) + " · 그림: " + ART_NAMES[str(args["art"])])
 	_trace("MODE title frame=%d" % frames)
 	snd.song("boss")
@@ -298,6 +301,7 @@ func _start(m: String) -> void:
 	touch.show_art = false
 	touch.show_fight = true
 	menu.visible = false
+	_apply_speed()
 	_trace("MODE %s frame=%d" % [m, frames])      # 에뮬레이터 점검(scripts/emu_check.sh)이 logcat 에서 데모 시작을 기다린다
 	if m == "demo":
 		var dm: Array = Lines.at("ch6.demo")
@@ -306,9 +310,9 @@ func _start(m: String) -> void:
 	elif kind == "duel":
 		var fm: Array = Lines.at("ch6.fight")
 		hud.message(fm[0], fm[1], 2.5)
-		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 K(누르고) · 구르기 Space · 기술 U · 기술 바꾸기 I")
+		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 K(누르고) · 구르기 Space · 기술 U · 기술 바꾸기 I · 속도 F")
 	else:
-		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 · 막기 K · 구르기 Space · 기술 U · 바꾸기 I · 교대 Tab")
+		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 · 막기 K · 구르기 Space · 기술 U · 바꾸기 I · 교대 Tab · 속도 F")
 	if not snd.song_playing():
 		snd.song("boss")
 
@@ -386,6 +390,9 @@ func _scripted() -> void:
 			_fake_swap = true
 		"art":
 			_fake_art = true
+		"speed":
+			save["speed"] = Save.next_speed(float(save["speed"]))
+			_apply_speed()
 
 
 func _pressed_anything() -> bool:
@@ -486,6 +493,17 @@ func _load_save() -> void:
 	_trace("SAVE %s art=%s cleared=%s" % [p["state"], save["art"], ",".join(save["cleared"].keys())])
 
 
+## 게임 속도: 싸우는 동안(데모 포함)만 — 물리 틱(= 로직 프레임 한 번, 판정은 60Hz 고정 한 칸)을 1초에 60 · 90 · 120 번으로 하고
+## (Engine.time_scale 만으로는 틱 수가 안 늘어난다 — delta 만 커진다), time_scale 도 같이 올려 그림 · 연출 시간을 맞춘다.
+## 판정 · 리플레이 · 시드 결과는 그대로(같은 로직 프레임 열 — verify '흐름'). 처음 화면 · 결과는 ×1
+func _apply_speed() -> void:
+	var on := mode == "fight" or mode == "demo"
+	var k: float = float(save["speed"]) if on else 1.0
+	Engine.physics_ticks_per_second = roundi(BASE_TICKS * k)
+	Engine.time_scale = k
+	touch.set_speed_label(Save.speed_label(float(save["speed"])))
+
+
 func _write_save() -> void:
 	if save_path == "":
 		return
@@ -512,6 +530,11 @@ func _physics_process(_dt: float) -> void:
 		touch.take_edges()
 		_set_paused(true)
 		return
+	if mode == "fight" and (Input.is_action_just_pressed("speed") or touch.take_edge("speed")):
+		save["speed"] = Save.next_speed(float(save["speed"]))
+		_write_save()
+		_apply_speed()
+		hud.message(str(Lines.at("speed")) % Save.speed_label(float(save["speed"])), "", 0.8)
 	mode_t += 1
 	match mode:
 		"title":
@@ -613,6 +636,7 @@ func _end_fight(result: String) -> void:
 	var played := mode == "fight"                       # 데모(봇)가 이긴 판은 세이브에 안 넣는다
 	mode = "result"
 	mode_t = 0
+	_apply_speed()
 	_save_replay(REPLAY_LAST)
 	touch.show_swap = false
 	results.append(_summary())
@@ -711,7 +735,9 @@ func _finish_run() -> void:
 	for r in results:
 		if r["over"] == "win":
 			wins += 1
-	print("RESULT ", JSON.stringify({"frames": frames, "fights": fights, "wins": wins, "last": results[-1]}))
+	# draws = 화면 프레임 수(게임 속도 ×1.5 · ×2 면 같은 로직 프레임에 화면이 덜 돈다 — verify '흐름' 이 본다)
+	print("RESULT ", JSON.stringify({"frames": frames, "fights": fights, "wins": wins, "last": results[-1],
+		"draws": Engine.get_process_frames()}))
 	set_physics_process(false)
 	get_tree().quit(0)
 
