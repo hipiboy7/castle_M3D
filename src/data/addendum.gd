@@ -8,6 +8,8 @@ extends RefCounted
 ## 이 판의 후보(provisional) — castle_common 에 올릴 것은 docs/castle_common_요청.md. castle_common 에 그 인물이 생기면
 ## character() 가 castle_common 값을 먼저 쓴다(여기는 빈 칸만 채운다).
 ## 기술의 동작 · 프레임 · 피해(3층)는 src/data/moves.gd, 능력치 → 3층 배율은 derive().
+## castle_common 70차(5b145d8)가 인물 3 · 신겐 능력치 · 기술 11 을 받아 갔다(요청 16 ~ 18행) — 지금은 공통 값이 먼저이고
+## 여기 표는 공통에 없는 칸(엑스트라 castle_guard · 구일화 시기별 rank_by · stats_by · 기술 move)과 받기 전 판의 대비로 남는다.
 
 const Common = preload("res://src/data/common.gd")
 
@@ -96,12 +98,15 @@ static func character(id: String) -> Dictionary:
 	return out
 
 
-## 기술 — castle_common skills.json 에 있으면 그것, 없으면 여기
+## 기술 — 1층(이름 · 설명 · from · refs)은 castle_common skills.json 이 먼저(70차부터 11장 기술 11개가 있다),
+## 동작(move — 3층, 이 판 소유)은 여기 표에서 잇는다
 static func skill(id: String) -> Dictionary:
+	var out: Dictionary = SKILLS.get(id, {}).duplicate(true)
 	for s in Common._j("skills")["skills"]:
 		if s["id"] == id:
-			return s
-	return SKILLS.get(id, {})
+			out.merge(s, true)
+			break
+	return out
 
 
 static func rank_at(id: String, period: String) -> String:

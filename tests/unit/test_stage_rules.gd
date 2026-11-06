@@ -78,9 +78,9 @@ func test_phase2_per_fighter_and_no_end_on_ko() -> void:
 ## 이스크라 평 킬러급 · 주먹/칼. castle_common 에 있는 인물은 castle_common 이 먼저
 func test_addendum_characters() -> void:
 	var hy := Addendum.character("hayabusa")
-	check(hy["rank"] == "준10강" and hy["weapons"] == ["긴칼"], "하야부사 %s" % hy)
+	check(hy["rank"] == "준10강" and hy["weapons"] == ["칼"], "하야부사 %s(castle_common 70차 — 원문 '긴칼'은 칼)" % hy)
 	var g4 := Addendum.character("gyeonghodaechoehuui4in")
-	check(g4["rank"] == "전국구" and g4["weapons"] == ["총/칼"], "4인 %s" % g4)
+	check(g4["rank"] == "전국구" and g4["weapons"] == ["칼/총"], "4인 %s(castle_common 70차)" % g4)
 	check(Addendum.rank_at("guilhwa", "hwajin") == "전국구" and Addendum.rank_at("guilhwa", "church") == "이스크라 평 킬러급",
 		"구일화 시기별 등급")
 	check(Addendum.stats_at("guilhwa", "hwajin")["맷집"] < Addendum.stats_at("guilhwa", "church")["맷집"], "구일화 교회 전이 더 세다")
@@ -94,6 +94,11 @@ func test_addendum_characters() -> void:
 	for k in sg:
 		check(hs[k] < sg[k], "하야부사 %s < 신겐" % k)
 	check(str(Addendum.skill("hayabusa_arc")["from"]) == "shingen_daegeuk", "하야부사 큰 호 베기는 신겐 대극의 하향")
+	# castle_common 70차가 기술 1층(이름 · refs)을 가져갔다 — 1층은 공통 값, 동작(3층 move)은 이 판 표에서
+	var arc := Addendum.skill("hayabusa_arc")
+	check(arc["refs"] == ["019/046-065", "098/024-031"], "기술 1층은 castle_common 값 %s" % arc)
+	check(arc["move"] == "s_hy_arc", "기술 동작(3층)은 이 판 표 %s" % arc)
+	check(Addendum.skill("guilhwa_headbutt")["move"] == "s_gu_headbutt", "구일화 들이받기 동작")
 
 
 ## 능력치(1층) → 3층 배율: 맷집 → 체력, 힘 → 피해, 속도 → 걸음. 기준 80 = 1배

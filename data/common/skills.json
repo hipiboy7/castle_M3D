@@ -1,5 +1,5 @@
 {
-  "_about": "기술 정체(1층) + 등급 · 게이지와 얽힌 효과(2층). cost: 고정 칸(기본 1) / cost_k > 0 이면 엇박 비용 × cost_k / cost_all 이면 all_min_bars 칸 이상일 때 전부. effects: lethal(엇박 계열 · 예수존 피해 규칙) · self_cost(맞히면 잃는 내 체력 비율) · stun_rel_sec([아랫급에게, 같은 급 · 윗급에게] 기절 초) · stun_rank + stun_rank_sec(그 등급 이하 기절 초) · immune_lower(마무리까지 아랫급에게 무적). 첫 동작 · 프레임은 판별(3층). 뜻은 rules/기술.md. castle_M c339c6d 에서 옮김 (2026-10-26)",
+  "_about": "기술 정체(1층) + 등급 · 게이지와 얽힌 효과(2층). cost: 고정 칸(기본 1) / cost_k > 0 이면 엇박 비용 × cost_k / cost_all 이면 all_min_bars 칸 이상일 때 전부. effects: lethal(엇박 계열 · 예수존 피해 규칙) · self_cost(맞히면 잃는 내 체력 비율) · stun_rel_sec([아랫급에게, 같은 급 · 윗급에게] 기절 초) · stun_rank + stun_rank_sec(그 등급 이하 기절 초) · immune_lower(마무리까지 아랫급에게 무적). 첫 동작 · 프레임은 판별(3층). 뜻은 rules/기술.md. castle_M c339c6d 에서 옮김 (2026-10-26) · from(하향 원본 — 기술 id 또는 '인물 id:원작 기술 이름') · refs(원작 위치 — 화/컷) 칸 2026-11-06 추가",
   "skills": [
     {
       "id": "offbeat2",
@@ -131,6 +131,105 @@
       "effects": {"lethal": "jesus"},
       "desc": "예수존(총 사거리보다 좁은 둘레) 안의 상대를 남들 한 번 쏠 틈에 세 발 맞힌다 — 셋이면 한 발씩, 하나면 세 발. 외성 하위 밑은 즉사, 외성 하위 90% · 중위 80% · 상위 70% · 내성 하위 50% · 중위 45% · 상위 40% · 톱 30%",
       "src": "사용자 2026-10-20 열한 · 열두 번째 답"
+    },
+    {
+      "id": "shingen_daegeuk",
+      "name": "대극 큰 호 베기",
+      "owner": "shingen",
+      "weapons": ["대도"],
+      "desc": "긴 칼(대극)로 흰 호를 그리며 크게 휘두르고 아래에서 위로 쳐올린다",
+      "refs": ["062/084-106", "098/035-047"],
+      "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
+    },
+    {
+      "id": "shingen_dive",
+      "name": "낮은 파고들기",
+      "owner": "shingen",
+      "weapons": ["칼", "대도"],
+      "desc": "몸을 낮춰 휘두름 밑으로 파고들어 단도로 벤다 — 못 막는다",
+      "refs": ["062/084-106", "098/035-047"],
+      "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
+    },
+    {
+      "id": "shingen_frontkick",
+      "name": "앞차기",
+      "owner": "shingen",
+      "desc": "구두 바닥으로 몸통을 밀어 찬다 — 멀리 날아간다",
+      "refs": ["097/000-001", "099/028-030", "101/036-037"],
+      "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
+    },
+    {
+      "id": "shingen_leap",
+      "name": "날아차기",
+      "owner": "shingen",
+      "desc": "한 발로 뛰어올라 위에서 내리찍듯 찬다 — 못 막는다",
+      "refs": ["101/042-044"],
+      "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
+    },
+    {
+      "id": "hayabusa_arc",
+      "name": "하야부사식 큰 호 베기",
+      "owner": "hayabusa",
+      "weapons": ["칼"],
+      "desc": "대극 큰 호 베기의 하향 — 호가 좁고 느리다",
+      "from": "shingen_daegeuk",
+      "refs": ["019/046-065", "098/024-031"],
+      "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
+    },
+    {
+      "id": "hayabusa_low",
+      "name": "낮은 다리 베기",
+      "owner": "hayabusa",
+      "weapons": ["칼"],
+      "desc": "낮은 파고들기의 하향 — 무릎 꿇듯 낮춰 다리를 긋는다",
+      "from": "shingen_dive",
+      "refs": ["095/080@1287"],
+      "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
+    },
+    {
+      "id": "g4_heelkick",
+      "name": "내려찍기 하이킥",
+      "owner": "gyeonghodaechoehuui4in",
+      "desc": "마준영 하이킥의 하향 — 다리를 높이 들어 뒤꿈치로 내려찍는다",
+      "from": "majunyeong:구속복 하이킥",
+      "refs": ["002/101-103"],
+      "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
+    },
+    {
+      "id": "g4_chop",
+      "name": "칼 내리찍기",
+      "owner": "gyeonghodaechoehuui4in",
+      "weapons": ["칼/총"],
+      "desc": "마준영 칼 내리찍기의 하향",
+      "from": "majunyeong:칼 내리찍기",
+      "refs": ["033/057-060"],
+      "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
+    },
+    {
+      "id": "g4_shot",
+      "name": "근거리 사격",
+      "owner": "gyeonghodaechoehuui4in",
+      "weapons": ["칼/총"],
+      "desc": "마준영 근거리 연사의 하향 — 겨눈 뒤 한 발. 못 막는다(구른다)",
+      "from": "majunyeong:근거리 소음기 연사",
+      "refs": ["045/082-086", "045/094", "058/039-045"],
+      "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
+    },
+    {
+      "id": "guilhwa_headbutt",
+      "name": "들이받기",
+      "owner": "guilhwa",
+      "desc": "뛰어들며 머리 · 어깨로 턱을 들이받는다 — 맞으면 잠깐 기절(기절 초는 판별)",
+      "refs": ["057/042-079", "109/019-020"],
+      "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
+    },
+    {
+      "id": "guilhwa_forearm",
+      "name": "팔뚝 연타",
+      "owner": "guilhwa",
+      "desc": "팔꿈치 · 팔뚝으로 얼굴을 세 번 연달아 친다",
+      "refs": ["057/042-079"],
+      "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
     }
   ]
 }
