@@ -160,6 +160,9 @@ func _hits() -> void:
 
 
 func _resolve(a, d) -> void:
+	for p in pending:
+		if p[0] == a and p[1] == d:
+			return                                   # 미룬 사이 같은 공격자의 다음 판정은 버린다(rules/전투_쳐내기.md 1절)
 	var mv: Dictionary = _hit_move(a)
 	var at: Vector3 = _contact(a, d)
 	var push: Vector2 = a.dir_to(d)
@@ -202,7 +205,9 @@ func _resolve(a, d) -> void:
 			_stagger(d)
 		_check_hp(d, a)
 		return
-	if parryable and not mv["guard_break"] and not d.is_boss and d.can_act() and _faces(d, a) and LATE_PARRY > 0:
+	# 늦은 쳐내기: 쳐내기가 있는 사람만 · 달리는 중이 아닐 때만(rules/전투_쳐내기.md 1절 — 69차 세부)
+	if parryable and not mv["guard_break"] and not d.is_boss and d.can_parry and d.can_act() \
+			and d.running_t < Fighter.RUN_AFTER and _faces(d, a) and LATE_PARRY > 0:
 		pending.append([a, d, mv, at, LATE_PARRY])
 		return
 	_take_hit(a, d, mv, at)

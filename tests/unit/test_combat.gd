@@ -337,3 +337,40 @@ func test_accessors() -> void:
 	h.skills = []
 	check(h.current_skill().is_empty(), "기술이 없으면 빈 것")
 	check(Common.rules().has("gauge") and Common.rules()["gauge"] == Common.gauge(), "rules() 의 gauge = gauge()")
+
+
+## castle_common rules/전투_쳐내기.md 1절 늦은 쳐내기 세부(69차): 쳐내기가 있는 인물만 · 미룬 사이 같은 공격자 다음 판정 버림 ·
+## 달리기 중 미루지 않음
+func test_late_parry_details() -> void:
+	var d := _close(0.9)
+	var w = d["world"]
+	d["hero"].can_parry = false
+	_tick(d, {}, {"use": "b_slash1"})
+	for i in 15:
+		_tick(d)
+	check(w.pending.is_empty(), "쳐내기 없는 사람은 미루지 않는다 (pending %d)" % w.pending.size())
+	var d2 := _close(0.9)
+	var h2 = d2["hero"]
+	h2.running_t = Fighter.RUN_AFTER
+	h2.state = "move"
+	_tick(d2, {"move": Vector2(0, 1)}, {"use": "b_slash1"})
+	for i in 15:
+		h2.running_t = Fighter.RUN_AFTER
+		_tick(d2, {"move": Vector2(0, 1)})
+	check(d2["world"].pending.is_empty(), "달리는 중에는 미루지 않는다")
+	# 미룬 사이 같은 공격자의 다음 판정(연타 · 여러 대 기술)은 버린다
+	var d3 := _close(0.9)
+	var w3 = d3["world"]
+	var b3 = d3["boss"]
+	var h3 = d3["hero"]
+	_tick(d3, {}, {"use": "b_slash1"})
+	var deferred := false
+	for i in 30:
+		_tick(d3)
+		if not w3.pending.is_empty() and not deferred:
+			deferred = true
+			b3.hit_ids.clear()                              # 같은 공격자가 바로 다음 판정을 낸 것처럼
+			w3._hits()
+			check(w3.pending.size() == 1, "미룬 사이 같은 공격자의 다음 판정은 버린다 (%d)" % w3.pending.size())
+	check(deferred, "미루기가 일어났다")
+	check(is_equal_approx(h3.hp, h3.hp_max - 9.0), "한 번만 맞는다 (hp %s)" % h3.hp)
