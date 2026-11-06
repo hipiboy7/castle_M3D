@@ -49,6 +49,7 @@
 - 캐릭터를 GLB 로 바꿀 때: `update_from(f, dt, frozen)` 를 가진 그림 클래스를 새로 만들어 `src/main.gd` 에서 바꿔 끼운다(판정은 그대로)
 - `assets/` 자산 — 출처 목록 `assets/ASSETS.md`(새 파일은 여기 한 줄, verify 가 본다)
 - `scripts/` 검증 · Godot 받기 · 에뮬레이터 점검(CI 경로 필터에 들어 있다), `tools/` 개발 도우미(경로 필터 밖 — 바꿔도 CI 가 안 돈다)
+- 그림 A · B(S3): `tools/make_models.gd`(헤드리스 — GLB `assets/models/<id>_a.glb`) · `tools/make_sprites.gd`(가상 화면 `tools/xvfb_run.sh` — 도트 시트 `assets/sprites/<id>_b.png/json`). 고치면 두 도구를 다시 돌리고 `--import`. 게임은 `--art puppet|a|b` · 처음 화면 '그림' 버튼. 수치 조정은 `tests/sim_stage.gd`(11장 봇 6판) · `tests/sim.gd`(6장)
 
 ## 2. 검증
 - 전체 검증: `python3.11 scripts/verify.py` (약 20초 — 공통 데이터(도장 · castle_common 비교) · 자산 출처 · 가져오기 · 테스트(공통 cases 1,464줄 포함) · 자동 결투 3판. 출력에 ERROR · WARNING · Leaked 가 있으면 실패). 커밋 전에 반드시. 마일스톤 끝 · 태그 전에는 `--strict`(castle_common 이 앞서 있으면 실패)
