@@ -1,5 +1,5 @@
 {
-  "cell": 94,
+  "cell": 92,
   "dirs": 8,
   "frames": [
     "idle",
@@ -37,5 +37,5 @@
   "look_y": 1.05,
   "made_by": "tools/make_sprites.gd",
   "source": "res://assets/roster/models/songikcheon_a.glb",
-  "world_h": 3.995
+  "world_h": 3.91
 }

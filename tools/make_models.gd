@@ -174,6 +174,9 @@ func _body(lk: Dictionary) -> void:
 		# 넥타이 셔츠는 V. 옷깃(라펠) 두 줄이 V 가장자리를 따라 내려와 재킷으로 읽히게(아킬라 · 김용성 — 재킷 색이 살빛에 가까움)
 		var vk: float = lk.get("v_k", 1.0) if collar == "open" else 1.0      # 앞섶을 더 풀어헤친 만큼(김성준)
 		var pw := 0.085 if collar == "crew" or collar == "turtle" else (0.062 * vk if collar == "open" else 0.055)
+		if lk.get("inner") != null:                                 # 겉옷 안 정장(outfit.inner — 크로트 트렌치 안 남색 정장): 열린 앞섶에 넓게
+			_blob(g["chest"] + Vector3(0, 0.08, -bz * 0.85), Vector3(0.13 * wide, 0.17, 0.035), lk["inner"], "chest")
+			_blob(g["hips"] + Vector3(0, 0.06, -0.12 * depth * maxf(1.0, wide * 0.95)), Vector3(0.12 * wide, 0.09, 0.03), lk["inner"], "hips")
 		_blob(g["chest"] + Vector3(0, 0.12, -bz * 0.93), Vector3(pw, 0.12, 0.03), shirt, "chest")
 		if collar == "open":
 			_blob(g["chest"] + Vector3(0, 0.2 - 0.04 * vk, -bz * 0.97), Vector3(0.03, 0.05, 0.02) * vk, skin, "chest")
@@ -257,7 +260,7 @@ func _face(lk: Dictionary, hc: Vector3, hk: float) -> void:
 	var brow_k: float = lk.get("brow_k", 1.0)
 	var blind := str(lk.get("blind_eye", ""))                       # 먼 눈(인물 자기 쪽 — 흰자만)
 	for sx in [-1.0, 1.0]:
-		var ec: Color = Color(0.9, 0.9, 0.88) if blind == ("l" if sx < 0.0 else "r") else eye
+		var ec: Color = Color(0.9, 0.9, 0.88) if blind == ("l" if sx < 0.0 else "r") or lk.get("blank_eyes", false) else eye   # 먼 눈 · 동공 없는 흰자(샤모)
 		_blob(hc + Vector3(0.045 * sx, 0.01, -0.112) * hk, Vector3(0.02, eh, 0.01) * hk, ec, "head")
 		if lk.get("female", false):                                 # 속눈썹(눈 위 짙은 선 · 바깥 끝이 올라감)
 			_line(hc + Vector3(0.028 * sx, 0.012 + eh, -0.117) * hk, hc + Vector3(0.068 * sx, 0.02 + eh, -0.107) * hk, 0.004 * hk,
@@ -268,14 +271,15 @@ func _face(lk: Dictionary, hc: Vector3, hk: float) -> void:
 		_blob(hc + Vector3(0, -0.09, -0.06) * hk, Vector3(0.082, 0.032, 0.058) * hk, skin_stubble(lk), "head")   # 턱선을 따라 얇게
 	if lk.get("lips") != null:                                      # 붉은 입술(오지인)
 		_blob(hc + Vector3(0, -0.06, -0.116) * hk, Vector3(0.018, 0.006, 0.008) * hk, lk["lips"], "head")
+	var beard: Color = lk.get("beard_col", lk["hair"])             # 수염 색(looks.json facial_hair_color — 없으면 머리색)
 	if lk.get("beard", false):
-		_blob(hc + Vector3(0, -0.085, -0.085) * hk, Vector3(0.06, 0.035, 0.035) * hk, lk["hair"], "head")
+		_blob(hc + Vector3(0, -0.085, -0.085) * hk, Vector3(0.06, 0.035, 0.035) * hk, beard, "head")
 	if lk.get("mustache", false):                                   # 끝이 처진 콧수염(군터)
-		_blob(hc + Vector3(0, -0.045, -0.113) * hk, Vector3(0.036, 0.008, 0.01) * hk, lk["hair"], "head")
+		_blob(hc + Vector3(0, -0.045, -0.113) * hk, Vector3(0.036, 0.008, 0.01) * hk, beard, "head")
 		for sx in [-1.0, 1.0]:
-			_blob(hc + Vector3(0.034 * sx, -0.056, -0.106) * hk, Vector3(0.007, 0.014, 0.008) * hk, lk["hair"], "head")
+			_blob(hc + Vector3(0.034 * sx, -0.056, -0.106) * hk, Vector3(0.007, 0.014, 0.008) * hk, beard, "head")
 	if lk.get("goatee", false):                                     # 염소수염(김성준)
-		_blob(hc + Vector3(0, -0.11, -0.092) * hk, Vector3(0.024, 0.034, 0.02) * hk, lk["hair"], "head")
+		_blob(hc + Vector3(0, -0.11, -0.092) * hk, Vector3(0.024, 0.034, 0.02) * hk, beard, "head")
 	if lk.get("face_ring") != null:                                 # 입술 · 눈썹 피어싱(라텔 · 판테라)
 		_blob(hc + Vector3(0.016, -0.068, -0.118) * hk, Vector3(0.007, 0.007, 0.006) * hk, lk["face_ring"], "head")
 	if lk.get("eyepatch") != null:                                  # 안대(남일호) — 눈 위 검은 판 + 끈
@@ -293,7 +297,7 @@ func _face(lk: Dictionary, hc: Vector3, hk: float) -> void:
 
 ## 수염 그늘 색: 살빛에 머리색을 조금 섞어 어둡게(살빛만 어둡게 하면 흰 입마개처럼 보였다 — 2026-11-06 검토)
 func skin_stubble(lk: Dictionary) -> Color:
-	return (lk["skin"] as Color).darkened(0.16).lerp(Looks.hair_lift(lk["hair"]).darkened(0.2), 0.12)   # 늘 살빛보다 어둡게(흰 머리 · 짙은 살 — 신겐)
+	return (lk["skin"] as Color).darkened(0.16).lerp(Looks.hair_lift(lk.get("beard_col", lk["hair"])).darkened(0.2), 0.12)   # 늘 살빛보다 어둡게(흰 머리 · 짙은 살 — 신겐)
 
 
 ## 흉터 자리(인형과 같은 이름): nose — 콧등에서 왼뺨 광대로 사선 + 입술 아래 ~ 턱 세로 · brow — 이마에서 눈썹으로 · double — 왼뺨 두 줄.

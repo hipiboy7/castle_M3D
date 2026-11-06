@@ -1,5 +1,5 @@
 {
-  "cell": 112,
+  "cell": 102,
   "dirs": 8,
   "frames": [
     "idle",
@@ -40,5 +40,5 @@
   "look_y": 1.05,
   "made_by": "tools/make_sprites.gd",
   "source": "res://assets/roster/models/shire_a.glb",
-  "world_h": 4.76
+  "world_h": 4.335
 }

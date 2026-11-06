@@ -45,8 +45,13 @@ HAT = {"beanie": "beanie", "bucket_hat": "bucket", "cap": "cap", "fedora": "fedo
 # 전인물 외형(2026-11-06) — looks.json 의 모든 id 가 외형 이름을 갖는다. 위 NAMES 에 없는 id 는 이름 = id · 대표 차림(None)이고
 # 장 표에 쓰이지 않는 '명부(roster)' 인물이라 그림은 assets/roster/ 에 둔다(APK 에서 뺀다 — export_presets.cfg exclude_filter).
 # 키 · 체격 · 무기 · 자세(이 판 소유 칸)는 looks.json build · weapons 에서 기본값을 셈한다(game_fields()) — 손 값(LOOKS)이 있는 이름은 손 값.
-# 여성: canon characters.json 에 gender 칸이 없어 look 글('여성' · '여학생' · 붉은 입술 · 스커트 · 원피스)과 looks.json 차림으로 골랐다
+# 여성: looks.json 인물 gender(m · f — castle_common 76차). gender 가 없는 기록(무리 인물)만 아래 목록(75차까지 look 글로 고른 것)으로
 FEMALE = {"chasumin", "iriwon", "lingling", "marina", "ojiin", "risa", "yusehui"}
+
+
+def is_female(rec):
+    g = rec.get("gender")
+    return g == "f" if g in ("m", "f") else rec.get("id") in FEMALE
 # looks.json weapon kind → 이 판 무기(src/view/puppet3d.gd _attach). 맞는 것이 없으면 맨손("")
 WEAPON = {"knuckles": "knuckles", "combat_knife": "combat", "knife": "gerber", "karambit": "combat", "sashimi_knife": "sashimi",
           "dagger": "tanto", "tanto": "tanto", "katana": "katana", "tachi": "tachi", "sword": "katana", "machete": "sashimi",
@@ -125,7 +130,7 @@ def pick(rec, when):
     return rec["base"]
 
 
-def convert(lk, cid="", roster=False):
+def convert(lk, cid="", roster=False, female=False):
     h, o = lk.get("head") or {}, lk.get("outfit") or {}
     outer, shirt, pants = o.get("outer") or {}, o.get("shirt") or {}, o.get("pants") or {}
     d = {}
@@ -253,7 +258,16 @@ def convert(lk, cid="", roster=False):
     d["badge"] = (rgb(acc["badge"].get("color")) or GOLD) if "badge" in acc else None
     d["chain"] = (rgb(acc["chain"].get("color")) or GOLD) if "chain" in acc else None
     d["holster"] = (rgb(acc["holster"].get("color")) or (0.45, 0.27, 0.14)) if "holster" in acc else None
-    if cid in FEMALE:
+    if rgb((h.get("makeup") or {}).get("lips")):       # 입술 색(76차 head.makeup.lips — 링링 · 리사 · 오지인)
+        d["lips"] = rgb(h["makeup"]["lips"])
+    if rgb(h.get("facial_hair_color")):                 # 수염 색(76차 — 없으면 머리색)
+        d["beard_col"] = lift(rgb(h["facial_hair_color"]), 1.05)
+    if h.get("blank_eyes"):
+        d["blank_eyes"] = True                           # 동공 없이 흰자(샤모)
+    inner = o.get("inner") or {}
+    if inner.get("kind") not in (None, "none") and ok in ("long_coat", "trench_coat", "robe", "leather_jacket", "suit_jacket"):
+        d["inner"] = lift(rgb(inner.get("color"))) or (0.2, 0.22, 0.28)   # 겉옷 안 정장(76차 outfit.inner — 크로트 · 구스타프 11장)
+    if female:
         d["female"] = True
         d.setdefault("lips", (0.72, 0.32, 0.34))
     if roster:
@@ -264,8 +278,6 @@ def convert(lk, cid="", roster=False):
                 d["sole"] = rgb(shoes["color"])
         if rgb(o.get("gloves")):
             d["gloves"] = lift(rgb(o.get("gloves")))
-        if rgb((h.get("makeup") or {}).get("lips")):
-            d["lips"] = rgb(h["makeup"]["lips"])
         if pants.get("color") is None and ok in ("suit_jacket", "blazer") and "suit" in d:
             d["pants"] = d["suit"]        # 바지 색 미상 — 정장 위아래(김황 · 김용성)
         if shirt.get("kind") == "none" and ok not in (None, "none") and "suit" in d:
@@ -282,6 +294,8 @@ def convert(lk, cid="", roster=False):
                 d["eyepatch"] = "l" if "left" in w else "r"
             if a.get("kind") == "other" and (w in ("suspenders", "shoulders") or "멜빵" in nt):
                 d["suspenders"] = rgb(a.get("color")) or (0.1, 0.1, 0.11)
+        if rgb((acc.get("belt_buckle") or {}).get("color")):
+            d["buckle"] = rgb(acc["belt_buckle"]["color"])   # 버클 색(불곰 금 버클)
         if "necklace" in acc and d["chain"] is None:
             d["chain"] = rgb(acc["necklace"].get("color")) or GOLD
         if "cigar" in acc:
@@ -300,7 +314,7 @@ def convert(lk, cid="", roster=False):
     return d
 
 
-def game_fields(lk, cid):
+def game_fields(lk, cid, fem=False):
     """명부 인물의 이 판 소유 칸(키 · 체격 · 무기 · 자세) 기본값 — build.rel_height · rel_bulk · frame 을 김신(1.0 · 1.0 = scale 1.04 ·
     shoulder 1.12 · depth 1.1 · limb 1.15 — looks.gd LOOKS kim)에 견준다. 무기는 weapons 의 첫 근접 무기(없으면 총)를 오른손,
     양손(hands both) · 왼손 무기가 있으면 왼손에도."""
@@ -308,7 +322,6 @@ def game_fields(lk, cid):
     h = float(b.get("rel_height") or 1.0)
     k = float(b.get("rel_bulk") or 1.0)
     frame = b.get("frame") or "normal"
-    fem = cid in FEMALE
     cl = lambda v, lo, hi: round(max(lo, min(hi, v)), 3)
     wide = cl(1.0 + (k - 1.0) * 1.5 + (0.1 if frame == "fat" else 0.0), 0.8, 1.55)
     sh = {"broad": 0.1, "narrow": -0.08}.get(b.get("shoulders"), 0.03)
@@ -393,7 +406,7 @@ def build():
         cid, when = names[name]
         if cid not in looks:
             continue
-        d = keep_hand(convert(pick(looks[cid], when), cid, name in roster), hands.get(name, {}), KEEP.get(name, ()))
+        d = keep_hand(convert(pick(looks[cid], when), cid, name in roster, is_female(looks[cid])), hands.get(name, {}), KEEP.get(name, ()))
         body = ", ".join("%s: %s" % (json.dumps(k), gd(v)) for k, v in sorted(d.items()))
         lines.append('\t"%s": {%s},  # %s%s' % (name, body, cid, " · " + when if when else ""))
     lines += ['}', '',
@@ -401,7 +414,7 @@ def build():
               '## 그림은 assets/roster/models/<이름>_a.glb · assets/roster/sprites/<이름>_b(APK 에서 뺀다 — 편집기 · 시험에서만 있다)',
               'const ROSTER := {']
     for cid in roster:
-        body_d = game_fields(looks[cid]["base"], cid)
+        body_d = game_fields(looks[cid]["base"], cid, is_female(looks[cid]))
         lines.append('\t"%s": {%s},' % (cid, ", ".join("%s: %s" % (json.dumps(k), gd(v)) for k, v in sorted(body_d.items()))))
     lines += ['}', '', '## looks.json id → 이 판 외형 이름(대표 차림 — 장 차림 이름이 따로 있어도 None 차림 이름을 먼저)', 'const ID_NAME := {']
     idn = {}

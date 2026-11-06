@@ -1,5 +1,5 @@
 {
-  "cell": 100,
+  "cell": 96,
   "dirs": 8,
   "frames": [
     "idle",
@@ -37,5 +37,5 @@
   "look_y": 1.05,
   "made_by": "tools/make_sprites.gd",
   "source": "res://assets/roster/models/choedalcheon_a.glb",
-  "world_h": 4.25
+  "world_h": 4.08
 }

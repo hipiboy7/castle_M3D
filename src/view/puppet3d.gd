@@ -273,7 +273,7 @@ func _face(lk: Dictionary, skin: Material, eye: Material, dark: Material, hair: 
 	var blind_m := _mat(Color(0.9, 0.9, 0.88), 0.5, 0.0)
 	for sx in [-1.0, 1.0]:
 		_mesh(J["head"], _sphere(0.022, 0.044), skin, Vector3(0.103 * sx, -0.004, 0.006))     # 귀
-		var em := blind_m if blind == ("l" if sx < 0.0 else "r") else eye
+		var em := blind_m if blind == ("l" if sx < 0.0 else "r") or lk.get("blank_eyes", false) else eye   # 먼 눈 · 흰자 눈(샤모)
 		_mesh(J["head"], _box(Vector3(0.024, eye_h, 0.012)), em, Vector3(0.037 * sx, 0.008, -0.096))
 		if lk.get("piercing", false):                            # 귀 검은 스터드
 			_mesh(J["head"], _sphere(0.007, 0.014), dark, Vector3(0.112 * sx, -0.024, 0.0))
@@ -285,16 +285,16 @@ func _face(lk: Dictionary, skin: Material, eye: Material, dark: Material, hair: 
 	if lk.get("hat") != null:
 		_hat(J["head"], str(lk["hat"]), _mat(lk.get("hat_col", Color(0.2, 0.2, 0.22)), 0.9, 0.2))
 	if lk.get("beard", false):                                   # 짧은 턱수염 · 콧수염 (신겐)
-		var bm := _mat(lk["hair"], 0.7, 0.0)
+		var bm := _mat(lk.get("beard_col", lk["hair"]), 0.7, 0.0)
 		_mesh(J["head"], _box(Vector3(0.07, 0.03, 0.03)), bm, Vector3(0, -0.085, -0.075))
 		_mesh(J["head"], _box(Vector3(0.05, 0.01, 0.012)), bm, Vector3(0, -0.032, -0.104))
 	if lk.get("mustache", false):                                # 끝이 처진 콧수염 (군터)
-		var mm := _mat(lk["hair"], 0.7, 0.0)
+		var mm := _mat(lk.get("beard_col", lk["hair"]), 0.7, 0.0)
 		_mesh(J["head"], _box(Vector3(0.06, 0.014, 0.014)), mm, Vector3(0, -0.031, -0.104))
 		for sx in [-1.0, 1.0]:
 			_mesh(J["head"], _box(Vector3(0.01, 0.03, 0.012)), mm, Vector3(0.031 * sx, -0.044, -0.098), Vector3(0, 0, -12 * sx))
 	if lk.get("goatee", false):                                  # 염소수염 (김성준)
-		var gm := _mat(lk["hair"], 0.7, 0.0)
+		var gm := _mat(lk.get("beard_col", lk["hair"]), 0.7, 0.0)
 		_mesh(J["head"], _box(Vector3(0.034, 0.05, 0.024)), gm, Vector3(0, -0.098, -0.072), Vector3(18, 0, 0))
 		_mesh(J["head"], _box(Vector3(0.04, 0.009, 0.01)), gm, Vector3(0, -0.033, -0.104))
 	if lk.get("bandage") != null:                                # 머리띠처럼 감은 흰 붕대 (강만재 — 앞 화 부상)
