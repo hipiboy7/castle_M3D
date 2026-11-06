@@ -150,7 +150,8 @@ func apply(d: Dictionary) -> void:
 			"line":
 				# 엇박 % · 기절 글자와 같은 순간이면 조금 뒤에(rc.2 리뷰 5 와 같은 까닭)
 				var busy: bool = w.events.any(func(x): return x[0] == "lethal" or x[0] == "stun")
-				hud.message(str(e[1]), str(e[2]), float(e[3]), 1.2 if busy else 0.0)
+				var late: float = float(e[4]) if e.size() > 4 else 0.0     # 장 첫 글 뒤의 첫 방 글(stage.gd _enter)
+				hud.message(str(e[1]), str(e[2]), float(e[3]), maxf(late, 1.2 if busy else 0.0))
 			"swap":
 				fx.pop(Vector3(e[1].pos.x, 2.5, e[1].pos.y), "%s · %s" % [str(Lines.at("ch11.swap")), e[1].name],
 					Color(0.6, 0.9, 1.0), 48, 0.9)

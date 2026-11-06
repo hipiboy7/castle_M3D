@@ -5,7 +5,7 @@ extends RefCounted
 ## world · hero(지금 조작하는 사람) · boss(화면 위 큰 막대에 보일 적, 없으면 null) + kind "stage" · heroes · enemies · allies.
 ## 방 · 역할 · 시점은 장 표(src/data/campaign.gd 가 장 id 로 고른다 — ch0 prologue · ch1 hoeam · ch11 hotel), 1층(등급 · 능력치 · 기술)은 castle_common → 없으면 src/data/addendum.gd(3D 덧붙임).
 ## 판 끝: 마지막 방(end)에 닿으면 win, 조작하는 사람이 다 쓰러지면 lose(world.over). 신겐은 체력 yield_at 에서 길을 내준다(062).
-## 신호(world.events 에 더함): ["room", 방 번호] · ["line", 제목, 작은 글, 초] · ["swap", 새로 조작하는 사람] · ["yield", 적]
+## 신호(world.events 에 더함): ["room", 방 번호] · ["line", 제목, 작은 글, 초, (늦춤 초)] · ["swap", 새로 조작하는 사람] · ["yield", 적]
 
 const Fighter = preload("res://src/combat/fighter.gd")
 const World = preload("res://src/combat/world.gd")
@@ -123,10 +123,10 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 	return f
 
 
-static func _line(d: Dictionary, key: String, secs := 2.6) -> void:
+static func _line(d: Dictionary, key: String, secs := 2.6, delay := 0.0) -> void:
 	var v = Lines.at("%s.rooms.%s.%s" % [d["tbl"].LINES, d["room"]["id"], key])
 	if v is Array and v.size() >= 2:
-		d["world"].events.append(["line", str(v[0]), str(v[1]), secs])
+		d["world"].events.append(["line", str(v[0]), str(v[1]), secs, delay])
 
 
 static func _enter(d: Dictionary, i: int) -> void:
@@ -167,10 +167,12 @@ static func _enter(d: Dictionary, i: int) -> void:
 	d["t"] = 0
 	d["fight_t"] = 0
 	w.events.append(["room", i])
-	if i == 0:
+	var after := 0.0
+	if i == 0:                                       # 장 첫 글 → 그 뒤에 첫 방 글(같은 순간이면 첫 글이 덮여 안 보인다)
 		var st = Lines.at(T.LINES + ".start")
-		w.events.append(["line", str(st["text"]), str(st["sub"]), 2.4])
-	_line(d, "enter", 3.0)
+		w.events.append(["line", str(st["text"]), str(st["sub"]), 2.4, 0.0])
+		after = 2.4
+	_line(d, "enter", 3.0, after)
 	_focus(d)
 
 
