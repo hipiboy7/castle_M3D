@@ -2,6 +2,8 @@ extends CanvasLayer
 ## 화면 표시 — 백도찬 체력 · 체간(위 가운데), 김신 체력 · 체간(왼쪽 위), FPS · 프레임 시간(오른쪽 위, 보류 결정 #7 · #9 판단용),
 ## 김신 기술 게이지(칸) · 고른 기술(이름 · 비용, 게이지가 모자라면 흐리게),
 ## 가운데 알림(시작 · 2차 · 승패), 아래 도움말. 색은 이 파일 머리 상수 한 곳.
+## 11장(여럿): 위 가운데는 방의 큰 적(없으면 가장 가까운 적 · 없으면 숨김), 김신 쪽 밑에 짝(교대할 사람) 체력, 적 머리 위 작은 막대
+## (set_minibars — main.gd 가 화면 자리로 바꿔 준다). 처음 화면에는 왼쪽 · 오른쪽 고르기 글(set_choices).
 
 const Common = preload("res://src/data/common.gd")
 const SafeArea = preload("res://src/ui/safe_area.gd")
@@ -35,6 +37,12 @@ var _gauge: Array = []
 var _seg_w := 28.0
 var skill_name: Label
 var dim: ColorRect
+var partner_name: Label
+var partner_hp: ColorRect
+var _partner_bg: ColorRect
+var minis: Control
+var choice_l: Label
+var choice_r: Label
 var _hero_nodes: Array = []      # [노드, 안전 영역 왼쪽 위에서의 자리] — 김신 쪽 묶음(이름 · 막대 · 게이지 · 기술)
 
 
@@ -79,6 +87,24 @@ func setup() -> void:
 		_hero_nodes.append([n, n.position])
 	for g in _gauge:
 		_hero_nodes.append([g.get_parent(), g.get_parent().position])
+	partner_name = _label("", 16, COL_DIM)
+	partner_name.position = Vector2(24, 114)
+	var pb := _bar(Vector2(24, 136), Vector2(_hero_w * 0.6, 8))
+	partner_hp = pb[0]
+	partner_hp.color = COL_HP_HERO.darkened(0.25)
+	_partner_bg = pb[1]
+	for n in [partner_name, _partner_bg]:
+		_hero_nodes.append([n, n.position])
+	minis = MiniBars.new()
+	minis.set_anchors_preset(Control.PRESET_FULL_RECT)
+	minis.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(minis)
+	root.move_child(minis, 1)                       # 덮개(dim) 바로 위 · 글자들 아래
+	choice_l = _label("", 34, COL_TEXT)
+	choice_r = _label("", 34, COL_TEXT)
+	for c in [choice_l, choice_r]:
+		c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		c.size = Vector2(520, 120)
 	fps = _label("", 18, COL_DIM)
 	msg = _label("", 54, COL_TEXT)
 	msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -106,6 +132,8 @@ func _layout() -> void:
 	hint.position = Vector2(cx - 500, sa.end.y - 46)
 	for hn in _hero_nodes:
 		hn[0].position = sa.position + hn[1]
+	choice_l.position = Vector2(sa.position.x + sa.size.x * 0.25 - 260, sa.position.y + sa.size.y * 0.5 + 20)
+	choice_r.position = Vector2(sa.position.x + sa.size.x * 0.75 - 260, sa.position.y + sa.size.y * 0.5 + 20)
 
 
 func _label(text: String, size: int, col: Color) -> Label:
@@ -135,10 +163,19 @@ func _bar(pos: Vector2, size: Vector2) -> Array:
 	return [fill, bg]
 
 
-func update_bars(hero, boss, phase: int, dt: float) -> void:
+func update_bars(hero, boss, phase: int, dt: float, partner = null) -> void:
 	_layout()
-	_fill(boss_hp, boss.hp / boss.hp_max, _boss_w)
-	_fill(boss_post, boss.posture / boss.posture_max, _boss_w)
+	var has_boss: bool = boss != null
+	for n in [boss_name, _boss_bg[0], _boss_bg[1]]:
+		n.visible = has_boss
+	if has_boss:
+		_fill(boss_hp, boss.hp / boss.hp_max, _boss_w)
+		_fill(boss_post, boss.posture / boss.posture_max, _boss_w)
+	partner_name.visible = partner != null
+	_partner_bg.visible = partner != null
+	if partner != null:
+		partner_name.text = "%s%s" % [partner.name, "" if partner.alive() else " — 쓰러짐"]
+		_fill(partner_hp, partner.hp / partner.hp_max, _hero_w * 0.6)
 	_fill(hero_hp, hero.hp / hero.hp_max, _hero_w)
 	_fill(hero_post, hero.posture / hero.posture_max, _hero_w)
 	var bars: float = hero.gauge / Common.bar_points()
@@ -147,13 +184,15 @@ func update_bars(hero, boss, phase: int, dt: float) -> void:
 		_gauge[i].size.x = maxf(0.0, (_seg_w - 4.0) * k)
 		_gauge[i].color = COL_GAUGE if k >= 1.0 else COL_GAUGE_PART
 	var sk: Dictionary = hero.current_skill()
+	skill_name.text = ""
 	if not sk.is_empty():
 		var ok: bool = hero.can_pay(sk)
 		var cost := float(sk["cost"])
 		var cost_txt := "%d칸+ 전부" % Common.all_min_bars() if cost < 0.0 else "%d칸" % roundi(cost)
 		skill_name.text = "기술: %s (%s)" % [sk["name"], cost_txt]
 		skill_name.add_theme_color_override("font_color", COL_TEXT if ok else COL_DIM)
-	boss_name.text = str(boss.name) + ("   2차 · 전력" if phase == 2 else "")
+	if has_boss:
+		boss_name.text = str(boss.name) + ("   2차 · 전력" if phase == 2 else "")
 	hero_name.text = str(hero.name)
 	fps.text = "FPS %d · %.1fms" % [Engine.get_frames_per_second(), Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0]
 	for q in _queue:
@@ -184,6 +223,29 @@ func message(text: String, small := "", secs := 2.0, delay := 0.0) -> void:
 	msg.text = text
 	sub.text = small
 	_msg_t = secs
+
+
+## 처음 화면: 왼쪽 · 오른쪽 고르기 글 (빈 글이면 숨김)
+func set_choices(left: String, right: String) -> void:
+	choice_l.text = left
+	choice_r.text = right
+
+
+## 적 머리 위 작은 체력 막대: [[화면 자리, 체력 비율, 색], ...]
+func set_minibars(items: Array) -> void:
+	minis.items = items
+	minis.queue_redraw()
+
+
+class MiniBars extends Control:
+	var items: Array = []
+
+	func _draw() -> void:
+		for it in items:
+			var p: Vector2 = it[0]
+			var w := 54.0
+			draw_rect(Rect2(p.x - w * 0.5 - 2, p.y - 2, w + 4, 9), Color(0, 0, 0, 0.6))
+			draw_rect(Rect2(p.x - w * 0.5, p.y, w * clampf(float(it[1]), 0.0, 1.0), 5), it[2])
 
 
 func set_dim(on: bool) -> void:

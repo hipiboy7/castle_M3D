@@ -98,12 +98,12 @@ jobs:
       - name: 검증 (가져오기 · 테스트 · 자동 결투 3판)
         run: python3 scripts/verify.py
 
-      # versionCode 는 늘 올린다(run 번호), versionName 은 태그(앞의 v 뺌) — 가지 빌드는 0.2.0-dev.<run 번호> (개발 규격 7절)
+      # versionCode 는 늘 올린다(run 번호), versionName 은 태그(앞의 v 뺌) — 가지 빌드는 0.3.0-dev.<run 번호> (개발 규격 7절)
       - name: 버전 (versionCode = run 번호 · versionName = 태그)
         run: |
           set -e
           CODE=$GITHUB_RUN_NUMBER
-          if [ "$GITHUB_REF_TYPE" = "tag" ]; then NAME="${GITHUB_REF_NAME#v}"; else NAME="0.2.0-dev.$GITHUB_RUN_NUMBER"; fi
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then NAME="${GITHUB_REF_NAME#v}"; else NAME="0.3.0-dev.$GITHUB_RUN_NUMBER"; fi
           sed -i "s|^version/code=.*|version/code=$CODE|; s|^version/name=.*|version/name=\"$NAME\"|" export_presets.cfg
           grep "^version/" export_presets.cfg
 

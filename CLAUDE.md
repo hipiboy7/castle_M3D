@@ -40,11 +40,11 @@
 대화는 세션이 끝나면 사라진다. 이어받는 데 필요한 사실은 전부 저장소(이 문서 · 문서 · history · 커밋)에 둔다.
 
 ## 1. 구조
-- `src/combat/` 순수 로직(fighter · world · boss_ai · bot · duel) — 노드 없음, 60프레임 고정, 같은 시드면 같은 결과. 시험 `tests/unit/`(A) · `tests/integration/`(B) · 공통 `tests/helpers.gd`
-- `src/data/common.gd` 공통 데이터 읽기 + 규칙 함수(castle_common `ref/rules.py` 와 같은 이름 · 인자, 시험 `tests/unit/test_common_cases.gd`), `skills.gd` 이 판의 기술 값(id → 동작 · 3층) · `moves.gd` 동작 표(3층)
+- `src/combat/` 순수 로직(fighter · world · boss_ai · bot · duel(6장) · stage(11장 호텔 캐슬 — 방 · 여럿 · 교대) · enemy_ai(적 프로필)) — 노드 없음, 60프레임 고정, 같은 시드면 같은 결과. 시험 `tests/unit/`(A) · `tests/integration/`(B) · 공통 `tests/helpers.gd`
+- `src/data/common.gd` 공통 데이터 읽기 + 규칙 함수(castle_common `ref/rules.py` 와 같은 이름 · 인자, 시험 `tests/unit/test_common_cases.gd`), `skills.gd` 이 판의 기술 값(id → 동작 · 3층) · `moves.gd` 동작 표(3층) · `addendum.gd` **3D 덧붙임 1층**(castle_common 에 아직 없는 인물 · 기술 — 사용자 답 2026-11-06, 요청 16 ~ 19행) · `hotel.gd` 11장 방 · 역할(3층) · `lines.gd` 대사(`data/story/lines.json`)
 - `data/common/` 받은 사본(sync 가 쓴다 — json 5개는 APK 에 들어가고 `cases/` · `docs/` 는 안 들어간다)
-- `src/view/` 그림(puppet3d 관절 인형 · poses 각도 표 · arena3d 무대 · fx3d 연출 · camera_rig) — 로직 상태를 읽기만 한다
-- `src/ui/` 화면 표시 · 터치, `src/main.gd` 본체(흐름 · 입력 · 소리 · 실행 인자)
+- `src/view/` 그림(puppet3d 관절 인형 · poses 각도 표 · looks 외형 표 · arena3d 부두 · hotel3d 호텔 층 · fx3d 연출 · event_fx 신호 → 연출 · sound · camera_rig) — 로직 상태를 읽기만 한다
+- `src/ui/` 화면 표시 · 터치 · 안전 영역 · 뒤로 버튼 규칙(nav), `src/main.gd` 본체(흐름 · 입력 · 무대 · 인형 바꿔 끼우기 · 실행 인자)
 - 인물 · 기술은 id(castle_common `characters.json` · `skills.json` — `kimshin` · `kickarts` …)로 참조하고, 화면 이름은 `name`
 - 캐릭터를 GLB 로 바꿀 때: `update_from(f, dt, frozen)` 를 가진 그림 클래스를 새로 만들어 `src/main.gd` 에서 바꿔 끼운다(판정은 그대로)
 - `assets/` 자산 — 출처 목록 `assets/ASSETS.md`(새 파일은 여기 한 줄, verify 가 본다)
@@ -58,7 +58,7 @@
 
 ## 2-1. 설계 · 시험 원칙 (agentic-sdlc `docs/howtoCLAUDEMD.md` 골격 2 · 3 · 5 · 13절 · `docs/howtoGAME.md` 4절 — `7110098` 에서 옮겨 적음)
 - **SOLID**
-  - SRP: 로직(`src/combat`) · 데이터(`src/data`) · 그림(`src/view`) · 화면 표시(`src/ui`) · 흐름(`src/main.gd`)을 나눈다. 지금 `main.gd`(흐름 · 입력 · 소리 · 연출) · `fighter.gd` · `puppet3d.gd` 가 책임이 많다 — S2 에서 새 무대 · 인물이 들어올 때 쪼갠다
+  - SRP: 로직(`src/combat`) · 데이터(`src/data`) · 그림(`src/view`) · 화면 표시(`src/ui`) · 흐름(`src/main.gd`)을 나눈다. `main.gd` 는 S2 에서 소리(`sound.gd`) · 연출(`event_fx.gd`) · 외형(`looks.gd`) · 대사(`lines.json`)를 뺐다. `fighter.gd` · `puppet3d.gd` 는 아직 크다
   - OCP: 2층 값은 castle_common JSON(`common.gd`), 3층 조정 값은 표(`moves.gd` `M` · `main.gd` `LOOKS` · `skills.gd` `BAEK_OFFBEAT`)로 늘린다 — 규칙 코드를 고치지 않고
   - LSP: 그림 클래스는 `update_from(f, dt, frozen)`(+ `remove_glasses`)만 갖추면 바꿔 끼울 수 있어야 한다(관절 인형 → GLB · 도트 빌보드)
   - ISP: 로직은 그림을 모른다 — 그림 · 소리는 `World.events` 신호와 상태만 읽는다
@@ -74,7 +74,7 @@
   - 배치: A → `tests/unit/`, B → `tests/integration/`(`tests/run_tests.gd` 가 두 폴더를 돈다)
   - 커버리지: GDScript 는 줄 단위 도구가 없다 — **함수 단위**(A · B 파일의 함수 중 시험이 부르는 비율)를 verify '커버리지' 줄이 잰다(`.tools/cov/` 사본에 표시 줄을 넣어 돌림 · 기준 밑이면 실패 · 파일 목록 `scripts/verify.py` `COV_FILES`)
   - 입력 리플레이 · 상태 해시(같은 입력 기록이면 같은 해시)는 멀티 ④ 의 바탕 — S2 에서 넣는다
-- **하드코딩 금지**: 경로는 상대(`res://` · `../castle_common`), 환경마다 다른 값은 환경 변수(`GODOT` · `CASTLE_COMMON`), 비밀 없음(디버그 키는 0절 예외). 도메인 상수는 그 파일 머리 `const` 한 곳, 3층 조정 값은 표. 대사는 지금 코드에 있다(`main.gd`) — S2 에서 대사 파일로 뺀다(기획서 00 8절). 재현성 값(시드)은 고정
+- **하드코딩 금지**: 경로는 상대(`res://` · `../castle_common`), 환경마다 다른 값은 환경 변수(`GODOT` · `CASTLE_COMMON`), 비밀 없음(디버그 키는 0절 예외). 도메인 상수는 그 파일 머리 `const` 한 곳, 3층 조정 값은 표. 대사는 `data/story/lines.json`(원작 인용은 refs 화/컷). 재현성 값(시드)은 고정
 - **도메인 품질**(골격 13절): 판정 결정성(60Hz 고정 · 시드 하나) · 받은 공통 데이터는 손대지 않음(도장 — verify) · 자산 출처(`assets/ASSETS.md` — verify) · 원작 신뢰도(canon `conf: ai` 는 연출에만, 근거 주석에 표시) · 성능 예산(`docs/성능.md` — 실기 FPS, 다음 단계) · 세이브는 아직 없음(생기면 형식 버전 · 옛 세이브 시험)
 
 ## 3. Git · 외부 서비스

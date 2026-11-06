@@ -22,6 +22,11 @@ var show_pause := false:
 	set(v):
 		show_pause = v
 		queue_redraw()
+var show_swap := false:
+	set(v):
+		show_swap = v
+		queue_redraw()
+var last_tap := Vector2(-1, -1)  # 마지막으로 누른 자리(처음 화면에서 왼쪽 · 오른쪽 고르기)
 var _last_safe := Rect2()
 # at: "br" 안전 영역 오른쪽 아래 기준(기본) · "tr" 오른쪽 위 기준. pause 는 show_pause 일 때만 보이고 눌린다
 var buttons := [
@@ -31,6 +36,7 @@ var buttons := [
 	{"id": "skill", "label": "기술", "r": 60.0, "off": Vector2(-300, -270)},
 	{"id": "skill_next", "label": "바꾸기", "r": 44.0, "off": Vector2(-440, -330)},
 	{"id": "pause", "label": "멈춤", "r": 34.0, "off": Vector2(-56, 92), "at": "tr"},
+	{"id": "swap", "label": "교대", "r": 44.0, "off": Vector2(-450, -190)},
 ]
 
 
@@ -54,7 +60,12 @@ func _btn_pos(b: Dictionary) -> Vector2:
 
 
 func _active(b: Dictionary) -> bool:
-	return show_pause or b["id"] != "pause"
+	match str(b["id"]):
+		"pause":
+			return show_pause
+		"swap":
+			return show_swap
+	return true
 
 
 func _input(e: InputEvent) -> void:
@@ -62,6 +73,8 @@ func _input(e: InputEvent) -> void:
 		return
 	if e is InputEventScreenTouch:
 		if e.pressed:
+			last_tap = e.position
+			_edges["tap"] = true
 			var hit := false
 			for b in buttons:
 				if _active(b) and e.position.distance_to(_btn_pos(b)) <= b["r"] * 1.3:

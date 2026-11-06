@@ -15,6 +15,7 @@
                테스트를 다시 돌린다(이 저장소 소스는 그대로). A ≥ 90% · B ≥ 70%(CLAUDE.md 2-1절) — 모자라면 실패
   3. 자동 결투  godot --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 --seed S  (시드 1 · 2 · 3,
                게임 전체 — 무대 · 인형 · 연출 · 화면 표시까지 돌려 멈춤 · 스크립트 오류가 없는지)
+  3. 11장 자동 판  같은 명령에 --mode stage (시드 1 · 2, 150초 — 호텔 캐슬 5방 · 여럿 · 교대 · 방 넘김 · 무대 다시 만들기)
   4. 흐름       ① 일시정지 앞뒤가 같은 판 — seed 1 40초 와 42초 + 600 프레임에 2초 멈춤(--events 600:pause,720:resume)의 결과가 같다
                ② 뒤로 버튼 · 앱 내려감 — 처음 화면 → 데모 → 뒤로 → 처음 → 누름 → 결투 → 내려감(멈춤) → 누름(계속) → 뒤로(멈춤) →
                뒤로(처음 화면) 순서가 --trace 줄에 나온다 (src/ui/nav.gd · main.gd _back · _app_hidden)
@@ -268,6 +269,16 @@ def main():
         results.append(run(f"자동 결투 seed {seed} · 90초",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--seconds", "90",
                             "--seed", str(seed)], auto_ok))
+    for seed in (1, 2):
+        def stage_ok(out):
+            m = re.search(r"^RESULT (.*)$", out, re.M)
+            if m is None:
+                return False, "RESULT 줄 없음"
+            last = json.loads(m.group(1))["last"]
+            return True, f"{last['over'] or 'time'} · 방 {last['room']} · 넘은 방 {last['cleared']} · {last['times']}"
+        results.append(run(f"11장 자동 판 seed {seed} · 150초",
+                           [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
+                            "--seconds", "150", "--seed", str(seed)], stage_ok))
     results.append(step_flow(g))
     n_ok = sum(results)
     print(f"verify: {n_ok}/{len(results)} 통과 · {time.time() - t0:.0f}초 — {'OK' if n_ok == len(results) else 'FAIL'}")

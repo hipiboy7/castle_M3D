@@ -23,7 +23,7 @@ static func make(seed_value: int, opts := {}) -> Dictionary:
 	w.end_on_ko = false
 	var d := {"kind": "stage", "world": w, "heroes": [], "ctrl": 0, "room_i": -1, "room": {}, "enemies": [], "allies": [],
 		"ais": {}, "bots": {}, "yield": {}, "seed": seed_value, "stage": "intro", "t": 0, "fight_t": 0, "cleared": 0,
-		"times": {}, "hero": null, "boss": null, "crowd": int(opts.get("crowd", 0)), "n": 0}
+		"times": {}, "look_of": {}, "hero": null, "boss": null, "crowd": int(opts.get("crowd", 0)), "n": 0}
 	for id in ["kimshin", "woojin"]:
 		var h = _hero(id)
 		d["bots"][h] = Bot.new(h, null, _rng(seed_value * 7919 + d["heroes"].size() + 1))
@@ -82,6 +82,7 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 	if extra.get("leader", false):
 		f.hp_max *= 1.25
 		f.hp = f.hp_max
+		d["look_of"][f] = "g4_leader"                 # 그림: 희끗한 크루컷의 중심 인물(058/039-045)
 	var i: int = d["enemies"].size() + d["allies"].size() + 1
 	if team == 1:
 		f.is_boss = true                              # 적 쪽: 공격 준비 동안 상대 쪽으로 몸을 오래 튼다 · 늦은 쳐내기 없음
@@ -124,6 +125,7 @@ static func _enter(d: Dictionary, i: int) -> void:
 	for f in d["enemies"] + d["allies"]:
 		d["bots"].erase(f)
 		d["ais"].erase(f)
+		d["look_of"].erase(f)
 	d["enemies"] = []
 	d["allies"] = []
 	d["yield"] = {}

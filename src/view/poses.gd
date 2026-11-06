@@ -28,6 +28,19 @@ const GUARD_BAEK := {
 	"th_r": Vector3(22, -4, 6), "kn_r": 24.0, "ft_r": -6.0, "th_l": Vector3(-14, 4, 10), "kn_l": 22.0, "ft_l": 10.0,
 }
 
+# 맨주먹(피우진 · 구일화 · 경호원): 두 주먹을 턱 앞에, 왼발이 앞
+const GUARD_BOX := {
+	"pelvis": Vector3(6, 18, 0), "spine": Vector3(4, 4, 0), "chest": Vector3(6, 8, 0), "head": Vector3(-2, -24, 0),
+	"sh_r": Vector3(36, 26, 22), "el_r": 128.0, "sh_l": Vector3(52, 34, 16), "el_l": 120.0,
+	"th_r": Vector3(-14, -4, 8), "kn_r": 26.0, "ft_r": 10.0, "th_l": Vector3(22, 4, 6), "kn_l": 28.0, "ft_l": -6.0,
+}
+# 긴 칼(신겐 · 하야부사): 오른손 칼을 비스듬히 앞으로 낮게, 왼손은 비우거나 단도
+const GUARD_LONG := {
+	"pelvis": Vector3(6, 20, 0), "spine": Vector3(4, 4, 0), "chest": Vector3(4, 10, 0), "head": Vector3(-4, -28, 0),
+	"sh_r": Vector3(40, 30, 12), "el_r": 50.0, "wr_r": Vector3(-30, 0, 0), "sh_l": Vector3(36, 30, 14), "el_l": 96.0,
+	"th_r": Vector3(24, -4, 6), "kn_r": 28.0, "ft_r": -6.0, "th_l": Vector3(-18, 4, 10), "kn_l": 24.0, "ft_l": 12.0,
+}
+
 const LUNGE_LEGS := {"th_r": Vector3(40, -4, 6), "kn_r": 48.0, "ft_r": -10.0, "th_l": Vector3(-28, 4, 9), "kn_l": 14.0,
 	"ft_l": 16.0}
 
@@ -154,6 +167,14 @@ const SHAPES := {
 			"sh_r": Vector3(90, 8, 2), "el_r": 0.0, "th_r": Vector3(46, -4, 6), "kn_r": 56.0, "th_l": Vector3(-30, 4, 8),
 			"kn_l": 12.0, "root_fwd": 0.2},
 		"F": {"sh_r": Vector3(64, 10, 10), "el_r": 40.0},
+	},
+	# 총(경호대 최후의 4인): 오른팔을 곧게 뻗어 겨눈다 — 왼손 총은 인형이 좌우로 뒤집는다(shot_L)
+	"shot": {
+		"W": {"pelvis": Vector3(2, -24, 0), "chest": Vector3(2, -28, 0), "head": Vector3(-4, 30, 0),
+			"sh_r": Vector3(86, 6, 4), "el_r": 4.0, "wr_r": Vector3(-40, 0, 0)},
+		"S": {"pelvis": Vector3(-2, -24, 0), "chest": Vector3(-6, -28, 0), "head": Vector3(-2, 30, 0),
+			"sh_r": Vector3(98, 6, 4), "el_r": 10.0, "wr_r": Vector3(-60, 0, 0)},
+		"F": {"sh_r": Vector3(80, 6, 6), "el_r": 20.0, "wr_r": Vector3(-30, 0, 0)},
 	},
 	# 제압 — 두 칼을 높이 엇갈려 들었다가 X 자로 내리벤다
 	"cross": {

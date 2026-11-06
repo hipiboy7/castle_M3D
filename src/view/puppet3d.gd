@@ -46,7 +46,9 @@ var _last_state := ""
 
 func setup(lk: Dictionary) -> void:
 	look = lk
-	guard_pose = _merge(P.NEUTRAL, P.GUARD_KIM if lk.get("guard", "kim") == "kim" else P.GUARD_BAEK)
+	var gd: Dictionary = {"kim": P.GUARD_KIM, "baek": P.GUARD_BAEK, "box": P.GUARD_BOX, "long": P.GUARD_LONG}.get(
+		str(lk.get("guard", "kim")), P.GUARD_KIM)
+	guard_pose = _merge(P.NEUTRAL, gd)
 	for sh in P.SHAPES:
 		var keys: Dictionary = P.SHAPES[sh]
 		var w := _merge(guard_pose, keys["W"])
@@ -55,11 +57,11 @@ func setup(lk: Dictionary) -> void:
 			s = _merge(_merge(w, P.LUNGE_LEGS), keys["S"])
 		var f := _merge(s, keys["F"])
 		shape_keys[sh] = [w, s, f]
-		if sh == "punch":
+		if sh == "punch" or sh == "shot":
 			# 왼손 주먹: 오른손 주먹을 좌우로 뒤집는다 (삼연타 둘째 대)
 			var wl := _merge(guard_pose, _mirror(keys["W"]))
 			var sl := _merge(wl, _mirror(keys["S"]))
-			shape_keys["punch_L"] = [wl, sl, _merge(sl, _mirror(keys["F"]))]
+			shape_keys[sh + "_L"] = [wl, sl, _merge(sl, _mirror(keys["F"]))]
 	cur = guard_pose.duplicate()
 	_build()
 	_apply(cur)
@@ -147,8 +149,17 @@ func _build() -> void:
 		_mesh(J["head"], _box(Vector3(0.006, 0.046, 0.006)), _mat(lk["skin"].darkened(0.35).lerp(Color(0.6, 0.2, 0.2), 0.3), 0.7, 0.0),
 			Vector3(-0.06, -0.03, -0.088), Vector3(0, -30, 18))
 	_hair(J["head"], hair, str(lk.get("hair_style", "short")))
-	if lk.get("glasses", false):
+	if lk.get("beard", false):                                   # 짧은 턱수염 · 콧수염 (신겐)
+		var bm := _mat(lk["hair"], 0.7, 0.0)
+		_mesh(J["head"], _box(Vector3(0.07, 0.03, 0.03)), bm, Vector3(0, -0.085, -0.075))
+		_mesh(J["head"], _box(Vector3(0.05, 0.01, 0.012)), bm, Vector3(0, -0.032, -0.104))
+	var gl = lk.get("glasses", false)
+	if gl is String:
+		glasses = _shades(J["head"], str(gl), lk.get("lens", Color(0.05, 0.05, 0.06)))
+	elif gl:
 		glasses = _glasses(J["head"])
+	if lk.get("chain") != null:                                  # 금 체인 목걸이 (구일화)
+		_mesh(cs, _cyl(0.07, 0.075, 0.012), _mat(lk["chain"], 0.25, 0.2, 0.9), Vector3(0, 0.19, -0.03), Vector3(18, 0, 0))
 	# 팔 · 다리
 	for side in ["r", "l"]:
 		var sx := 1.0 if side == "r" else -1.0
@@ -183,7 +194,7 @@ func _build() -> void:
 		J["ft_" + side] = ft
 		_mesh(ft, _capsule(0.045, 0.26), shoe, Vector3(0, -0.012, -0.055), Vector3(90, 0, 0), Vector3(1.05, 1, 0.9))
 	weapon_r = _attach(J["hand_r"], str(lk.get("weapon_r", "")), GRIP_FWD)
-	weapon_l = _attach(J["hand_l"], str(lk.get("weapon_l", "")), GRIP_REV)
+	weapon_l = _attach(J["hand_l"], str(lk.get("weapon_l", "")), GRIP_FWD if lk.get("grip_l", "rev") == "fwd" else GRIP_REV)
 	# 예고 표시 (흰 ! 쳐내기 · 빨간 ! 가드 불가 · 빈틈)
 	tele = Label3D.new()
 	tele.font = FONT
@@ -226,6 +237,31 @@ func _hair(head: Node3D, m: Material, style: String) -> void:
 				_mesh(loose, _box(Vector3(0.01, 0.075, 0.008)), m, Vector3(-0.022 + 0.04 * k, 0.045, -0.1),
 					Vector3(-14, 0, 8 - 20 * k))
 			loose.visible = false
+	elif style == "topknot":
+		# 피우진: 가운데 가르마 장발을 싸울 땐 정수리에 상투로 묶는다 — 짧게 붙인 머리 + 정수리 상투
+		_mesh(head, _sphere(0.108, 0.2), m, Vector3(0, 0.05, 0.02), Vector3.ZERO, Vector3(1.0, 0.66, 1.02))
+		_mesh(head, _sphere(0.045, 0.08), m, Vector3(0, 0.125, 0.03))
+		_mesh(head, _box(Vector3(0.012, 0.06, 0.012)), m, Vector3(0, 0.06, -0.1), Vector3(-10, 0, 0))
+	elif style == "wavy_back":
+		# 하야부사 · 구일화: 웨이브 진 머리를 뒤로 넘겨 목덜미까지
+		_mesh(head, _sphere(0.11, 0.2), m, Vector3(0, 0.05, 0.03), Vector3.ZERO, Vector3(1.04, 0.68, 1.04))
+		_mesh(head, _sphere(0.085, 0.14), m, Vector3(0, -0.04, 0.075), Vector3.ZERO, Vector3(1.1, 1.2, 0.8))
+		for k in 3:
+			_mesh(head, _sphere(0.03, 0.06), m, Vector3(-0.05 + 0.05 * k, 0.1, 0.0))
+	elif style == "spiky":
+		# 신겐: 하얗게 곤두선 스파이크 백발
+		_mesh(head, _sphere(0.106, 0.2), m, Vector3(0, 0.05, 0.02), Vector3.ZERO, Vector3(1.0, 0.62, 1.0))
+		for k in 7:
+			var a := TAU * k / 7.0
+			var spike := CylinderMesh.new()
+			spike.top_radius = 0.0
+			spike.bottom_radius = 0.026
+			spike.height = 0.09
+			spike.radial_segments = 5
+			_mesh(head, spike, m, Vector3(0.06 * cos(a), 0.12, 0.06 * sin(a) + 0.01), Vector3(-22 * sin(a), 0, 22 * cos(a)))
+	elif style == "crew":
+		# 경호대 최후의 4인 중심: 희끗한 짧은 크루컷
+		_mesh(head, _sphere(0.107, 0.2), m, Vector3(0, 0.055, 0.02), Vector3.ZERO, Vector3(0.98, 0.5, 0.98))
 	elif style == "parted":
 		_mesh(head, _sphere(0.108, 0.2), m, Vector3(0, 0.05, 0.022), Vector3.ZERO, Vector3(1.0, 0.66, 1.02))
 		_mesh(head, _box(Vector3(0.11, 0.03, 0.17)), m, Vector3(0.034, 0.088, -0.004), Vector3(0, 0, -12))
@@ -233,6 +269,19 @@ func _hair(head: Node3D, m: Material, style: String) -> void:
 	else:
 		_mesh(head, _sphere(0.107, 0.2), m, Vector3(0, 0.048, 0.024), Vector3.ZERO, Vector3(1.0, 0.64, 1.02))
 		_mesh(head, _box(Vector3(0.15, 0.036, 0.05)), m, Vector3(0, 0.07, -0.084), Vector3(-22, 0, 0))
+
+
+## 색안경: sun — 검은 사각 선글라스(피우진) · aviator — 에비에이터(구일화, 렌즈 색 lens)
+func _shades(head: Node3D, kind: String, lens_col: Color) -> Node3D:
+	var g := _node(head, Vector3.ZERO)
+	var frame := _mat(Color(0.08, 0.08, 0.09), 0.3, 0.0, 0.6) if kind == "sun" else _mat(Color(0.8, 0.66, 0.3), 0.25, 0.0, 0.9)
+	var lens := _mat(lens_col, 0.06, 0.5, 0.2)
+	for sx in [-1.0, 1.0]:
+		var sz := Vector3(0.042, 0.026, 0.006) if kind == "sun" else Vector3(0.04, 0.032, 0.006)
+		_mesh(g, _box(sz), lens, Vector3(0.04 * sx, 0.008, -0.107))
+		_mesh(g, _box(Vector3(0.004, 0.004, 0.09)), frame, Vector3(0.062 * sx, 0.014, -0.062))
+	_mesh(g, _box(Vector3(0.024, 0.005, 0.006)), frame, Vector3(0, 0.016, -0.109))
+	return g
 
 
 ## 백도찬 안경: 테 없는(은테) 직사각 — 알이 빛을 받아 하얗게 눈을 가린다(canon look)
@@ -289,6 +338,25 @@ func _knife(kind: String) -> Node3D:
 		_mesh(root, tip, steel, Vector3(0, 0.23, 0))
 		for k in 4:                                              # 등날 톱니
 			_mesh(root, _box(Vector3(0.008, 0.008, 0.005)), steel, Vector3(-0.017, 0.09 + 0.022 * k, 0), Vector3(0, 0, 45))
+		return root
+	if kind == "katana" or kind == "tachi":
+		# 카타나(하야부사) · 대도 '대극'(신겐 — 더 길다): 검은 손잡이 · 금빛 츠바 · 살짝 휜 긴 날
+		var long := 0.98 if kind == "tachi" else 0.82
+		_mesh(root, _cyl(0.015, 0.015, 0.24), _mat(Color(0.07, 0.06, 0.07), 0.8, 0.0), Vector3(0, -0.07, 0))
+		_mesh(root, _cyl(0.04, 0.04, 0.012), _mat(Color(0.8, 0.64, 0.25), 0.3, 0.0, 0.85), Vector3(0, 0.055, 0))
+		_mesh(root, _box(Vector3(0.026, long, 0.006)), steel, Vector3(0.004, 0.065 + long * 0.5, 0), Vector3(0, 0, -2.0))
+		return root
+	if kind == "tanto":
+		_mesh(root, _cyl(0.013, 0.013, 0.1), _mat(Color(0.1, 0.08, 0.07), 0.8, 0.0), Vector3(0, -0.01, 0))
+		_mesh(root, _box(Vector3(0.024, 0.18, 0.005)), steel, Vector3(0, 0.13, 0))
+		return root
+	if kind == "pistol":
+		var black := _mat(Color(0.1, 0.1, 0.11), 0.35, 0.1, 0.5)
+		_mesh(root, _box(Vector3(0.03, 0.05, 0.1)), black, Vector3(0, -0.005, 0.02))         # 손잡이(손바닥 쪽)
+		_mesh(root, _box(Vector3(0.03, 0.17, 0.04)), black, Vector3(0, 0.06, -0.01))         # 총열 — 아래팔 연장선(겨누는 쪽)
+		return root
+	if kind == "baton":
+		_mesh(root, _cyl(0.018, 0.02, 0.5), _mat(Color(0.08, 0.08, 0.09), 0.5, 0.1), Vector3(0, 0.2, 0))
 		return root
 	if kind == "sashimi":
 		_mesh(root, _cyl(0.012, 0.012, 0.12), _mat(Color(0.45, 0.3, 0.17), 0.8, 0.0), Vector3(0, -0.01, 0))
@@ -454,6 +522,34 @@ func _ground() -> void:
 	J["hips"].position.y += (ANKLE_H * k - lo) / k
 
 
+## 발밑 고리 — 여럿이 섞이는 11장에서 누가 누구인지(조작 · 짝 · 아군). null 이면 없앤다
+var marker: MeshInstance3D = null
+
+
+func set_marker(col) -> void:
+	if col == null:
+		if marker != null:
+			marker.visible = false
+		return
+	if marker == null:
+		var t := TorusMesh.new()
+		t.inner_radius = 0.42
+		t.outer_radius = 0.5
+		t.rings = 24
+		t.ring_segments = 4
+		marker = MeshInstance3D.new()
+		marker.mesh = t
+		marker.scale = Vector3(1, 0.08, 1)
+		marker.position = Vector3(0, 0.02, 0)
+		var m := StandardMaterial3D.new()
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		marker.material_override = m
+		add_child(marker)
+	marker.visible = true
+	marker.material_override.albedo_color = col
+
+
 func update_from(f, dt: float, frozen: bool) -> void:
 	position = Vector3(f.pos.x, 0, f.pos.y)
 	_update_flash(f)
@@ -574,6 +670,8 @@ func _attack_pose(f) -> Dictionary:
 	var shape := str(mv["shape"])
 	if shape == "slash_back":
 		shape = "slash_back_L" if str(mv["hand"]) == "L" and weapon_l != null else "slash_back_R"
+	elif (shape == "punch" or shape == "shot") and str(mv["hand"]) == "L" and str(mv["fx"]) != "triple":
+		shape += "_L"                                  # 왼손 주먹(스트레이트 · 팔꿈치) · 왼손 총
 	var keys: Array = shape_keys.get(shape, shape_keys["slash"])
 	var w: Dictionary = keys[0]
 	var s: Dictionary = keys[1]

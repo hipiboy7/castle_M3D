@@ -20,6 +20,7 @@
 | `sfx/ko.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 쓰러뜨림 (`src/main.gd` `_play`) |
 | `sfx/miss.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 헛침 (`src/main.gd` `_play`) |
 | `sfx/shine.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 예고 · 습득 · 연출 (`src/main.gd` `_play`) |
+| `sfx/shot.wav` | 직접(절차 생성) — 이 저장소 `tools/gen_sfx.py` (2026-11-06) | 근거리 사격 (경호대 최후의 4인 `t_shot` — `src/view/sound.gd`) |
 | `sfx/slash.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 베기 · 찌르기 (`src/main.gd` `_play`) |
 | `sfx/step.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 걸음 (`src/main.gd` `_play`) |
 | `sfx/swing.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 휘두름 (`src/main.gd` `_play`) |
