@@ -18,6 +18,7 @@
                게임 전체 — 무대 · 인형 · 연출 · 화면 표시까지 돌려 멈춤 · 스크립트 오류가 없는지)
   3. 11장 자동 판  같은 명령에 --mode stage (시드 1 · 2, 150초 — 호텔 캐슬 5방 · 여럿 · 교대 · 방 넘김 · 무대 다시 만들기)
   3. 0 · 1장 자동 판  --mode ch0 (120초 — 프롤로그를 봇이 한 번은 깬다) · --mode ch1 (360초 — 회암시 6방 · 1인 판 · 아군 서진태)
+               · --mode ch2 (300초 — 하성 본사 8방 · 방마다 조작 인물 김신 / 서진태 · 따돌리기 방)
   3. 리플레이    11장 seed 2 판의 입력 기록(--save-replay .tools/replay_stage2.json)을 다른 프로세스에서 --replay 로 다시 돌려
                끝 · 중간 해시(60프레임마다)가 같은지(src/combat/replay.gd — 결정성 · 멀티 ④ 바탕)
   3. 그림 A · B   --art a · b(GLB 툰 모델 · 도트 빌보드)로 11장 신겐 방 · 1장 윤덕수 방 20초 · 성능 판 --crowd 30 20초 — 오류 없이 도는지
@@ -334,7 +335,7 @@ def main():
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
                             "--seconds", "150", "--seed", str(seed)]
                            + (["--save-replay", REPLAY_FILE] if seed == 2 else []), stage_ok))
-    for ch, secs, need_win in (("ch0", 120, True), ("ch1", 360, False)):
+    for ch, secs, need_win in (("ch0", 120, True), ("ch1", 360, False), ("ch2", 300, False)):
         def p1_ok(out, need_win=need_win):
             m = re.search(r"^RESULT (.*)$", out, re.M)
             if m is None:

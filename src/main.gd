@@ -32,9 +32,10 @@ const ART_NAMES := {"puppet": "관절 인형", "a": "A · GLB 툰 모델", "b": 
 const Arena = preload("res://src/view/arena3d.gd")
 const Hotel3d = preload("res://src/view/hotel3d.gd")
 const Town3d = preload("res://src/view/town3d.gd")
+const Haseong3d = preload("res://src/view/haseong3d.gd")
 const Moves = preload("res://src/data/moves.gd")
 ## 장 무대 그림(campaign.gd CHAPTERS view) → 그림 클래스 — 모두 build(theme, bounds, detail) 를 갖는다(LSP)
-const VIEWS := {"hotel": Hotel3d, "town": Town3d}
+const VIEWS := {"hotel": Hotel3d, "town": Town3d, "haseong": Haseong3d}
 const Fx = preload("res://src/view/fx3d.gd")
 const Cam = preload("res://src/view/camera_rig.gd")
 const Sound = preload("res://src/view/sound.gd")
@@ -59,6 +60,7 @@ var args := {"autoplay": false, "seconds": 0.0, "seed": 1, "shots": [], "shot_di
 var paused := false
 var _fake_press := false
 var _fake_swap := false
+var _esc_hint := false
 var _mouse_was := false
 var _fake_art := false
 var headless := false
@@ -294,9 +296,20 @@ func _attack_label(h) -> String:
 	return "베기" if shape.begins_with("slash") or shape.begins_with("thrust") else "치기"
 
 
-## 교대 버튼 · 짝 막대: 조작하는 사람이 둘 이상인 여러 사람 판만(0 · 1장은 김신 혼자)
+## 따돌리기 방(2장 남궁혁): 남은 초를 아래 알림 줄에 — 방을 넘으면 지운다
+func _escape_hint() -> void:
+	var left := Stage.escape_left(d) if kind == "stage" else -1.0
+	if left >= 0.0:
+		hud.set_hint(str(Lines.at(d["tbl"].LINES + ".escape_hint")) % ceili(left))
+		_esc_hint = true
+	elif _esc_hint:
+		hud.set_hint("")
+		_esc_hint = false
+
+
+## 교대 버튼 · 짝 막대: 지금 방에 조작하는 사람이 둘 이상인 여러 사람 판만(0 · 1장은 김신 혼자 · 2장은 방마다 한 사람)
 func _can_swap() -> bool:
-	return kind == "stage" and d.has("heroes") and d["heroes"].size() > 1
+	return kind == "stage" and Stage.can_swap(d)
 
 
 func _look_of(f) -> String:
@@ -743,6 +756,7 @@ func _after_tick() -> void:
 	var w = d["world"]
 	if w.events.any(func(e): return e[0] == "room"):
 		_build_stage_view()
+		touch.show_swap = mode == "fight" and _can_swap()     # 2장: 방마다 조작 인물이 바뀐다
 	var swapped: bool = w.events.any(func(e): return e[0] == "swap" or e[0] == "ko")
 	evfx.apply(d)
 	w.events.clear()
@@ -793,9 +807,7 @@ func _summary() -> Dictionary:
 func _process(dt: float) -> void:
 	if d.is_empty():
 		return
-	var partner = null
-	if _can_swap():
-		partner = d["heroes"][(int(d["ctrl"]) + 1) % d["heroes"].size()]
+	var partner = Stage.partner(d) if kind == "stage" else null
 	var phase: int = d["boss"].phase if d["boss"] != null else 1
 	if paused or menu_open:
 		hud.update_bars(d["hero"], d["boss"], phase, 0.0, partner)     # 접기 · 펴기에 자리만 다시 잡는다
@@ -815,6 +827,7 @@ func _process(dt: float) -> void:
 	else:
 		cam.follow(hp, pup[d["boss"]].position, dt, d["world"].shake)
 	hud.update_bars(d["hero"], d["boss"], phase, dt, partner)
+	_escape_hint()
 	var minis: Array = []
 	if kind == "stage":
 		for e in d["enemies"]:

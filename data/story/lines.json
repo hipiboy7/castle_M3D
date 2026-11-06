@@ -1,9 +1,10 @@
 {
-  "_about": "화면 대사 · 알림 글 (S2 — main.gd 에서 뺌, CLAUDE.md 2-1절 하드코딩 금지). 원작 인용은 refs(화/컷 — castle_common canon/episodes quote)를 단다. refs 없는 글은 이 판이 쓴 안내 · 요약(원작 인용 아님). 키: ch0 = 프롤로그 블라디보스토크(방 id 는 src/data/prologue.gd ROOMS), ch1 = 1장 범죄도시 회암(src/data/hoeam.gd ROOMS), ch6 = 6장 인천항 결투, ch11 = 11장 호텔 캐슬(방 id 는 src/data/hotel.gd ROOMS). ch0 · ch1 refs 는 1부 canon 형식 p1:화/컷(canon episodes p1_NNN quote · fights 장면의 따옴표 말)",
+  "_about": "화면 대사 · 알림 글 (S2 — main.gd 에서 뺌, CLAUDE.md 2-1절 하드코딩 금지). 원작 인용은 refs(화/컷 — castle_common canon/episodes quote)를 단다. refs 없는 글은 이 판이 쓴 안내 · 요약(원작 인용 아님). 키: ch0 = 프롤로그 블라디보스토크(방 id 는 src/data/prologue.gd ROOMS), ch1 = 1장 범죄도시 회암(src/data/hoeam.gd ROOMS), ch2 = 2장 하성 본사(src/data/haseong.gd ROOMS — escape_hint = 따돌리기 방 남은 초), ch6 = 6장 인천항 결투, ch11 = 11장 호텔 캐슬(방 id 는 src/data/hotel.gd ROOMS). ch0 · ch1 refs 는 1부 canon 형식 p1:화/컷(canon episodes p1_NNN quote · fights 장면의 따옴표 말)",
   "title": {"text": "캐슬 M", "sub": "", "hint": "장을 눌러 고른다 · 가만히 두면 데모", "continue": "이어하기", "soon": "준비 중", "locked": "잠김", "cleared": "깸 ×%d", "new_save": "새로 시작"},
   "chapters": {
     "ch0": ["프롤로그", "블라디보스토크 · 마지막 의뢰"],
     "ch1": ["1장 · 범죄도시 회암", "김신 대 DS — 김대건 · 윤덕수"],
+    "ch2": ["2장 · 하성 본사", "김신 · 서진태 대 하성 — 남궁혁 · 신태진"],
     "ch6": ["6장 · 인천항 부두", "김신 대 백도찬"],
     "ch11": ["11장 · 호텔 캐슬", "김신 · 피우진 교대"]
   },
@@ -40,6 +41,22 @@
     },
     "down": "쓰러졌다",
     "lose": ["패배", "김신이 쓰러졌다 — 다시 · 흰 ! 쳐내기 · 빨간 ! 구르기"]
+  },
+  "ch2": {
+    "start": {"text": "2장 · 하성 본사", "sub": "(뼈대 — 대사 작업에서 채운다)", "refs": []},
+    "rooms": {
+      "site_night": {"enter": ["공사장 · 밤", ""]},
+      "lobby": {"enter": ["하성 본사 · 1층 로비", ""]},
+      "guard_corridor": {"enter": ["대표실 앞 복도", ""]},
+      "lobby_stairs": {"enter": ["우측 빌딩 · 중앙계단", ""]},
+      "ceo_office": {"enter": ["대표실", ""]},
+      "upper_corridor": {"enter": ["위층 복도", ""], "escape": ["따돌렸다", ""]},
+      "junkyard_night": {"enter": ["부진폐차장 · 밤", ""]},
+      "junkyard_end": {"enter": ["2장 끝", ""], "end": ["2장 끝", ""]}
+    },
+    "down": "쓰러졌다",
+    "lose": ["패배", "쓰러졌다 — 다시 · 흰 ! 쳐내기 · 빨간 ! 구르기"],
+    "escape_hint": "따돌려라 — %d초 · 오른쪽 끝으로 빠져나가도 된다"
   },
   "speed": "속도 %s",
   "menu": {"heading": "메뉴 — 스테이지 고르기 (위 = 장 · 아래 = 그 장의 스테이지)", "resume": "계속", "title": "처음 화면"},

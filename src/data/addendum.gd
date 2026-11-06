@@ -17,7 +17,7 @@ const Common = preload("res://src/data/common.gd")
 const PERIOD_CH11 := "hwajin"
 
 ## 이름 없는 엑스트라(인물 표 · canon 에 없다 — 장 데이터 검사가 canon 인물 id 를 보지 않는 것)
-const EXTRAS := ["castle_guard", "gunter_guard", "ds_member", "ds_raider"]
+const EXTRAS := ["castle_guard", "gunter_guard", "ds_member", "ds_raider", "haseong_suit", "haseong_guard", "namgu_youth"]
 
 const CHARACTERS := {
 	"shingen": {"id": "shingen", "name": "사사키 신겐", "rank": "내성 상위", "weapons": ["맨손", "칼", "대도"],
@@ -60,6 +60,48 @@ const CHARACTERS := {
 	"ds_raider": {"id": "ds_raider", "name": "DS 습격조", "rank": "건달급", "weapons": ["맨손", "곤봉"],
 		"stats": {"힘": 46, "속도": 42, "기술": 32, "맷집": 46}, "skills": [],
 		"src": "3D 덧붙임 엑스트라(원작 fight:pyechajang 'DS 습격조(방망이 · 쇠파이프 · 복면)' p1:008-010)",
+		"provisional": ["rank", "stats"]},
+	# ---- 2장 하성 본사(S5 묶음 4) — 등급 · 무기는 사용자 답 2026-11-06("신태진은 준10강 양손 칼. 황보민철은 전국구, 양손 칼. 이슬은
+	# 전국구 맨손. 오지인 전국구 아래급에 긴 칼. 김재훈은 최하위, 맨손." — 전국구 아래급 = 경호대급, 최하위 = 건달급(ranks.json 사다리)).
+	# 능력치 · 기술 고르기는 이 판 후보(같은 등급 인물 — 하야부사 · 경호대 최후의 4인 · 구일화 — 에 맞춤). castle_common 요청 24행
+	# 남궁혁: castle_common characters.json 에 기술 책(너클 낀 주먹 카운터)만 있고 등급 칸이 없다 — 등급은 castle_common ranks.json
+	# 강함표(strength '외성 하위': 남궁혁) 그대로. 능력치는 이 판 후보(외성 하위 · 너클 카운터 — 기술 쪽)
+	"namgunghyuk": {"id": "namgunghyuk", "name": "남궁혁", "rank": "외성 하위", "weapons": ["너클"],
+		"stats": {"힘": 76, "속도": 72, "기술": 78, "맷집": 76}, "skills": [],
+		"src": "등급 = castle_common ranks.json strength(외성 하위) · 무기 = characters.json main(너클) · 능력치는 이 판 후보",
+		"provisional": ["stats", "skills"]},
+	"sintaejin": {"id": "sintaejin", "name": "신태진", "rank": "준10강", "weapons": ["양손 칼"],
+		"stats": {"힘": 70, "속도": 76, "기술": 72, "맷집": 68}, "skills": [],
+		"src": "사용자 2026-11-06 '신태진은 준10강 양손 칼' · 능력치는 이 판 후보(하야부사 준10강 곁 — 쌍칼이라 속도 쪽)",
+		"provisional": ["stats", "skills"]},
+	"hwangbomincheol": {"id": "hwangbomincheol", "name": "황보민철", "rank": "전국구", "weapons": ["양손 칼"],
+		"stats": {"힘": 60, "속도": 62, "기술": 56, "맷집": 62}, "skills": [],
+		"src": "사용자 2026-11-06 '황보민철은 전국구, 양손 칼' · 능력치는 이 판 후보(경호대 최후의 4인 전국구 곁)",
+		"provisional": ["stats", "skills"]},
+	"iseul": {"id": "iseul", "name": "이슬", "rank": "전국구", "weapons": ["맨손"],
+		"stats": {"힘": 70, "속도": 48, "기술": 44, "맷집": 76}, "skills": [],
+		"src": "사용자 2026-11-06 '이슬은 전국구 맨손' · 능력치는 이 판 후보(180cm 100kg 거구 — castle_common looks.json build · 구일화 전국구 곁)",
+		"provisional": ["stats", "skills"]},
+	"ojiin": {"id": "ojiin", "name": "오지인", "rank": "경호대급", "weapons": ["긴 칼"],
+		"stats": {"힘": 54, "속도": 56, "기술": 52, "맷집": 52}, "skills": [],
+		"src": "사용자 2026-11-06 '오지인 전국구 아래급에 긴 칼' · 능력치는 이 판 후보",
+		"provisional": ["stats", "skills"]},
+	"kimjaehoon": {"id": "kimjaehoon", "name": "김재훈", "rank": "건달급", "weapons": ["맨손"],
+		"stats": {"힘": 36, "속도": 40, "기술": 28, "맷집": 38}, "skills": [],
+		"src": "사용자 2026-11-06 '김재훈은 최하위, 맨손' · 능력치는 이 판 후보",
+		"provisional": ["stats"]},
+	# 2장 엑스트라(원작 fight:haseong_lobby '하성 조직원(검은 정장)' · fight:gyeonghotim '대표실 앞 특별 경호팀' · '남구청년회 사람들')
+	"haseong_suit": {"id": "haseong_suit", "name": "하성 조직원", "rank": "건달급", "weapons": ["맨손", "칼"],
+		"stats": {"힘": 44, "속도": 44, "기술": 34, "맷집": 44}, "skills": [],
+		"src": "3D 덧붙임 엑스트라(원작 fight:haseong_lobby 하성 로비 부하 · 검은 정장 p1:024-028)",
+		"provisional": ["rank", "stats"]},
+	"haseong_guard": {"id": "haseong_guard", "name": "특별 경호팀", "rank": "경호대급", "weapons": ["맨손", "칼"],
+		"stats": {"힘": 50, "속도": 50, "기술": 42, "맷집": 50}, "skills": [],
+		"src": "3D 덧붙임 엑스트라(원작 fight:gyeonghotim 대표실 앞 특별 경호팀 p1:025-026)",
+		"provisional": ["rank", "stats"]},
+	"namgu_youth": {"id": "namgu_youth", "name": "남구청년회", "rank": "건달급", "weapons": ["맨손"],
+		"stats": {"힘": 42, "속도": 44, "기술": 32, "맷집": 44}, "skills": [],
+		"src": "3D 덧붙임 엑스트라(원작 fight:haseong_lobby 남구청년회 사람들 — 서진태 쪽 p1:024-028)",
 		"provisional": ["rank", "stats"]},
 }
 
