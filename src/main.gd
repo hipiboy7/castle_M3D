@@ -232,6 +232,9 @@ func _new_run(ch: String, room := -1) -> void:
 	else:
 		d = Duel.make(seed_now)
 	rec = Replay.start(kind, seed_now, opts)
+	hud.clear_messages()
+	evfx.later_msg = []
+	evfx.later_t = 0.0
 	_build_stage_view()
 	d["world"].events = d["world"].events.filter(func(e): return e[0] != "room")   # 첫 방은 위에서 이미 그렸다
 

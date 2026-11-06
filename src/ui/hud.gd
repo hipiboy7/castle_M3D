@@ -216,6 +216,14 @@ func message(text: String, small := "", secs := 2.0, delay := 0.0) -> void:
 	_msg_t = secs
 
 
+## 판을 새로 만들 때(장 · 방 바꿈): 앞 판의 알림 · 기다리는 알림을 지운다(메뉴로 6장에 가면 0장 방 글이 늦게 떠 덮이던 것)
+func clear_messages() -> void:
+	_queue.clear()
+	msg.text = ""
+	sub.text = ""
+	_msg_t = 0.0
+
+
 ## 적 머리 위 작은 체력 막대: [[화면 자리, 체력 비율, 색], ...]
 func set_minibars(items: Array) -> void:
 	minis.items = items
