@@ -41,31 +41,35 @@ const ROLES := {
 		"moveset": {"combo": "k_slash1", "dash": "k_dash", "counter": "k_counter", "finisher": "k_finisher"}},
 	"kimshin_bare": {"look": "kim_bare",
 		"moveset": {"combo": "kf_jab", "dash": "kf_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
-	"jintae": {"hp": 190.0, "posture": 60.0, "walk": 2.2, "run": 4.8, "stagger": 50, "look": "jintae",
-		"moveset": {"combo": "j_jab", "dash": "j_dash", "finisher": "j_finisher"}},
-	# 이슬: 공사장에서는 적(ai), 로비에서는 아군(moveset) — 한 줄에 둘 다(stage._npc 가 편에 따라 고른다)
-	"iseul": {"hp": 900.0, "posture": 260.0, "walk": 1.8, "run": 3.9, "stagger": 75, "poise": 30.0, "finisher_cap": 0.12, "ai": "manjae",
-		"look": "iseul", "moveset": {"combo": "kf_jab", "dash": "kf_dash", "finisher": "kf_finisher"}},
+	# 서진태(2장 조작 인물 · 칼 — 028 로비 난전 · 026-027 황보민철): 칼 베기 → 되베기 → 회전 베기 · 낮은 대시 · 역수 내리꽂기.
+	# 칼날 쳐내기가 없어(막기만) 반격 동작은 없다. 기술은 castle_common 진행(stage._hero — 이 시점엔 없음)
+	"jintae": {"hp": 230.0, "posture": 70.0, "walk": 2.2, "run": 4.8, "stagger": 50, "look": "jintae",
+		"moveset": {"combo": "jk_slash1", "dash": "jk_dash", "finisher": "jk_finisher"}},
+	# 이슬: 공사장에서는 적(ai), 로비에서는 아군(moveset · 1층 skills) — 한 줄에 둘 다(stage._npc 가 편에 따라 고른다).
+	# 공사장은 '한 합'(022/055-066) — 방 표 hp_k 로 짧게
+	"iseul": {"hp": 900.0, "posture": 260.0, "walk": 1.8, "run": 3.9, "stagger": 75, "poise": 30.0, "finisher_cap": 0.12, "ai": "iseul",
+		"look": "iseul", "moveset": {"combo": "ia_hook", "dash": "ia_dash", "finisher": "ia_finisher"}},
 	# 아군(봇)
-	"namgu_youth": {"hp": 200.0, "posture": 45.0, "walk": 1.9, "run": 4.0, "stagger": 70, "look": "namgu_youth",
-		"moveset": {"combo": "kf_jab", "dash": "kf_dash", "finisher": "kf_finisher"}},
+	"namgu_youth": {"hp": 220.0, "posture": 45.0, "walk": 1.9, "run": 4.0, "stagger": 70, "look": "namgu_youth",
+		"moveset": {"combo": "ny_jab", "dash": "ny_dash", "finisher": "ny_finisher"}},
 	# 적
-	"haseong_suit": {"hp": 240.0, "posture": 45.0, "walk": 1.8, "run": 3.8, "stagger": 70, "poise": 0.0, "ai": "thug",
+	"haseong_suit": {"hp": 240.0, "posture": 45.0, "walk": 1.8, "run": 3.8, "stagger": 70, "poise": 0.0, "ai": "haseong_suit",
 		"look": "haseong_suit"},
-	"haseong_guard": {"hp": 280.0, "posture": 60.0, "walk": 1.9, "run": 4.0, "stagger": 70, "poise": 0.0, "ai": "thug",
+	"haseong_guard": {"hp": 280.0, "posture": 60.0, "walk": 1.9, "run": 4.0, "stagger": 70, "poise": 0.0, "ai": "haseong_guard",
 		"look": "haseong_guard"},
-	"ojiin": {"hp": 900.0, "posture": 220.0, "walk": 2.0, "run": 4.3, "stagger": 70, "poise": 26.0, "finisher_cap": 0.12, "ai": "hayabusa",
-		"look": "ojiin"},
-	"hwangbomincheol": {"hp": 1500.0, "posture": 420.0, "walk": 2.0, "run": 4.4, "stagger": 75, "poise": 30.0, "finisher_cap": 0.06, "ai": "hyeokju",
+	# 오지인: 원작은 맞붙지 않고 '열에 아홉은 진다'며 칼을 내려놓고 비켜선다(026/049-052) — yield_at 에서 길을 내준다(stage.gd)
+	"ojiin": {"hp": 900.0, "posture": 220.0, "walk": 2.0, "run": 4.3, "stagger": 70, "poise": 26.0, "finisher_cap": 0.12, "ai": "ojiin",
+		"look": "ojiin", "yield_at": 0.4},
+	"hwangbomincheol": {"hp": 720.0, "posture": 260.0, "walk": 2.0, "run": 4.4, "stagger": 75, "poise": 30.0, "finisher_cap": 0.06, "ai": "mincheol",
 		"look": "hwangbomincheol", "phase2_at": 0.5},
-	"kimjaehoon": {"hp": 300.0, "posture": 60.0, "walk": 1.8, "run": 3.8, "stagger": 70, "poise": 0.0, "ai": "thug",
+	"kimjaehoon": {"hp": 300.0, "posture": 60.0, "walk": 1.8, "run": 3.8, "stagger": 70, "poise": 0.0, "ai": "jaehoon",
 		"look": "kimjaehoon"},
-	"gangchangseok": {"hp": 800.0, "posture": 240.0, "walk": 1.8, "run": 3.9, "stagger": 75, "poise": 28.0, "finisher_cap": 0.12, "ai": "thug_brute",
+	"gangchangseok": {"hp": 800.0, "posture": 240.0, "walk": 1.9, "run": 4.1, "stagger": 75, "poise": 28.0, "finisher_cap": 0.12, "ai": "changseok",
 		"look": "gangchangseok"},
-	"namgunghyuk": {"hp": 2400.0, "posture": 700.0, "walk": 2.0, "run": 4.4, "stagger": 80, "poise": 36.0, "finisher_cap": 0.04, "ai": "manjae",
-		"look": "namgunghyuk", "hp_floor": 0.4},
-	"sintaejin": {"hp": 2200.0, "posture": 640.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 34.0, "finisher_cap": 0.06, "ai": "hayabusa",
-		"look": "sintaejin", "phase2_at": 0.5, "dmg_k": 2.8},
+	"namgunghyuk": {"hp": 2400.0, "posture": 700.0, "walk": 2.0, "run": 4.4, "stagger": 80, "poise": 36.0, "finisher_cap": 0.04, "ai": "namgung",
+		"look": "namgunghyuk", "hp_floor": 0.4, "dmg_k": 1.6},
+	"sintaejin": {"hp": 1750.0, "posture": 600.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 34.0, "finisher_cap": 0.06, "ai": "sintaejin",
+		"look": "sintaejin", "phase2_at": 0.5, "dmg_k": 2.3},
 }
 
 ## 방 — 칸 뜻은 hotel.gd ROOMS. 덧붙임: cast(이 방에 나오는 조작 인물 id — heroes 자리도 이 차례) · kit(조작 인물 id → ROLES 의
@@ -73,7 +77,7 @@ const ROLES := {
 const ROOMS := [
 	{"id": "site_night", "theme": "site_alley", "bounds": Rect2(-5.6, -2.4, 11.2, 4.8), "cast": ["kimshin"], "kit": {"kimshin": "kimshin_bare"},
 		"heroes": [Vector2(-3.0, 0.2)], "allies": [],
-		"enemies": [["iseul", Vector2(2.0, 0.0)]], "boss": "iseul"},
+		"enemies": [["iseul", Vector2(2.0, 0.0), {"hp_k": 0.5}]], "boss": "iseul"},
 	{"id": "lobby", "theme": "haseong_lobby", "bounds": Rect2(-7.2, -3.2, 14.4, 6.4), "cast": ["jintae"],
 		"heroes": [Vector2(-5.0, 0.2)], "allies": [["iseul", Vector2(-4.4, -1.4)], ["namgu_youth", Vector2(-5.4, 1.6)], ["namgu_youth", Vector2(-4.0, 2.0)]],
 		"enemies": [["haseong_suit", Vector2(0.6, -2.0)], ["haseong_suit", Vector2(1.4, 1.6)], ["haseong_suit", Vector2(2.6, -0.4)],

@@ -1,5 +1,5 @@
 extends RefCounted
-## 적 AI (여러 사람 판 — 0장 군터 호텔 · 1장 회암시 · 11장 호텔 캐슬) — 프로필 표(PROFILES) 하나로 엑스트라 · 군터 · DS 간부 ·
+## 적 AI (여러 사람 판 — 0장 군터 호텔 · 1장 회암시 · 2장 하성 본사 · 11장 호텔 캐슬) — 프로필 표(PROFILES) 하나로 엑스트라 · 군터 · DS 간부 ·
 ## 김대건 · 윤덕수 · 경호원 · 경호대 최후의 4인 · 하야부사 · 신겐을 움직인다.
 ## 백도찬 AI(boss_ai.gd)처럼 Fighter.intent 만 채운다. 판(stage.gd)이 매 프레임 상대(가장 가까운 사람)와 may_attack 을 준다 —
 ## 여럿이 한꺼번에 몰아치지 않게 동시에 패턴을 내는 적 수를 판이 제한한다(협공은 하되 예고를 읽을 틈은 남긴다).
@@ -84,6 +84,59 @@ const PROFILES := {
 		"weights": [[["hook", 3], ["jab_hook", 2], ["straight", 2], ["one_two", 2], ["stomp", 1], ["grab", 1]],
 			[["hook", 2], ["jab_hook", 2], ["one_two", 3], ["grab", 3], ["hook_grab", 2]]],
 		"cd": [44, 34], "near": 1.1, "far": 2.0, "engage": 2.2, "phase2": {"dmg_k": 1.15, "cd_k": 0.7, "guard_add": 0.1}},
+	# ---- 2장 하성 본사(S5 묶음 4) — canon fights p1:022-033(화/컷 · conf ai). 동작은 src/data/moves.gd(is_ · hs_ · hg_ · oj_ · hb_ ·
+	# cs_ · jh_ · ng_ · st_). 칸은 0 · 1장과 같다(guard_add · counter · phase2.counter_add · kite)
+	# 이슬(022 공사장 한 합 · 전국구 거구): 성큼 다가와 크게 뻗는 주먹 · 내려치는 주먹 · 붙잡아 후려 날리기(026/000-001)
+	"iseul": {"patterns": {"punch": [["is_punch", 0]], "hook_punch": [["is_hook", 6], ["is_punch", 0]], "hammer": [["is_hammer", 0]],
+			"throw": [["is_throw", 0]], "hook_hammer": [["is_hook", 8], ["is_hammer", 0]]},
+		"weights": [[["punch", 3], ["hook_punch", 2], ["hammer", 1], ["throw", 1], ["hook_hammer", 1]]], "cd": [60, 40],
+		"near": 1.0, "far": 1.8, "engage": 2.1},
+	# 하성 조직원(로비 · 024-028): 주먹 · 각목 · 칼 · 손도끼 — 정장 무리
+	"haseong_suit": {"patterns": {"punch": [["hs_punch", 0]], "bat": [["hs_bat", 0]], "knife": [["hs_knife", 0]],
+			"punch_knife": [["hs_punch", 8], ["hs_knife", 0]], "hatchet": [["hs_hatchet", 0]]},
+		"weights": [[["punch", 2], ["bat", 2], ["knife", 2], ["punch_knife", 1], ["hatchet", 1]]], "cd": [80, 60],
+		"near": 1.0, "far": 1.8, "engage": 2.0},
+	# 특별 경호팀(대표실 앞 · 026/024-045): 칼 달려들기 · 휘두르기 · 덮쳐 붙잡기 — 정장보다 자주 · 빨리
+	"haseong_guard": {"patterns": {"knife": [["hg_knife", 0]], "slash2": [["hg_slash", 6], ["hg_knife", 0]], "punch_slash": [["hg_punch", 6], ["hg_slash", 0]],
+			"grab": [["hg_grab", 0]]},
+		"weights": [[["knife", 3], ["slash2", 2], ["punch_slash", 2], ["grab", 1]]], "cd": [60, 50], "near": 1.0, "far": 1.9, "engage": 2.2},
+	# 오지인(026/049-059 카타나 비서): 베기 · 되베기 · 찌르기 · 치마 뒤 단검(빨간 !) — 길을 내주는 체력은 장 표 yield_at
+	"ojiin": {"patterns": {"slash2": [["oj_slash", 6], ["oj_slash2", 0]], "slash_thrust": [["oj_slash", 8], ["oj_thrust", 0]],
+			"thrust": [["oj_thrust", 0]], "dagger": [["oj_dagger", 0]], "slash_dagger": [["oj_slash2", 6], ["oj_dagger", 0]]},
+		"weights": [[["slash2", 3], ["slash_thrust", 2], ["thrust", 1], ["dagger", 1], ["slash_dagger", 1]]], "cd": [50, 40],
+		"near": 1.3, "far": 2.3, "engage": 2.5},
+	# 황보민철(026-027 두 칼): 돌진에 맞받아 얼굴 스치기(counter) · 내디딤 찌르기 · 치켜 내리찍기 · 두 칼. 2차(출혈 — 027/165-171
+	# '시간 싸움이 불리') 왼다리 미끼 찌르기를 섞어 끝을 노린다
+	"mincheol": {"patterns": {"lunge": [["hb_lunge", 0]], "twin": [["hb_twin", 6], ["hb_back", 0]], "chop": [["hb_chop", 0]],
+			"back_lunge": [["hb_back", 6], ["hb_lunge", 0]], "bait": [["hb_bait", 0]], "twin_bait": [["hb_twin", 8], ["hb_bait", 0]]},
+		"weights": [[["lunge", 3], ["twin", 3], ["chop", 2], ["back_lunge", 2]],
+			[["twin", 3], ["back_lunge", 2], ["lunge", 2], ["bait", 2], ["twin_bait", 1], ["chop", 1]]],
+		"cd": [46, 36], "near": 1.1, "far": 2.0, "engage": 2.3, "counter": ["hb_face", 0.15],
+		"phase2": {"dmg_k": 1.1, "cd_k": 0.75, "guard_add": 0.05, "counter_add": 0.1}},
+	# 강창석(칼잡이 2인자 — 013-019): 낮게 지나치며 베기 · 연속 찌르기 · 수평 베기 · 칼 쥔 채 하이킥
+	"changseok": {"patterns": {"pass": [["cs_pass", 0]], "stab": [["cs_stab", 0]], "sweep": [["cs_sweep", 0]],
+			"sweep_kick": [["cs_sweep", 6], ["cs_highkick", 0]], "pass_stab": [["cs_pass", 8], ["cs_stab", 0]]},
+		"weights": [[["pass", 2], ["stab", 2], ["sweep", 2], ["sweep_kick", 1], ["pass_stab", 1]]], "cd": [70, 50],
+		"near": 1.0, "far": 1.9, "engage": 2.1},
+	# 김재훈(029 대표실 · 아주 약함): 떨어져서 어둠 속 리볼버 연사(쏘고 나면 장전이 길다) — 붙으면 헛스윙 · 밀치기
+	"jaehoon": {"patterns": {"swing": [["jh_swing", 0]], "shove_swing": [["jh_shove", 8], ["jh_swing", 0]]},
+		"weights": [[["swing", 2], ["shove_swing", 1]]], "cd": [100, 60], "near": 1.8, "far": 4.0, "engage": 1.9,
+		"ranged": ["jh_revolver", 2.1, 6.6, 330], "kite": true},
+	# 남궁혁(024-030 너클): 기술 책 '너클 낀 주먹 카운터' — 치기 시작하면 자주 맞받는다(counter) · 하이가드. 연타 · 원 궤적 훅 ·
+	# 휘두르는 발차기 · 날아차기 · 손목 잡고 무릎. 따돌리기 방(2장 6 — 쓰러뜨릴 수 없다)이라 2차는 없다
+	"namgung": {"patterns": {"jab": [["ng_jab", 0]], "jab_hook": [["ng_jab", 4], ["ng_hook", 0]], "hook": [["ng_hook", 0]],
+			"kick": [["ng_kick", 0]], "fly": [["ng_flykick", 0]], "knee": [["ng_knee", 0]], "kick_hook": [["ng_kick", 6], ["ng_hook", 0]]},
+		"weights": [[["jab", 3], ["jab_hook", 3], ["hook", 2], ["kick", 2], ["fly", 1], ["knee", 1], ["kick_hook", 1]]],
+		"cd": [40, 30], "near": 1.1, "far": 2.0, "engage": 2.3, "guard_add": 0.15, "counter": ["ng_counter", 0.4]},
+	# 신태진(031-032 장도 · 쌍칼 · 권총): 1차 수평 베기 · 내려베기 · 낮은 휩쓸기 · 돌진 · 허수 · 코앞 권총.
+	# 2차(복면을 벗음 032/020-031): 얼굴 찌르기 → 숨긴 두 번째 칼 · 쌍칼 밀어붙이기 · 올려 베기 · 권총 — 더 몰아친다
+	"sintaejin": {"patterns": {"sweep": [["st_sweep", 0]], "sweep_drop": [["st_sweep", 8], ["st_drop", 0]], "low": [["st_low", 0]],
+			"rush": [["st_rush", 0]], "feint": [["st_feint", 0]], "low_pistol": [["st_low", 6], ["st_pistol", 0]],
+			"face_second": [["st_face", 4], ["st_second", 0]], "twin": [["st_twin", 0]], "twin_up": [["st_twin", 4], ["st_upslash", 0]],
+			"pistol": [["st_pistol", 0]], "face_sweep": [["st_face", 6], ["st_sweep", 0]]},
+		"weights": [[["sweep", 3], ["sweep_drop", 2], ["low", 2], ["rush", 2], ["feint", 1], ["low_pistol", 1]],
+			[["face_second", 3], ["twin", 2], ["twin_up", 2], ["face_sweep", 2], ["rush", 1], ["pistol", 1], ["sweep_drop", 1]]],
+		"cd": [38, 30], "near": 1.3, "far": 2.3, "engage": 2.5, "phase2": {"dmg_k": 1.15, "cd_k": 0.7, "guard_add": 0.1}},
 }
 
 var me

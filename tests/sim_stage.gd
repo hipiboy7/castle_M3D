@@ -1,6 +1,6 @@
 extends SceneTree
 ## 여러 사람 판 자동 판 결과 (창 없음): <godot> --headless --path . -s res://tests/sim_stage.gd -- [장 id] 1 2 3 4 5 6
-## 장 id(ch0 · ch1 · ch11, 기본 ch11)의 사람 · 아군은 봇 대 방마다의 적. 방마다 싸운 시간(초) · 끝 방 · 체력 — 수치 조정용.
+## 장 id(ch0 · ch1 · ch2 · ch11, 기본 ch11)의 사람 · 아군은 봇 대 방마다의 적. 방마다 싸운 시간(초) · 끝 방 · 체력 — 수치 조정용.
 ## [장 id] 다음에 room=N 을 주면 그 방부터(보스 방만 여러 번 돌릴 때).
 
 const Stage = preload("res://src/combat/stage.gd")

@@ -1,5 +1,5 @@
 extends "res://tests/helpers.gd"
-## 0 · 1장(1부 처음) 동작 · 적 프로필(A 등급 — src/data/moves.gd 3층 표 · src/combat/enemy_ai.gd PROFILES 표 값).
+## 0 · 1 · 2장(1부 처음) 동작 · 적 프로필(A 등급 — src/data/moves.gd 3층 표 · src/combat/enemy_ai.gd PROFILES 표 값).
 ## 표끼리 맞는지: 프로필이 부르는 동작이 다 있다 · 사람마다 제 동작(뼈대 복사 아님) · 프레임이 말이 된다 · 못 막는 큰 동작은
 ## 빨간 ! 로 읽을 틈이 있다 · 김혁주 첫 베기는 잽 · 두 번째가 진짜(멈칫) · 2차가 있는 보스는 2차 표가 따로 ·
 ## 김신 맨손 연타 차례. 판정 규칙은 그대로(fighter · world) — 그 규칙 위에서 새 동작이 뜻대로 걸리는지도 본다(기절 · 넘어짐 · 버팀).
@@ -8,10 +8,17 @@ const EnemyAI = preload("res://src/combat/enemy_ai.gd")
 const Prologue = preload("res://src/data/prologue.gd")
 const Hoeam = preload("res://src/data/hoeam.gd")
 
-## 0 · 1장 프로필 → 그 사람 동작 id 머리
+## 0 · 1 · 2장 프로필 → 그 사람 동작 id 머리
 const OWNERS := {"thug": "m_", "thug_brute": "m_", "thug_revolver": "m_", "thug_uzi": "m_", "thug_pipe": "m_", "gunter": "gt_",
-	"hyeokju": "hj_", "seongjun": "sj_", "daegeon": "dg_", "manjae": "mj_", "deoksu": "yd_"}
-const PREFIXES := ["m_", "gt_", "hj_", "sj_", "dg_", "mj_", "yd_"]
+	"hyeokju": "hj_", "seongjun": "sj_", "daegeon": "dg_", "manjae": "mj_", "deoksu": "yd_",
+	# 2장 하성 본사(S5 묶음 4)
+	"iseul": "is_", "haseong_suit": "hs_", "haseong_guard": "hg_", "ojiin": "oj_", "mincheol": "hb_", "changseok": "cs_",
+	"jaehoon": "jh_", "namgung": "ng_", "sintaejin": "st_"}
+const PREFIXES := ["m_", "gt_", "hj_", "sj_", "dg_", "mj_", "yd_", "is_", "hs_", "hg_", "oj_", "hb_", "cs_", "jh_", "ng_", "st_"]
+## 사람 · 아군 동작(예고 없음) — 0 · 1장 김신 맨손 · 서진태 아군, 2장 서진태 칼 · 이슬 아군 · 남구청년회
+const PEOPLE := ["kf_jab", "kf_jab2", "kf_upper", "kf_dash", "kf_counter", "kf_finisher", "j_jab", "j_jab2", "j_kick", "j_dash", "j_finisher",
+	"jk_slash1", "jk_slash2", "jk_spin", "jk_dash", "jk_finisher", "ia_hook", "ia_punch", "ia_dash", "ia_finisher", "s_is_throw", "s_is_slam",
+	"ny_jab", "ny_punch", "ny_kick", "ny_dash", "ny_finisher"]
 const READ_MIN := 14          # 못 막는 동작(빨간 !)의 준비 프레임 하한 — 보고 구를 틈(봇은 7프레임 앞에서 구른다)
 
 
@@ -62,9 +69,10 @@ func test_p1_profiles_use_own_moves() -> void:
 		for k in ["cd", "near", "far", "engage"]:
 			check(prof.has(k), "%s 칸 %s" % [pid, k])
 	# 총잡이는 총을 쏘고, 맨손 · 칼잡이는 총이 없다
-	for pid in ["thug_revolver", "thug_uzi", "gunter"]:
+	for pid in ["thug_revolver", "thug_uzi", "gunter", "jaehoon"]:
 		check(EnemyAI.PROFILES[pid].has("ranged"), "%s 는 총" % pid)
-	for pid in ["thug", "thug_brute", "thug_pipe", "hyeokju", "seongjun", "daegeon", "manjae", "deoksu"]:
+	for pid in ["thug", "thug_brute", "thug_pipe", "hyeokju", "seongjun", "daegeon", "manjae", "deoksu",
+			"iseul", "haseong_suit", "haseong_guard", "ojiin", "mincheol", "changseok", "namgung", "sintaejin"]:
 		check(not EnemyAI.PROFILES[pid].has("ranged"), "%s 는 총이 없다" % pid)
 	# 패턴이 서로 다르다(같은 표를 복사해 두지 않았다)
 	var seen := {}
@@ -76,8 +84,8 @@ func test_p1_profiles_use_own_moves() -> void:
 
 func test_p1_move_frames() -> void:
 	var ids := _enemy_ids()
-	check(ids.size() >= 30, "0 · 1장 적 동작 %d 개" % ids.size())
-	for k in ids + ["kf_jab", "kf_jab2", "kf_upper", "kf_dash", "kf_counter", "kf_finisher", "j_jab", "j_jab2", "j_kick", "j_dash", "j_finisher"]:
+	check(ids.size() >= 75, "0 · 1 · 2장 적 동작 %d 개" % ids.size())
+	for k in ids + PEOPLE:
 		var mv := Moves.get_move(k)
 		check(int(mv["startup"]) >= 1 and int(mv["active"]) >= 1 and int(mv["recovery"]) >= 0, "%s 프레임" % k)
 		check(Moves.total(mv) <= 90, "%s 가 1.5초 안에 끝난다 (%d)" % [k, Moves.total(mv)])
