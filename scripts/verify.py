@@ -1,7 +1,7 @@
 """전체 검증 (창 없음) — 이 명령이 0 으로 끝나야 커밋 · push 한다.
 
-    py -3.12 scripts/verify.py            # 약 20초
-    py -3.12 scripts/verify.py --strict   # castle_common 이 앞서 있으면 실패 (마일스톤 끝 · 태그 전)
+    python3.11 scripts/verify.py            # 약 20초 (Windows: py -3.12)
+    python3.11 scripts/verify.py --strict   # castle_common 이 앞서 있으면 실패 (마일스톤 끝 · 태그 전)
     GODOT=/path/to/godot python3 scripts/verify.py   # CI(리눅스) — Godot 실행 파일을 환경 변수로
 
 단계:
@@ -10,7 +10,9 @@
                같은지 — 다르면 알림(--strict 는 실패), 없으면(CI) 건너뛴다. castle_M scripts/verify.py 3-1 과 같은 방식
   0. 자산 출처    assets/ 의 파일(.import 빼고)이 모두 assets/ASSETS.md 에 있고, 목록에만 있는 파일이 없다(개발 규격 6절)
   1. 가져오기   godot --headless --path . --import  (스크립트 문법 · 자원 가져오기)
-  2. 테스트     godot --headless --path . -s res://tests/run_tests.gd  (전투 규칙 — tests/test_combat.gd)
+  2. 테스트     godot --headless --path . -s res://tests/run_tests.gd  (tests/unit · tests/integration)
+  2. 커버리지   함수 단위 — .tools/cov/ 에 src · tests · data 사본을 만들고 A · B 등급 파일의 함수 머리마다 표시 줄을 넣어
+               테스트를 다시 돌린다(이 저장소 소스는 그대로). A ≥ 90% · B ≥ 70%(CLAUDE.md 2-1절) — 모자라면 실패
   3. 자동 결투  godot --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 --seed S  (시드 1 · 2 · 3,
                게임 전체 — 무대 · 인형 · 연출 · 화면 표시까지 돌려 멈춤 · 스크립트 오류가 없는지)
 출력에 SCRIPT ERROR · ERROR: · WARNING: · Leaked 가 하나라도 있으면 실패.
@@ -31,6 +33,13 @@ import get_godot  # noqa: E402
 COMMON_DIR = os.path.join(ROOT, "data", "common")
 COMMON_SRC = os.environ.get("CASTLE_COMMON") or os.path.join(os.path.dirname(ROOT), "castle_common")
 ASSETS = os.path.join(ROOT, "assets")
+# CLAUDE.md 2-1절 TDD 등급 — 함수 단위 커버리지를 재는 파일 (main.gd 흐름은 노드가 있어 자동 결투 단계가 본다)
+COV_FILES = {
+    "A": ["src/data/common.gd", "src/data/skills.gd", "src/data/moves.gd", "src/combat/world.gd", "src/combat/fighter.gd"],
+    "B": ["src/combat/duel.gd", "src/combat/boss_ai.gd", "src/combat/bot.gd"],
+}
+COV_MIN = {"A": 0.90, "B": 0.70}
+FUNC_RE = re.compile(r"^(\s*)(?:static\s+)?func\s+(\w+)\s*\(")
 BAD = re.compile(r"SCRIPT ERROR|^ERROR:|^WARNING:|Leaked|Parse Error", re.M)
 
 
@@ -76,7 +85,7 @@ def step_common(strict):
     t0 = time.time()
     stamp_path = os.path.join(COMMON_DIR, "SOURCE.json")
     if not os.path.exists(stamp_path):
-        print("[FAIL] 공통 데이터 — data/common/SOURCE.json 이 없다: py -3.12 ../castle_common/tools/sync.py castle_M3D")
+        print("[FAIL] 공통 데이터 — data/common/SOURCE.json 이 없다: python3.11 ../castle_common/tools/sync.py castle_M3D")
         return False
     with open(stamp_path, encoding="utf-8") as f:
         stamp = json.load(f)
@@ -100,7 +109,7 @@ def step_common(strict):
         if behind:
             ok = not strict
             msg += (f" · {'[실패]' if strict else '[알림]'} castle_common 이 앞섰다({', '.join(behind)}) — "
-                    "py -3.12 ../castle_common/tools/sync.py castle_M3D 로 받고 테스트")
+                    "python3.11 ../castle_common/tools/sync.py castle_M3D 로 받고 테스트")
         else:
             msg += " · castle_common 과 같다"
     else:
@@ -129,6 +138,71 @@ def step_assets():
     return ok
 
 
+def _instrument(text, rel):
+    """함수마다 몸 첫 줄 앞에 커버리지 표시 줄을 넣는다. 돌려주는 값: (새 글, 함수 이름 목록)."""
+    lines = text.split("\n")
+    out, names, i = [], [], 0
+    while i < len(lines):
+        m = FUNC_RE.match(lines[i])
+        if not m:
+            out.append(lines[i])
+            i += 1
+            continue
+        names.append(m.group(2))
+        depth = 0
+        while True:                                   # 여러 줄 머리: 괄호가 닫히고 ':' 로 끝나는 줄까지
+            ln = lines[i]
+            out.append(ln)
+            depth += ln.count("(") - ln.count(")")
+            i += 1
+            if depth <= 0 and ln.rstrip().endswith(":"):
+                break
+        j = i
+        while j < len(lines) and (not lines[j].strip() or lines[j].lstrip().startswith("#")):
+            j += 1
+        indent = re.match(r"^(\s*)", lines[j]).group(1) if j < len(lines) else "\t"
+        out.append(f'{indent}if Engine.has_meta("cov"): Engine.get_meta("cov")["{rel}:{m.group(2)}"] = 1')
+    return "\n".join(out), names
+
+
+def step_coverage(g):
+    import shutil
+    t0 = time.time()
+    dst = os.path.join(ROOT, ".tools", "cov")
+    shutil.rmtree(dst, ignore_errors=True)
+    os.makedirs(dst)
+    shutil.copy(os.path.join(ROOT, "project.godot"), dst)
+    for d in ("src", "tests", "data"):
+        shutil.copytree(os.path.join(ROOT, d), os.path.join(dst, d))
+    funcs = {}
+    for grade, files in COV_FILES.items():
+        for rel in files:
+            with open(os.path.join(ROOT, rel), encoding="utf-8") as f:
+                text, names = _instrument(f.read(), rel)
+            with open(os.path.join(dst, rel), "w", encoding="utf-8") as f:
+                f.write(text)
+            funcs[rel] = (grade, names)
+    out_json = os.path.join(dst, "cov.json")
+    p = subprocess.run([g, "--headless", "--path", dst, "-s", "res://tests/run_tests.gd", "--", "--cov", out_json],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600)
+    if not os.path.exists(out_json):
+        print(f"[FAIL] 커버리지 — 결과 파일이 없다\n" + "\n".join("     " + ln for ln in (p.stdout + p.stderr).splitlines()[-15:]))
+        return False
+    with open(out_json, encoding="utf-8") as f:
+        hit = set(json.load(f))
+    ok, parts, missed = True, [], []
+    for grade in COV_FILES:
+        tot = sum(len(funcs[r][1]) for r in COV_FILES[grade])
+        got = sum(1 for r in COV_FILES[grade] for n in funcs[r][1] if f"{r}:{n}" in hit)
+        k = got / tot if tot else 1.0
+        ok = ok and k >= COV_MIN[grade]
+        parts.append(f"{grade} {got}/{tot} {k:.0%} (기준 {COV_MIN[grade]:.0%})")
+        missed += [f"{os.path.basename(r)}:{n}" for r in COV_FILES[grade] for n in funcs[r][1] if f"{r}:{n}" not in hit]
+    msg = " · ".join(parts) + (f" · 안 불린 함수: {', '.join(missed)}" if missed else "")
+    print(f"[{'ok' if ok else 'FAIL'}] 커버리지 ({time.time() - t0:.1f}s) — {msg}")
+    return ok
+
+
 def main():
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")      # 윈도우 콘솔(cp1252)에서 한글 출력에 죽지 않게
@@ -148,6 +222,7 @@ def main():
         m = re.search(r"tests: (\d+) passed, (\d+) failed", out)
         return (m is not None and m.group(2) == "0"), (m.group(0) if m else "결과 줄 없음")
     results.append(run("테스트", [g, "--headless", "--path", ".", "-s", "res://tests/run_tests.gd"], tests_ok))
+    results.append(step_coverage(g))
     for seed in (1, 2, 3):
         def auto_ok(out):
             m = re.search(r"^RESULT (.*)$", out, re.M)

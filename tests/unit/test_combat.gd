@@ -1,44 +1,8 @@
-extends RefCounted
+extends "res://tests/helpers.gd"
 ## 전투 규칙 테스트 — 맞기 · 구르기 무적 · 칼날 쳐내기 · 가드 불가 · 빈틈 → 제압 상한 · 연타 · 2차 바닥 ·
 ## 기술(엇박 계열 관통 · 엇엇박 · 반대발 · 각법 기절 · 빈틈 우선 · 삼연타 기절 · 게이지) · 백도찬 첫 엇박 → 습득 ·
 ## 엇박 구르기 · 결정성.
-
-const Duel = preload("res://src/combat/duel.gd")
-const Fighter = preload("res://src/combat/fighter.gd")
-const Moves = preload("res://src/data/moves.gd")
-const World = preload("res://src/combat/world.gd")
-const Skills = preload("res://src/data/skills.gd")
-const Common = preload("res://src/data/common.gd")
-
-var failures: Array = []
-
-
-func check(cond: bool, msg: String) -> void:
-	if not cond:
-		failures.append(msg)
-
-
-## 두 사람을 가까이 마주 세운 판 (AI · 봇은 쓰지 않고 손으로 입력을 준다)
-func _close(dist := 0.8) -> Dictionary:
-	var d := Duel.make(1)
-	d["hero"].pos = Vector2(0, 0)
-	d["hero"].facing = Vector2(1, 0)
-	d["boss"].pos = Vector2(dist, 0)
-	d["boss"].facing = Vector2(-1, 0)
-	return d
-
-
-## 손 입력으로 한 프레임 (보스 입력도 직접)
-func _tick(d: Dictionary, hero_it := {}, boss_it := {}) -> void:
-	var w = d["world"]
-	d["hero"].intent = hero_it
-	d["boss"].intent = boss_it
-	w.tick()
-
-
-func _run(d: Dictionary, n: int) -> void:
-	for i in n:
-		_tick(d)
+## (A 등급 — 판정 · 피해 · 기절 · 게이지 · 등급: 손 입력으로 world.tick 을 돌린다)
 
 
 func test_slash_hits() -> void:
@@ -153,20 +117,6 @@ func test_phase2_floor() -> void:
 	check(d["world"].phase == 2, "1차 바닥에서 2차로")
 	check(is_equal_approx(b.hp, b.hp_max * 0.55), "1차는 55%% 아래로 안 내려간다 (%s)" % b.hp)
 	check(seen, "phase2 신호")
-
-
-func _events(d: Dictionary, kind: String) -> Array:
-	var out := []
-	for e in d["world"].events:
-		if e[0] == kind:
-			out.append(e)
-	return out
-
-
-## 백도찬이 엇박을 쓴 것처럼 — 김신이 엇박 계열을 얻는다 (엇엇박 · 엇박 · 반대발 엇박 · 각법 · 삼연타)
-func _learn(d: Dictionary) -> void:
-	Duel._boss_offbeat(d)
-	d["world"].slowmo = 0
 
 
 func test_offbeat_pierces_parry_lethal() -> void:
@@ -330,88 +280,6 @@ func test_skill_needs_gauge() -> void:
 	check(h.skill_index("offbeat") < 0, "엇박 계열은 백도찬이 쓰기 전에는 없다")
 
 
-func test_boss_first_offbeat_teaches() -> void:
-	var d := Duel.make(1)
-	var h = d["hero"]
-	var b = d["boss"]
-	d["ai"].parry_rate = 0.0
-	b.hp = b.hp_max * 0.9
-	var learned := false
-	var lethal_on_hero := false
-	var slow := false
-	var low: float = h.hp
-	for i in 400:
-		Duel.step(d, {"move": Vector2.ZERO, "face": h.dir_to(b)})       # 김신은 가만히 (구르지 않는다)
-		slow = slow or d["world"].slowmo > 0
-		low = minf(low, h.hp)
-		for e in d["world"].events:
-			learned = learned or e[0] == "learn"
-			lethal_on_hero = lethal_on_hero or (e[0] == "lethal" and e[1] == h)
-		d["world"].events.clear()
-		if d["ai"].demo == "done":
-			break
-	check(learned, "백도찬이 엇박을 쓰면 김신이 엇박 계열을 얻는다")
-	check(h.skill_index("offbeat2") >= 0 and h.skill_index("offbeat_rev") >= 0, "엇엇박 · 반대발 엇박도 (%s)" % [h.skills])
-	check(lethal_on_hero, "첫 엇박이 김신에게 들어간다(안 구르면)")
-	check(slow, "첫 엇박은 슬로모션")
-	check(low >= h.hp_max * Skills.BAEK_OFFBEAT["demo_floor"] - 0.001, "첫 엇박 장면에서 김신은 25%% 아래로 안 내려간다 (%s)" % low)
-	check(d["ai"].demo == "done" and h.hp_floor == 0.0 and b.hp_floor == 0.0, "장면이 끝나면 체력 바닥을 푼다")
-
-
-func test_baek_rolls_from_offbeat() -> void:
-	var d := _close(1.4)
-	var h = d["hero"]
-	var b = d["boss"]
-	var ai = d["ai"]
-	_learn(d)
-	ai.dodge_rate = 1.0
-	ai.parry_rate = 0.0
-	ai.cooldown = 9999
-	h.skill_idx = h.skill_index("offbeat")
-	var face: Vector2 = h.dir_to(b)
-	Duel.step(d, {"skill": true, "face": face})
-	for i in 40:
-		Duel.step(d, {"face": face})
-	check(is_equal_approx(b.hp, b.hp_max), "백도찬은 자유로우면 엇박 계열을 보고 구른다 (boss hp %s)" % b.hp)
-
-
-func test_deterministic_same_seed() -> void:
-	var a := Duel.simulate(7, 2400)
-	var b := Duel.simulate(7, 2400)
-	check(a == b, "같은 시드면 같은 결과\n%s\n%s" % [a, b])
-
-
-func test_bot_fights_boss() -> void:
-	var r := Duel.simulate(3, 3600)
-	check(r["boss_hp"] < Duel.BOSS["hp"], "봇이 1분 안에 보스에게 피해를 준다 %s" % r)
-	check(r["stats"]["parries"] > 0, "봇이 흰 ! 를 보고 쳐낸다 %s" % r)
-
-
-## S1 공통 받기: 결투의 2층 값이 공통 데이터에서 온다 — 김신 등급은 진행(6장 백도찬전 앞 = 내성 상위), 게이지 10칸 ·
-## 배율 4.988(fast_rank_k 2배 포함, 어긋남 ④), 비용 = skill_cost, 이름 = skills.json · characters.json
-func test_duel_values_from_common() -> void:
-	var d := Duel.make(1)
-	var h = d["hero"]
-	var b = d["boss"]
-	check(h.char_id == "kimshin" and h.name == "김신" and b.char_id == "baekdochan" and b.name == "백도찬", "인물 id · 이름")
-	check(h.rank == "내성 상위" and b.rank == "톱", "등급 (%s · %s)" % [h.rank, b.rank])
-	check(is_equal_approx(h.gauge_max, 10.0 * Common.bar_points()), "게이지 10칸 (%s)" % h.gauge_max)
-	check(absf(h.gauge_rate - 4.988) < 1e-9, "차는 배율 4.988 (%s)" % h.gauge_rate)
-	var got := []
-	for sk in h.skills:
-		got.append([sk["id"], sk["name"], sk["cost"]])
-	check(got == [["kickarts", "각법", 1.0], ["triple", "리천식 삼연타", 1.0]],
-		"처음 기술 — 동작이 있는 것만(스텝 · 촌경 빠짐) %s" % [got])
-	_learn(d)
-	got = []
-	for sk in h.skills:
-		got.append([sk["id"], sk["name"], sk["cost"]])
-	check(got.slice(0, 3) == [["offbeat2", "엇엇박 찌르기", -1.0], ["offbeat", "엇박 찌르기", 4.0], ["offbeat_rev", "반대발 엇박 찌르기", 2.0]],
-		"엇박 습득 — rank_order 순 · 비용 공식 %s" % [got])
-	check(Moves.get_move("s_offbeat2")["lethal"] == "offbeat2" and is_equal_approx(Moves.get_move("s_offbeat2")["self_cost"], 0.2),
-		"엇엇박 효과는 skills.json effects 에서")
-
-
 ## 어긋남 ①: 등급 차 강함 — 보통 공격 피해 × rank_damage_k, 한참 아랫급의 공격에는 움찔하지 않는다(shrugs_off).
 ## 이 결투(1등급 차)에서는 1.0 이라, 등급을 바꿔 연결만 본다
 func test_rank_gap_damage_and_armor() -> void:
@@ -455,3 +323,15 @@ func test_dodge_gains_gauge() -> void:
 	check(dodged, "피함 신호")
 	var want: float = Common.gain_points("dodge") * h.gauge_rate
 	check(h.gauge - g0 >= want - 0.001, "피하면 %s 이상 찬다 (%s)" % [want, h.gauge - g0])
+
+
+## 작은 길잡이 함수 — world.hero() · boss() · fighter.current_skill() · common.rules()
+func test_accessors() -> void:
+	var d := _close()
+	var w = d["world"]
+	check(w.hero() == d["hero"] and w.boss() == d["boss"], "world.hero() · boss() 가 두 사람을 돌려준다")
+	var h = d["hero"]
+	check(h.current_skill()["id"] == h.skills[h.skill_idx]["id"], "고른 기술")
+	h.skills = []
+	check(h.current_skill().is_empty(), "기술이 없으면 빈 것")
+	check(Common.rules().has("gauge") and Common.rules()["gauge"] == Common.gauge(), "rules() 의 gauge = gauge()")
