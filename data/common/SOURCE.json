@@ -1,6 +1,6 @@
 {
   "_about": "castle_common 복사본 — 손으로 고치지 않는다. 받기: py -3.12 D:/claude/fun/castle_common/tools/sync.py castle_M3D",
-  "castle_common": "d2ba288a2a813e29e8f1d0eff2d77035426ed65e",
+  "castle_common": "2b5411bc1effe73adaffabccca95caebf22ad14f",
   "files": {
     "characters.json": "4677e26eea2da0098c34040a34e98eebf8b0b23c70b39bf3a49e2ff6a2ad8669",
     "progression.json": "948d33d7627c8008a3dbf1ddbc76468d6b9f6d8e029c478be0c01eb95bffabe4",
@@ -8,9 +8,9 @@
     "rules.json": "bf6460802531f80e7265e142ff229997bff6b466162c792c15b521667fed2745",
     "skills.json": "a994e95f453e2f1b8efec91200b03b454dad1a4a0af3ffd522dc51ff42777e55",
     "cases/rules_cases.json": "26a3936a18743c3b2c9bfba55f46b18e94e36e82584d2e89ee7f432e352a38aa",
-    "docs/개발규격/README.md": "9540c6edd9e5a750420ceee1e2b79da3dae49808ae440b0af2da357d06ffb861",
-    "docs/개발규격/sdlc_넘길것.md": "a0515c6118603524145685bf2d209fb9a7065ccaedb5ce244166532cba1b8032",
-    "docs/개발규격/게임개발규격.md": "423dd0d28598b28601f898971955bd10552a461c43197483bd90e4e779eb6047",
+    "docs/개발규격/README.md": "d75049214448d9173b3402521794bc391273db711df01b0a3ee90646fac5a4c9",
+    "docs/개발규격/sdlc_넘길것.md": "ff54a7af5a33a1f72ca3843e8e41151118c33b75543dc80b67b9d2dd23be0803",
+    "docs/개발규격/게임개발규격.md": "f203586deae9c5e96aaa3c4db149eef58f0a92e7f716db9a2fb34e11a57a06ad",
     "docs/개발규격/캐슬_게임공통.md": "ae4b5d351ed5894c8931b69c62173d124055afee7b4a81986183a27ffe690f6a"
   }
 }
