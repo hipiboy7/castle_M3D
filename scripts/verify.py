@@ -21,7 +21,7 @@
                · --mode ch2 (300초 — 하성 본사 8방 · 방마다 조작 인물 김신 / 서진태 · 따돌리기 방)
   3. 리플레이    11장 seed 2 판의 입력 기록(--save-replay .tools/replay_stage2.json)을 다른 프로세스에서 --replay 로 다시 돌려
                끝 · 중간 해시(60프레임마다)가 같은지(src/combat/replay.gd — 결정성 · 멀티 ④ 바탕)
-  3. 그림 A · B   --art a · b(GLB 툰 모델 · 도트 빌보드)로 11장 신겐 방 · 1장 윤덕수 방 20초 · 성능 판 --crowd 30 20초 — 오류 없이 도는지
+  3. 그림 A · B   --art a · b(GLB 툰 모델 · 도트 빌보드)로 11장 신겐 방 · 1장 윤덕수 방 · 2장 로비 · 위층 · 폐차장(하성 무대 · 서진태 조작 · 따돌리기) 20초 · 성능 판 --crowd 30 20초 — 오류 없이 도는지
   4. 세이브     --save .tools/save_check.json 으로 처음 화면 그림 버튼(--events 60:art) → 파일 art=b → 다음 실행이 그것을 읽는다
   4. 흐름       ⓪ 게임 속도 ×1.5(--events 1:speed)도 ×1 과 같은 판(로직 프레임 열이 같다 — 1초에 도는 수만 다름)
                ① 일시정지 앞뒤가 같은 판 — seed 1 40초 와 42초 + 600 프레임에 2초 멈춤(--events 600:pause,720:resume)의 결과가 같다
@@ -364,6 +364,10 @@ def main():
         results.append(run(f"그림 {art.upper()} (1장 윤덕수 방 · 20초)",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "ch1",
                             "--room", "4", "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))
+    for art, room, name in (("a", "1", "2장 로비 · 서진태"), ("b", "5", "2장 위층 복도 · 남궁혁"), ("a", "6", "2장 폐차장 · 신태진")):
+        results.append(run(f"그림 {art.upper()} ({name} · 20초)",
+                           [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "ch2",
+                            "--room", room, "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))
     results.append(run("성능 판 (28층 · 경호원 35명 · 20초)",
                        [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
                         "--crowd", "30", "--seconds", "20"], lambda out: (("RESULT" in out), "")))
