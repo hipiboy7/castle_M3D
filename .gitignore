@@ -4,3 +4,4 @@ build/
 shots/
 *.tmp
 __pycache__/
+.claude/worktrees/
