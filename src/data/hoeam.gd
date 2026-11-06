@@ -40,20 +40,20 @@ const ROLES := {
 		"moveset": {"combo": "kf_jab", "dash": "kf_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
 	"jintae": {"hp": 180.0, "posture": 60.0, "walk": 2.2, "run": 4.8, "stagger": 50, "look": "jintae",
 		"moveset": {"combo": "j_jab", "dash": "j_dash", "finisher": "j_finisher"}},
-	"ds_member": {"hp": 80.0, "posture": 45.0, "walk": 1.8, "run": 3.8, "stagger": 70, "poise": 0.0, "ai": "thug",
+	"ds_member": {"hp": 240.0, "posture": 45.0, "walk": 1.8, "run": 3.8, "stagger": 70, "poise": 0.0, "ai": "thug",
 		"look": "ds_suit"},
-	"ds_raider": {"hp": 85.0, "posture": 45.0, "walk": 1.8, "run": 3.9, "stagger": 70, "poise": 0.0, "ai": "thug_pipe",
+	"ds_raider": {"hp": 160.0, "posture": 45.0, "walk": 1.8, "run": 3.9, "stagger": 70, "poise": 0.0, "ai": "thug_pipe",
 		"look": "ds_raider"},
-	"kimhyeokju": {"hp": 260.0, "posture": 100.0, "walk": 2.0, "run": 4.3, "stagger": 70, "poise": 4.0, "ai": "hyeokju",
+	"kimhyeokju": {"hp": 1200.0, "posture": 200.0, "walk": 2.0, "run": 4.3, "stagger": 70, "poise": 28.0, "finisher_cap": 0.12, "ai": "hyeokju",
 		"look": "kimhyeokju"},
-	"kimseongjun": {"hp": 300.0, "posture": 120.0, "walk": 1.9, "run": 4.2, "stagger": 70, "poise": 6.0, "ai": "seongjun",
+	"kimseongjun": {"hp": 640.0, "posture": 220.0, "walk": 1.9, "run": 4.2, "stagger": 70, "poise": 28.0, "finisher_cap": 0.12, "ai": "seongjun",
 		"look": "kimseongjun"},
-	"kimdaegeon": {"hp": 700.0, "posture": 240.0, "walk": 1.95, "run": 4.2, "stagger": 75, "poise": 12.0, "ai": "daegeon",
-		"look": "kimdaegeon", "phase2_at": 0.5, "dmg_k": 1.8},
-	"gangmanjae": {"hp": 380.0, "posture": 160.0, "walk": 1.7, "run": 3.7, "stagger": 75, "poise": 10.0, "ai": "manjae",
+	"kimdaegeon": {"hp": 1800.0, "posture": 480.0, "walk": 1.95, "run": 4.2, "stagger": 75, "poise": 30.0, "finisher_cap": 0.06, "ai": "daegeon",
+		"look": "kimdaegeon", "phase2_at": 0.5, "dmg_k": 2.6},
+	"gangmanjae": {"hp": 800.0, "posture": 260.0, "walk": 1.7, "run": 3.7, "stagger": 75, "poise": 30.0, "finisher_cap": 0.12, "ai": "manjae",
 		"look": "gangmanjae"},
-	"yundeoksu": {"hp": 950.0, "posture": 300.0, "walk": 1.85, "run": 4.0, "stagger": 80, "poise": 14.0, "ai": "deoksu",
-		"look": "yundeoksu", "phase2_at": 0.5, "dmg_k": 2.0},
+	"yundeoksu": {"hp": 2000.0, "posture": 600.0, "walk": 1.85, "run": 4.0, "stagger": 80, "poise": 34.0, "finisher_cap": 0.06, "ai": "deoksu",
+		"look": "yundeoksu", "phase2_at": 0.5, "dmg_k": 3.2},
 }
 
 ## 방 — 칸 뜻은 hotel.gd ROOMS. enemies 셋째 칸(덧붙임): look · ai · name · hp_k (stage.gd _npc)
@@ -85,5 +85,5 @@ const ROOMS := [
 const INTRO_T := 75
 const CLEAR_T := 150
 const END_T := 360
-const HEAL_ON_CLEAR := 0.3
+const HEAL_ON_CLEAR := 0.2
 const MAX_ATTACKERS := 2

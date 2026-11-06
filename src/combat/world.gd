@@ -248,7 +248,8 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 		var cost: float = a.hp_max * float(mv["self_cost"])
 		a.hp = maxf(1.0, a.hp - cost)
 		events.append(["self_cost", a, cost])
-	if int(mv.get("hit_no", 0)) >= int(mv["hits"]) and mv["knockdown"] and not d.is_boss:
+	# 넘어뜨리기: 여러 대(삼연타)는 마지막 대에, 한 대짜리(0 · 1장 태클 · 메치기)는 그 대에 — hit_no 가 없으면 마지막 대로 본다
+	if int(mv.get("hit_no", mv["hits"])) >= int(mv["hits"]) and mv["knockdown"] and not d.is_boss:
 		d.get_down()
 	stats["hits"] += 1
 	hitstop = maxi(hitstop, int(mv["hitstop"]))

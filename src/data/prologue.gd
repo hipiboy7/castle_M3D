@@ -28,9 +28,9 @@ const CROWD_ID := "gunter_guard"
 const ROLES := {
 	"kimshin": {"hp": 200.0, "posture": 60.0, "walk": 2.1, "run": 4.6, "stagger": 50, "look": "kim_bare",
 		"moveset": {"combo": "kf_jab", "dash": "kf_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
-	"gunter_guard": {"hp": 70.0, "posture": 40.0, "walk": 1.8, "run": 3.8, "stagger": 70, "poise": 0.0, "ai": "thug",
+	"gunter_guard": {"hp": 420.0, "posture": 100.0, "walk": 1.8, "run": 3.8, "stagger": 70, "poise": 0.0, "ai": "thug",
 		"look": "gunter_suit"},
-	"gunter": {"hp": 170.0, "posture": 70.0, "walk": 1.6, "run": 3.4, "stagger": 70, "poise": 2.0, "ai": "gunter",
+	"gunter": {"hp": 1150.0, "posture": 400.0, "walk": 1.6, "run": 3.4, "stagger": 70, "poise": 30.0, "ai": "gunter",
 		"look": "gunter"},
 }
 

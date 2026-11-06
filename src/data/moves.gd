@@ -186,33 +186,163 @@ const M := {
 	"s_sg_leap": {"label": "날아차기", "startup": 26, "active": 4, "recovery": 20, "damage": 20, "reach": 14, "radius": 11,
 		"lunge": 44, "parryable": false, "knockback": 6.0, "hitstop": 12, "posture": 30, "telegraph": "unblock",
 		"shape": "axe", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 6, "skill": true, "skill_id": "shingen_leap"},
-	# ---- 0 · 1장(S5 묶음 2 · 3) — 1부 처음 김신은 맨손(p1:014/025-027 '너 정도엔 필요 없다'), 서진태는 아군 봇(1장 1 · 4 방)
-	# 김신 맨손: 잽 → 잽 → 턱 쳐 올리기(002/016-017 · 014/027-030 어퍼컷) · 날아 차기 돌진(003/026-030) · 받아넘기며 반격 · 처박기
+	# ---- 0 · 1장(S5 묶음 2 · 3) — 1부 처음 김신은 맨손(p1:014/025-027 '너 정도엔 필요 없다'), 서진태는 아군 봇(1장 1 · 4 방).
+	# 처음 값은 이 판이 정했다(봇 판 · 판 길이로 조정 — tests/sim_stage.gd ch0 · ch1). 원작 위치는 castle_common canon fights(화/컷).
+	# 1부 처음 김신(내성 중위)은 이 장의 누구보다 여러 등급 위 — 보통 공격의 피해 · 체간이 몇 배로 들어가고(common rank_damage_k)
+	# 아랫급의 보통 공격엔 움찔하지 않는다(shrugs_off). 그래서 보스는 넘어뜨리는(knockdown) · 숨 막히는(stun_3d) 큰 동작을 빨간 ! 로 낸다
+	# 김신 맨손: 잽 → 주먹 → 턱 쳐 올리기 · 날아 차기 돌진 · 받아넘기며 치기 · 처박기
 	"kf_jab": {"label": "잽", "startup": 4, "active": 3, "recovery": 9, "damage": 6, "reach": 12, "radius": 9,
-		"lunge": 3, "next": "kf_jab2", "cancel": 7, "posture": 7, "shape": "punch", "sfx": "swing"},
+		"lunge": 3, "next": "kf_jab2", "cancel": 7, "posture": 7, "shape": "punch", "sfx": "swing"},          # 014/027-030 파고들기
 	"kf_jab2": {"label": "주먹", "startup": 4, "active": 3, "recovery": 10, "damage": 7, "reach": 13, "radius": 9,
 		"lunge": 4, "next": "kf_upper", "cancel": 8, "posture": 9, "shape": "punch", "sfx": "swing", "hand": "L"},
 	"kf_upper": {"label": "턱 쳐 올리기", "startup": 6, "active": 4, "recovery": 15, "damage": 12, "reach": 12, "radius": 10,
 		"arc": 60, "lunge": 6, "knockback": 3.4, "hitstop": 7, "posture": 18, "shape": "punch", "sfx": "kick",
-		"hit_sfx": "hit_heavy", "shake": 2},
+		"hit_sfx": "hit_heavy", "shake": 2},                                                                   # 002/016-017 · 014/027-030 어퍼컷
 	"kf_dash": {"label": "날아 차기", "startup": 6, "active": 5, "recovery": 14, "damage": 11, "reach": 14, "radius": 9,
-		"lunge": 28, "knockback": 3.8, "hitstop": 6, "posture": 16, "shape": "sidekick", "sfx": "kick", "hit_sfx": "hit_heavy"},
+		"lunge": 28, "knockback": 3.8, "hitstop": 6, "posture": 16, "shape": "sidekick", "sfx": "kick", "hit_sfx": "hit_heavy"},   # 003/026-030 · 006/004-005
 	"kf_counter": {"label": "받아넘기며 치기", "startup": 2, "active": 3, "recovery": 10, "damage": 15, "reach": 13, "radius": 11,
-		"arc": 80, "lunge": 6, "posture": 24, "hitstop": 7, "shape": "punch", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 2},
+		"arc": 80, "lunge": 6, "posture": 24, "hitstop": 7, "shape": "punch", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 2},   # 014/027-030 ⑤ · 016/005-007 어깨로 흘리고 휘두르기
 	"kf_finisher": {"label": "처박기", "startup": 3, "active": 4, "recovery": 18, "damage": 40, "reach": 14, "radius": 10,
 		"lunge": 8, "knockback": 4.0, "hitstop": 16, "posture": 0, "shape": "punch", "sfx": "kick", "hit_sfx": "hit_heavy",
-		"shake": 6},
-	# 서진태(1장 아군) — 빠른 주먹 · 발(003 '드루와' · 006 하이킥). 아군 AI 로만 나온다
-	"j_jab": {"label": "주먹", "startup": 4, "active": 3, "recovery": 9, "damage": 6, "reach": 12, "radius": 9,
-		"lunge": 4, "next": "j_kick", "cancel": 7, "posture": 7, "shape": "punch", "sfx": "swing"},
+		"shake": 6},                                                                                           # 016/007 턱 밀어 메다꽂기 · 020/024-030 아스팔트에 처박기
+	# 서진태(1장 아군) — 빠른 주먹 둘 → 하이킥(006/005-009 3연타 · 오른발 하이킥). 아군 AI 로만 나온다
+	"j_jab": {"label": "주먹", "startup": 4, "active": 3, "recovery": 8, "damage": 6, "reach": 12, "radius": 9,
+		"lunge": 4, "next": "j_jab2", "cancel": 6, "posture": 7, "shape": "punch", "sfx": "swing"},
+	"j_jab2": {"label": "주먹", "startup": 4, "active": 3, "recovery": 9, "damage": 6, "reach": 12, "radius": 9,
+		"lunge": 4, "next": "j_kick", "cancel": 7, "posture": 8, "shape": "punch", "sfx": "swing", "hand": "L"},
 	"j_kick": {"label": "하이킥", "startup": 7, "active": 4, "recovery": 15, "damage": 11, "reach": 14, "radius": 10,
 		"arc": 70, "lunge": 4, "knockback": 3.4, "hitstop": 7, "posture": 16, "shape": "sidekick", "sfx": "kick",
 		"hit_sfx": "hit_heavy", "shake": 2},
-	"j_dash": {"label": "날아 차기", "startup": 6, "active": 5, "recovery": 14, "damage": 10, "reach": 14, "radius": 9,
-		"lunge": 26, "knockback": 3.8, "hitstop": 6, "posture": 16, "shape": "sidekick", "sfx": "kick", "hit_sfx": "hit_heavy"},
+	"j_dash": {"label": "뛰어들어 치기", "startup": 6, "active": 5, "recovery": 14, "damage": 10, "reach": 14, "radius": 9,
+		"lunge": 26, "knockback": 3.8, "hitstop": 6, "posture": 16, "shape": "punch", "sfx": "kick", "hit_sfx": "hit_heavy"},   # 006/005-007 대각선으로 뛰어들어
 	"j_finisher": {"label": "내려찍기", "startup": 4, "active": 4, "recovery": 18, "damage": 30, "reach": 14, "radius": 10,
 		"lunge": 8, "knockback": 4.6, "hitstop": 14, "posture": 0, "shape": "axe", "sfx": "kick", "hit_sfx": "hit_heavy",
 		"shake": 5},
+	# 엑스트라(m_) — 군터 경호원 · DS 조직원 · DS 습격조(건달급). 느리고 예고가 길다(0장 첫 방은 '싸움 익히기')
+	"m_punch": {"label": "주먹", "startup": 14, "active": 3, "recovery": 12, "damage": 7, "reach": 12, "radius": 9,
+		"lunge": 6, "posture": 9, "telegraph": "parry", "shape": "punch", "sfx": "swing"},
+	"m_swing": {"label": "휘두르기", "startup": 17, "active": 3, "recovery": 14, "damage": 9, "reach": 13, "radius": 10,
+		"arc": 90, "lunge": 5, "knockback": 2.4, "posture": 12, "telegraph": "parry", "shape": "punch", "sfx": "swing"},        # 005/016-017 크게 휘두르자(후웅)
+	"m_knife": {"label": "칼 찌르기", "startup": 16, "active": 3, "recovery": 13, "damage": 9, "reach": 15, "radius": 8,
+		"lunge": 10, "posture": 10, "telegraph": "parry", "shape": "thrust", "sfx": "knife"},                                  # 003/016-018 · 003/026-030 칼을 들고 덮침
+	"m_pipe": {"label": "쇠파이프 내려치기", "startup": 17, "active": 3, "recovery": 14, "damage": 10, "reach": 16, "radius": 10,
+		"arc": 60, "lunge": 5, "posture": 12, "telegraph": "parry", "shape": "slash", "sfx": "swing", "hit_sfx": "hit_heavy"},  # 003/042-045 배트 · 008/001-004 쇠파이프 · 방망이
+	"m_pipe_back": {"label": "되휘두르기", "startup": 12, "active": 3, "recovery": 14, "damage": 8, "reach": 16, "radius": 10,
+		"arc": 100, "lunge": 4, "posture": 10, "telegraph": "parry", "shape": "slash_back", "sfx": "swing"},                     # 008/001-004 머리 위로 지나가는 휘두르기
+	"m_charge": {"label": "함성 돌진", "startup": 18, "active": 4, "recovery": 16, "damage": 10, "reach": 14, "radius": 10,
+		"arc": 60, "lunge": 24, "knockback": 3.0, "posture": 12, "telegraph": "parry", "shape": "slash", "sfx": "swing"},       # 008/001-004 함성과 함께 정면 돌진
+	"m_brute_hook": {"label": "거구 훅", "startup": 18, "active": 4, "recovery": 16, "damage": 12, "reach": 13, "radius": 11,
+		"arc": 90, "lunge": 6, "knockback": 3.6, "hitstop": 7, "posture": 16, "telegraph": "parry", "shape": "punch", "sfx": "kick",
+		"hit_sfx": "hit_heavy", "shake": 2},                                                                   # 002/013-015 포니테일 거구
+	"m_brute_slam": {"label": "두 손 내려찍기", "startup": 26, "active": 4, "recovery": 22, "damage": 14, "reach": 13, "radius": 11,
+		"arc": 40, "lunge": 8, "parryable": false, "knockdown": true, "knockback": 3.0, "hitstop": 10, "posture": 20,
+		"telegraph": "unblock", "shape": "slash", "sfx": "swing", "hit_sfx": "hit_heavy", "shake": 4, "whiff": 20},
+	# 총(선 판정 world.gd shape shot) — 겨누는 동안 빨간 ! (보고 구른다). 리볼버는 한 발, 우지는 네 발을 흩뿌린다
+	"m_revolver": {"label": "리볼버", "startup": 30, "active": 2, "recovery": 20, "damage": 12, "reach": 150, "radius": 4,
+		"parryable": false, "knockback": 2.0, "hitstop": 6, "posture": 12, "telegraph": "unblock", "shape": "shot",
+		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 3},                                                    # 002/013-015 리볼버를 겨눈 대머리
+	"m_uzi": {"label": "우지 난사", "startup": 26, "active": 16, "recovery": 18, "damage": 4, "reach": 140, "radius": 6,
+		"parryable": false, "hits": 4, "knockback": 0.8, "hitstop": 3, "posture": 5, "telegraph": "unblock", "shape": "shot",
+		"sfx": "shot", "hit_sfx": "hit", "shake": 2},                                                          # 002/013-017 권총과 우지를 난사(타타타타)
+	# 군터(gt_, 0장 보스 · 조장급) — 거래를 거절당하자 탁자 밑 리볼버(002/021-028). 쏘는 게 거의 전부, 붙으면 발악
+	"gt_revolver": {"label": "탁자 밑 리볼버", "startup": 34, "active": 2, "recovery": 22, "damage": 18, "reach": 150, "radius": 4,
+		"parryable": false, "knockback": 3.0, "hitstop": 8, "posture": 18, "telegraph": "unblock", "shape": "shot",
+		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 4, "skill": true},
+	"gt_fan": {"label": "리볼버 연사", "startup": 28, "active": 12, "recovery": 22, "damage": 7, "reach": 150, "radius": 6,
+		"parryable": false, "hits": 3, "knockback": 1.2, "hitstop": 4, "posture": 8, "telegraph": "unblock", "shape": "shot",
+		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 3},
+	"gt_swing": {"label": "발악 주먹", "startup": 15, "active": 3, "recovery": 14, "damage": 8, "reach": 12, "radius": 10,
+		"arc": 80, "lunge": 5, "posture": 10, "telegraph": "parry", "shape": "punch", "sfx": "swing"},
+	"gt_glass": {"label": "위스키 잔 휘두르기", "startup": 16, "active": 3, "recovery": 14, "damage": 9, "reach": 13, "radius": 10,
+		"arc": 90, "lunge": 4, "posture": 10, "telegraph": "parry", "shape": "slash_back", "sfx": "knife", "hand": "L"},        # 002/021-028 팔이 움직이며 위스키 잔이 깨지고(까앙)
+	"gt_point": {"label": "코앞 사격", "startup": 20, "active": 2, "recovery": 20, "damage": 14, "reach": 60, "radius": 5,
+		"parryable": false, "knockback": 3.0, "hitstop": 8, "posture": 16, "telegraph": "unblock", "shape": "shot",
+		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 4},
+	# 김혁주(hj_, DS 부장 서열 4위 · 잭나이프 두 자루, 003/045-051) — '잭나이프는 큰 베기 무기가 아니다 → 첫 베기는 잽, 두 번째가 진짜'.
+	# 첫 베기는 빠르고 가볍게(넓은 호), 두 번째는 칼을 치켜든 채 반 박자 멈칫(feints)한 뒤 무겁게 내려온다 — 일찍 누르면 빗나간다
+	"hj_jab": {"label": "잭나이프 잽", "startup": 9, "active": 3, "recovery": 7, "damage": 5, "reach": 13, "radius": 10,
+		"arc": 100, "lunge": 4, "posture": 6, "telegraph": "parry", "shape": "slash", "sfx": "knife"},
+	"hj_real": {"label": "진짜 베기", "startup": 20, "active": 3, "recovery": 14, "damage": 14, "reach": 14, "radius": 10,
+		"arc": 70, "lunge": 6, "posture": 16, "telegraph": "parry", "shape": "slash_back", "sfx": "slash", "hit_sfx": "hit_heavy",
+		"shake": 2, "hand": "L", "feints": [8]},
+	"hj_thrust": {"label": "잭나이프 찌르기", "startup": 14, "active": 3, "recovery": 14, "damage": 10, "reach": 16, "radius": 8,
+		"lunge": 10, "knockback": 2.6, "posture": 12, "telegraph": "parry", "shape": "thrust", "sfx": "slash"},
+	"hj_rush": {"label": "양손 잭나이프 돌진", "startup": 18, "active": 8, "recovery": 16, "damage": 7, "reach": 14, "radius": 10,
+		"arc": 70, "lunge": 26, "hits": 2, "knockback": 1.6, "posture": 10, "telegraph": "parry", "shape": "slash", "sfx": "knife"},   # 003/045 '작업 들어온 거냐' 외치며 돌진
+	# 김성준(sj_, 약에 취함 · 칼, 008-010) — 몰아치는 주먹 · 코트 휘두르기 · 멀리 날려 보내는 부츠 발차기 · 칼
+	"sj_flurry": {"label": "주먹 연타", "startup": 10, "active": 12, "recovery": 14, "damage": 5, "reach": 13, "radius": 10,
+		"arc": 60, "lunge": 10, "hits": 3, "knockback": 0.6, "hitstop": 4, "posture": 7, "telegraph": "parry", "shape": "punch",
+		"sfx": "swing"},                                                                                       # 009/014-015 '재밌게 좀 해보라' 연타(퍽 퍽)
+	"sj_coat": {"label": "코트 휘두르기", "startup": 16, "active": 4, "recovery": 14, "damage": 9, "reach": 14, "radius": 12,
+		"arc": 140, "lunge": 4, "knockback": 2.0, "posture": 12, "telegraph": "parry", "shape": "slash", "sfx": "swing"},        # 008/004-007 '지루해 죽겠다' 코트 팔을 수평으로 크게
+	"sj_kick": {"label": "부츠 발차기", "startup": 20, "active": 3, "recovery": 18, "damage": 15, "reach": 14, "radius": 10,
+		"lunge": 14, "parryable": false, "knockdown": true, "knockback": 16.0, "hitstop": 12, "posture": 26, "telegraph": "unblock",
+		"shape": "sidekick", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 6, "skill": true},                 # 008/004-007 머리 쪽 발차기 → 김신이 승합차에 처박힘
+	"sj_upslash": {"label": "칼 베어 올리기", "startup": 15, "active": 3, "recovery": 14, "damage": 12, "reach": 15, "radius": 10,
+		"arc": 80, "lunge": 6, "posture": 14, "telegraph": "parry", "shape": "slash_back", "sfx": "knife", "hand": "L"},        # 009/017-019 아래에서 위로 크게 베어 올림
+	"sj_knife": {"label": "칼 크게 휘두르기", "startup": 19, "active": 3, "recovery": 16, "damage": 14, "reach": 15, "radius": 11,
+		"arc": 120, "lunge": 8, "posture": 16, "telegraph": "parry", "shape": "slash", "sfx": "slash", "hit_sfx": "hit_heavy",
+		"feints": [9]},                                                                                        # 010/001-002 정수로 쥔 칼을 치켜들었다가 크게 호
+	# 김대건(dg_, 1장 보스 · 경호대급, 014-016) — 1차: 큰 직선 · 훅 · 크로스 카운터(치기 시작하면 맞받는다 — enemy_ai counter) ·
+	# 뒷발 돌려차기 · 페인트 하이킥 · 낮은 미끄러지기 · 베어허그 태클. 2차('피떡이 돼야 시동' 015/042-048): 프로다운 연타 · 정권 · 날아 무릎
+	"dg_straight": {"label": "큰 직선 주먹", "startup": 14, "active": 3, "recovery": 13, "damage": 12, "reach": 14, "radius": 9,
+		"lunge": 10, "knockback": 3.0, "hitstop": 6, "posture": 14, "telegraph": "parry", "shape": "punch", "sfx": "swing",
+		"hit_sfx": "hit_heavy"},                                                                               # 014/027-030 '팡'
+	"dg_hook": {"label": "오른 훅", "startup": 17, "active": 4, "recovery": 16, "damage": 14, "reach": 13, "radius": 11,
+		"arc": 100, "lunge": 6, "knockback": 3.6, "hitstop": 7, "posture": 18, "telegraph": "parry", "shape": "punch", "sfx": "kick",
+		"hit_sfx": "hit_heavy", "shake": 2},                                                                   # 015/000 크게 휘두른 오른 훅(부웅)
+	"dg_cross": {"label": "크로스 카운터", "startup": 7, "active": 3, "recovery": 14, "damage": 13, "reach": 14, "radius": 9,
+		"lunge": 8, "knockback": 3.2, "hitstop": 8, "posture": 16, "telegraph": "parry", "shape": "punch", "sfx": "kick",
+		"hit_sfx": "hit_heavy", "shake": 3, "hand": "L"},                                                      # 014/030-032 엇갈려 동시에 꽂힘
+	"dg_spin": {"label": "뒷발 돌려차기", "startup": 20, "active": 4, "recovery": 18, "damage": 17, "reach": 15, "radius": 11,
+		"arc": 120, "lunge": 8, "parryable": false, "knockdown": true, "knockback": 5.0, "hitstop": 11, "posture": 26,
+		"telegraph": "unblock", "shape": "sidekick", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 5, "skill": true},  # 015/006-009 헛친 몸이 돈 그대로 뒷발
+	"dg_highkick": {"label": "페인트 하이킥", "startup": 22, "active": 3, "recovery": 18, "damage": 16, "reach": 15, "radius": 10,
+		"arc": 70, "lunge": 8, "knockdown": true, "knockback": 4.0, "hitstop": 10, "posture": 24, "telegraph": "parry",
+		"shape": "sidekick", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 4, "feints": [8], "skill": true},  # 015/012-016 '걸렸다' 큰 주먹(속임) 뒤 디딤 하이킥
+	"dg_slide": {"label": "낮게 미끄러져 들기", "startup": 16, "active": 4, "recovery": 20, "damage": 11, "reach": 16, "radius": 8,
+		"lunge": 34, "parryable": false, "knockdown": true, "knockback": 3.0, "hitstop": 9, "posture": 20, "telegraph": "unblock",
+		"shape": "thrust_low", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 3, "whiff": 16},              # 015/023-028 낮게 미끄러져 다리를 뻗어
+	"dg_tackle": {"label": "베어허그 태클", "startup": 24, "active": 6, "recovery": 22, "damage": 18, "reach": 13, "radius": 11,
+		"lunge": 44, "parryable": false, "guard_break": true, "knockdown": true, "knockback": 5.0, "hitstop": 14, "posture": 34,
+		"telegraph": "unblock", "shape": "thrust", "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 6, "skill": true, "whiff": 30},   # 015/029-036 허리를 껴안아 밀어붙임 — 빠져나오면 크게 빈다
+	"dg_jab": {"label": "잽", "startup": 8, "active": 3, "recovery": 9, "damage": 7, "reach": 13, "radius": 9,
+		"lunge": 5, "posture": 8, "telegraph": "parry", "shape": "punch", "sfx": "swing", "hand": "L"},        # 016/001-002 주먹 연타(프로다워짐)
+	"dg_jeongkwon": {"label": "정권", "startup": 12, "active": 3, "recovery": 14, "damage": 16, "reach": 15, "radius": 9,
+		"lunge": 12, "knockback": 5.0, "hitstop": 9, "posture": 22, "telegraph": "parry", "shape": "punch", "sfx": "kick",
+		"hit_sfx": "hit_heavy", "shake": 4},                                                                   # 015/042-048 일어나 정권 — 김신이 밀려남
+	"dg_knee": {"label": "날아 무릎", "startup": 22, "active": 4, "recovery": 20, "damage": 20, "reach": 14, "radius": 11,
+		"lunge": 38, "parryable": false, "knockdown": true, "knockback": 5.0, "hitstop": 13, "posture": 30, "telegraph": "unblock",
+		"shape": "axe", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 6, "skill": true, "whiff": 20},       # 016/004-005 몸을 날려 내리꽂는 무릎
+	# 강만재(mj_, 흉터 거구 · 네임드, 005-006) — 느리고 맷집이 대단하다 · 하이가드 · 큰 오른손 · 긴 스트레이트 · 보디블로
+	"mj_swing": {"label": "큰 오른손 휘두르기", "startup": 19, "active": 4, "recovery": 16, "damage": 12, "reach": 14, "radius": 12,
+		"arc": 110, "lunge": 6, "knockback": 3.4, "hitstop": 7, "posture": 16, "telegraph": "parry", "shape": "punch", "sfx": "swing",
+		"hit_sfx": "hit_heavy"},                                                                               # 006/005-007
+	"mj_hook": {"label": "훅", "startup": 16, "active": 4, "recovery": 15, "damage": 11, "reach": 13, "radius": 11,
+		"arc": 90, "lunge": 5, "knockback": 3.0, "posture": 14, "telegraph": "parry", "shape": "punch", "sfx": "kick", "hand": "L"},   # 006/008-009 크게 훅(후웅)
+	"mj_straight": {"label": "긴 스트레이트", "startup": 14, "active": 3, "recovery": 14, "damage": 11, "reach": 17, "radius": 9,
+		"lunge": 8, "knockback": 3.0, "posture": 14, "telegraph": "parry", "shape": "punch", "sfx": "swing"},  # 006/009-011
+	"mj_rush": {"label": "낮은 돌진 주먹", "startup": 18, "active": 4, "recovery": 16, "damage": 12, "reach": 14, "radius": 10,
+		"lunge": 26, "knockback": 3.4, "posture": 16, "telegraph": "parry", "shape": "punch", "sfx": "kick", "hit_sfx": "hit_heavy"},  # 006/009-011 낮게 돌진(착)
+	"mj_body": {"label": "보디블로", "startup": 22, "active": 3, "recovery": 18, "damage": 16, "reach": 12, "radius": 10,
+		"lunge": 10, "parryable": false, "knockback": 1.6, "hitstop": 14, "posture": 30, "telegraph": "unblock", "shape": "punch",
+		"sfx": "kick", "hit_sfx": "hit_heavy", "shake": 5, "skill": true, "stun_3d": [60, 45]},              # 005/019-020 시계 찬 주먹을 복부 깊이 — 털썩 주저앉는다
+	# 윤덕수(yd_, 1장 끝 보스 · 전국구, 018-020) — 큰 오른 훅 · 오른 스트레이트 · 얼굴 잡아 들어 메치기 · 짓밟기.
+	# 옆구리를 맞은 뒤(020/014-018 '이런... 낭패가') 2차 — 메치기를 더 자주
+	"yd_jab": {"label": "왼손 견제", "startup": 9, "active": 3, "recovery": 10, "damage": 7, "reach": 13, "radius": 9,
+		"lunge": 5, "posture": 8, "telegraph": "parry", "shape": "punch", "sfx": "swing", "hand": "L"},
+	"yd_hook": {"label": "큰 오른 훅", "startup": 18, "active": 4, "recovery": 16, "damage": 16, "reach": 14, "radius": 12,
+		"arc": 110, "lunge": 8, "knockback": 4.4, "hitstop": 9, "posture": 20, "telegraph": "parry", "shape": "punch", "sfx": "kick",
+		"hit_sfx": "hit_heavy", "shake": 3},                                                                   # 020/000-005 붉은 눈빛 궤적과 함께 오른쪽 큰 훅
+	"yd_straight": {"label": "오른 스트레이트", "startup": 13, "active": 3, "recovery": 14, "damage": 13, "reach": 16, "radius": 9,
+		"lunge": 10, "knockback": 3.6, "hitstop": 7, "posture": 16, "telegraph": "parry", "shape": "punch", "sfx": "swing",
+		"hit_sfx": "hit_heavy"},                                                                               # 020/014-018
+	"yd_grab": {"label": "얼굴 잡아 메치기", "startup": 24, "active": 5, "recovery": 22, "damage": 22, "reach": 13, "radius": 10,
+		"lunge": 16, "parryable": false, "guard_break": true, "knockdown": true, "knockback": 2.0, "hitstop": 16, "posture": 40,
+		"telegraph": "unblock", "shape": "thrust", "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 7, "skill": true, "whiff": 24},   # 019/124-138 얼굴을 움켜쥐어 들어 올려 등부터 꽂음
+	"yd_stomp": {"label": "짓밟기", "startup": 16, "active": 4, "recovery": 18, "damage": 12, "reach": 10, "radius": 11,
+		"lunge": 8, "parryable": false, "knockback": 0.6, "hitstop": 10, "posture": 18, "telegraph": "unblock", "shape": "axe",
+		"sfx": "kick", "hit_sfx": "hit_heavy", "shake": 5},                                                    # 019/138 쓰러진 남자를 밟음(콰득)
 }
 
 static var _cache := {}
