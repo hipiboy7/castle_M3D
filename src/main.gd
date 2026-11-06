@@ -32,6 +32,7 @@ const ART_NAMES := {"puppet": "관절 인형", "a": "A · GLB 툰 모델", "b": 
 const Arena = preload("res://src/view/arena3d.gd")
 const Hotel3d = preload("res://src/view/hotel3d.gd")
 const Town3d = preload("res://src/view/town3d.gd")
+const Moves = preload("res://src/data/moves.gd")
 ## 장 무대 그림(campaign.gd CHAPTERS view) → 그림 클래스 — 모두 build(theme, bounds, detail) 를 갖는다(LSP)
 const VIEWS := {"hotel": Hotel3d, "town": Town3d}
 const Fx = preload("res://src/view/fx3d.gd")
@@ -282,6 +283,15 @@ func _markers() -> void:
 			elif d["allies"].has(f):
 				col = Color(0.4, 0.9, 0.5, 0.5)
 		pup[f].set_marker(col)
+
+
+## 공격 버튼 글: 연타 첫 동작이 칼(베기 · 찌르기 모양)이면 '베기', 주먹 · 발이면 '치기'(0 · 1장 맨손 김신 · 11장 피우진)
+func _attack_label(h) -> String:
+	var combo := str(h.moveset.get("combo", ""))
+	if combo == "":
+		return "베기"
+	var shape := str(Moves.get_move(combo)["shape"])
+	return "베기" if shape.begins_with("slash") or shape.begins_with("thrust") else "치기"
 
 
 ## 교대 버튼 · 짝 막대: 조작하는 사람이 둘 이상인 여러 사람 판만(0 · 1장은 김신 혼자)
@@ -794,6 +804,7 @@ func _process(dt: float) -> void:
 	var frozen: bool = d["world"].hitstop > 0 and (mode == "fight" or mode == "demo")
 	for f in pup:
 		pup[f].update_from(f, dt, frozen)
+	touch.set_label("attack", _attack_label(d["hero"]))
 	var hp: Vector3 = pup[d["hero"]].position
 	if kind == "stage":
 		var pts: Array = []

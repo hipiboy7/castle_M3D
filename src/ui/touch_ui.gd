@@ -139,10 +139,15 @@ func take_edge(id: String) -> bool:
 
 ## 속도 버튼 글(×1 · ×1.5 · ×2 — main.gd 가 고를 때마다)
 func set_speed_label(t: String) -> void:
+	set_label("speed", t)
+
+
+## 버튼 글 바꾸기(속도 · 공격 — 칼이면 '베기', 맨손이면 '치기': main.gd 가 조작하는 사람이 바뀔 때)
+func set_label(id: String, t: String) -> void:
 	for b in buttons:
-		if b["id"] == "speed":
+		if b["id"] == id and b["label"] != t:
 			b["label"] = t
-	queue_redraw()
+			queue_redraw()
 
 
 func held(id: String) -> bool:
