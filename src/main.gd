@@ -61,6 +61,8 @@ var paused := false
 var _fake_press := false
 var _fake_swap := false
 var _esc_hint := false
+var _switch_to: Array = []                 # 메뉴로 고른 [장, 방] — mode "switch" 가 SWITCH_WAIT 프레임 뒤 판을 바꾼다
+const SWITCH_WAIT := 2
 var _mouse_was := false
 var _fake_art := false
 var headless := false
@@ -609,10 +611,13 @@ func _menu_input() -> void:
 			menu_ch = id
 			_fill_stage_menu()
 	elif pick.begins_with("room:"):
-		var room := int(pick.substr(5))
+		# 메뉴를 닫고 판은 두 프레임 뒤에 바꾼다(mode "switch") — 처음 화면 카드처럼 멈춤이 풀린 뒤 무대 · 인형을 다시 만든다.
+		# (v0.5.0-rc.1 폰: 싸움 중 메뉴로 6장 부두에 가면 화면이 굳고 터치도 안 됨 — 사용자 2026-11-06. 여기 서버에서는 재현 안 됨)
 		_set_menu(false)
-		_new_run(menu_ch, room)
-		_start("fight")
+		_switch_to = [menu_ch, int(pick.substr(5))]
+		mode = "switch"
+		mode_t = 0
+		touch.show_fight = false
 	elif pick == "resume":
 		_set_menu(false)
 	elif pick == "title":
@@ -673,6 +678,10 @@ func _physics_process(_dt: float) -> void:
 		hud.message(str(Lines.at("speed")) % Save.speed_label(float(save["speed"])), "", 0.8)
 	mode_t += 1
 	match mode:
+		"switch":
+			if mode_t >= SWITCH_WAIT:
+				_new_run(str(_switch_to[0]), int(_switch_to[1]))
+				_start("fight")
 		"title":
 			var pick := _title_pick()
 			if pick == "bench":

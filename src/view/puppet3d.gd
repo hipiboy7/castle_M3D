@@ -94,7 +94,7 @@ func _build() -> void:
 	var sh_wide: float = lk.get("shoulder", wide)               # 어깨 너비만 따로(김신 — 어깨 넓은 근육질)
 	var depth: float = lk.get("depth", 1.0)                     # 몸통 두께(앞뒤) — 거구 · 근육질
 	var limb: float = lk.get("limb", 1.0)                       # 팔다리 굵기 — 막대처럼 보이지 않게(rc.2 폰 리뷰 6)
-	var head_k: float = lk.get("head", 1.0)                     # 머리 크기
+	var head_k: float = lk.get("head", 1.0) * Looks.HEAD_K     # 머리 크기(HEAD_K — 사용자 2026-11-06 '머리가 너무 큼')
 	var body_k: float = lk.get("scale", 1.06 if big else 1.0)
 
 	J["fall"] = _node(self, Vector3.ZERO)

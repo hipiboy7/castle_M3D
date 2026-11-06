@@ -276,10 +276,28 @@ static func look(name: String) -> Dictionary:
 		lk.merge(LooksCommon.ROSTER[base], true)
 	if LooksCommon.BY_NAME.has(base):        # 원작 조각 대조 겉모습(castle_common data/looks.json — 사용자 답58)
 		lk.merge(LooksCommon.BY_NAME[base], true)
+	lk["scale"] = shown_scale(base, float(lk.get("scale", 1.06 if lk.get("big", false) else 1.0)))
 	if base == name:
 		return lk
 	lk.merge(art_of(base), true)
 	return lk
+
+
+## 화면 키(사용자 2026-11-06 "메인 케릭터들 크기는 비 메인 케릭터들보다 크게 그러나 지금보다 작게해주고, 머리가 너무크니까
+## 머리 사이즈는 더 작게"): 표의 scale(인물끼리의 키 차 — 김신 1.04 · 백도찬 1.2 · 거구 보스 1.28)은 그대로 두고 화면에서만
+## 메인(이름 있는 인물)은 MAIN_BASE 위로 차이를 MAIN_SPREAD 만큼 줄여 그리고, 엑스트라(EXTRA_LOOKS — 이름 없는 무리)는 표 그대로.
+## 머리는 HEAD_K 배(관절 인형 머리 마디 · GLB 머리 뼈 — puppet3d · puppet_glb). 도트(그림 B)는 시트에 구워져 다시 만들 때 따른다
+const MAIN_BASE := 1.03
+const MAIN_SPREAD := 0.5
+const HEAD_K := 0.82
+const EXTRA_LOOKS := ["guard", "g4", "g4_leader", "gunter_suit", "gunter_bald", "gunter_uzi", "gunter_brute", "ds_suit", "ds_raider",
+	"haseong_suit", "haseong_guard", "namgu_youth"]
+
+
+static func shown_scale(base: String, s: float) -> float:
+	if EXTRA_LOOKS.has(base):
+		return s
+	return MAIN_BASE + maxf(0.0, s - 1.04) * MAIN_SPREAD
 
 
 ## 그림 A · B 가 있는가 — 명부 그림은 APK 에 없으니 파일이 있을 때만(폰에서는 관절 인형)

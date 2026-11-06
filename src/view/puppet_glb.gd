@@ -23,6 +23,8 @@ func setup(lk: Dictionary) -> void:
 		bone_of[n] = skel.find_bone(n)
 	for mi in model.find_children("*", "MeshInstance3D", true, false):
 		mi.material_override = _toon()
+	if bone_of.get("head", -1) >= 0:                     # 머리를 작게(Looks.HEAD_K — GLB 는 그대로, 뼈 크기만. _drive 는 자리 · 회전만 쓴다)
+		skel.set_bone_pose_scale(bone_of["head"], Vector3.ONE * Looks.HEAD_K)
 	_drive()
 
 
