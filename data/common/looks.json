@@ -75,7 +75,8 @@
     ],
     "piercing_where": ["left_ear", "right_ear", "both_ears", "brow", "nose", "lip"],
     "piercing_kind": ["stud", "ring"],
-    "headwear": ["cap", "beanie", "fedora", "headband", "hood", "bandana", "helmet"],
+    "headwear": ["cap", "beanie", "fedora", "bucket_hat", "headband", "hood", "bandana", "helmet"],
+    "blind_eye": ["left", "right"],
     "outer": [
       "suit_jacket",
       "long_coat",
@@ -336,7 +337,7 @@
         "head": {
           "hair_style": "topknot",
           "hair_len": "medium",
-          "hair_color": "#796753",
+          "hair_color": "#8c7a5c",
           "hair_note": "갈색 ~ 금빛 머리를 뒤로 넘겨 정수리에 작게 묶음 · 옆머리 몇 가닥이 귀 앞으로 흘러내림",
           "skin": "#ddc0b2",
           "eyes": "sharp",
@@ -389,7 +390,7 @@
       "ref_image": "work/looks/ref/andycheong.png",
       "profile": null,
       "conf": "ai",
-      "note": "9장 컷은 붉은 · 푸른 무대 조명이라 색 편차가 크다"
+      "note": "9장 컷은 붉은 · 푸른 무대 조명이라 색 편차가 크다 · 머리는 짙은 금발 · 모래빛 회갈색 — 붉은 경기장 조명 컷이 생강빛 · 보라 정장으로 보인다(026/161 · 027/053 · 032/181 · 034/005 — 74차 원작 대조(서브에이전트 — L3 검토 review_2d) A6)"
     },
     {
       "id": "baekdochan",
@@ -503,7 +504,7 @@
           "eyes": "narrow",
           "brows": "thick",
           "jaw": "square",
-          "facial_hair": ["stubble"],
+          "facial_hair": [],
           "scars": [
             {"where": "forehead", "shape": "line"},
             {"where": "nose_bridge", "shape": "line"},
@@ -542,7 +543,7 @@
       "ref_image": "work/looks/ref/bakcheolgyu.png",
       "profile": null,
       "conf": "ai",
-      "note": "전신 컷을 못 찾음 — 바지 · 신발 색 null(정장 바지 · 구두로 봄). 2부 064 조각은 안 봄"
+      "note": "전신 컷을 못 찾음 — 바지 · 신발 색 null(정장 바지 · 구두로 봄). 2부 064 조각은 안 봄 · base 수염 없음 — 대표 컷은 말끔(턱 밑 빗금은 음영 · 뺨 · 턱 자국은 흉터 — 74차 원작 대조(서브에이전트 — L3 검토 review_2d) B11)"
     },
     {
       "id": "barista",
@@ -1037,7 +1038,7 @@
       "ref_image": "work/looks/ref/chasumin.png",
       "profile": "sources/character_profile/차수민.jpg",
       "conf": "ai",
-      "note": "노란 끈 워커 · 입술 아래 점 · 은반지는 이번 조각에서 확인 못 함. 렌치는 weapons 목록에 맞는 값이 없어 hammer 로 둠. 측정하지 않은 색 칸(검정 · 흰 · 은 · 금 기본값)은 null 로 둠."
+      "note": "노란 끈 워커 · 입술 아래 점 · 은반지는 이번 조각에서 확인 못 함. 렌치는 weapons 목록에 맞는 값이 없어 hammer 로 둠. 측정하지 않은 색 칸(검정 · 흰 · 은 · 금 기본값)은 null 로 둠. · base 단발이 맞음(p1:014/022 턱 · 목 기장) — 1부 1장 따뜻한 조명에선 짙은 갈색으로 보임(74차 원작 대조(서브에이전트 — L3 검토 review_2d) A7)"
     },
     {
       "id": "cheonildo",
@@ -1062,11 +1063,18 @@
           "eyes": "narrow",
           "brows": "thick",
           "jaw": "square",
-          "facial_hair": ["mustache", "beard"],
-          "scars": [{"where": "left_eye", "shape": "x", "note": "이마에서 눈을 지나 뺨까지 여러 줄 교차 사선"}],
+          "facial_hair": [],
+          "scars": [
+            {
+              "where": "left_eye",
+              "shape": "x",
+              "note": "이마에서 인물 왼눈(화면 오른쪽)을 지나 뺨까지 여러 줄 교차 사선 — 그 눈은 실명(흰자만)"
+            }
+          ],
           "glasses": null,
           "piercings": [],
-          "headwear": null
+          "headwear": null,
+          "blind_eye": "left"
         },
         "outfit": {
           "outer": {
@@ -1137,7 +1145,7 @@
       "ref_image": "work/looks/ref/cheonildo.png",
       "profile": "sources/character_profile/호텔캐슬_천일도.jpg",
       "conf": "ai",
-      "note": "1부 2 ~ 6장 차림(남색 줄무늬 · 붉은 넥타이 등)은 p1:117 회색 핀스트라이프로 묶음 — 장마다 정장 색이 조금씩 다름(canon 글)."
+      "note": "1부 2 ~ 6장 차림(남색 줄무늬 · 붉은 넥타이 등)은 p1:117 회색 핀스트라이프로 묶음 — 장마다 정장 색이 조금씩 다름(canon 글). · 한쪽 눈 실명 — 답59(윈도우) #2(카드: 인물 왼눈 = 화면 오른쪽이 흰자만) · 수염 없음 — 카드 · 006/172 · 065/110 · 066/013 모두 말끔(입가 주름을 수염으로 잘못 읽었음). 왼눈 실명은 066/013 에서도 흰 눈(74차 원작 대조(서브에이전트 — L3 검토 review_2d))"
     },
     {
       "id": "choedalcheon",
@@ -1412,9 +1420,9 @@
           "limbs": "normal"
         },
         "head": {
-          "hair_style": "slick",
+          "hair_style": "wavy_back",
           "hair_len": "medium",
-          "hair_color": "#15202c",
+          "hair_color": "#1f4d5c",
           "hair_note": "짙은 청록빛 흑발을 뒤로 넘겨 목덜미 · 귀 아래까지 내림(끝이 바깥으로 뻗침)",
           "skin": "#e8d7d0",
           "eyes": "big",
@@ -2277,7 +2285,7 @@
         "outfit": {
           "outer": {
             "kind": "long_coat",
-            "color": "#725f62",
+            "color": "#5e2430",
             "pattern": "plain",
             "note": "버건디(빛 받은 곳 자줏빛 회색) · 검은 깃 · 무릎 아래 길이"
           },
@@ -2458,7 +2466,7 @@
           "headwear": null
         },
         "outfit": {
-          "outer": {"kind": "robe", "color": "#32222d", "pattern": "plain"},
+          "outer": {"kind": "robe", "color": "#5a2433", "pattern": "plain"},
           "shirt": {"kind": "none", "color": null},
           "tie": null,
           "pants": null,
@@ -2956,7 +2964,7 @@
           "headwear": null
         },
         "outfit": {
-          "outer": {"kind": "long_coat", "color": "#3e3f46", "pattern": "plain"},
+          "outer": {"kind": "long_coat", "color": "#2c2b2d", "pattern": "plain"},
           "shirt": {"kind": "open_shirt", "color": "#2e2327"},
           "tie": null,
           "pants": {"kind": "slacks", "color": "#4e4751"},
@@ -2996,10 +3004,10 @@
         {
           "chapters": ["10"],
           "label": "2부 044~045 — 붉은 재킷 · 붉은 트렌치코트 · 검은 셔츠 · 밝은 바지(조각 확인 안 함)",
-          "refs": ["045/043-070"],
+          "refs": ["045/043-070", "044/116"],
           "diff": {
             "outfit": {
-              "outer": {"kind": "trench_coat", "color": null},
+              "outer": {"kind": "trench_coat", "color": "#6a3e38"},
               "shirt": {"kind": "dress_shirt", "color": "#141414"},
               "pants": {"kind": "slacks", "color": null}
             }
@@ -3015,7 +3023,7 @@
       "ref_image": "work/looks/ref/hyeonseok.png",
       "profile": "sources/character_profile/하성_현석.jpg",
       "conf": "ai",
-      "note": "10장 붉은 코트는 몽타주로만 봄(색 미측정). 2부 대표 컷은 대부분 어두운 밤 · 푸른 조명"
+      "note": "10장 붉은 코트는 몽타주로만 봄(색 미측정). 2부 대표 컷은 대부분 어두운 밤 · 푸른 조명 · 버건디 갈색은 080/016 붉은 조명 — 다른 컷(082/041 · 082/043)은 거의 검은 숯색 코트 · 회색 바지. 044/116 붉은 벽돌색 재킷은 2부 044~045 시기(74차 원작 대조(서브에이전트 — L3 검토 review_2d) A9)"
     },
     {
       "id": "icheolmin",
@@ -3570,7 +3578,7 @@
         "outfit": {
           "outer": {
             "kind": "suit_jacket",
-            "color": "#382a45",
+            "color": "#262e44",
             "pattern": "plain",
             "note": "남색(붉은 조명 컷이라 측정값이 보랏빛)"
           },
@@ -3884,7 +3892,7 @@
       "ref_image": "work/looks/ref/iwashiro.png",
       "profile": null,
       "conf": "ai",
-      "note": "070 실내 컷은 잿빛 조명이라 정장 색은 '짙은 갈회색' 정도로만 믿을 것. 신발 · 기모노 색 · 잉어 문신(101-102) 조각은 안 봄. 1부 기모노 색은 null(본 p1:097/010 이 얼굴만)."
+      "note": "070 실내 컷은 잿빛 조명이라 정장 색은 '짙은 갈회색' 정도로만 믿을 것. 신발 · 기모노 색 · 잉어 문신(101-102) 조각은 안 봄. 1부 기모노 색은 null(본 p1:097/010 이 얼굴만). · 짧은 검은 올백 그대로(066/002 · 070/008 · 135/064 · 2부 일본 관계도 — 74차 원작 대조(서브에이전트 — L3 검토 review_2d) A13)"
     },
     {
       "id": "jackson",
@@ -4738,7 +4746,7 @@
           "eyes": "sharp",
           "brows": "thick",
           "jaw": "square",
-          "facial_hair": ["stubble"],
+          "facial_hair": [],
           "scars": [{"where": "left_cheek", "shape": "line"}, {"where": "lip", "shape": "line"}],
           "glasses": null,
           "piercings": [],
@@ -4789,7 +4797,7 @@
       "ref_image": "work/looks/ref/kimdaegeon.png",
       "profile": "sources/character_profile/김대건.jpg",
       "conf": "ai",
-      "note": "4장 회색 정장 색은 직접 못 봐 null. 6장 이후는 영정 · 회상 · 환영뿐이라 base 로 그린다."
+      "note": "4장 회색 정장 색은 직접 못 봐 null. 6장 이후는 영정 · 회상 · 환영뿐이라 base 로 그린다. · base 수염 없음 — 대표 컷은 말끔(턱 밑 빗금은 음영 · 뺨 · 턱 자국은 흉터 — 74차 원작 대조(서브에이전트 — L3 검토 review_2d) B11)"
     },
     {
       "id": "kimgyeongbae",
@@ -5310,8 +5318,8 @@
           "eyes": "narrow",
           "brows": "normal",
           "jaw": "square",
-          "facial_hair": ["stubble"],
-          "scars": [{"where": "left_cheek", "shape": "line"}],
+          "facial_hair": [],
+          "scars": [],
           "glasses": null,
           "piercings": [{"where": "left_ear", "kind": "stud", "color": null}],
           "headwear": null
@@ -5335,7 +5343,7 @@
           },
           {"name": "은색 슬라이드 소음기 권총", "kind": "pistol", "length": "short", "grip": "forward", "hands": "right"}
         ],
-        "signature": ["짧은 올백 + 앞머리 가닥(흐트러지면 눈 덮는 앞머리)", "가는 눈 · 엷은 미소", "턱 수염 그늘"],
+        "signature": ["짧은 올백 + 앞머리 가닥(흐트러지면 눈 덮는 앞머리)", "가는 눈 · 엷은 미소", "검은 정장 · 흰 셔츠 · 검은 넥타이"],
         "color_from": "008/181"
       },
       "periods": [
@@ -5344,12 +5352,7 @@
           "label": "프롤로그 — 러시아 킬러 '아무르 티그로', 검은 롱코트 · 터틀넥",
           "refs": ["p1:002/023", "p1:002/025"],
           "diff": {
-            "head": {
-              "hair_style": "fringe",
-              "hair_note": "눈썹 · 눈을 덮는 검은 앞머리, 파르스름한 눈",
-              "scars": [],
-              "facial_hair": []
-            },
+            "head": {"hair_style": "fringe", "hair_note": "눈썹 · 눈을 덮는 검은 앞머리, 파르스름한 눈", "facial_hair": []},
             "outfit": {
               "outer": {"kind": "long_coat", "color": "#001220", "pattern": "plain"},
               "shirt": {"kind": "turtleneck", "color": "#1a181b"},
@@ -5364,7 +5367,7 @@
           "label": "1부 귀국 — 검은 터틀넥 + 검은 정장 재킷",
           "refs": ["p1:003/010"],
           "diff": {
-            "head": {"hair_style": "fringe", "scars": [], "facial_hair": []},
+            "head": {"hair_style": "fringe", "facial_hair": []},
             "outfit": {"shirt": {"kind": "turtleneck", "color": "#1a181b"}, "tie": null},
             "accessories": []
           }
@@ -5419,7 +5422,7 @@
       "ref_image": "work/looks/ref/kimshin.png",
       "profile": "sources/character_profile/김신.jpg",
       "conf": "ai",
-      "note": "옷깃 배지는 008/181 오른쪽 아래 작은 점으로만 보여 색은 측정 못 함(null — canon '금 배지'). 정장 색은 앙각 그늘이라 #282d30 — 실제론 검정에 가깝다. 바지 · 구두 색은 p1:002/023 · 089 컷 값. 측정하지 않은 색 칸(검정 · 흰 · 은 · 금 기본값)은 null 로 둠."
+      "note": "옷깃 배지는 008/181 오른쪽 아래 작은 점으로만 보여 색은 측정 못 함(null — canon '금 배지'). 정장 색은 앙각 그늘이라 #282d30 — 실제론 검정에 가깝다. 바지 · 구두 색은 p1:002/023 · 089 컷 값. 측정하지 않은 색 칸(검정 · 흰 · 은 · 금 기본값)은 null 로 둠. · 뺨 흉터 없음 — 답59(윈도우) #4(docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) · 카드 빗금은 음영 · base 수염 없음 — 대표 컷은 말끔(턱 밑 빗금은 음영 · 뺨 · 턱 자국은 흉터 — 74차 원작 대조(서브에이전트 — L3 검토 review_2d) B11)"
     },
     {
       "id": "kimtaeha",
@@ -5505,7 +5508,7 @@
         "head": {
           "hair_style": "wavy",
           "hair_len": "medium",
-          "hair_color": "#6e5e4c",
+          "hair_color": "#43362c",
           "hair_note": "가르마 탄 웨이브 갈색 머리 — 앞머리가 이마 · 안경 위로 흘러내림(빛 받은 곳 색 — 그늘은 더 짙음)",
           "skin": "#e9ddc7",
           "eyes": "normal",
@@ -5744,7 +5747,7 @@
         "head": {
           "hair_style": "crew",
           "hair_len": "short",
-          "hair_color": "#d9e6e9",
+          "hair_color": "#dcdcdc",
           "hair_note": "아주 짧게 친 흰(백금) 머리 — 위는 살짝 뒤로 넘김",
           "skin": "#e1d7d2",
           "eyes": "sharp",
@@ -5925,7 +5928,7 @@
           "hair_len": "short",
           "hair_color": "#c0c2c7",
           "hair_note": "은회색 짧은 머리 — 옆 · 뒤로 넘기고 앞머리 몇 가닥이 이마로 흐트러짐(싸우면 더)",
-          "skin": "#7e6b76",
+          "skin": "#e6d3c8",
           "eyes": "sharp",
           "brows": "thin",
           "jaw": "sharp",
@@ -5934,7 +5937,7 @@
           "glasses": null,
           "piercings": [],
           "headwear": null,
-          "makeup": {"lips": "#513d50", "note": "짙은 보라 입술 · 눈가 어두운 화장 — 중성적"}
+          "makeup": {"lips": "#513d50", "note": "짙은 보라 입술 · 눈가 어두운 화장"}
         },
         "outfit": {
           "outer": {
@@ -5967,7 +5970,7 @@
           },
           {"name": "줄 끝 칼(로프 다트)", "kind": "knife", "length": "short", "grip": "forward", "hands": "left"}
         ],
-        "signature": ["은회색 짧은 넘긴 머리", "짙은 보라 입술 · 눈가 화장 — 중성적", "버건디 더블 정장"],
+        "signature": ["은회색 짧은 넘긴 머리", "짙은 보라 입술 · 눈가 화장", "버건디 더블 정장"],
         "color_from": "037/059(머리 · 입술 · 이너) · 037/053(정장 · 바지) — 붉은 · 보라 조명 컷"
       },
       "periods": [
@@ -6007,7 +6010,7 @@
       "ref_image": "work/looks/ref/lingling.png",
       "profile": "sources/character_profile/화진_링링.jpg",
       "conf": "ai",
-      "note": "2부 컷은 붉은 · 보라 · 청록 조명이라 피부 · 정장 색이 틀어짐. 1부 4장은 다리만 봐서 라벤더 색은 그늘 값."
+      "note": "2부 컷은 붉은 · 보라 · 청록 조명이라 피부 · 정장 색이 틀어짐. 1부 4장은 다리만 봐서 라벤더 색은 그늘 값. · 여성(본명 링샤오 — 답59(윈도우) #1 docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) · 피부는 붉은 · 보라 조명 값(#7e6b76) 대신 밝은 값(L3 검토(work/looks/review_2d.md B6)"
     },
     {
       "id": "mahakyoung",
@@ -6710,7 +6713,7 @@
           "hair_len": "short",
           "hair_color": "#22262c",
           "hair_note": "짧은 흑발을 단정히 뒤로 넘김 — 위가 평평하게 각짐 · 옆 짧게",
-          "skin": "#766760",
+          "skin": "#ae9e8f",
           "eyes": "narrow",
           "brows": "thick",
           "jaw": "square",
@@ -6808,9 +6811,9 @@
           "jaw": "sharp",
           "facial_hair": ["stubble"],
           "scars": [{"where": "neck", "shape": "burn", "note": "목 가운데 둥근 흉터(울대 자리)"}],
-          "glasses": {"kind": "sunglasses_square", "lens": "#111111", "note": "p1:105 에서만 — 평소엔 오른눈 검은 안대(끈)"},
+          "glasses": null,
           "piercings": [],
-          "headwear": {"kind": "bandana", "color": "#4a5a52", "note": "정한 목록에 버킷햇 없음 — 챙 짧은 벙거지(끈 달림)"}
+          "headwear": {"kind": "bucket_hat", "color": "#4a5a52", "note": "챙 짧은 녹색 벙거지(끈 달림)"}
         },
         "outfit": {
           "outer": {
@@ -6881,7 +6884,7 @@
       "ref_image": "work/looks/ref/namilho.png",
       "profile": "sources/character_profile/남일호.jpg",
       "conf": "ai",
-      "note": "headwear 는 정한 목록에 버킷햇이 없어 가장 가까운 값을 못 고름 — bandana 로 두고 note 에 '벙거지' (L3 에서 bucket hat 으로 그릴 것). 바지 · 신발은 대표 차림 컷에서 안 보여 canon 글"
+      "note": "headwear 는 정한 목록에 버킷햇이 없어 가장 가까운 값을 못 고름 — bandana 로 두고 note 에 '벙거지' (L3 에서 bucket hat 으로 그릴 것). 바지 · 신발은 대표 차림 컷에서 안 보여 canon 글 · 검은 사각 선글라스는 p1:105 에서만 — base 는 늘 보이는 오른눈 안대(L3 검토(work/looks/review_2d.md B2)"
     },
     {
       "id": "namyong",
@@ -7936,10 +7939,7 @@
           "shoes": {"kind": "boots", "color": null},
           "gloves": null
         },
-        "accessories": [
-          {"kind": "mask", "where": "face", "color": "#111111"},
-          {"kind": "holster", "where": "back_waist", "color": null}
-        ],
+        "accessories": [{"kind": "holster", "where": "back_waist", "color": null}],
         "weapons": [
           {"name": "마체테", "kind": "machete", "length": "medium", "grip": "forward", "hands": "right"},
           {"name": "권총", "kind": "pistol", "length": "short", "grip": "forward", "hands": "right"}
@@ -7955,7 +7955,6 @@
           "diff": {
             "outfit": {"tie": "#111111"},
             "accessories": [
-              {"kind": "mask", "where": "face", "color": "#111111"},
               {"kind": "other", "where": "shoulders", "color": "#111111", "note": "검은 X자 하네스 끈"}
             ]
           }
@@ -7970,7 +7969,7 @@
       "ref_image": "work/looks/ref/scaledanjang.png",
       "profile": null,
       "conf": "ai",
-      "note": "출연 컷 대부분이 어둡고 붉은 · 푸른 조명이라 색은 밝은 부분만 뽑았다. 신발은 이번에 본 컷에 안 나옴(canon '검은 부츠'). 005 바다 전투 차림(연녹 셔츠 · 카고) 안 봄"
+      "note": "출연 컷 대부분이 어둡고 붉은 · 푸른 조명이라 색은 밝은 부분만 뽑았다. 신발은 이번에 본 컷에 안 나옴(canon '검은 부츠'). 005 바다 전투 차림(연녹 셔츠 · 카고) 안 봄 · 고글 가면은 눈 · 코만 가린다 — 얼굴 mask 빼고 웃는 입이 보이게(L3 검토(work/looks/review_2d.md A4)"
     },
     {
       "id": "seojeongchi",
@@ -8958,15 +8957,15 @@
           "weight_kg": 79
         },
         "head": {
-          "hair_style": "short",
+          "hair_style": "slick",
           "hair_len": "short",
-          "hair_color": "#2a2420",
-          "hair_note": "옆 짧게, 위는 살짝 옆으로 넘김(짙은 갈색 — 하늘이 겹쳐 색 못 뽑아 눈대중)",
+          "hair_color": "#4e3c34",
+          "hair_note": "갈색 — 옆은 짧고 위는 높이 뒤로 넘김(공식 카드 · 057/034)",
           "skin": "#e7d7c0",
           "eyes": "sharp",
           "brows": "thick",
           "jaw": "square",
-          "facial_hair": ["beard"],
+          "facial_hair": ["goatee", "mustache"],
           "scars": [],
           "glasses": null,
           "piercings": [],
@@ -8987,7 +8986,7 @@
         "weapons": [
           {"name": "나무 판자", "kind": "pipe", "length": "medium", "grip": "two_hand", "hands": "both"}
         ],
-        "signature": ["짙은 녹색 셔츠 · 검은 벨트", "짧은 짙은 머리 + 턱수염", "다부진 큰 체격"],
+        "signature": ["짙은 녹색 셔츠 · 검은 벨트", "높이 뒤로 넘긴 갈색 머리 + 턱 염소수염 · 옅은 콧수염", "다부진 큰 체격"],
         "color_from": "057/034(흐린 낮)"
       },
       "periods": [
@@ -9026,7 +9025,7 @@
       "ref_image": "work/looks/ref/wonil.png",
       "profile": "sources/character_profile/신원일.jpg",
       "conf": "ai",
-      "note": "신발은 본 컷에 안 나와 null. 1부 4 ~ 6장 차림은 canon 글."
+      "note": "신발은 본 컷에 안 나와 null. 1부 4 ~ 6장 차림은 canon 글. · 카드 값으로(답59(윈도우) #5 · 6절 8 — 공식 카드 · 057/034 대조, 74차 원작 대조(서브에이전트 — L3 검토 review_2d) A15)"
     },
     {
       "id": "wonyong",
@@ -9221,7 +9220,7 @@
         "head": {
           "hair_style": "short",
           "hair_len": "short",
-          "hair_color": "#eece93",
+          "hair_color": "#d8ceb0",
           "hair_note": "짧은 금발을 뒤 · 위로 넘김 · 옆은 짧게",
           "skin": "#d9c49b",
           "eyes": "narrow",
@@ -9229,7 +9228,7 @@
           "jaw": "square",
           "facial_hair": ["goatee", "mustache"],
           "scars": [],
-          "glasses": {"kind": "sunglasses_round", "lens": "#3a8a3a", "note": "가는 테 타원 렌즈(초록 반사) — 094~095 에만"},
+          "glasses": null,
           "piercings": [],
           "headwear": null
         },
@@ -9280,7 +9279,7 @@
       "ref_image": "work/looks/ref/yamamotokyoji.png",
       "profile": null,
       "conf": "ai",
-      "note": "목에 두른 흰 천 · 징 박힌 벨트 · 흰 운동화는 직접 못 봄(canon 글). 2부 12장 컷이 대부분 밤 · 붉은 조명이라 점퍼 색이 어둡게 뽑힌다."
+      "note": "목에 두른 흰 천 · 징 박힌 벨트 · 흰 운동화는 직접 못 봄(canon 글). 2부 12장 컷이 대부분 밤 · 붉은 조명이라 점퍼 색이 어둡게 뽑힌다. · 녹색 둥근 안경(가는 테 타원 · 초록 반사 #3a8a3a)은 094~095 에만 — base 에서 뺌(L3 검토(work/looks/review_2d.md A3)"
     },
     {
       "id": "yeominsu",
@@ -9614,7 +9613,7 @@
       "ref_image": "work/looks/ref/yuwoosung.png",
       "profile": "sources/character_profile/화진_유우성.jpg",
       "conf": "ai",
-      "note": "1부(2 · 4 · 7장) 갈색 무늬 정장 · 파란 스리피스 · 흰 정장은 조각 미확인. 전신(구두)을 못 봄. 9장(023 · 024 · 029 · 034)은 차림이 화마다 바뀌어 periods 에 안 넣음 — canon 글 참고."
+      "note": "1부(2 · 4 · 7장) 갈색 무늬 정장 · 파란 스리피스 · 흰 정장은 조각 미확인. 전신(구두)을 못 봄. 9장(023 · 024 · 029 · 034)은 차림이 화마다 바뀌어 periods 에 안 넣음 — canon 글 참고. · 흑발 그대로(카드 · 013/098) — 회갈색은 036/009 따뜻한 조명 · 041/083 세피아(74차 원작 대조(서브에이전트 — L3 검토 review_2d) A12)"
     },
     {
       "id": "_castle_g4",

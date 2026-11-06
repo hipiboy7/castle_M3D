@@ -58,3 +58,29 @@
 | `sprites/gangmanjae_b.json` | 〃 | 그림 B 강만재 |
 | `sprites/yundeoksu_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/yundeoksu_a.glb`) | 그림 B 윤덕수 |
 | `sprites/yundeoksu_b.json` | 〃 | 그림 B 윤덕수 |
+| `models/sintaejin_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06, 외형은 castle_common `data/looks.json` ddeeb4c — 원작 조각 대조 · conf ai, `src/view/looks.gd` 주석) | 그림 A 신태진(2장) |
+| `models/namgunghyuk_a.glb` | 〃 | 그림 A 남궁혁(2장) |
+| `models/hwangbomincheol_a.glb` | 〃 | 그림 A 황보민철(2장) |
+| `models/iseul_a.glb` | 〃 | 그림 A 이슬(2장) |
+| `models/ojiin_a.glb` | 〃 | 그림 A 오지인(2장) |
+| `models/kimjaehoon_a.glb` | 〃 | 그림 A 김재훈(2장) |
+| `models/insu_a.glb` | 〃 | 그림 A 인수(2장) |
+| `models/gangchangseok_a.glb` | 〃 | 그림 A 강창석(2장) |
+| `sprites/sintaejin_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/sintaejin_a.glb`) | 그림 B 신태진 |
+| `sprites/sintaejin_b.json` | 〃 | 그림 B 신태진 |
+| `sprites/namgunghyuk_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/namgunghyuk_a.glb`) | 그림 B 남궁혁 |
+| `sprites/namgunghyuk_b.json` | 〃 | 그림 B 남궁혁 |
+| `sprites/hwangbomincheol_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/hwangbomincheol_a.glb`) | 그림 B 황보민철 |
+| `sprites/hwangbomincheol_b.json` | 〃 | 그림 B 황보민철 |
+| `sprites/iseul_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/iseul_a.glb`) | 그림 B 이슬 |
+| `sprites/iseul_b.json` | 〃 | 그림 B 이슬 |
+| `sprites/ojiin_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/ojiin_a.glb`) | 그림 B 오지인 |
+| `sprites/ojiin_b.json` | 〃 | 그림 B 오지인 |
+| `sprites/kimjaehoon_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/kimjaehoon_a.glb`) | 그림 B 김재훈 |
+| `sprites/kimjaehoon_b.json` | 〃 | 그림 B 김재훈 |
+| `sprites/insu_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/insu_a.glb`) | 그림 B 인수 |
+| `sprites/insu_b.json` | 〃 | 그림 B 인수 |
+| `sprites/gangchangseok_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/gangchangseok_a.glb`) | 그림 B 강창석 |
+| `sprites/gangchangseok_b.json` | 〃 | 그림 B 강창석 |
+| `sprites/kimshin_p1_blade_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/kimshin_p1_a.glb` + 군용 단검) | 그림 B 김신 2장(1부 차림 · 칼) |
+| `sprites/kimshin_p1_blade_b.json` | 〃 | 그림 B 김신 2장 |

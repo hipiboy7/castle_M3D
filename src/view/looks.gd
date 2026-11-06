@@ -146,10 +146,76 @@ const LOOKS := {
 		"bracelet_l": Color(0.05, 0.05, 0.06), "buckle": Color(0.75, 0.76, 0.8),
 		"big": true, "scale": 1.28, "wide": 1.45, "depth": 1.5, "limb": 1.55, "head": 0.95, "jaw": true,
 		"weapon_r": "", "weapon_l": "", "guard": "box"},
+	# ---- 2장 하성 본사(1부 021~036) — 근거 castle_common data/looks.json(원작 조각 대조 · 2장 차림이 있으면 그것, conf ai — 연출에만).
+	#      겉모습 칸은 looks_common 이 덮는다. 키 · 체격은 build.rel_height · rel_bulk 를 기존 인물(김신 1.0 · 1.0 = scale 1.04)에 견줘 손으로
+	#  김신(2장 — looks.json 에 2장 차림이 없어 1장 귀국 차림 kim_bare 그대로 + 군용 단검 한 자루, 역수)
+	"kim_p1_blade": {"suit": Color(0.15, 0.15, 0.19), "pants": Color(0.34, 0.34, 0.37), "shirt": Color(0.07, 0.07, 0.09), "collar": "turtle",
+		"skin": Color(0.91, 0.77, 0.65), "hair": Color(0.11, 0.11, 0.15), "hair_style": "fringe", "glasses": false, "big": false,
+		"scale": 1.04, "shoulder": 1.12, "eye_h": 0.007, "depth": 1.1, "limb": 1.15, "head": 0.9, "brow_tilt": 12.0, "jaw": true,
+		"piercing": true, "buckle": Color(0.82, 0.84, 0.88), "sole": Color(0.9, 0.9, 0.88),
+		"weapon_r": "combat", "weapon_l": "", "guard": "kim"},
+	#  신태진(2장 '청소부' — 녹색 벙거지 · 자주 티 · 검은 긴 코트 · 끈 감은 나무 손잡이 외날 단도, 0.98 · 0.94 근육질): 가운데 가른 흑발 앞머리 · 왼뺨 흉
+	"sintaejin": {"outfit": "coat", "suit": Color(0.07, 0.08, 0.1), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.5, 0.4, 0.48), "collar": "crew",
+		"skin": Color(0.92, 0.82, 0.76), "hair": Color(0.08, 0.09, 0.12), "hair_style": "fringe", "hat": "beanie", "hat_col": Color(0.17, 0.25, 0.21),
+		"scar": true, "big": false, "scale": 1.0, "shoulder": 1.06, "limb": 1.1, "head": 0.92, "eye_h": 0.008, "brow_tilt": 10.0,
+		"weapon_r": "tanto", "weapon_l": "", "guard": "baek"},
+	#  남궁혁(1.02 · 1.15 근육질 · 굵은 팔다리): 그을린 피부 · 각진 흑발 올백 · 흰 정장 · 짙은 청록 넥타이 · 금 배지 · 금 너클(오른손)
+	"namgunghyuk": {"suit": Color(0.93, 0.93, 0.91), "pants": Color(0.92, 0.92, 0.9), "shirt": Color(0.62, 0.61, 0.66), "tie": Color(0.12, 0.2, 0.28),
+		"skin": Color(0.8, 0.68, 0.58), "hair": Color(0.13, 0.15, 0.17), "hair_style": "slick", "badge": Color(0.95, 0.75, 0.25),
+		"piercing": true, "big": true, "scale": 1.14, "wide": 1.25, "depth": 1.3, "limb": 1.3, "head": 0.94, "jaw": true, "eye_h": 0.008,
+		"brow_k": 1.5, "buckle": Color(0.2, 0.2, 0.22), "weapon_r": "knuckles", "weapon_l": "", "guard": "box"},
+	#  황보민철(2장 싸움 차림 — 소매 걷은 흰 셔츠 · 등 X자 갈색 멜빵 · 검은 바지, 0.99 · 1.06): 짧은 흑발 · 왼눈 세로 흉터 · 나무 손잡이 단도 두 자루(1부 정수)
+	"hwangbomincheol": {"outfit": "shirt", "suit": Color(0.95, 0.93, 0.91), "pants": Color(0.05, 0.05, 0.06), "shirt": Color(0.95, 0.93, 0.91),
+		"skin": Color(0.86, 0.74, 0.64), "hair": Color(0.04, 0.04, 0.05), "hair_style": "short", "holster": Color(0.41, 0.34, 0.27),
+		"buckle": Color(0.2, 0.2, 0.22), "big": false, "scale": 1.06, "shoulder": 1.12, "depth": 1.15, "limb": 1.2, "head": 0.92, "jaw": true,
+		"eye_h": 0.008, "brow_k": 1.4, "weapon_r": "tanto", "weapon_l": "tanto", "grip_l": "fwd", "guard": "baek"},
+	#  이슬(0.98 · 1.19 거구): 짙은 피부 · 아주 짧은 흑발 · 금테 에비에이터 갈색 렌즈 · 콧수염 + 염소수염 · 콧등 흉터 · 밝은 회색 더블 정장 · 겨자 넥타이 · 맨손
+	"iseul": {"suit": Color(0.5, 0.5, 0.53), "pants": Color(0.48, 0.48, 0.51), "shirt": Color(0.72, 0.72, 0.74), "tie": Color(0.6, 0.48, 0.25),
+		"skin": Color(0.52, 0.37, 0.25), "hair": Color(0.06, 0.06, 0.06), "hair_style": "crew", "glasses": "aviator", "lens": Color(0.3, 0.24, 0.19),
+		"big": true, "scale": 1.1, "wide": 1.32, "depth": 1.38, "limb": 1.35, "head": 0.95, "jaw": true, "brow_k": 1.4,
+		"weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  오지인(0.92 · 0.63 마름 — 비서): 뒤로 틀어 올린 낮은 쪽머리 · 양귀 금 고리 · 붉은 입술 · 검은 V넥 랩 블라우스(긴소매) · 버건디 펜슬 스커트 ·
+	#        검은 하이힐 · 카타나. 긴소매라 outfit vest(몸통 · 팔 모두 블라우스 색)
+	"ojiin": {"outfit": "vest", "suit": Color(0.17, 0.17, 0.18), "pants": Color(0.42, 0.24, 0.24), "shirt": Color(0.17, 0.17, 0.18), "collar": "open",
+		"skirt": true, "skin": Color(0.95, 0.88, 0.83), "hair": Color(0.05, 0.05, 0.06), "hair_style": "bun", "piercing": true,
+		"lips": Color(0.62, 0.24, 0.3), "big": false, "scale": 0.93, "wide": 0.84, "shoulder": 0.82, "depth": 0.85, "limb": 0.78, "head": 0.98,
+		"eye_h": 0.008, "brow_k": 0.7, "weapon_r": "katana", "weapon_l": "", "guard": "long"},
+	#  김재훈(0.97 · 0.89 보통): 실눈 · 붉은 갈색 투블럭 올백 · 녹회색 조끼 · 회색 셔츠 · 검은 넥타이 · 갈색 구두 · 은색 자동권총
+	"kimjaehoon": {"outfit": "vest", "suit": Color(0.42, 0.44, 0.41), "pants": Color(0.42, 0.44, 0.41), "shirt": Color(0.6, 0.6, 0.63),
+		"tie": Color(0.13, 0.13, 0.14), "skin": Color(0.86, 0.74, 0.66), "hair": Color(0.4, 0.27, 0.24), "hair2": Color(0.3, 0.21, 0.19),
+		"hair_style": "undercut", "shoe": Color(0.28, 0.19, 0.16), "eye_h": 0.005, "big": false, "scale": 1.0, "wide": 0.97, "limb": 1.02,
+		"head": 0.94, "weapon_r": "pistol", "weapon_l": "", "guard": "baek"},
+	#  인수(1.03 · 1.2 근육질 — 남구희망청년회 2인자): 회색 니트 비니 + 어깨 닿는 흑발 · 콧수염 · 염소수염 · 왼귀 고리 · 짙은 회색 반팔 티 ·
+	#        오른 팔뚝 문신 · 청바지 · 맨손
+	"insu": {"outfit": "shirt", "suit": Color(0.3, 0.31, 0.35), "pants": Color(0.38, 0.46, 0.58), "shirt": Color(0.3, 0.31, 0.35), "collar": "crew",
+		"skin": Color(0.9, 0.82, 0.75), "hair": Color(0.12, 0.11, 0.13), "hair_style": "long", "hat": "beanie", "hat_col": Color(0.42, 0.43, 0.47),
+		"piercing": true, "tattoo": Color(0.15, 0.15, 0.17), "tattoo_side": "r", "sole": Color(0.85, 0.85, 0.85),
+		"big": true, "scale": 1.16, "wide": 1.3, "depth": 1.35, "limb": 1.38, "head": 0.94, "jaw": true, "eye_h": 0.008, "brow_k": 1.4,
+		"weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  강창석(029 사무실 — 0.99 · 0.93 어깨 넓음): 실눈 함박웃음 · 붉은 기 짙은 갈색 올백 + 늘어진 앞머리 · 버건디 정장 위아래 · 검은 크루넥 ·
+	#        굵은 금 체인 · 금시계 · 긴 회칼(오른손) + 짧은 날(왼손 역수)
+	"gangchangseok": {"suit": Color(0.47, 0.25, 0.27), "pants": Color(0.33, 0.2, 0.22), "shirt": Color(0.12, 0.1, 0.12), "collar": "crew",
+		"skin": Color(0.92, 0.82, 0.74), "hair": Color(0.24, 0.13, 0.14), "hair_style": "slick_fringe", "chain": Color(0.8, 0.66, 0.3),
+		"bracelet_l": Color(0.75, 0.66, 0.5), "eye_h": 0.005, "big": false, "scale": 1.02, "shoulder": 1.08, "limb": 1.05, "head": 0.94,
+		"weapon_r": "sashimi", "weapon_l": "tanto", "guard": "baek"},
+	#  하성 조직원(엑스트라 — 검은 정장 · 흰 셔츠 · 검은 넥타이 · 짧은 흑발, 단도)
+	"haseong_suit": {"suit": Color(0.08, 0.08, 0.1), "pants": Color(0.08, 0.08, 0.1), "shirt": Color(0.9, 0.9, 0.92),
+		"tie": Color(0.05, 0.05, 0.06), "skin": Color(0.87, 0.73, 0.61), "hair": Color(0.07, 0.07, 0.08), "hair_style": "short",
+		"big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "tanto", "weapon_l": "", "guard": "baek"},
+	#  하성 정예 경호팀(엑스트라 — 검은 정장 · 턱수염 · 귀걸이 · 크루컷 거구, 맨손)
+	"haseong_guard": {"suit": Color(0.06, 0.06, 0.08), "pants": Color(0.06, 0.06, 0.08), "shirt": Color(0.88, 0.88, 0.9),
+		"tie": Color(0.05, 0.05, 0.06), "skin": Color(0.84, 0.7, 0.58), "hair": Color(0.07, 0.07, 0.08), "hair_style": "crew",
+		"beard": true, "piercing": true, "big": true, "scale": 1.1, "wide": 1.2, "depth": 1.25, "limb": 1.25, "head": 0.95, "jaw": true,
+		"weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  남구희망청년회(엑스트라 — 검은 비니 · 검은 반팔 티 · 검은 바지 · 흰 밑창 운동화, 맨손)
+	"namgu_youth": {"outfit": "shirt", "suit": Color(0.09, 0.09, 0.1), "pants": Color(0.1, 0.1, 0.11), "shirt": Color(0.09, 0.09, 0.1),
+		"collar": "crew", "skin": Color(0.88, 0.75, 0.64), "hair": Color(0.08, 0.08, 0.09), "hair_style": "short", "hat": "beanie",
+		"hat_col": Color(0.1, 0.1, 0.11), "sole": Color(0.9, 0.9, 0.88), "big": false, "scale": 1.0, "limb": 1.08,
+		"weapon_r": "", "weapon_l": "", "guard": "box"},
 }
 
 ## 그림 A · B 가 있는 인물(S3 — 김신 · 신겐, 기획서 03 5절 '시험 범위 2명' · S5 0 · 1장 이름 있는 인물). 모델 · 시트는 이 표를 보고
-## 만든다(tools/make_models.gd · make_sprites.gd). 엑스트라(군터 경호원 · DS 정장 · 습격조)는 관절 인형 그대로(main.gd 가 has_art 로 고른다)
+## 만든다(tools/make_models.gd · make_sprites.gd). 엑스트라(군터 경호원 · DS 정장 · 습격조 · 하성 조직원 · 남구 청년회)는 관절 인형 그대로(main.gd 가 has_art 로 고른다)
 const ART := {
 	"kim": {"glb": "res://assets/models/kimshin_a.glb", "dots": "res://assets/sprites/kimshin_b"},
 	"shingen": {"glb": "res://assets/models/shingen_a.glb", "dots": "res://assets/sprites/shingen_b"},
@@ -161,6 +227,16 @@ const ART := {
 	"kimdaegeon": {"glb": "res://assets/models/kimdaegeon_a.glb", "dots": "res://assets/sprites/kimdaegeon_b"},
 	"gangmanjae": {"glb": "res://assets/models/gangmanjae_a.glb", "dots": "res://assets/sprites/gangmanjae_b"},
 	"yundeoksu": {"glb": "res://assets/models/yundeoksu_a.glb", "dots": "res://assets/sprites/yundeoksu_b"},
+	# 2장 하성 본사 — 김신 2장은 1부 처음과 몸 · 옷이 같아 GLB 를 같이 쓰고(칼은 인형 것) 도트만 따로(칼 자세)
+	"kim_p1_blade": {"glb": "res://assets/models/kimshin_p1_a.glb", "dots": "res://assets/sprites/kimshin_p1_blade_b"},
+	"sintaejin": {"glb": "res://assets/models/sintaejin_a.glb", "dots": "res://assets/sprites/sintaejin_b"},
+	"namgunghyuk": {"glb": "res://assets/models/namgunghyuk_a.glb", "dots": "res://assets/sprites/namgunghyuk_b"},
+	"hwangbomincheol": {"glb": "res://assets/models/hwangbomincheol_a.glb", "dots": "res://assets/sprites/hwangbomincheol_b"},
+	"iseul": {"glb": "res://assets/models/iseul_a.glb", "dots": "res://assets/sprites/iseul_b"},
+	"ojiin": {"glb": "res://assets/models/ojiin_a.glb", "dots": "res://assets/sprites/ojiin_b"},
+	"kimjaehoon": {"glb": "res://assets/models/kimjaehoon_a.glb", "dots": "res://assets/sprites/kimjaehoon_b"},
+	"insu": {"glb": "res://assets/models/insu_a.glb", "dots": "res://assets/sprites/insu_b"},
+	"gangchangseok": {"glb": "res://assets/models/gangchangseok_a.glb", "dots": "res://assets/sprites/gangchangseok_b"},
 }
 
 

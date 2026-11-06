@@ -27,15 +27,20 @@ NAMES = {
     "g4": ("_castle_g4", None), "g4_leader": ("_castle_g4", "리더"), "gunter": ("gunter", "0"),
     "ds_suit": ("_ds_member", None), "jintae": ("jintae", "1"), "kimhyeokju": ("kimhyeokju", "1"),
     "kimseongjun": ("kimseongjun", "1"), "kimdaegeon": ("kimdaegeon", "1"), "gangmanjae": ("gangmanjae", "1"),
-    "yundeoksu": ("yundeoksu", "1"),
+    "yundeoksu": ("yundeoksu", "1"), "kim_bare": ("kimshin", "1"),
+    # 2장(1부 021~036 하성 본사) — 김신은 looks.json 에 2장 차림이 없어 1장(귀국 — 터틀넥 + 정장 재킷)에 칼을 든다
+    "kim_p1_blade": ("kimshin", "1"), "sintaejin": ("sintaejin", "2"), "namgunghyuk": ("namgunghyuk", "2"),
+    "hwangbomincheol": ("hwangbomincheol", "2"), "iseul": ("iseul", "2"), "ojiin": ("ojiin", "2"),
+    "kimjaehoon": ("kimjaehoon", "2"), "insu": ("insu", "2"), "gangchangseok": ("gangchangseok", "2"),
 }
 # 이 판 장면에 맞춘 칸은 덮지 않는다: 피우진 싸울 땐 상투(원작 — 대표 차림은 장발) · 서진태 검은 투블럭 + 금발(hair2 와 짝)
-KEEP = {"woojin": ("hair_style",), "jintae": ("hair_style",)}
+KEEP = {"woojin": ("hair_style",), "jintae": ("hair_style",), "ojiin": ("outfit",)}   # 오지인: 긴소매 블라우스(겉옷 없음 → shirt 는 소매 걷음) — vest 로
 HAIR = {"bald": "bald", "buzz": "buzz", "crew": "crew", "short": "short", "undercut": "undercut", "spiky": "spiky",
         "messy": "curly", "slick": "slick", "slick_fringe": "slick_fringe", "parted": "parted", "fringe": "fringe",
         "wavy": "curly", "wavy_back": "wavy_back", "long": "long", "ponytail": "ponytail", "topknot": "topknot",
-        "bun": "topknot", "bob": "long", "afro": "curly", "mohawk": "spiky", "dreads": "long"}
+        "bun": "bun", "bob": "long", "afro": "curly", "mohawk": "spiky", "dreads": "long"}
 SUN = {"sunglasses_square": "sun", "sunglasses_round": "sun", "goggles": "sun", "aviator": "aviator"}
+HAT = {"beanie": "beanie", "bucket_hat": "bucket"}     # 그리는 모자만(챙 없는 니트 비니 · 챙이 아래로 처진 벙거지)
 GOLD = (0.95, 0.75, 0.25)
 COLOR_GAP = 0.42
 GAP = {"hair": 0.25}            # 머리색은 짙음 ↔ 밝음이 식별 특징이라 더 쉽게 바꾼다(백도찬 — 공식 카드 · 조각 모두 짙은 갈색)
@@ -93,9 +98,14 @@ def merge(base, diff):
 def pick(rec, when):
     if when is None:
         return rec["base"]
-    for p in rec.get("periods") or []:
-        if when in (p.get("chapters") or []) or when in (p.get("label") or ""):
+    periods = rec.get("periods") or []
+    for p in periods:                     # 장 번호는 chapters 로만 맞춘다(label 의 '2부' 가 2장으로 잡히지 않게)
+        if when in (p.get("chapters") or []):
             return merge(rec["base"], p.get("diff"))
+    if not when.isdigit():
+        for p in periods:                 # 장 번호가 아닌 말(예: '리더')은 label 에서
+            if when in (p.get("label") or ""):
+                return merge(rec["base"], p.get("diff"))
     return rec["base"]
 
 
@@ -112,6 +122,8 @@ def convert(lk):
             d["outfit"] = "coat"
         elif ok == "robe":
             d["outfit"] = "robe"
+        elif ok == "vest":
+            d["outfit"] = "vest"         # 조끼 — 팔은 셔츠 소매
         if ok == "leather_jacket":
             d["leather"] = True
     elif ok == "none":
@@ -124,8 +136,11 @@ def convert(lk):
         d["collar"] = "open"
     elif shirt.get("kind") == "turtleneck":
         d["collar"] = "turtle"
+    elif shirt.get("kind") == "tshirt":
+        d["collar"] = "crew"             # 둥근 목 티 — 단추 · 목 V 없음
     if lift(rgb(pants.get("color"))):
         d["pants"] = lift(rgb(pants.get("color")))
+    d["skirt"] = pants.get("kind") == "skirt"
     if "tie" in o:
         d["tie"] = lift(rgb(o.get("tie")))          # None = 넥타이 없음
     if skin(h.get("skin")):
@@ -137,7 +152,11 @@ def convert(lk):
     if h.get("hair_style") in HAIR:
         d["hair_style"] = HAIR[h["hair_style"]]
     g = h.get("glasses")
-    if g:
+    if g and g.get("lens") == "clear":    # 맑은 렌즈 — 선글라스처럼 검게 그리지 않는다(테 색만)
+        d["glasses"] = True
+        if rgb(g.get("frame")):
+            d["frame"] = rgb(g.get("frame"))
+    elif g:
         lens = rgb(g.get("lens"))
         d["glasses"] = SUN.get(g.get("kind"), "sun" if lens else True)
         if lens:
@@ -150,17 +169,29 @@ def convert(lk):
         d["scar"] = "double"
     elif "nose_bridge" in scars:
         d["scar"] = "nose"
-    elif any(s in ("forehead", "left_eye", "right_eye") for s in scars):
+    elif "left_eye" in scars or "right_eye" in scars:
+        d["scar"] = "eye_l" if "left_eye" in scars else "eye_r"      # 눈썹 위에서 눈을 지나 뺨으로 세로 한 줄(황보민철)
+    elif "forehead" in scars:
         d["scar"] = "brow"
     elif any(s in ("left_cheek", "right_cheek") for s in scars):
         d["scar"] = True
     else:
         d["scar"] = False
-    fh = set(h.get("facial_hair") or [])
+    fh = set(h.get("facial_hair") or [])     # 수염은 이 칸에서만(김신 — 수염 그늘 없음, 답59)
+    d["stubble"] = "stubble" in fh
     d["beard"] = "beard" in fh
     d["mustache"] = "mustache" in fh
     d["goatee"] = "goatee" in fh
+    if h.get("blind_eye") in ("left", "right"):
+        d["blind_eye"] = h["blind_eye"][0]   # 인물 자기 쪽 — 그 눈은 흰자
+    hw = h.get("headwear") or {}
+    if hw.get("kind") in HAT:
+        d["hat"] = HAT[hw["kind"]]
+        d["hat_col"] = lift(rgb(hw.get("color"))) or (0.2, 0.2, 0.22)
     acc = {a.get("kind"): a for a in lk.get("accessories") or []}
+    for a in lk.get("accessories") or []:
+        if a.get("kind") == "other" and a.get("where") == "lips" and rgb(a.get("color")):
+            d["lips"] = rgb(a.get("color"))
     d["badge"] = (rgb(acc["badge"].get("color")) or GOLD) if "badge" in acc else None
     d["chain"] = (rgb(acc["chain"].get("color")) or GOLD) if "chain" in acc else None
     d["holster"] = (rgb(acc["holster"].get("color")) or (0.45, 0.27, 0.14)) if "holster" in acc else None

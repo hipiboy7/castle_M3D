@@ -797,6 +797,16 @@
       "provisional": true,
       "note": "민정수석 정필성",
       "summary": "청와대(민정수석실)는 민정수석 정필성이 있는 권력 기관으로, 정필성은 천일도 위에 있던 인물이다. 2부 회상에서 생포돼 고문당한 젊은 최민욱이 정필성에게서 '전국 통'이 되라는 제안을 받아 수락하고 파천 대부분이 풀려났지만, 뒤에 최민욱은 외국인들을 시켜 정필성을 죽인다."
+    },
+    {
+      "id": "chaehong",
+      "name": "채홍",
+      "aliases": [],
+      "refs": ["131/016@1240"],
+      "conf": "ai",
+      "provisional": true,
+      "src": "공식 인물 카드 · 관계도(sources/character_profile/ — 판독 work/profile/profiles.json · docs/인물프로필_분석.md) · 사용자 답59(윈도우)(docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) — work/pilot/apply_profile.py(74차)",
+      "note": "천일도 카드 ABOUT '당대 최고의 전국구 조직 채홍'(천일도가 들어가 세를 키운 곳). 2부 131 회상의 '대국 요정 채홍'(장소 locations chaehong · fight:chaehong_seupgyeok)은 같은 이름의 건물 — 조직과 건물이 같은 이름인지 원작 확인 전"
     }
   ]
 }

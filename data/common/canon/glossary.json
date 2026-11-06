@@ -23,7 +23,21 @@
       "kind": "rank_term",
       "src": "ranks.json 사다리 '준10강'",
       "refs": [],
-      "conf": "user"
+      "conf": "user",
+      "members": [
+        "mahakyoung",
+        "majunyeong",
+        "juro",
+        "baekdochan",
+        "namgunghyuk",
+        "ryujihak",
+        "odohwa",
+        "choedalcheon",
+        "yuwoosung",
+        "lingling"
+      ],
+      "members_src": "공식 인물 카드 · 관계도(sources/character_profile/ — 판독 work/profile/profiles.json · docs/인물프로필_분석.md) · 사용자 답59(윈도우)(docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) — work/pilot/apply_profile.py(74차)",
+      "note": "공식 10강(1부 끝) — 마학영 · 마준영(캐슬홀딩스) · 주로(호텔) · 백도찬 · 남궁혁(선진) · 류지학(하성) · 오도화(모리) · 최달천(골드) · 유우성 · 링링(화진)(1부 캐슬 조직도)"
     },
     {
       "id": "jeongukgu",
@@ -110,7 +124,9 @@
       "aliases": ["캐슬의 7개의 기둥", "7개의 기둥", "7기둥", "기둥"],
       "refs": ["p1:033/142-150", "p1:033/147", "p1:033/149-169", "007/041"],
       "src": "1부 판독 · 종합 패스(docs/1부답_2부반영거리.md '1부 종합 패스' — 2026-11-03) · 1부 답8 (work/pilot_p1/답변_p1_08.md — 사용자 2026-11-03) · 검수 OK(사용자 2026-11-04 답37 — docs/인터뷰/2026-11-04_자산화_답변37.md)",
-      "note": "신태진이 말한 '캐슬의 7개의 기둥'(1부 033/147) — 원탁 회의에 모이는 캐슬 실세. 033 원탁 자막: 김황 · 임무열(모리) · 천일도 · 유우성(화진) · 김태훈 · 백도찬(공석) + 화 끝 입장한 흉터 남자, 일곱째 = 최민욱(캐슬홀딩스 — characters.choeminuk). 입장 전 금속 탐지기 몸수색 · 이름과 직함을 불러 들임 · 늦게 온 사람 '막내'(033/142-150). 1부 판독 ilgopgidung 을 2부 판독 id castlegidung 으로 합침(1부 답8) · 용어 gidung(기둥) 합침(답37 #9)"
+      "note": "신태진이 말한 '캐슬의 7개의 기둥'(1부 033/147) — 원탁 회의에 모이는 캐슬 실세. 033 원탁 자막: 김황 · 임무열(모리) · 천일도 · 유우성(화진) · 김태훈 · 백도찬(공석) + 화 끝 입장한 흉터 남자, 일곱째 = 최민욱(캐슬홀딩스 — characters.choeminuk). 입장 전 금속 탐지기 몸수색 · 이름과 직함을 불러 들임 · 늦게 온 사람 '막내'(033/142-150). 1부 판독 ilgopgidung 을 2부 판독 id castlegidung 으로 합침(1부 답8) · 용어 gidung(기둥) 합침(답37 #9) · 공식 7기둥(1부 끝 · 7개 조직의 대표) — 캐슬홀딩스 최민욱 · 캐슬호텔 천일도 · 선진무역 백도찬 · 하성그룹 김태훈 · 모리투자신탁 임무열 · 골드캐피털 김황 · 화진기획 유우성(1부 캐슬 조직도 · 1부 캐슬 7기둥)",
+      "members": ["choeminuk", "cheonildo", "baekdochan", "kimtaehoon", "immuyeol", "kimhwang", "yuwoosung"],
+      "members_src": "공식 인물 카드 · 관계도(sources/character_profile/ — 판독 work/profile/profiles.json · docs/인물프로필_분석.md) · 사용자 답59(윈도우)(docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) — work/pilot/apply_profile.py(74차)"
     },
     {
       "id": "jungripguyeok",

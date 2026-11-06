@@ -30,6 +30,11 @@ const ATTACKS := {
 	"kim_bare": ["kf_jab", "kf_jab2", "kf_upper", "kf_dash", "j_finisher", "k_thrust"],
 	"gunter": GUN, "jintae": FISTS, "kimhyeokju": KNIFE, "kimseongjun": KNIFE,
 	"kimdaegeon": FISTS, "gangmanjae": FISTS, "yundeoksu": FISTS,
+	# 2장 하성 본사
+	"kim_p1_blade": ["k_slash1", "k_slash2", "k_thrust", "k_dash", "kf_jab", "kf_upper", "kf_dash", "j_finisher"],
+	"sintaejin": KNIFE, "hwangbomincheol": KNIFE, "gangchangseok": KNIFE, "kimjaehoon": GUN,
+	"namgunghyuk": FISTS, "iseul": FISTS, "insu": FISTS,
+	"ojiin": ["hy_slash1", "hy_slash2", "hy_thrust", "k_thrust", "w_jab", "j_kick"],
 }
 
 var vp: SubViewport

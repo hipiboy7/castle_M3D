@@ -2,9 +2,10 @@ extends SceneTree
 ## 외형 확인 사진(개발용) — 관절 인형(src/view/puppet3d.gd)을 외형마다 앞 · 옆(3/4)에서 찍어 PNG 로 남긴다. 원작 조각(castle_common
 ## work/looks/ref/<id>.png)과 나란히 보고 고치는 데 쓴다(castle_common 73차 · 사용자 답58 '원작 캐릭터를 다시 확인해서').
 ## 창이 있어야 그린다:  tools/xvfb_run.sh <godot> --path . -s res://tools/shot_looks.gd -- 출력폴더 [외형이름 ..]
-## 출력: <출력폴더>/<외형이름>.png (앞 · 3/4 두 칸, 480x640 씩) — 저장소 밖에 둔다.
+## 출력: <출력폴더>/<외형이름>.png (앞 · 3/4 두 칸, 480x640 씩) — 저장소 밖에 둔다. 이름 끝이 _a 면 그림 A(GLB — src/view/puppet_glb.gd)로.
 
 const Puppet3D = preload("res://src/view/puppet3d.gd")
+const PuppetGlb = preload("res://src/view/puppet_glb.gd")
 const Looks = preload("res://src/view/looks.gd")
 
 const W := 480
@@ -46,7 +47,7 @@ func _run() -> void:
 		var name := str(n)
 		var shots: Array[Image] = []
 		for yaw in [0.0, 35.0]:
-			var p := Puppet3D.new()
+			var p = PuppetGlb.new() if name.ends_with("_a") and Looks.has_art(name.trim_suffix("_a")) else Puppet3D.new()
 			vp.add_child(p)
 			p.setup(Looks.look(name))
 			var d := Vector3(sin(deg_to_rad(yaw)), 0.15, -cos(deg_to_rad(yaw))).normalized()   # 인형 앞은 -Z
