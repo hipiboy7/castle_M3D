@@ -1,8 +1,9 @@
 extends "res://tests/helpers.gd"
-## 화면 쪽 순수 함수 — 안전 영역 여백 환산(src/ui/safe_area.gd) · 뒤로 버튼 · 앱 내려감 처리(src/ui/nav.gd).
+## 화면 쪽 순수 함수 — 안전 영역 여백 환산(src/ui/safe_area.gd) · 뒤로 버튼 · 앱 내려감 처리(src/ui/nav.gd) · 처음 화면 카드 자리(title_menu.gd).
 
 const SafeArea = preload("res://src/ui/safe_area.gd")
 const Nav = preload("res://src/ui/nav.gd")
+const TitleMenu = preload("res://src/ui/title_menu.gd")
 
 
 func test_safe_insets_scale_to_view() -> void:
@@ -27,3 +28,19 @@ func test_app_hidden_pauses_only_fight() -> void:
 	check(Nav.pause_on_hide("fight", false), "결투 중 앱이 내려가면 일시정지")
 	check(not Nav.pause_on_hide("fight", true), "이미 멈췄으면 그대로")
 	check(not Nav.pause_on_hide("demo", false) and not Nav.pause_on_hide("title", false), "데모 · 처음 화면은 멈추지 않는다(소리만 끈다)")
+
+
+## 처음 화면 카드: 기준 화면 · 폴드 4 커버(가로로 긴 화면 · 펀치홀 여백) · 펼친 화면(6:5)에서 안 겹치고 안전 영역 안
+func test_title_menu_layout() -> void:
+	for sa in [Rect2(0, 0, 1280, 720), Rect2(44, 0, 1800, 700), Rect2(0, 0, 1280, 1067)]:
+		var L := TitleMenu.layout(sa, 4)
+		var cards: Array = L["cards"]
+		check(cards.size() == 4, "카드 넷")
+		check(sa.encloses(L["cont"]), "이어하기가 안전 영역 안 %s" % sa)
+		for i in cards.size():
+			check(sa.encloses(cards[i]), "카드 %d 가 안전 영역 안 %s %s" % [i, sa, cards[i]])
+			check(not cards[i].intersects(L["cont"]), "카드 %d 와 이어하기가 안 겹친다" % i)
+			if i > 0:
+				check(cards[i].position.x >= cards[i - 1].end.x, "카드 %d 가 앞 카드와 안 겹친다" % i)
+	check(TitleMenu.layout(Rect2(0, 0, 1280, 720), 0)["cards"].is_empty(), "카드가 없으면 빈 줄")
+

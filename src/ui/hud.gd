@@ -3,7 +3,7 @@ extends CanvasLayer
 ## 김신 기술 게이지(칸) · 고른 기술(이름 · 비용, 게이지가 모자라면 흐리게),
 ## 가운데 알림(시작 · 2차 · 승패), 아래 도움말. 색은 이 파일 머리 상수 한 곳.
 ## 11장(여럿): 위 가운데는 방의 큰 적(없으면 가장 가까운 적 · 없으면 숨김), 김신 쪽 밑에 짝(교대할 사람) 체력, 적 머리 위 작은 막대
-## (set_minibars — main.gd 가 화면 자리로 바꿔 준다). 처음 화면에는 왼쪽 · 오른쪽 고르기 글(set_choices).
+## (set_minibars — main.gd 가 화면 자리로 바꿔 준다). 처음 화면 장 고르기는 src/ui/title_menu.gd.
 
 const Common = preload("res://src/data/common.gd")
 const SafeArea = preload("res://src/ui/safe_area.gd")
@@ -41,8 +41,6 @@ var partner_name: Label
 var partner_hp: ColorRect
 var _partner_bg: ColorRect
 var minis: Control
-var choice_l: Label
-var choice_r: Label
 var _hero_nodes: Array = []      # [노드, 안전 영역 왼쪽 위에서의 자리] — 김신 쪽 묶음(이름 · 막대 · 게이지 · 기술)
 
 
@@ -100,11 +98,6 @@ func setup() -> void:
 	minis.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(minis)
 	root.move_child(minis, 1)                       # 덮개(dim) 바로 위 · 글자들 아래
-	choice_l = _label("", 34, COL_TEXT)
-	choice_r = _label("", 34, COL_TEXT)
-	for c in [choice_l, choice_r]:
-		c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		c.size = Vector2(520, 120)
 	fps = _label("", 18, COL_DIM)
 	msg = _label("", 54, COL_TEXT)
 	msg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -132,8 +125,6 @@ func _layout() -> void:
 	hint.position = Vector2(cx - 500, sa.end.y - 46)
 	for hn in _hero_nodes:
 		hn[0].position = sa.position + hn[1]
-	choice_l.position = Vector2(sa.position.x + sa.size.x * 0.25 - 260, sa.position.y + sa.size.y * 0.5 + 20)
-	choice_r.position = Vector2(sa.position.x + sa.size.x * 0.75 - 260, sa.position.y + sa.size.y * 0.5 + 20)
 
 
 func _label(text: String, size: int, col: Color) -> Label:
@@ -223,12 +214,6 @@ func message(text: String, small := "", secs := 2.0, delay := 0.0) -> void:
 	msg.text = text
 	sub.text = small
 	_msg_t = secs
-
-
-## 처음 화면: 왼쪽 · 오른쪽 고르기 글 (빈 글이면 숨김)
-func set_choices(left: String, right: String) -> void:
-	choice_l.text = left
-	choice_r.text = right
 
 
 ## 적 머리 위 작은 체력 막대: [[화면 자리, 체력 비율, 색], ...]

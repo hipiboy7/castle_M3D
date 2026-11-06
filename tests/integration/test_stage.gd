@@ -10,6 +10,9 @@ func test_stage_deterministic() -> void:
 	var a := Stage.simulate(3, 5000)
 	var b := Stage.simulate(3, 5000)
 	check(a == b, "같은 시드면 같은 판\n%s\n%s" % [a, b])
+	var c := Stage.simulate(3, 5000, {"chapter": "ch11"})
+	check(a == c, "장 id 를 주어도 같은 판(기본 ch11 — 장 표 hotel.gd)")
+	check(Stage.make(1)["tbl"] == Hotel and Stage.make(1)["chapter"] == "ch11", "판이 장 표를 들고 있다")
 
 
 func test_ranks_and_parry_at_ch11() -> void:

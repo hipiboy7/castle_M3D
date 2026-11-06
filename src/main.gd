@@ -2,24 +2,28 @@ extends Node3D
 ## 3D 초안 본체 — 흐름(처음 화면 → 데모 · 판 → 결과) · 입력 · 무대 · 인형 바꿔 끼우기만 한다(S2 에서 쪼갬 — 소리 src/view/sound.gd ·
 ## 신호 → 연출 src/view/event_fx.gd · 대사 data/story/lines.json). 판정 · AI 는 순수 로직(src/combat/), 그림은 그 상태를 읽어서
 ## 그린다(src/view/) — 그림을 GLB 캐릭터로 바꿔도 판정은 그대로.
-## 판 두 가지: duel = 6장 인천항 김신 대 백도찬(combat/duel.gd) · stage = 11장 호텔 캐슬(combat/stage.gd — 층 · 여럿 · 교대).
+## 장(src/data/campaign.gd)마다 판 하나: duel = 6장 인천항 김신 대 백도찬(combat/duel.gd) · stage = 방을 지나는 여러 사람 판
+## (combat/stage.gd + 장 표 — 11장 호텔 캐슬). 처음 화면 = 이어하기 + 장 카드(src/ui/title_menu.gd), 깬 장은 세이브(src/data/save.gd
+## — user://save.json. 창 없는 실행은 --save 경로를 줄 때만 읽고 쓴다: 점검이 사람 세이브를 건드리지 않고 늘 같은 결과).
 ##
-## 실행 인자(-- 뒤에): --autoplay 봇이 김신(끝나면 다음 시드로 다시) · --mode duel|stage 자동 판 종류(기본 duel)
+## 실행 인자(-- 뒤에): --autoplay 봇이 김신(끝나면 다음 시드로 다시) · --mode 장 id(ch6 · ch11 — 옛 이름 duel · stage 도 됨, 기본 ch6)
 ##   --seconds N N초(게임 시간) 뒤 결과를 찍고 끝 · --seed S · --shots 폴더:프레임,프레임 그 프레임 화면을 PNG 로
 ##   --touch PC 에서도 터치 버튼 · --room N stage 를 N번 방부터 · --crowd N 28층에 경호원 N명 더(성능 점검)
-##   --art puppet|a|b 그림(김신 · 신겐만 — a = GLB 툰 모델 · b = 도트 빌보드, 기획서 03 5절). 처음 화면 '그림' 버튼 · 3 키로도 바꾼다
+##   --art puppet|a|b 그림(김신 · 신겐만 — a = GLB 툰 모델(기본 · #9 결정) · b = 도트 빌보드). 처음 화면 '그림' 버튼 · 3 키로도 바꾼다
+##   --save 경로 세이브 파일(창 없는 실행에서 세이브를 시험할 때 — 없으면 창 없는 실행은 세이브를 안 쓴다)
 ##   --safe L,T,R,B 안전 영역 여백(기준 화면 단위 — 노치 · 제스처 바 흉내) · --trace 흐름 줄(MODE · PAUSE)을 창 없이도 찍는다
 ##   --save-replay 경로 --seconds 로 끝날 때 마지막 판의 입력 기록을 저장 · --replay 경로 기록을 창 없이 다시 돌려 해시를 견주고 끝
 ##     (combat/replay.gd — 판이 끝날 때마다 user://replay_last.json 에도 남긴다: 폰에서 생긴 버그를 그대로 재현)
 ##   --events 프레임:동작,… 그 프레임에 동작을 흉내 — back(뒤로 버튼) · press(아무 버튼) · pause · resume(일시정지 버튼) ·
-##            hide · show(앱이 내려감 · 돌아옴) · swap(교대). scripts/verify.py '흐름' 단계가 쓴다
+##            hide · show(앱이 내려감 · 돌아옴) · swap(교대) · art(처음 화면 그림 버튼). scripts/verify.py '흐름' · '세이브' 단계가 쓴다
 ## 창 없이 점검: <godot> --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 [--mode stage]
 ## 첫 화면에서 6초 동안 아무것도 안 누르면 데모(봇) — 6장 · 11장을 번갈아. 에뮬레이터 스크린샷도 이것을 찍는다.
 
 const Duel = preload("res://src/combat/duel.gd")
 const Stage = preload("res://src/combat/stage.gd")
 const Replay = preload("res://src/combat/replay.gd")
-const Hotel = preload("res://src/data/hotel.gd")
+const Campaign = preload("res://src/data/campaign.gd")
+const Save = preload("res://src/data/save.gd")
 const Lines = preload("res://src/data/lines.gd")
 const Puppet = preload("res://src/view/puppet3d.gd")
 const PuppetGlb = preload("res://src/view/puppet_glb.gd")
@@ -35,21 +39,30 @@ const Looks = preload("res://src/view/looks.gd")
 const Hud = preload("res://src/ui/hud.gd")
 const Touch = preload("res://src/ui/touch_ui.gd")
 const Nav = preload("res://src/ui/nav.gd")
+const TitleMenu = preload("res://src/ui/title_menu.gd")
 const SafeArea = preload("res://src/ui/safe_area.gd")
 
 const DEMO_AFTER := 360
 const SHOT_WARMUP := 3          # --shots: 찍을 프레임 바로 앞 몇 프레임만 그린다
 const MINI_Y := 2.45            # 적 머리 위 작은 막대 높이(m, 몸 크기만큼 더)
 const REPLAY_LAST := "user://replay_last.json"
+const SAVE_PATH := "user://save.json"
 
 var args := {"autoplay": false, "seconds": 0.0, "seed": 1, "shots": [], "shot_dir": "", "touch": false, "trace": false,
-	"events": {}, "mode": "duel", "room": 0, "crowd": 0, "art": "puppet", "replay": "", "save_replay": ""}
+	"events": {}, "mode": "ch6", "room": 0, "crowd": 0, "art": "", "replay": "", "save_replay": "", "save": ""}
 var paused := false
 var _fake_press := false
 var _fake_swap := false
+var _mouse_was := false
+var _fake_art := false
 var headless := false
 var mode := "title"
-var kind := "duel"              # 지금 판 종류 (duel · stage)
+var kind := "duel"              # 지금 판 종류 (duel · stage — campaign.gd kind)
+var chapter := "ch6"            # 지금 장 id
+var save := {}                  # 세이브(src/data/save.gd) — save_path 가 ""이면 기억만 하고 파일은 안 쓴다
+var save_path := ""
+var last_win := false           # 결과 화면: 이겼으면 누르면 처음 화면(이어하기가 다음 장), 졌으면 다시
+var menu: Control
 var demos := 0
 var d: Dictionary = {}
 var rec: Dictionary = {}        # 지금 판의 입력 기록(combat/replay.gd)
@@ -87,6 +100,9 @@ func _ready() -> void:
 	hud = Hud.new()
 	add_child(hud)
 	hud.setup()
+	menu = TitleMenu.new()
+	hud.root.add_child(menu)
+	menu.visible = false
 	touch = Touch.new()
 	hud.root.add_child(touch)
 	touch.visible = args["touch"] or DisplayServer.is_touchscreen_available()
@@ -101,11 +117,13 @@ func _ready() -> void:
 	evfx.pup = pup
 	seed_now = int(args["seed"])
 	fps_log_ms = Time.get_ticks_msec()
+	_load_save()
 	if args["autoplay"]:
-		_new_run(str(args["mode"]))
+		var ch := Campaign.from_mode(str(args["mode"]))
+		_new_run(ch if ch != "" else "ch6")
 		_start("demo")
 	else:
-		_new_run("duel")
+		_new_run(Save.next_chapter(save))
 		_enter_title()
 
 
@@ -147,6 +165,9 @@ func _parse_args() -> void:
 			"--save-replay":
 				i += 1
 				args["save_replay"] = a[i]
+			"--save":
+				i += 1
+				args["save"] = a[i]
 			"--seconds":
 				i += 1
 				args["seconds"] = float(a[i])
@@ -168,7 +189,7 @@ func _setup_input() -> void:
 		"left": [KEY_A, KEY_LEFT], "right": [KEY_D, KEY_RIGHT], "up": [KEY_W, KEY_UP], "down": [KEY_S, KEY_DOWN],
 		"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_L, KEY_C],
 		"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B], "pause": [KEY_ESCAPE, KEY_P], "swap": [KEY_TAB, KEY_Q],
-		"pick_duel": [KEY_1], "pick_stage": [KEY_2], "art": [KEY_3], "bench": [KEY_4],
+		"pick_1": [KEY_1], "pick_2": [KEY_2], "art": [KEY_3], "bench": [KEY_4], "accept": [KEY_ENTER, KEY_KP_ENTER],
 	}
 	for act in keys:
 		if not InputMap.has_action(act):
@@ -181,11 +202,12 @@ func _setup_input() -> void:
 
 # ----------------------------------------------------------------------
 # 판 · 무대 · 인형
-func _new_run(k: String) -> void:
-	kind = k
+func _new_run(ch: String) -> void:
+	chapter = ch
+	kind = Campaign.kind(ch)
 	var opts := {}
 	if kind == "stage":
-		opts = {"room": int(args["room"]), "crowd": int(args["crowd"])}
+		opts = {"chapter": ch, "room": int(args["room"]), "crowd": int(args["crowd"])}
 		d = Stage.make(seed_now, opts)
 	else:
 		d = Duel.make(seed_now)
@@ -248,7 +270,7 @@ func _markers() -> void:
 func _look_of(f) -> String:
 	if kind == "duel":
 		return "kim" if f == d["hero"] else "baek"
-	return str(d.get("look_of", {}).get(f, Hotel.ROLES[f.char_id]["look"]))
+	return str(d.get("look_of", {}).get(f, d["tbl"].ROLES[f.char_id]["look"]))
 
 
 func _enter_title() -> void:
@@ -260,7 +282,8 @@ func _enter_title() -> void:
 	touch.show_fight = false
 	var t = Lines.at("title")
 	hud.message(str(t["text"]), str(t["sub"]), 9999.0)
-	hud.set_choices("◀ 6장 · 인천항 부두\n김신 대 백도찬", "11장 · 호텔 캐슬 ▶\n김신 · 피우진 교대")
+	_fill_menu()
+	menu.visible = true
 	hud.set_hint(str(t["hint"]) + " · 그림: " + ART_NAMES[str(args["art"])])
 	_trace("MODE title frame=%d" % frames)
 	snd.song("boss")
@@ -274,7 +297,7 @@ func _start(m: String) -> void:
 	touch.show_swap = m == "fight" and kind == "stage"
 	touch.show_art = false
 	touch.show_fight = true
-	hud.set_choices("", "")
+	menu.visible = false
 	_trace("MODE %s frame=%d" % [m, frames])      # 에뮬레이터 점검(scripts/emu_check.sh)이 logcat 에서 데모 시작을 기다린다
 	if m == "demo":
 		var dm: Array = Lines.at("ch6.demo")
@@ -316,7 +339,7 @@ func _back() -> void:
 			_set_paused(true)
 		"title":
 			_set_paused(false)
-			_new_run("duel")
+			_new_run(Save.next_chapter(save))
 			_enter_title()
 		"quit":
 			get_tree().quit(0)
@@ -361,6 +384,8 @@ func _scripted() -> void:
 			_app_hidden(false)
 		"swap":
 			_fake_swap = true
+		"art":
+			_fake_art = true
 
 
 func _pressed_anything() -> bool:
@@ -372,12 +397,16 @@ func _pressed_anything() -> bool:
 		or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 
 
-## 처음 화면 고르기: 1 · 2 키 · 화면 왼쪽 / 오른쪽 누르기(터치 · 마우스) · 그 밖의 버튼은 6장. 고르지 않았으면 ""
+## 처음 화면 고르기 → 장 id · "bench" · ""(아직). 장 카드 · 이어하기를 누름(터치 · 마우스), 1 · 2 키 = 할 수 있는 장 차례,
+## Enter · 베기 · 구르기 · 쳐내기 키 = 이어하기. 빈 곳을 누르면 아무것도 안 한다(카드를 빗맞혀 시작하지 않게)
 func _title_pick() -> String:
-	if Input.is_action_just_pressed("art") or touch.peek_edge("art"):
+	if Input.is_action_just_pressed("art") or touch.peek_edge("art") or _fake_art:
+		_fake_art = false
 		touch.take_edges()
 		var order := ["puppet", "a", "b"]
 		args["art"] = order[(order.find(str(args["art"])) + 1) % order.size()]
+		save["art"] = args["art"]
+		_write_save()
 		_build_stage_view()
 		hud.set_hint(str(Lines.at("title")["hint"]) + " · 그림: " + ART_NAMES[str(args["art"])])
 		mode_t = 0
@@ -385,19 +414,87 @@ func _title_pick() -> String:
 	if Input.is_action_just_pressed("bench") or touch.peek_edge("bench"):
 		touch.take_edges()
 		return "bench"
-	if Input.is_action_just_pressed("pick_stage"):
-		return "stage"
-	if Input.is_action_just_pressed("pick_duel"):
-		return "duel"
+	var ids := Campaign.playable_ids()
+	for k in 2:
+		if Input.is_action_just_pressed("pick_%d" % (k + 1)) and k < ids.size():
+			return str(ids[k])
+	var at := Vector2(-1, -1)
 	var e: Dictionary = touch.take_edges()
-	var w: float = get_viewport().get_visible_rect().size.x
 	if e.has("tap"):
-		return "stage" if touch.last_tap.x > w * 0.5 else "duel"
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		return "stage" if get_viewport().get_mouse_position().x > w * 0.5 else "duel"
-	if _pressed_anything():
-		return "duel"
+		at = touch.last_tap
+	elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and not _mouse_was:
+		at = get_viewport().get_mouse_position()
+	_mouse_was = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	if at.x >= 0.0:
+		return _menu_choice(menu.hit(at))
+	if _fake_press or Input.is_action_just_pressed("accept") or Input.is_action_just_pressed("attack") \
+			or Input.is_action_just_pressed("roll") or Input.is_action_just_pressed("parry"):
+		_fake_press = false
+		return Save.next_chapter(save)
 	return ""
+
+
+## 누른 카드 → 시작할 장(준비 중 · 잠김이면 알림만)
+func _menu_choice(id: String) -> String:
+	if id == "":
+		return ""
+	if id == "continue":
+		return Save.next_chapter(save)
+	if Save.unlocked(save, id):
+		return id
+	var t = Lines.at("title")
+	hud.message(str(Campaign.title(id)[0]), str(t["soon"] if not Campaign.playable(id) else t["locked"]), 1.6)
+	hud.message(str(t["text"]), str(t["sub"]), 9999.0, 1.6)
+	mode_t = 0
+	return ""
+
+
+func _fill_menu() -> void:
+	var t = Lines.at("title")
+	var nx := Save.next_chapter(save)
+	menu.cont = {"id": "continue", "title": str(t["continue"]), "sub": str(Campaign.title(nx)[0])}
+	menu.items = []
+	for id in Campaign.ids():
+		var ct = Campaign.title(id)
+		var st := "open" if Save.unlocked(save, id) else ("soon" if not Campaign.playable(id) else "locked")
+		var mark := ""
+		if Save.cleared(save, id):
+			mark = str(t["cleared"]) % int(save["cleared"][id]["count"])
+		elif st != "open":
+			mark = str(t[st])
+		menu.items.append({"id": id, "title": str(ct[0]), "sub": str(ct[1]), "state": st, "mark": mark})
+	menu.refresh()
+
+
+## 세이브 읽기 — 창 없는 실행은 --save 를 줄 때만 파일(점검이 사람 세이브를 건드리지 않게)
+func _load_save() -> void:
+	save_path = str(args["save"]) if str(args["save"]) != "" else ("" if headless else SAVE_PATH)
+	var text := ""
+	if save_path != "" and FileAccess.file_exists(save_path):
+		text = FileAccess.get_file_as_string(save_path)
+	var p := Save.parse(text)
+	save = p["save"]
+	match str(p["state"]):
+		"broken":
+			DirAccess.rename_absolute(save_path, save_path + ".bak")       # 깨진 파일은 남겨 두고 새로
+			print("SAVE broken → %s.bak" % save_path)
+		"newer":
+			print("SAVE newer format — read only")
+			save_path = ""                                                 # 다음 판이 쓴 세이브는 덮어쓰지 않는다
+	if str(args["art"]) == "":
+		args["art"] = str(save["art"])
+	_trace("SAVE %s art=%s cleared=%s" % [p["state"], save["art"], ",".join(save["cleared"].keys())])
+
+
+func _write_save() -> void:
+	if save_path == "":
+		return
+	var f := FileAccess.open(save_path, FileAccess.WRITE)
+	if f == null:
+		print("SAVE error %d %s" % [FileAccess.get_open_error(), save_path])
+		return
+	f.store_string(Save.dump(save))
+	f.close()
 
 
 func _physics_process(_dt: float) -> void:
@@ -422,7 +519,7 @@ func _physics_process(_dt: float) -> void:
 			if pick == "bench":
 				# 성능 점검(#9 기준 '적 30명'): 28층에 경호원 30명을 더 세우고 봇 데모 — 오른쪽 위 FPS 를 본다
 				args["crowd"] = 30
-				_new_run("stage")
+				_new_run("ch11")
 				args["crowd"] = 0
 				_start("demo")
 				hud.message("성능 점검", "28층 · 적 %d명 — 오른쪽 위 FPS" % d["enemies"].size(), 4.0)
@@ -431,11 +528,12 @@ func _physics_process(_dt: float) -> void:
 				_start("fight")
 			elif mode_t > DEMO_AFTER:
 				demos += 1
-				_new_run("stage" if demos % 2 == 1 else "duel")      # 데모는 11장 · 6장을 번갈아
+				var ids := Campaign.playable_ids()
+				_new_run(str(ids[demos % ids.size()]))                # 데모는 할 수 있는 장을 번갈아(11장부터)
 				_start("demo")
 		"demo", "fight":
 			if mode == "demo" and not args["autoplay"] and mode_t > 30 and (_pressed_anything() or touch.any_touch()):
-				_new_run(kind)
+				_new_run(chapter)
 				_start("fight")
 				return
 			# 슬로모션(백도찬 첫 엇박): 로직을 두 화면에 한 번만 돌린다
@@ -448,17 +546,25 @@ func _physics_process(_dt: float) -> void:
 					Duel.step(d, it)
 				_after_tick()
 		"result":
-			if mode_t > 300 or (mode_t > 60 and not args["autoplay"] and _pressed_anything()):
+			if args["autoplay"] and mode_t > 300:
 				seed_now += 1
-				_new_run(kind)
-				_start("demo" if args["autoplay"] else "fight")
+				_new_run(chapter)
+				_start("demo")
+			elif not args["autoplay"] and mode_t > 60 and _pressed_anything():
+				seed_now += 1
+				if last_win:
+					_new_run(Save.next_chapter(save))      # 이겼으면 처음 화면 — 이어하기가 다음 장
+					_enter_title()
+				else:
+					_new_run(chapter)
+					_start("fight")
 	_shots()
 	if not headless and Time.get_ticks_msec() - fps_log_ms >= 10000:
 		# 실제 시간 10초마다 로그(안드로이드는 logcat) — 에뮬레이터 · 실기 FPS 를 CI 가 모은다 (castle_M 보류 결정 #7 · #9).
 		# frame = 지금까지 로직 프레임 수(느린 기기에서는 한 화면에 로직 4프레임까지만 돌아 게임이 느려진다)
 		fps_log_ms = Time.get_ticks_msec()
 		print("FPS_LOG fps=%d process_ms=%.1f frame=%d mode=%s kind=%s fighters=%d screen=%s" % [Engine.get_frames_per_second(),
-			Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, frames, mode, kind, d["world"].fighters.size(),
+			Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, frames, mode, chapter, d["world"].fighters.size(),
 			str(get_viewport().get_visible_rect().size)])
 	_check_seconds()
 
@@ -504,16 +610,21 @@ func _after_tick() -> void:
 
 
 func _end_fight(result: String) -> void:
+	var played := mode == "fight"                       # 데모(봇)가 이긴 판은 세이브에 안 넣는다
 	mode = "result"
 	mode_t = 0
 	_save_replay(REPLAY_LAST)
 	touch.show_swap = false
 	results.append(_summary())
-	var key := "ch6" if kind == "duel" else "ch11"
+	var key: String = "ch6" if kind == "duel" else str(d["tbl"].LINES)
+	last_win = result == "win" and played
+	if last_win:
+		Save.record_clear(save, chapter, int(d["world"].frame))
+		_write_save()
 	if result == "win":
 		if pup.has(d["hero"]):
 			pup[d["hero"]].victory = true
-		var wm = Lines.at("ch6.win") if kind == "duel" else Lines.at("ch11.rooms.office.end")
+		var wm = Lines.at("ch6.win") if kind == "duel" else Lines.at("%s.rooms.%s.end" % [key, d["room"]["id"]])
 		hud.message(str(wm[0]), str(wm[1]), 9999.0)
 		snd.song("victory", false)
 	else:
@@ -522,7 +633,13 @@ func _end_fight(result: String) -> void:
 		var lm: Array = Lines.at(key + ".lose")
 		hud.message(lm[0], lm[1], 9999.0)
 		snd.song("gameover", false)
-	hud.set_hint("" if args["autoplay"] else "누르면 다시")
+	var rl = Lines.at("result")
+	if args["autoplay"]:
+		hud.set_hint("")
+	elif last_win:
+		hud.set_hint(str(rl["win_next"]) % str(Campaign.title(Save.next_chapter(save))[0]))
+	else:
+		hud.set_hint(str(rl["lose"]))
 
 
 func _summary() -> Dictionary:

@@ -1,5 +1,5 @@
 extends RefCounted
-## 11장 호텔 캐슬 — 층(방) 표 · 인물 역할(3층: 체력 · 체간 · 속도 · 동작 묶음 · AI · 외형) · 장 시점.
+## 11장 호텔 캐슬 장 표 — 층(방) 표 · 인물 역할(3층: 체력 · 체간 · 속도 · 동작 묶음 · AI · 외형) · 장 시점.
 ## 흐름(원작 arc:hotelcastle_raid · fight:baekui_tower · fight:kimshin_shingen — castle_common canon):
 ##   28층 중앙홀(057 — 백의 일행 대 경호대 정장, 구일화가 '올라가라') → 71층 회장층 홀(058 — 검은 정장 거구 넷 = 경호대 최후의 4인)
 ##   → 71층 복도(059 — 하야부사가 길을 막음) → 회장실 앞(058 ~ 062 — 신겐, 고집에 밀려 길을 내줌) → 빈 회장실(062/099-106)
@@ -10,6 +10,11 @@ extends RefCounted
 ## 이 판의 시점 = 11장 호텔 캐슬 기습(castle_common progression 'raid:castle_hotel' 앞까지의 진행 — 김신 재앙 · 피우진 외성 하위)
 const EVENT := "raid:castle_hotel"
 const PERIOD := "hwajin"
+
+## 장 표 칸(src/data/campaign.gd 가 장 id ch11 로 이 표를 고르고, src/combat/stage.gd 가 읽는다)
+const HEROES := ["kimshin", "woojin"]   # 조작하는 사람(교대 차례) — 둘 다 ROLES 에 moveset
+const LINES := "ch11"                    # data/story/lines.json 의 이 장 글 — <LINES>.start · .rooms.<방 id>.<때> · .down
+const CROWD_ID := "castle_guard"          # 성능 점검(--crowd N)에서 첫 방에 더 세우는 엑스트라
 
 ## 인물 역할(3층). hp · posture 는 능력치 맷집 배율을 곱하기 전 값, dmg_k 는 능력치 힘 배율에 더 곱한다(보스 손맛). moveset 은 사람(김신 · 피우진)과 아군(구일화)만 — 적은 AI 가 동작을 고른다
 const ROLES := {

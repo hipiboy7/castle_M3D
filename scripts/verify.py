@@ -19,6 +19,7 @@
   3. 리플레이    11장 seed 2 판의 입력 기록(--save-replay .tools/replay_stage2.json)을 다른 프로세스에서 --replay 로 다시 돌려
                끝 · 중간 해시(60프레임마다)가 같은지(src/combat/replay.gd — 결정성 · 멀티 ④ 바탕)
   3. 그림 A · B   --art a · b(GLB 툰 모델 · 도트 빌보드, 김신 · 신겐)로 신겐 방 20초 · 성능 판 --crowd 30 20초 — 오류 없이 도는지
+  4. 세이브     --save .tools/save_check.json 으로 처음 화면 그림 버튼(--events 60:art) → 파일 art=b → 다음 실행이 그것을 읽는다
   4. 흐름       ① 일시정지 앞뒤가 같은 판 — seed 1 40초 와 42초 + 600 프레임에 2초 멈춤(--events 600:pause,720:resume)의 결과가 같다
                ② 뒤로 버튼 · 앱 내려감 — 처음 화면 → 데모 → 뒤로 → 처음 → 누름 → 결투 → 내려감(멈춤) → 누름(계속) → 뒤로(멈춤) →
                뒤로(처음 화면) 순서가 --trace 줄에 나온다 (src/ui/nav.gd · main.gd _back · _app_hidden)
@@ -42,7 +43,8 @@ COMMON_SRC = os.environ.get("CASTLE_COMMON") or os.path.join(os.path.dirname(ROO
 ASSETS = os.path.join(ROOT, "assets")
 # CLAUDE.md 2-1절 TDD 등급 — 함수 단위 커버리지를 재는 파일 (main.gd 흐름은 노드가 있어 자동 결투 단계가 본다)
 COV_FILES = {
-    "A": ["src/data/common.gd", "src/data/skills.gd", "src/data/moves.gd", "src/data/addendum.gd", "src/data/lines.gd", "src/combat/world.gd", "src/combat/fighter.gd", "src/combat/replay.gd"],
+    "A": ["src/data/common.gd", "src/data/skills.gd", "src/data/moves.gd", "src/data/addendum.gd", "src/data/lines.gd", "src/combat/world.gd", "src/combat/fighter.gd", "src/combat/replay.gd",
+          "src/data/campaign.gd", "src/data/save.gd"],
     "B": ["src/combat/duel.gd", "src/combat/boss_ai.gd", "src/combat/bot.gd", "src/combat/stage.gd", "src/combat/enemy_ai.gd"],
 }
 REPLAY_FILE = ".tools/replay_stage2.json"
@@ -246,6 +248,23 @@ def step_flow(g):
     return good
 
 
+def step_save(g):
+    """세이브 파일 앞뒤 — 처음 화면 그림 버튼(--events art)이 .tools/save_check.json 에 쓰이고, 다음 실행이 그것을 읽는다.
+    깬 장 기록 · 이어하기 · 옛 · 깨진 · 새 형식은 tests/unit/test_campaign.gd 가 본다"""
+    path = os.path.join(ROOT, ".tools", "save_check.json")
+    if os.path.exists(path):
+        os.remove(path)
+    base = [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--save", path, "--trace"]
+    ok = run("세이브 쓰기 (그림 A → B)", base + ["--seconds", "3", "--events", "60:art"], lambda out: ("SAVE new art=a" in out, ""))
+    try:
+        with open(path, encoding="utf-8") as f:
+            art = json.load(f).get("art")
+    except (OSError, ValueError):
+        art = None
+    ok &= run("세이브 읽기", base + ["--seconds", "1"], lambda out: ("SAVE ok art=b" in out, f"파일 art={art}"))
+    return ok and art == "b"
+
+
 def main():
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")      # 윈도우 콘솔(cp1252)에서 한글 출력에 죽지 않게
@@ -272,7 +291,7 @@ def main():
             return m is not None, (m.group(1)[:150] if m else "RESULT 줄 없음")
         results.append(run(f"자동 결투 seed {seed} · 90초",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--seconds", "90",
-                            "--seed", str(seed)], auto_ok))
+                            "--seed", str(seed)] + (["--art", "puppet"] if seed == 3 else []), auto_ok))
     for seed in (1, 2):
         def stage_ok(out):
             m = re.search(r"^RESULT (.*)$", out, re.M)
@@ -301,6 +320,7 @@ def main():
                        [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
                         "--crowd", "30", "--seconds", "20"], lambda out: (("RESULT" in out), "")))
     results.append(step_flow(g))
+    results.append(step_save(g))
     n_ok = sum(results)
     print(f"verify: {n_ok}/{len(results)} 통과 · {time.time() - t0:.0f}초 — {'OK' if n_ok == len(results) else 'FAIL'}")
     return 0 if n_ok == len(results) else 1

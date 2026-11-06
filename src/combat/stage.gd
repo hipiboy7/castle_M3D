@@ -1,9 +1,9 @@
 extends RefCounted
-## 11장 호텔 캐슬 한 판 — 층(방)을 차례로 지나며 김신 · 피우진(교대)이 적 여럿과 싸운다. 순수 로직(노드 없음, 60프레임 고정,
+## 방을 차례로 지나는 여러 사람 판(장 표 하나 = 장 하나 — 지금은 11장 호텔 캐슬: 층을 지나며 김신 · 피우진(교대)이 적 여럿과 싸운다). 순수 로직(노드 없음, 60프레임 고정,
 ## 같은 시드면 같은 결과) — 게임(main.gd) · 시험 · 자동 플레이가 같은 것을 쓴다. 결투(duel.gd)와 같은 모양의 사전을 돌려준다:
 ## world · hero(지금 조작하는 사람) · boss(화면 위 큰 막대에 보일 적, 없으면 null) + kind "stage" · heroes · enemies · allies.
-## 방 · 역할 · 시점은 src/data/hotel.gd, 1층(등급 · 능력치 · 기술)은 castle_common → 없으면 src/data/addendum.gd(3D 덧붙임).
-## 판 끝: 빈 회장실에 닿으면 win, 두 사람이 다 쓰러지면 lose(world.over). 신겐은 체력 yield_at 에서 길을 내준다(062).
+## 방 · 역할 · 시점은 장 표(src/data/campaign.gd 가 장 id 로 고른다 — ch11 = src/data/hotel.gd), 1층(등급 · 능력치 · 기술)은 castle_common → 없으면 src/data/addendum.gd(3D 덧붙임).
+## 판 끝: 마지막 방(end)에 닿으면 win, 두 사람이 다 쓰러지면 lose(world.over). 신겐은 체력 yield_at 에서 길을 내준다(062).
 ## 신호(world.events 에 더함): ["room", 방 번호] · ["line", 제목, 작은 글, 초] · ["swap", 새로 조작하는 사람] · ["yield", 적]
 
 const Fighter = preload("res://src/combat/fighter.gd")
@@ -13,19 +13,21 @@ const Bot = preload("res://src/combat/bot.gd")
 const Skills = preload("res://src/data/skills.gd")
 const Common = preload("res://src/data/common.gd")
 const Addendum = preload("res://src/data/addendum.gd")
-const Hotel = preload("res://src/data/hotel.gd")
+const Campaign = preload("res://src/data/campaign.gd")
 const Lines = preload("res://src/data/lines.gd")
 
 
-## opts: room(시작 방 번호 — 시험용) · crowd(28층에 경호원을 이만큼 더 — 성능 점검 '적 30명')
+## opts: chapter(장 id — 기본 ch11) · room(시작 방 번호 — 시험용) · crowd(첫 방에 엑스트라를 이만큼 더 — 성능 점검 '적 30명')
 static func make(seed_value: int, opts := {}) -> Dictionary:
 	var w = World.new()
 	w.end_on_ko = false
-	var d := {"kind": "stage", "world": w, "heroes": [], "ctrl": 0, "room_i": -1, "room": {}, "enemies": [], "allies": [],
+	var ch := str(opts.get("chapter", "ch11"))
+	var T = Campaign.table(ch)
+	var d := {"kind": "stage", "chapter": ch, "tbl": T, "world": w, "heroes": [], "ctrl": 0, "room_i": -1, "room": {}, "enemies": [], "allies": [],
 		"ais": {}, "bots": {}, "yield": {}, "seed": seed_value, "stage": "intro", "t": 0, "fight_t": 0, "cleared": 0,
 		"times": {}, "look_of": {}, "hero": null, "boss": null, "crowd": int(opts.get("crowd", 0)), "n": 0}
-	for id in ["kimshin", "woojin"]:
-		var h = _hero(id)
+	for id in T.HEROES:
+		var h = _hero(id, T)
 		d["bots"][h] = Bot.new(h, null, _rng(seed_value * 7919 + d["heroes"].size() + 1))
 		d["heroes"].append(h)
 	_enter(d, int(opts.get("room", 0)))
@@ -51,15 +53,15 @@ static func _base(f, role: Dictionary, stats: Dictionary) -> void:
 
 
 ## 사람(김신 · 피우진): 등급 · 기술은 castle_common 진행(11장 앞까지), 칼날 쳐내기는 characters.json can_parry
-static func _hero(id: String):
+static func _hero(id: String, T):
 	var c := Addendum.character(id)
-	var pr: Array = Common.progress(id, Common.events_until(Common.stage_of(Hotel.EVENT)))
+	var pr: Array = Common.progress(id, Common.events_until(Common.stage_of(T.EVENT)))
 	var f = Fighter.new(str(c["name"]), 0)
 	f.char_id = id
 	f.rank = pr[0]
-	var st := Addendum.stats_at(id, Hotel.PERIOD)
-	_base(f, Hotel.ROLES[id], st)
-	f.moveset = Hotel.ROLES[id]["moveset"]
+	var st := Addendum.stats_at(id, T.PERIOD)
+	_base(f, T.ROLES[id], st)
+	f.moveset = T.ROLES[id]["moveset"]
 	f.can_parry = bool(c.get("can_parry", false))
 	f.skills = Skills.entries(pr[1], f.rank)
 	f.gauge_max = Common.bars_for(f.rank) * Common.bar_points()
@@ -68,14 +70,15 @@ static func _hero(id: String):
 	return f
 
 
-## 아군 · 적 — 1층은 addendum(castle_common 이 먼저), 3층은 hotel.gd ROLES
+## 아군 · 적 — 1층은 addendum(castle_common 이 먼저), 3층은 장 표 ROLES
 static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}):
+	var T = d["tbl"]
 	var c := Addendum.character(id)
-	var role: Dictionary = Hotel.ROLES[id]
+	var role: Dictionary = T.ROLES[id]
 	var f = Fighter.new(str(c["name"]), team)
 	f.char_id = id
-	f.rank = Addendum.rank_at(id, Hotel.PERIOD)
-	_base(f, role, Addendum.stats_at(id, Hotel.PERIOD))
+	f.rank = Addendum.rank_at(id, T.PERIOD)
+	_base(f, role, Addendum.stats_at(id, T.PERIOD))
 	f.can_parry = bool(c.get("can_parry", false))
 	f.pos = pos
 	f.facing = Vector2(-1, 0) if team == 1 else Vector2(1, 0)
@@ -91,7 +94,7 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 		if role.has("yield_at"):
 			d["yield"][f] = float(role["yield_at"])
 			f.hp_floor = float(role["yield_at"])      # 길을 내주기 전에는 이 밑으로 안 내려간다
-		var g: float = Addendum.derive(Addendum.stats_at(id, Hotel.PERIOD))["guard"]
+		var g: float = Addendum.derive(Addendum.stats_at(id, T.PERIOD))["guard"]
 		d["ais"][f] = EnemyAI.new(f, str(role["ai"]), _rng(int(d["seed"]) * 131 + int(d["room_i"]) * 17 + i), g)
 		d["enemies"].append(f)
 	else:
@@ -102,7 +105,7 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 			sk.append({"id": sid, "name": str(s["name"]), "move": str(s["move"]), "cost": 1.0})
 		f.skills = sk
 		f.gauge_max = Common.bars_for(f.rank) * Common.bar_points()
-		f.gauge_rate = Common.gauge_rate(f.rank, Addendum.stats_at(id, Hotel.PERIOD).get("기술"))
+		f.gauge_rate = Common.gauge_rate(f.rank, Addendum.stats_at(id, T.PERIOD).get("기술"))
 		var b = Bot.new(f, null, _rng(int(d["seed"]) * 977 + i))
 		b.generic_skills = true
 		d["bots"][f] = b
@@ -112,14 +115,15 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 
 
 static func _line(d: Dictionary, key: String, secs := 2.6) -> void:
-	var v = Lines.at("ch11.rooms.%s.%s" % [d["room"]["id"], key])
+	var v = Lines.at("%s.rooms.%s.%s" % [d["tbl"].LINES, d["room"]["id"], key])
 	if v is Array and v.size() >= 2:
 		d["world"].events.append(["line", str(v[0]), str(v[1]), secs])
 
 
 static func _enter(d: Dictionary, i: int) -> void:
 	var w = d["world"]
-	var room: Dictionary = Hotel.ROOMS[i]
+	var T = d["tbl"]
+	var room: Dictionary = T.ROOMS[i]
 	d["room_i"] = i
 	d["room"] = room
 	for f in d["enemies"] + d["allies"]:
@@ -149,13 +153,13 @@ static func _enter(d: Dictionary, i: int) -> void:
 	if i == 0 and int(d["crowd"]) > 0:
 		for k in int(d["crowd"]):                    # 성능 점검: 경호원을 둥글게 더 세운다
 			var a := TAU * k / float(d["crowd"])
-			_npc(d, "castle_guard", 1, Vector2(1.6 + 3.2 * cos(a), 2.6 * sin(a)))
+			_npc(d, T.CROWD_ID, 1, Vector2(1.6 + 3.2 * cos(a), 2.6 * sin(a)))
 	d["stage"] = "intro"
 	d["t"] = 0
 	d["fight_t"] = 0
 	w.events.append(["room", i])
 	if i == 0:
-		var st = Lines.at("ch11.start")
+		var st = Lines.at(T.LINES + ".start")
 		w.events.append(["line", str(st["text"]), str(st["sub"]), 2.4])
 	_line(d, "enter", 3.0)
 	_focus(d)
@@ -164,11 +168,12 @@ static func _enter(d: Dictionary, i: int) -> void:
 ## 한 프레임. human 이 null 이면 봇이 지금 사람도 움직인다(자동 플레이). human["swap"] 이면 교대
 static func step(d: Dictionary, human = null) -> void:
 	var w = d["world"]
+	var T = d["tbl"]
 	d["t"] += 1
 	d["n"] += 1
 	match str(d["stage"]):
 		"intro":
-			if d["t"] >= Hotel.INTRO_T:
+			if d["t"] >= T.INTRO_T:
 				d["stage"] = "end" if d["room"].get("end", false) else "fight"
 				d["t"] = 0
 				if d["stage"] == "end":
@@ -176,11 +181,11 @@ static func step(d: Dictionary, human = null) -> void:
 		"fight":
 			d["fight_t"] += 1
 		"clear":
-			if d["t"] >= Hotel.CLEAR_T and d["room_i"] + 1 < Hotel.ROOMS.size():
+			if d["t"] >= T.CLEAR_T and d["room_i"] + 1 < T.ROOMS.size():
 				_enter(d, d["room_i"] + 1)
 				return
 		"end":
-			if d["t"] >= Hotel.END_T and w.over == "":
+			if d["t"] >= T.END_T and w.over == "":
 				w.over = "win"
 	if human != null and human.get("swap", false):
 		swap(d)
@@ -238,7 +243,7 @@ static func _intents(d: Dictionary, human) -> void:
 			continue
 		var ai = d["ais"][e]
 		var was: bool = ai.busy()
-		e.intent = ai.decide(e.target(), was or attackers < Hotel.MAX_ATTACKERS)
+		e.intent = ai.decide(e.target(), was or attackers < int(d["tbl"].MAX_ATTACKERS))
 		if not was and ai.busy():
 			attackers += 1
 	for k in d["heroes"].size():
@@ -283,7 +288,7 @@ static func _after(d: Dictionary) -> void:
 	var lead = d["heroes"][d["ctrl"]]
 	if not lead.alive():
 		if swap(d):
-			w.events.append(["line", str(Lines.at("ch11.down")), "", 1.6])
+			w.events.append(["line", str(Lines.at(d["tbl"].LINES + ".down")), "", 1.6])
 	var alive := 0
 	for h in d["heroes"]:
 		if h.alive():
@@ -303,7 +308,7 @@ static func _after(d: Dictionary) -> void:
 			d["times"][d["room"]["id"]] = d["fight_t"]
 			for h in d["heroes"]:
 				if h.alive():
-					h.hp = minf(h.hp_max, h.hp + h.hp_max * Hotel.HEAL_ON_CLEAR)
+					h.hp = minf(h.hp_max, h.hp + h.hp_max * float(d["tbl"].HEAL_ON_CLEAR))
 			_line(d, "clear", 2.4)
 	_focus(d)
 
