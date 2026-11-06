@@ -58,28 +58,107 @@ const LOOKS := {
 		"tie": Color(0.5, 0.14, 0.1), "skin": Color(0.72, 0.52, 0.36), "hair": Color(0.95, 0.95, 0.96), "hair_style": "spiky",
 		"beard": true, "eye_h": 0.007, "big": true, "scale": 1.18, "wide": 1.25, "depth": 1.3, "limb": 1.3, "head": 0.95,
 		"jaw": true, "weapon_r": "tachi", "weapon_l": "tanto", "grip_l": "fwd", "guard": "long"},
-	# ---- 0 · 1장(S5 묶음 2 · 3) — 뼈대: 자리만(외형은 다음 커밋에서 canon look 글로)
-	"gunter_suit": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
-	"gunter_bald": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.04, "limb": 1.1, "weapon_r": "pistol", "weapon_l": "", "guard": "box"},
-	"gunter_uzi": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "pistol", "weapon_l": "", "guard": "box"},
-	"gunter_brute": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": true, "scale": 1.14, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
-	"gunter": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.0, "limb": 1.1, "weapon_r": "pistol", "weapon_l": "", "guard": "box"},
-	"ds_suit": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
-	"ds_raider": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "baton", "weapon_l": "", "guard": "box"},
-	"jintae": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
-	"kimhyeokju": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.0, "limb": 1.1, "weapon_r": "tanto", "weapon_l": "", "guard": "box"},
-	"kimseongjun": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": false, "scale": 1.04, "limb": 1.1, "weapon_r": "tanto", "weapon_l": "", "guard": "box"},
-	"kimdaegeon": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": true, "scale": 1.12, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
-	"gangmanjae": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": true, "scale": 1.16, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
-	"yundeoksu": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9), "tie": Color(0.06, 0.06, 0.08), "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.09, 0.09, 0.1), "hair_style": "short", "big": true, "scale": 1.2, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
-	"kim_bare": {"suit": Color(0.16, 0.16, 0.2), "pants": Color(0.13, 0.13, 0.17), "shirt": Color(0.93, 0.93, 0.94), "tie": Color(0.09, 0.09, 0.12), "skin": Color(0.91, 0.77, 0.65), "hair": Color(0.11, 0.11, 0.15), "hair_style": "slick_fringe", "glasses": false, "big": false, "scale": 1.04, "shoulder": 1.12, "eye_h": 0.007, "depth": 1.1, "limb": 1.15, "head": 0.9, "brow_tilt": 12.0, "jaw": true, "scar": true, "piercing": true, "badge": Color(0.95, 0.75, 0.25), "buckle": Color(0.82, 0.84, 0.88), "weapon_r": "", "weapon_l": "", "guard": "box"},
+	# ---- 0 · 1장(S5 묶음 2 · 3) — 1부 처음(p1:002-020). 근거는 같은 canon look · looks_by_period · 화별 look 글(conf ai — 연출에만)
+	#  김신(1부 처음 · 맨손): 눈썹을 덮는 검은 앞머리 · 귀 검은 귀걸이 · 몸에 붙는 검은 터틀넥 + 검은 정장 재킷 · 회색 바지 ·
+	#        흰 밑창 검은 운동화(p1:003 · 008 · 014 · 019). 왼뺨 흉터는 031 무렵에 생긴다 → 아직 없음. 몸은 kim 과 같다
+	"kim_bare": {"suit": Color(0.15, 0.15, 0.19), "pants": Color(0.34, 0.34, 0.37), "shirt": Color(0.07, 0.07, 0.09), "collar": "turtle",
+		"skin": Color(0.91, 0.77, 0.65), "hair": Color(0.11, 0.11, 0.15), "hair_style": "fringe", "glasses": false, "big": false,
+		"scale": 1.04, "shoulder": 1.12, "eye_h": 0.007, "depth": 1.1, "limb": 1.15, "head": 0.9, "brow_tilt": 12.0, "jaw": true,
+		"piercing": true, "buckle": Color(0.82, 0.84, 0.88), "sole": Color(0.9, 0.9, 0.88),
+		"weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  군터 경호원(fight:gunter p1:002/013-015 — '경호원들이 권총과 우지를 난사 · 총알 박힌 정장 남자'): 짙은 회색 정장 · 흰 셔츠 ·
+	#        검은 넥타이 · 짧은 갈색 머리, 맨주먹
+	"gunter_suit": {"suit": Color(0.22, 0.22, 0.24), "pants": Color(0.2, 0.2, 0.22), "shirt": Color(0.88, 0.88, 0.9),
+		"tie": Color(0.06, 0.06, 0.08), "skin": Color(0.9, 0.78, 0.68), "hair": Color(0.36, 0.26, 0.17), "hair_style": "short",
+		"big": false, "scale": 1.02, "limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  대머리 경호원(p1:002/015-017 — '리볼버를 겨눈 대머리 · 김신 코트를 움켜쥠'): 대머리 · 다부진 몸 · 검은 정장 · 리볼버
+	"gunter_bald": {"suit": Color(0.1, 0.1, 0.12), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.88, 0.88, 0.9),
+		"tie": Color(0.06, 0.06, 0.08), "skin": Color(0.9, 0.76, 0.66), "hair": Color(0.5, 0.4, 0.32), "hair_style": "bald",
+		"big": false, "scale": 1.06, "wide": 1.16, "depth": 1.2, "limb": 1.2, "jaw": true,
+		"weapon_r": "revolver", "weapon_l": "", "guard": "baek"},
+	#  우지 든 장발 남자(p1:002/016-020 — 욕하며 우지 난사 · 권총 손잡이에 뒤통수를 맞음): 어깨까지 오는 장발 · 검은 셔츠 정장 · 우지
+	"gunter_uzi": {"suit": Color(0.2, 0.19, 0.2), "pants": Color(0.12, 0.12, 0.13), "shirt": Color(0.1, 0.1, 0.11),
+		"skin": Color(0.9, 0.78, 0.68), "hair": Color(0.3, 0.22, 0.15), "hair_style": "long", "big": false, "scale": 1.0,
+		"limb": 1.05, "weapon_r": "uzi", "weapon_l": "", "guard": "baek"},
+	#  포니테일 거구(p1:002/015 — 김신이 옆을 휩쓸고 지나감): 거구 · 뒤로 묶은 머리 · 검은 정장, 맨주먹
+	"gunter_brute": {"suit": Color(0.08, 0.08, 0.1), "pants": Color(0.08, 0.08, 0.1), "shirt": Color(0.86, 0.86, 0.88),
+		"tie": Color(0.3, 0.06, 0.06), "skin": Color(0.88, 0.74, 0.63), "hair": Color(0.55, 0.42, 0.26), "hair_style": "ponytail",
+		"big": true, "scale": 1.22, "wide": 1.3, "depth": 1.38, "limb": 1.35, "head": 0.92, "jaw": true, "beard": true,
+		"weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  군터: 뒤로 넘긴 금발 · 콧수염 · 이마에서 눈썹으로 내려오는 흉터 · 검은 모피 깃 와인색 가운(가슴털이 드러남) ·
+	#        손가락 금반지 여러 개 · 시가(p1:002/007-008 · 021-029). 탁자 밑 리볼버(fight:gunter 4)
+	"gunter": {"outfit": "robe", "suit": Color(0.44, 0.08, 0.15), "pants": Color(0.16, 0.1, 0.11), "shirt": Color(0.44, 0.08, 0.15),
+		"skin": Color(0.93, 0.79, 0.7), "hair": Color(0.88, 0.74, 0.42), "hair_style": "slick", "mustache": true, "scar": "brow",
+		"chest_hair": Color(0.55, 0.42, 0.25), "fur": Color(0.06, 0.05, 0.05), "rings": Color(0.95, 0.75, 0.25), "cigar": true,
+		"big": false, "scale": 1.04, "wide": 1.16, "depth": 1.28, "limb": 1.12, "head": 0.96, "jaw": true,
+		"weapon_r": "revolver", "weapon_l": "", "guard": "baek"},
+	#  DS 씨큐리티 정장(fight:kimhyeokju p1:003 · fight:jintae_ds p1:019 — '검은 정장 · 흰 셔츠, 짧은 갈색 머리 · 은발 ·
+	#        붉은 갈색 염소수염'): 검은 정장 · 깃 푼 흰 셔츠(넥타이 없음) · 짧은 갈색빛 머리, 맨주먹
+	"ds_suit": {"suit": Color(0.12, 0.12, 0.14), "pants": Color(0.11, 0.11, 0.13), "shirt": Color(0.9, 0.9, 0.9), "collar": "open",
+		"skin": Color(0.88, 0.74, 0.62), "hair": Color(0.3, 0.2, 0.13), "hair_style": "short", "big": false, "scale": 1.02,
+		"limb": 1.1, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  DS 습격조(fight:pyechajang p1:008/001-004 — '방망이 · 쇠파이프 · 복면 · 검은 복면(눈만 뚫림) · 검은 상의 · 갈색 바지'):
+	#        눈만 뚫린 검은 복면 · 검은 윗옷 · 갈색 바지 · 쇠파이프
+	"ds_raider": {"suit": Color(0.1, 0.1, 0.11), "pants": Color(0.38, 0.28, 0.19), "shirt": Color(0.1, 0.1, 0.11), "collar": "turtle",
+		"skin": Color(0.88, 0.74, 0.62), "hair": Color(0.1, 0.1, 0.1), "hair_style": "bald", "mask": Color(0.05, 0.05, 0.06),
+		"big": false, "scale": 1.02, "limb": 1.12, "weapon_r": "pipe", "weapon_l": "", "guard": "long"},
+	#  서진태(p1:003 첫 등장): 짧게 친 옆머리(검은 투블럭) 위 금발 웨이브 · 검은 뿔테 노란 렌즈 안경 · 양귀 검은 고리 귀걸이 ·
+	#        연분홍 · 베이지 재킷 + 검은 티 · 흰 줄 검은 트랙 바지 · 흰 · 회색 운동화 · 군용 나이프. 근육질
+	"jintae": {"suit": Color(0.92, 0.62, 0.74), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.07, 0.07, 0.08),
+		"skin": Color(0.92, 0.79, 0.68), "hair": Color(0.93, 0.8, 0.45), "hair2": Color(0.14, 0.11, 0.09), "hair_style": "undercut",
+		"glasses": "sun", "lens": Color(0.98, 0.82, 0.12), "piercing": true, "stripe": Color(0.92, 0.92, 0.92),
+		"shoe": Color(0.78, 0.78, 0.8), "sole": Color(0.95, 0.95, 0.95), "big": false, "scale": 1.0, "shoulder": 1.06,
+		"limb": 1.1, "head": 0.92, "weapon_r": "", "weapon_l": "combat", "guard": "box"},
+	#  김혁주(DS 부장 · p1:003/032-052): 짙은 피부 · 뒤로 넘겨 하나로 묶은 긴 검은 머리 · 날카로운 눈 · 남색 정장(열어 입음) ·
+	#        흰 셔츠 · 굵은 금 사슬 목걸이 · 손목 금 팔찌 · 붉은 손잡이 잭나이프 두 자루
+	"kimhyeokju": {"suit": Color(0.15, 0.19, 0.36), "pants": Color(0.13, 0.16, 0.3), "shirt": Color(0.92, 0.92, 0.9), "collar": "open",
+		"skin": Color(0.72, 0.54, 0.4), "hair": Color(0.06, 0.06, 0.07), "hair_style": "ponytail", "eye_h": 0.007, "brow_tilt": 14.0,
+		"chain": Color(0.95, 0.75, 0.25), "bracelet_r": Color(0.95, 0.75, 0.25), "big": false, "scale": 1.02, "limb": 1.08,
+		"weapon_r": "jackknife", "weapon_l": "jackknife", "grip_l": "fwd", "guard": "baek"},
+	#  김성준(약에 취한 — p1:008 · fight:pyechajang): 눈을 덮는 흐트러진 검은 곱슬머리 · 염소수염 · 양귀 귀걸이 · 목 문신 ·
+	#        보랏빛으로 번뜩이는 눈 · 검은 가죽 롱코트 · 가슴까지 풀어헤친 흰 셔츠 · 카키 바지 · 두꺼운 밑창 부츠 · 품에 칼
+	"kimseongjun": {"outfit": "coat", "leather": true, "suit": Color(0.1, 0.09, 0.09), "pants": Color(0.5, 0.46, 0.32),
+		"shirt": Color(0.92, 0.92, 0.9), "collar": "open", "v_k": 1.7, "skin": Color(0.9, 0.77, 0.66), "hair": Color(0.06, 0.06, 0.07),
+		"hair_style": "curly", "goatee": true, "piercing": true, "eye_col": Color(0.75, 0.3, 1.0), "neck_tattoo": Color(0.2, 0.2, 0.26),
+		"sole": Color(0.14, 0.12, 0.11), "big": false, "scale": 1.04, "limb": 1.1, "head": 0.94,
+		"weapon_r": "gerber", "weapon_l": "", "guard": "baek"},
+	#  김대건(p1:014-016 노을 일대일): 건장한 근육질 · 아주 짧은 검은 머리 · 콧등 ~ 뺨 흉터 · 입술 아래 ~ 턱 흉터 · 턱수염 그늘 →
+	#        재킷을 벗고 소매 걷은 흰 셔츠(깃 풂) · 검은 벨트 · 남색 바지 · 팔뚝 뱀 문신 · 오른손등 비늘 문신
+	"kimdaegeon": {"outfit": "shirt", "suit": Color(0.92, 0.92, 0.93), "pants": Color(0.13, 0.15, 0.25), "shirt": Color(0.92, 0.92, 0.93),
+		"skin": Color(0.87, 0.72, 0.6), "hair": Color(0.06, 0.06, 0.07), "hair_style": "buzz", "scar": "nose", "eye_h": 0.007,
+		"brow_tilt": 14.0, "tattoo": Color(0.3, 0.4, 0.4), "tattoo_side": "both", "buckle": Color(0.2, 0.2, 0.22),
+		"big": true, "scale": 1.12, "wide": 1.22, "depth": 1.28, "limb": 1.32, "head": 0.94, "jaw": true,
+		"weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  강만재(p1:019 거리 — '부장님' · '삼겹살'): 짙은 피부 · 두꺼운 목의 근육질 거구 · 아주 짧은 검은 머리에 흰 붕대를 머리띠처럼 ·
+	#        왼뺨 사선 흉터 두 줄 · 귀 검은 귀걸이 · 베이지 정장 재킷 · 깃 푼 흰 셔츠 · 베이지 바지(대표 look — 019 의 갈색 재킷은 짙은 피부와 섞여 대표 차림으로)
+	"gangmanjae": {"suit": Color(0.78, 0.68, 0.52), "pants": Color(0.72, 0.63, 0.48), "shirt": Color(0.9, 0.9, 0.9), "collar": "open",
+		"skin": Color(0.64, 0.47, 0.34), "hair": Color(0.06, 0.06, 0.07), "hair_style": "buzz", "bandage": Color(0.95, 0.95, 0.93),
+		"scar": "double", "piercing": true, "big": true, "scale": 1.22, "wide": 1.4, "depth": 1.45, "limb": 1.45, "head": 0.95,
+		"jaw": true, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  윤덕수(p1:019-020 거리 중앙선 · DS 대표): 어두운 피부 · 옆을 짧게 민 언더컷에 뒤로 넘긴 검은 머리 · 굵은 눈썹 · 각진 턱 ·
+	#        귀걸이 · 오른 팔뚝 문신의 근육질 거구 → 재킷을 벗고 넥타이를 푼 흰 셔츠(소매 걷음) · 회청색 바지 · 손목 검은 밴드,
+	#        싸움 끝에 넘긴 머리가 풀려 늘어진다(2차 — loose)
+	"yundeoksu": {"outfit": "shirt", "suit": Color(0.9, 0.92, 0.95), "pants": Color(0.3, 0.34, 0.42), "shirt": Color(0.9, 0.92, 0.95),
+		"tie": Color(0.42, 0.42, 0.46), "skin": Color(0.6, 0.43, 0.31), "hair": Color(0.05, 0.05, 0.06), "hair2": Color(0.24, 0.2, 0.18),
+		"hair_style": "undercut", "loose": true, "brow_k": 1.7, "piercing": true, "tattoo": Color(0.18, 0.2, 0.26), "tattoo_side": "r",
+		"bracelet_l": Color(0.05, 0.05, 0.06), "buckle": Color(0.75, 0.76, 0.8),
+		"big": true, "scale": 1.28, "wide": 1.45, "depth": 1.5, "limb": 1.55, "head": 0.95, "jaw": true,
+		"weapon_r": "", "weapon_l": "", "guard": "box"},
 }
 
-## 그림 A · B 가 있는 인물(S3 — 김신 · 신겐, 기획서 03 5절 '시험 범위 2명')
+## 그림 A · B 가 있는 인물(S3 — 김신 · 신겐, 기획서 03 5절 '시험 범위 2명' · S5 0 · 1장 이름 있는 인물). 모델 · 시트는 이 표를 보고
+## 만든다(tools/make_models.gd · make_sprites.gd). 엑스트라(군터 경호원 · DS 정장 · 습격조)는 관절 인형 그대로(main.gd 가 has_art 로 고른다)
 const ART := {
 	"kim": {"glb": "res://assets/models/kimshin_a.glb", "dots": "res://assets/sprites/kimshin_b"},
 	"shingen": {"glb": "res://assets/models/shingen_a.glb", "dots": "res://assets/sprites/shingen_b"},
-	"kim_bare": {"glb": "res://assets/models/kimshin_a.glb", "dots": "res://assets/sprites/kimshin_b"},   # 0 · 1장 맨손 김신 — 몸은 같은 GLB, 무기만 없음
+	"kim_bare": {"glb": "res://assets/models/kimshin_p1_a.glb", "dots": "res://assets/sprites/kimshin_p1_b"},   # 1부 처음 김신(터틀넥 · 맨손)
+	"gunter": {"glb": "res://assets/models/gunter_a.glb", "dots": "res://assets/sprites/gunter_b"},
+	"jintae": {"glb": "res://assets/models/jintae_a.glb", "dots": "res://assets/sprites/jintae_b"},
+	"kimhyeokju": {"glb": "res://assets/models/kimhyeokju_a.glb", "dots": "res://assets/sprites/kimhyeokju_b"},
+	"kimseongjun": {"glb": "res://assets/models/kimseongjun_a.glb", "dots": "res://assets/sprites/kimseongjun_b"},
+	"kimdaegeon": {"glb": "res://assets/models/kimdaegeon_a.glb", "dots": "res://assets/sprites/kimdaegeon_b"},
+	"gangmanjae": {"glb": "res://assets/models/gangmanjae_a.glb", "dots": "res://assets/sprites/gangmanjae_b"},
+	"yundeoksu": {"glb": "res://assets/models/yundeoksu_a.glb", "dots": "res://assets/sprites/yundeoksu_b"},
 }
 
 

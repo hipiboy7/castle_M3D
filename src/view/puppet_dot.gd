@@ -74,11 +74,7 @@ func _frame_for(f) -> String:
 			var su := int(mv["startup"])
 			var ac := int(mv["active"])
 			var part := "W" if f.t <= su else ("S" if f.t <= su + ac + 2 else "F")
-			if frames.has(key + ":" + part):
-				return key + ":" + part
-			if frames.has("slash:" + part):
-				return "slash:" + part
-			return "idle"
+			return attack_frame(key, part)
 		"parry", "parry_end":
 			return "parry"
 		"hitstun", "recoil":
@@ -91,6 +87,24 @@ func _frame_for(f) -> String:
 			return "roll%d" % clampi(f.t * 3 / 20, 0, 2)
 		"down", "dead":
 			return "down" if f.t > 6 else "hitstun"
+	return "idle"
+
+
+## 시트에 없는 모양은 가까운 모양으로 대신한다(왼손 → 오른손 · 같은 갈래), 끝까지 없으면 베기 · 주먹 · 서 있는 칸.
+## 새 인물의 기술이 시트보다 먼저 생겨도(tools/make_sprites.gd 를 다시 돌리기 전) 그림이 비지 않게
+const NEAR := {
+	"punch": ["punch_L", "thrust"], "punch_L": ["punch", "thrust"], "shot": ["shot_L", "punch", "thrust"],
+	"shot_L": ["shot", "punch_L", "punch"], "slash_back_L": ["slash_back_R", "slash"], "slash_back_R": ["slash_back_L", "slash"],
+	"thrust": ["thrust_low", "punch"], "thrust_low": ["thrust", "punch"], "offbeat": ["thrust", "punch"],
+	"offbeat_rev": ["offbeat", "thrust"], "cross": ["slash", "punch"], "spin": ["sidekick", "slash"],
+	"sidekick": ["axe", "spin", "punch"], "axe": ["sidekick", "punch"],
+}
+
+
+func attack_frame(key: String, part: String) -> String:
+	for k in [key] + NEAR.get(key, []) + ["slash", "punch"]:
+		if frames.has(str(k) + ":" + part):
+			return str(k) + ":" + part
 	return "idle"
 
 

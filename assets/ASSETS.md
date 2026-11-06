@@ -34,3 +34,27 @@
 | `sprites/kimshin_b.json` | 〃 — 도트 시트 칸 이름 · 크기 | 그림 B 김신 |
 | `sprites/shingen_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/shingen_a.glb`) | 그림 B 사사키 신겐 |
 | `sprites/shingen_b.json` | 〃 | 그림 B 사사키 신겐 |
+| `models/kimshin_p1_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06, 외형은 castle_common canon look · looks_by_period 글 — conf ai, `src/view/looks.gd` 주석) | 그림 A 김신 1부 처음(터틀넥 · 맨손 — 0 · 1장) |
+| `models/gunter_a.glb` | 〃 | 그림 A 군터(0장) |
+| `models/jintae_a.glb` | 〃 | 그림 A 서진태(1장) |
+| `models/kimhyeokju_a.glb` | 〃 | 그림 A 김혁주(1장) |
+| `models/kimseongjun_a.glb` | 〃 | 그림 A 김성준(1장) |
+| `models/kimdaegeon_a.glb` | 〃 | 그림 A 김대건(1장) |
+| `models/gangmanjae_a.glb` | 〃 | 그림 A 강만재(1장) |
+| `models/yundeoksu_a.glb` | 〃 | 그림 A 윤덕수(1장) |
+| `sprites/kimshin_p1_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/kimshin_p1_a.glb`) | 그림 B 김신 1부 처음 |
+| `sprites/kimshin_p1_b.json` | 〃 | 그림 B 김신 1부 처음 |
+| `sprites/gunter_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/gunter_a.glb`) | 그림 B 군터 |
+| `sprites/gunter_b.json` | 〃 | 그림 B 군터 |
+| `sprites/jintae_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/jintae_a.glb`) | 그림 B 서진태 |
+| `sprites/jintae_b.json` | 〃 | 그림 B 서진태 |
+| `sprites/kimhyeokju_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/kimhyeokju_a.glb`) | 그림 B 김혁주 |
+| `sprites/kimhyeokju_b.json` | 〃 | 그림 B 김혁주 |
+| `sprites/kimseongjun_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/kimseongjun_a.glb`) | 그림 B 김성준 |
+| `sprites/kimseongjun_b.json` | 〃 | 그림 B 김성준 |
+| `sprites/kimdaegeon_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/kimdaegeon_a.glb`) | 그림 B 김대건 |
+| `sprites/kimdaegeon_b.json` | 〃 | 그림 B 김대건 |
+| `sprites/gangmanjae_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/gangmanjae_a.glb`) | 그림 B 강만재 |
+| `sprites/gangmanjae_b.json` | 〃 | 그림 B 강만재 |
+| `sprites/yundeoksu_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/yundeoksu_a.glb`) | 그림 B 윤덕수 |
+| `sprites/yundeoksu_b.json` | 〃 | 그림 B 윤덕수 |

@@ -3,8 +3,8 @@ extends SceneTree
 ## 직교로 8방향 × 자세마다 그려, 작게 줄이고(도트) 색 수를 줄이고 검은 외곽선을 둘러 한 장(시트)으로 묶는다.
 ## 이 판의 임시 도트 규격(무정지 규칙 5): 칸 80x80 · 3.4m 높이 · 8방향(45도 — 앞이 0, 왼쪽으로 돈다) · 색 채널 16단 · 1px 외곽선.
 ## 창이 있어야 그린다 — 작업 서버는 가상 화면으로:
-##   tools/xvfb_run.sh <godot> --path . -s res://tools/make_sprites.gd
-## 출력: assets/sprites/<id>_b.png(행 = 방향 8, 열 = 자세) · <id>_b.json(자세 이름 · 칸 · 높이)
+##   tools/xvfb_run.sh <godot> --path . -s res://tools/make_sprites.gd [-- 외형이름 ..]   (이름을 주면 그 시트만)
+## 출력: src/view/looks.gd ART 의 dots — assets/sprites/<id>_b.png(행 = 방향 8, 열 = 자세) · <id>_b.json(자세 이름 · 칸 · 높이)
 
 const Puppet = preload("res://src/view/puppet_glb.gd")
 const Looks = preload("res://src/view/looks.gd")
@@ -14,12 +14,22 @@ const Moves = preload("res://src/data/moves.gd")
 const CELL := 80
 const RENDER := 320
 const WORLD_H := 3.4
+const LIE := 1.85                 # 누운 몸(넘어짐 · 쓰러짐) 길이(m, 몸 배율 1) — 칸 반쪽이 이보다 짧으면 칸을 키운다(밀도 그대로)
 const LOOK_Y := 1.05
 
-## 자세 목록 — 공격은 동작(moves.gd)의 준비(W) · 타격(S) · 회수(F) 세 칸. 칸 이름은 인형의 모양 이름(shape · 왼손이면 _L)
+## 자세 목록(외형 이름 → 동작) — 공격은 동작(moves.gd)의 준비(W) · 타격(S) · 회수(F) 세 칸. 칸 이름은 인형의 모양 이름(shape ·
+## 왼손이면 _L). "동작@R" · "동작@L" 은 치는 손만 바꿔 그린다. 시트에 없는 모양은 그림 B 가 가까운 칸으로 대신한다(puppet_dot.gd NEAR)
+## 0 · 1장 인물의 기술은 아직 쓰는 중이라(S5 묶음 2 · 3) 싸움 갈래마다 모양별 대표 동작 하나씩 — 맨주먹(주먹 · 왼주먹 · 옆차기 ·
+## 내려찍기 · 찌르기(돌진 · 태클) · 돌기) · 칼(베기 · 되베기 양손 · 찌르기 · 주먹 · 발) · 총(총 양손 · 주먹 · 베기 · 찌르기 · 발)
+const FISTS := ["w_jab", "w_straight", "j_kick", "j_finisher", "k_thrust", "b_wide"]
+const KNIFE := ["k_slash1", "b_slash2", "k_slash2", "k_thrust", "w_jab", "w_straight", "j_kick", "j_finisher"]
+const GUN := ["t_shot@R", "t_shot", "w_jab", "w_straight", "k_slash1", "k_thrust", "j_kick"]
 const ATTACKS := {
-	"kimshin": ["k_slash1", "k_slash2", "k_thrust", "s_offbeat", "s_kick", "s_triple", "k_finisher", "k_dash"],
+	"kim": ["k_slash1", "k_slash2", "k_thrust", "s_offbeat", "s_kick", "s_triple", "k_finisher", "k_dash"],
 	"shingen": ["sg_slash1", "sg_slash2", "sg_stab", "s_sg_dive", "s_sg_kick", "s_sg_leap"],
+	"kim_bare": ["kf_jab", "kf_jab2", "kf_upper", "kf_dash", "j_finisher", "k_thrust"],
+	"gunter": GUN, "jintae": FISTS, "kimhyeokju": KNIFE, "kimseongjun": KNIFE,
+	"kimdaegeon": FISTS, "gangmanjae": FISTS, "yundeoksu": FISTS,
 }
 
 var vp: SubViewport
@@ -59,21 +69,34 @@ func _run() -> void:
 	env.environment.ambient_light_color = Color(0.5, 0.5, 0.55)
 	env.environment.ambient_light_energy = 0.6
 	vp.add_child(env)
-	for id in ATTACKS:
+	var only := OS.get_cmdline_user_args()
+	var done := {}
+	for id in Looks.ART:
+		var dots := str(Looks.ART[id]["dots"])
+		if done.has(dots) or (not only.is_empty() and not only.has(id)):
+			continue
+		done[dots] = true
 		var t0 := Time.get_ticks_msec()
 		await _sheet(id)
-		print("SPRITES %s %dms" % [id, Time.get_ticks_msec() - t0])
+		print("SPRITES %s %dms" % [dots, Time.get_ticks_msec() - t0])
 	quit(0)
 
 
 func _sheet(id: String) -> void:
-	var lk: Dictionary = Looks.look("kim_a" if id == "kimshin" else "shingen_a")
+	var lk: Dictionary = Looks.look(id + "_a")
 	var p = Puppet.new()
 	vp.add_child(p)
 	p.setup(lk)
 	var poses := _poses(p, id)
 	var names: Array = poses.keys()
-	var sheet := Image.create(CELL * names.size(), CELL * 8, false, Image.FORMAT_RGBA8)
+	# 큰 몸(거구 보스)은 누운 칸이 잘리지 않게 칸 · 그리는 넓이를 같은 비율로 키운다 — 도트 밀도(칸 / m)는 김신과 같다.
+	# 김신 · 신겐 시트(S3)는 3.4m 칸 그대로 만들어 두었다(누운 칸 발끝이 조금 잘림 — 다시 돌리면 이 규칙으로 바뀐다)
+	var grow := maxf(1.0, LIE * float(lk.get("scale", 1.0)) / (WORLD_H * 0.5) + 0.02)
+	var cell := CELL if grow <= 1.0 else 2 * ceili(CELL * 0.5 * grow)
+	var world_h := WORLD_H * cell / CELL
+	vp.size = Vector2i(cell, cell) * (RENDER / CELL)
+	cam.size = world_h
+	var sheet := Image.create(cell * names.size(), cell * 8, false, Image.FORMAT_RGBA8)
 	for k in 8:
 		p.rotation.y = deg_to_rad(45.0 * k)
 		for c in names.size():
@@ -82,11 +105,11 @@ func _sheet(id: String) -> void:
 			await process_frame
 			await process_frame
 			var img := vp.get_texture().get_image()
-			sheet.blit_rect(_dot(img), Rect2i(0, 0, CELL, CELL), Vector2i(c * CELL, k * CELL))
+			sheet.blit_rect(_dot(img, cell), Rect2i(0, 0, cell, cell), Vector2i(c * cell, k * cell))
 	DirAccess.make_dir_recursive_absolute("res://assets/sprites")
-	var base := "res://assets/sprites/%s_b" % id
+	var base := str(lk["dots"])
 	sheet.save_png(ProjectSettings.globalize_path(base + ".png"))
-	var meta := {"frames": names, "dirs": 8, "cell": CELL, "world_h": WORLD_H, "look_y": LOOK_Y,
+	var meta := {"frames": names, "dirs": 8, "cell": cell, "world_h": world_h, "look_y": LOOK_Y,
 		"made_by": "tools/make_sprites.gd", "source": str(lk["glb"])}
 	var f := FileAccess.open(ProjectSettings.globalize_path(base + ".json"), FileAccess.WRITE)
 	f.store_string(JSON.stringify(meta, "  "))
@@ -117,8 +140,12 @@ func _poses(p, id: String) -> Dictionary:
 	f.t = 30
 	out["down"] = p._target_pose(f, 0.0)
 	f.state = "attack"
-	for mv_name in ATTACKS[id]:
-		var mv := Moves.get_move(mv_name)
+	for entry in ATTACKS.get(id, FISTS):
+		var parts: PackedStringArray = str(entry).split("@")
+		var mv := Moves.get_move(parts[0])
+		if parts.size() > 1:
+			mv = mv.duplicate()
+			mv["hand"] = parts[1]
 		f.move = mv
 		var key: String = p.shape_key(mv)
 		if out.has(key + ":S"):
@@ -132,13 +159,13 @@ func _poses(p, id: String) -> Dictionary:
 	return out
 
 
-## 320px 그림 → 80px 도트: 4x4 평균(알파 반 이상만) · 색 16단 · 투명 옆 1px 검은 외곽선
-func _dot(img: Image) -> Image:
+## 그림(칸의 4배) → 칸 도트(80px 이상): 4x4 평균(알파 반 이상만) · 색 16단 · 투명 옆 1px 검은 외곽선
+func _dot(img: Image, cell: int) -> Image:
 	img.convert(Image.FORMAT_RGBA8)
 	var k := RENDER / CELL
-	var out := Image.create(CELL, CELL, false, Image.FORMAT_RGBA8)
-	for y in CELL:
-		for x in CELL:
+	var out := Image.create(cell, cell, false, Image.FORMAT_RGBA8)
+	for y in cell:
+		for x in cell:
 			var acc := Color(0, 0, 0, 0)
 			var n := 0
 			var alpha := 0.0
@@ -153,13 +180,13 @@ func _dot(img: Image) -> Image:
 				var c2 := acc / n
 				out.set_pixel(x, y, Color(snappedf(c2.r, 1.0 / 15.0), snappedf(c2.g, 1.0 / 15.0), snappedf(c2.b, 1.0 / 15.0), 1.0))
 	var edged := out.duplicate()
-	for y in CELL:
-		for x in CELL:
+	for y in cell:
+		for x in cell:
 			if out.get_pixel(x, y).a > 0.0:
 				continue
 			for o in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 				var q: Vector2i = Vector2i(x, y) + o
-				if q.x >= 0 and q.y >= 0 and q.x < CELL and q.y < CELL and out.get_pixelv(q).a > 0.0:
+				if q.x >= 0 and q.y >= 0 and q.x < cell and q.y < cell and out.get_pixelv(q).a > 0.0:
 					edged.set_pixel(x, y, Color(0.03, 0.03, 0.05, 1.0))
 					break
 	return edged
