@@ -4,7 +4,7 @@
 > 정정 이력: 2026-11-05 — S1 공통 받기 뒤: 11행 확인 결과 · 13행 반영 현황 채움, 5행 castle_common `0ff47f5a`(규격 이름 `P{N}_요구사항정의서`) 메모.
 > 정정 이력: 2026-11-04 — 첫 작성(S0 조사 · `docs/기획_차이.md`). 양식은 castle_common `docs/개발규격/캐슬_게임공통.md` 3절. castle_common 이 반영하면 그 줄을 지운다.
 
-- 넘기는 법: 이 파일 내용을 castle_common 세션에 붙여 넣는다(같은 PC 면 경로 `../castle_M3D/docs/castle_common_요청.md` 만 알려 줘도 된다)
+- 넘기는 법: 이 파일 내용을 castle_common 세션에 붙여 넣는다(같은 PC 면 경로 `../castle_M_3D/docs/castle_common_요청.md` 만 알려 줘도 된다 — 2026-11-06 폴더 이름이 `castle_M3D` → `castle_M_3D`)
 - 원작 위치가 있는 줄은 없다 — 모두 데이터 칸 · 문서 · 규격 줄이라 `파일:id` 순
 - 2층 수치는 '바랄 값'에 후보만 적었다 — 확정은 사용자다
 
@@ -21,3 +21,4 @@
 | 12 | - | `rules/기술.md` 2 · 3절 | 엇엇박 > 엇박 | (없음) | (사용자가 "공통으로"라고 정할 때만) "엇박 · 반대발 엇박이 엇엇박을 쓰는 중인 상대에게 닿으면 닿지 않은 것으로 한다 — 엇엇박이 이긴다" | 3D 폰 리뷰 3차 원문 "엇박과 엇엇박 기술이 서로 부딪히면 엇엇박이 무조건 이겨" · `src/combat/world.gd:160` | 언젠가 |
 | 13 | - | `rules/기술.md` · `rules/등급과_게이지.md` 5절 · `README.md` 받는 판 표 | castle M 3D 반영 현황 | 할 일 | castle M 3D: **castle_common `8a6acfc` 받음**(`data/` · `cases/` 는 `c7ba55cd` 와 같다) · 규칙 함수 13개 cases 1,464줄 통과 · 손 복사 값 제거 · 등급 차 강함 · 진행으로 등급 · 비용 공식 · 게이지 배율 4.988 · 얻는 양 dodge · ko · 즉사 구간 · stun_rank 반영 — S1 커밋(`docs/S1_테스트결과서_공통받기.md` 머리). 3D 덧붙임(1 ~ 4 · 12행)은 반영 아님 | 캐슬_게임공통 2절 4항 | 다음 마일스톤 |
 | 14 | - | `docs/개발규격/게임개발규격.md` 7절 | 마일스톤 확인 릴리스 | "마일스톤 확인은 프리릴리스(예: `v0.3.0-rc.1`), 배포는 정식 태그" | "폰 확인용 릴리스는 GitHub 앱 → Releases 맨 위(Latest)에서 바로 받게 Latest 로 둘 수 있다(태그 이름은 `-rc.N` 그대로). 본문에 폰에서 할 일(설치 · 1분 경로 · 확인 목록)" — 판이 고르게 한 줄 | 사용자 2026-11-05 "url 치지 않고, github app 들어가서 바로 릴리즈 다운받게 해줘. 그리고 앞으로 폰에서 해야할 것은 모두 github app >release 에서 다운받아 바로 할 수 있게 해줘" → 이 판은 Latest · `docs/폰확인.md`(`android.yml` release 잡) | 다음 마일스톤 |
+| 15 | - | `games.json:castle_M3D` | `dest` | `castle_M3D/data/common` | `castle_M_3D/data/common`(id `castle_M3D` · `name` 은 그대로 — 저장소 이름과 같다) | 사용자 2026-11-06 "현재 프로젝트 디렉토리명을 castle_M_3D로 바꿔." — 지금 dest 로 받으면 옛 폴더를 새로 만든다. 이 판은 그동안 `sync.py castle_M3D --dest ../castle_M_3D/data/common` 으로 받는다(CLAUDE.md 0절). `docs/개발규격/캐슬_게임공통.md` 4절 판별 표에 폴더 이름이 있으면 같이 | 다음 받기 전 |

@@ -1,10 +1,11 @@
 # CLAUDE.md — castle M 3D 초안 작업 규칙
 
-「캐슬」 팬게임 castle M 의 **3D 초안**(Godot 4)이다. 목적은 하나 — 엔진 이전(castle_M 보류 결정 #9)을 정할 시험판.
+「캐슬」 팬게임 castle M 의 **3D 초안**(Godot 4)이다. 폴더 `D:/claude/fun/castle_M_3D`(2026-11-06 — 전 이름 `castle_M3D`), 저장소 · 판 id 는 `castle_M3D`. 목적은 하나 — 엔진 이전(castle_M 보류 결정 #9)을 정할 시험판.
 본편은 형제 폴더 `../castle_M`(pygame-ce, 저장소 `hipiboy7/castle_M`). 공통 규칙 · 데이터 · 개발 규격은 `../castle_common`.
 **이 폴더에서 Claude Code 를 따로 열어 개발한다** — 3D 일은 이 폴더 세션에서, 2D 본편 일은 castle_M 폴더 세션에서(2026-10-26 사용자).
 이 문서만으로 일할 수 있게 썼다. 여기 없는 규칙은 개발 규격(받은 사본 `data/common/docs/개발규격/` — `캐슬_게임공통.md` · `게임개발규격.md`)의 해당 절을 찾아 읽는다(전체를 읽지 않는다). 우선순위: 사용자 답(기획서 00 결정 10 포함) → 이 문서 → 기획서(castle_common `docs/기획서/03`) → 규격.
 
+> 정정 이력: 2026-11-06 — 폴더 이름 `castle_M3D` → **`castle_M_3D`**(사용자 "현재 프로젝트 디렉토리명을 castle_M_3D로 바꿔."). 저장소 이름 `hipiboy7/castle_M3D` · 판 id `castle_M3D`(castle_common `games.json`) · 패키지는 그대로. 받기 명령에 `--dest`(castle_common `games.json` 의 dest 가 옛 폴더 — 요청 15행).
 > 정정 이력: 2026-11-05 (4) — 폰에서 할 일은 GitHub 앱 → Releases → Latest 에서(사용자): 2절 · 3절, 릴리스는 Latest · 본문 `docs/폰확인.md`.
 > 정정 이력: 2026-11-05 (3) — 릴리스(규격 7절): 2절 리뷰는 릴리스 APK · 3절 태그 → release 잡 · versionCode · 아티팩트 1일, 5절 문서 이름 `S{N}_요구사항정의서`(사용자 "1~3 전부 추천대로").
 > 정정 이력: 2026-11-05 (2) — 확정 규격(castle_common `ab9c8551` · 답45) 반영: 0절 서명 키(유지 · 릴리스도 이 키) · 접는 폰 지원, 2절 창 없는 스크린샷을 이 판에서 안 하는 이유(`docs/기획_차이.md` 9-5).
@@ -20,7 +21,7 @@
 - **Android 전용**(기획서 00 결정 10 · 2026-11-04 사용자): PC판 · iOS 는 만들지 않는다. 조작 · 화면 · 성능은 폰 기준으로 만들고 판단한다. 키보드 입력(`src/main.gd`)은 개발 편의로만 둔다
 - **플랫폼**: 내보내기 `export_presets.cfg` 'Android' 하나 — ABI arm64-v8a(폰) + x86_64(에뮬레이터), 화면 가로(센서 가로 `project.godot` `orientation=4`, 기준 1280x720 · `stretch aspect="expand"`), minSdk · targetSdk 는 Godot 4.7 기본값(따로 정하지 않음). 워크플로 `.github/workflows/android.yml`, 수동 실행 `py -3.12 tools/ci.py dispatch [브랜치] [--emulator]`, 에뮬레이터 API 34 x86_64 pixel_6. 첫 폰 확인 2026-10-26(run #6 APK, 폰 리뷰 1차 — 테스트결과서 4.6)
 - **사용자 폰**: Android · **갤럭시 Z 폴드 4**(2026-11-04 사용자) — 커버 화면 약 23:9 · 펼친 안쪽 약 6:5. 접기 · 펴기(실행 중 화면 크기 · 비율 바뀜)를 지원한다 — 터치(`touch_ui.gd`) · HUD(`hud.gd` `_layout`)는 매 프레임 화면 크기를 다시 읽는다. 바뀐 뒤 그림 · 터치 자리를 폰 확인 목록에 둔다(규격 5절). 2022년 상위 기종(Snapdragon 8+ Gen 1)이라 '중급기 60fps' 판단은 따로 한다
-- **castle_common(최상류) — 읽기만**: 엔진과 상관없는 게임 규칙(`rules/` — 쳐내기 · 등급 · 기술)과 1 · 2층 데이터(`data/` — 등급 · 게이지 · 비용 · 엇박 피해 · 기절 초 · 진행), 개발 규격(`docs/개발규격/`)의 원본. 이 세션은 castle_common 을 고치지 않는다 — 고칠 거리는 `docs/castle_common_요청.md`(캐슬_게임공통 3절 양식)에 적어 넘긴다. 받기는 `py -3.12 ../castle_common/tools/sync.py castle_M3D` → `data/common/`(받은 사본 — 손으로 고치지 않는다, 도장 `data/common/SOURCE.json`) → 테스트(cases 포함) → "castle_common <커밋> 받음" 커밋. CHANGELOG 의 **[깨짐]** 항목은 받기 전에 읽는다
+- **castle_common(최상류) — 읽기만**: 엔진과 상관없는 게임 규칙(`rules/` — 쳐내기 · 등급 · 기술)과 1 · 2층 데이터(`data/` — 등급 · 게이지 · 비용 · 엇박 피해 · 기절 초 · 진행), 개발 규격(`docs/개발규격/`)의 원본. 이 세션은 castle_common 을 고치지 않는다 — 고칠 거리는 `docs/castle_common_요청.md`(캐슬_게임공통 3절 양식)에 적어 넘긴다. 받기는 `py -3.12 ../castle_common/tools/sync.py castle_M3D --dest ../castle_M_3D/data/common`(castle_common `games.json` 의 dest 가 옛 폴더 `castle_M3D/data/common` 이라 `--dest` 를 꼭 준다 — 요청 15행이 반영되면 뺀다) → `data/common/`(받은 사본 — 손으로 고치지 않는다, 도장 `data/common/SOURCE.json`) → 테스트(cases 포함) → "castle_common <커밋> 받음" 커밋. CHANGELOG 의 **[깨짐]** 항목은 받기 전에 읽는다
 - **3층은 이 판 소유**: 기술 프레임 · 거리 · 피해 · 예고(`src/data/moves.gd`), 체력 · 체간 · 속도(`src/combat/duel.gd`), 보스 패턴(`src/combat/boss_ai.gd` · `skills.gd` `BAEK_OFFBEAT`), 외형 · 연출 · 소리. 처음 값의 출처는 castle_M(`castle_m/action/moves.py` · `docs/P2_설계서_M1전투핵심.md` 8절 · `castle_m/data/looks.py` · `assets/`)이고 그 뒤 폰 리뷰로 이 판이 바꿔 왔다. 스토리는 castle_M `docs/story/`. 3D 에서 먼저 시험한 규칙(엇박 계열 기절 등)은 **3D 덧붙임**(`docs/S1_테스트결과서_공통받기.md` 3절) — 공통으로 올릴지는 사용자
 - **패키지** `com.hipiboy7.castlem3d`(castle_M 앱과 따로 설치된다), 서명 `android/debug.keystore`(castle_M 과 같은 고정 디버그 키, 의도적으로 커밋 · 유지 — 확정 규격 7절이 허용, 사용자 2026-11-04). 키는 바꾸지 않는다 — 릴리스(태그)에 붙이는 APK 도 이 키로 서명한다(덮어 설치 · 세이브 유지)
 - **개발 환경**: Windows Server 2022(작업 서버). Python 은 `py -3.12`(기본 `python` 은 3.14 라 쓰지 않는다), Godot 는 `.tools/`(커밋 안 함, `py -3.12 scripts/get_godot.py` 로 받음). 사용량 도구 `D:/claude/usage/usage_cost.py` 는 이 PC 전용 — 그 밖의 경로는 상대 경로로 쓴다
