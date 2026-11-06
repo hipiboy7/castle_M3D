@@ -146,10 +146,10 @@ func _faces(d, a) -> bool:
 
 func _hits() -> void:
 	for a in fighters:
-		if not a.is_active():
+		if not a.is_active() or a.inert:
 			continue
 		for d in fighters:
-			if d == a or d.team == a.team or not d.alive():
+			if d == a or d.team == a.team or not d.alive() or d.inert:
 				continue
 			if a.hit_ids.has(d.get_instance_id()):
 				continue

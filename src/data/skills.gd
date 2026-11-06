@@ -5,6 +5,7 @@ extends RefCounted
 ## 여기 남는 것은 3층(이 판 소유): 기술 id → 동작 표 · 처음 게이지 · 백도찬 엇박 패턴, 그리고 3D 덧붙임 기절(moves.gd stun_3d).
 
 const Common = preload("res://src/data/common.gd")
+const Addendum = preload("res://src/data/addendum.gd")
 
 const HERO_ID := "kimshin"
 const BOSS_ID := "baekdochan"
@@ -60,7 +61,7 @@ static func stun_frames(mv: Dictionary, att_rank: String, def_rank: String) -> i
 	if mv.get("stun_off", false):
 		return 0
 	var sid := str(mv["skill_id"])
-	if sid != "":
+	if sid != "" and not Addendum.SKILLS.has(sid):          # 3D 덧붙임 기술은 castle_common 에 없다 — stun_3d 만
 		var sec := Common.stun_sec(sid, att_rank, def_rank)
 		if sec > 0.0:
 			return roundi(sec * 60.0)

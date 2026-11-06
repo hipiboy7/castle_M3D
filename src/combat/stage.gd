@@ -1,0 +1,344 @@
+extends RefCounted
+## 11장 호텔 캐슬 한 판 — 층(방)을 차례로 지나며 김신 · 피우진(교대)이 적 여럿과 싸운다. 순수 로직(노드 없음, 60프레임 고정,
+## 같은 시드면 같은 결과) — 게임(main.gd) · 시험 · 자동 플레이가 같은 것을 쓴다. 결투(duel.gd)와 같은 모양의 사전을 돌려준다:
+## world · hero(지금 조작하는 사람) · boss(화면 위 큰 막대에 보일 적, 없으면 null) + kind "stage" · heroes · enemies · allies.
+## 방 · 역할 · 시점은 src/data/hotel.gd, 1층(등급 · 능력치 · 기술)은 castle_common → 없으면 src/data/addendum.gd(3D 덧붙임).
+## 판 끝: 빈 회장실에 닿으면 win, 두 사람이 다 쓰러지면 lose(world.over). 신겐은 체력 yield_at 에서 길을 내준다(062).
+## 신호(world.events 에 더함): ["room", 방 번호] · ["line", 제목, 작은 글, 초] · ["swap", 새로 조작하는 사람] · ["yield", 적]
+
+const Fighter = preload("res://src/combat/fighter.gd")
+const World = preload("res://src/combat/world.gd")
+const EnemyAI = preload("res://src/combat/enemy_ai.gd")
+const Bot = preload("res://src/combat/bot.gd")
+const Skills = preload("res://src/data/skills.gd")
+const Common = preload("res://src/data/common.gd")
+const Addendum = preload("res://src/data/addendum.gd")
+const Hotel = preload("res://src/data/hotel.gd")
+const Lines = preload("res://src/data/lines.gd")
+
+
+## opts: room(시작 방 번호 — 시험용) · crowd(28층에 경호원을 이만큼 더 — 성능 점검 '적 30명')
+static func make(seed_value: int, opts := {}) -> Dictionary:
+	var w = World.new()
+	w.end_on_ko = false
+	var d := {"kind": "stage", "world": w, "heroes": [], "ctrl": 0, "room_i": -1, "room": {}, "enemies": [], "allies": [],
+		"ais": {}, "bots": {}, "yield": {}, "seed": seed_value, "stage": "intro", "t": 0, "fight_t": 0, "cleared": 0,
+		"times": {}, "hero": null, "boss": null, "crowd": int(opts.get("crowd", 0)), "n": 0}
+	for id in ["kimshin", "woojin"]:
+		var h = _hero(id)
+		d["bots"][h] = Bot.new(h, null, _rng(seed_value * 7919 + d["heroes"].size() + 1))
+		d["heroes"].append(h)
+	_enter(d, int(opts.get("room", 0)))
+	return d
+
+
+static func _rng(s: int) -> RandomNumberGenerator:
+	var r := RandomNumberGenerator.new()
+	r.seed = s
+	return r
+
+
+static func _base(f, role: Dictionary, stats: Dictionary) -> void:
+	var k := Addendum.derive(stats)
+	f.hp_max = float(role["hp"]) * float(k["hp"])
+	f.hp = f.hp_max
+	f.posture_max = float(role["posture"])
+	f.walk_speed = float(role["walk"]) * float(k["speed"])
+	f.run_speed = float(role["run"]) * float(k["speed"])
+	f.stagger_len = int(role["stagger"])
+	f.dmg_k = float(k["dmg"]) * float(role.get("dmg_k", 1.0))
+	f.poise = float(role.get("poise", 0.0))
+
+
+## 사람(김신 · 피우진): 등급 · 기술은 castle_common 진행(11장 앞까지), 칼날 쳐내기는 characters.json can_parry
+static func _hero(id: String):
+	var c := Addendum.character(id)
+	var pr: Array = Common.progress(id, Common.events_until(Common.stage_of(Hotel.EVENT)))
+	var f = Fighter.new(str(c["name"]), 0)
+	f.char_id = id
+	f.rank = pr[0]
+	var st := Addendum.stats_at(id, Hotel.PERIOD)
+	_base(f, Hotel.ROLES[id], st)
+	f.moveset = Hotel.ROLES[id]["moveset"]
+	f.can_parry = bool(c.get("can_parry", false))
+	f.skills = Skills.entries(pr[1], f.rank)
+	f.gauge_max = Common.bars_for(f.rank) * Common.bar_points()
+	f.gauge_rate = Common.gauge_rate(f.rank, st.get("기술"))
+	f.gauge = (Skills.KIM_START_BARS if id == Skills.HERO_ID else 0.0) * Common.bar_points()
+	return f
+
+
+## 아군 · 적 — 1층은 addendum(castle_common 이 먼저), 3층은 hotel.gd ROLES
+static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}):
+	var c := Addendum.character(id)
+	var role: Dictionary = Hotel.ROLES[id]
+	var f = Fighter.new(str(c["name"]), team)
+	f.char_id = id
+	f.rank = Addendum.rank_at(id, Hotel.PERIOD)
+	_base(f, role, Addendum.stats_at(id, Hotel.PERIOD))
+	f.can_parry = bool(c.get("can_parry", false))
+	f.pos = pos
+	f.facing = Vector2(-1, 0) if team == 1 else Vector2(1, 0)
+	if extra.get("leader", false):
+		f.hp_max *= 1.25
+		f.hp = f.hp_max
+	var i: int = d["enemies"].size() + d["allies"].size() + 1
+	if team == 1:
+		f.is_boss = true                              # 적 쪽: 공격 준비 동안 상대 쪽으로 몸을 오래 튼다 · 늦은 쳐내기 없음
+		f.finisher_cap = float(role.get("finisher_cap", 0.0))
+		f.phase2_at = float(role.get("phase2_at", 0.0))
+		if role.has("yield_at"):
+			d["yield"][f] = float(role["yield_at"])
+			f.hp_floor = float(role["yield_at"])      # 길을 내주기 전에는 이 밑으로 안 내려간다
+		var g: float = Addendum.derive(Addendum.stats_at(id, Hotel.PERIOD))["guard"]
+		d["ais"][f] = EnemyAI.new(f, str(role["ai"]), _rng(int(d["seed"]) * 131 + int(d["room_i"]) * 17 + i), g)
+		d["enemies"].append(f)
+	else:
+		f.moveset = role["moveset"]
+		var sk: Array = []
+		for sid in c.get("skills", []):
+			var s := Addendum.skill(sid)
+			sk.append({"id": sid, "name": str(s["name"]), "move": str(s["move"]), "cost": 1.0})
+		f.skills = sk
+		f.gauge_max = Common.bars_for(f.rank) * Common.bar_points()
+		f.gauge_rate = Common.gauge_rate(f.rank, Addendum.stats_at(id, Hotel.PERIOD).get("기술"))
+		var b = Bot.new(f, null, _rng(int(d["seed"]) * 977 + i))
+		b.generic_skills = true
+		d["bots"][f] = b
+		d["allies"].append(f)
+	d["world"].add(f)
+	return f
+
+
+static func _line(d: Dictionary, key: String, secs := 2.6) -> void:
+	var v = Lines.at("ch11.rooms.%s.%s" % [d["room"]["id"], key])
+	if v is Array and v.size() >= 2:
+		d["world"].events.append(["line", str(v[0]), str(v[1]), secs])
+
+
+static func _enter(d: Dictionary, i: int) -> void:
+	var w = d["world"]
+	var room: Dictionary = Hotel.ROOMS[i]
+	d["room_i"] = i
+	d["room"] = room
+	for f in d["enemies"] + d["allies"]:
+		d["bots"].erase(f)
+		d["ais"].erase(f)
+	d["enemies"] = []
+	d["allies"] = []
+	d["yield"] = {}
+	w.fighters = []
+	w.pending = []
+	w.hitstop = 0
+	w.bounds = room["bounds"]
+	for k in d["heroes"].size():
+		var h = d["heroes"][k]
+		h.pos = room["heroes"][k]
+		h.facing = Vector2(1, 0)
+		h.vel = Vector2.ZERO
+		h.posture = 0.0
+		if h.alive():
+			h.set_state("idle")
+		w.add(h)
+	for a in room["allies"]:
+		_npc(d, a[0], 0, a[1])
+	for e in room["enemies"]:
+		_npc(d, e[0], 1, e[1], e[2] if e.size() > 2 else {})
+	if i == 0 and int(d["crowd"]) > 0:
+		for k in int(d["crowd"]):                    # 성능 점검: 경호원을 둥글게 더 세운다
+			var a := TAU * k / float(d["crowd"])
+			_npc(d, "castle_guard", 1, Vector2(1.6 + 3.2 * cos(a), 2.6 * sin(a)))
+	d["stage"] = "intro"
+	d["t"] = 0
+	d["fight_t"] = 0
+	w.events.append(["room", i])
+	if i == 0:
+		var st = Lines.at("ch11.start")
+		w.events.append(["line", str(st["text"]), str(st["sub"]), 2.4])
+	_line(d, "enter", 3.0)
+	_focus(d)
+
+
+## 한 프레임. human 이 null 이면 봇이 지금 사람도 움직인다(자동 플레이). human["swap"] 이면 교대
+static func step(d: Dictionary, human = null) -> void:
+	var w = d["world"]
+	d["t"] += 1
+	d["n"] += 1
+	match str(d["stage"]):
+		"intro":
+			if d["t"] >= Hotel.INTRO_T:
+				d["stage"] = "end" if d["room"].get("end", false) else "fight"
+				d["t"] = 0
+				if d["stage"] == "end":
+					_line(d, "end", 5.0)
+		"fight":
+			d["fight_t"] += 1
+		"clear":
+			if d["t"] >= Hotel.CLEAR_T and d["room_i"] + 1 < Hotel.ROOMS.size():
+				_enter(d, d["room_i"] + 1)
+				return
+		"end":
+			if d["t"] >= Hotel.END_T and w.over == "":
+				w.over = "win"
+	if human != null and human.get("swap", false):
+		swap(d)
+	_targets(d)
+	_intents(d, human)
+	w.tick()
+	_after(d)
+
+
+## 교대: 다른 사람이 살아 있으면 조작을 넘긴다(지금 사람이 기술 · 맞음 중이어도 된다 — 넘겨받은 쪽은 봇이 이어 받는다)
+static func swap(d: Dictionary) -> bool:
+	var other: int = 1 - int(d["ctrl"])
+	if not d["heroes"][other].alive():
+		return false
+	d["ctrl"] = other
+	d["world"].events.append(["swap", d["heroes"][other]])
+	_focus(d)
+	return true
+
+
+static func _foes_of(d: Dictionary, f) -> Array:
+	var out: Array = []
+	for o in d["world"].fighters:
+		if o.team != f.team and o.alive() and not o.inert:
+			out.append(o)
+	return out
+
+
+## 저마다 가장 가까운 상대를 겨눈다(같은 거리면 먼저 넣은 쪽 — 결정적)
+static func _targets(d: Dictionary) -> void:
+	for f in d["world"].fighters:
+		if not f.alive():
+			continue
+		var best = null
+		var bd := INF
+		for o in _foes_of(d, f):
+			var dd: float = f.dist_to(o)
+			if dd < bd:
+				bd = dd
+				best = o
+		f.set_target(best)
+
+
+static func _intents(d: Dictionary, human) -> void:
+	var w = d["world"]
+	var frozen: bool = w.hitstop > 0 or w.over != ""
+	var fighting: bool = d["stage"] == "fight"
+	var attackers := 0
+	for e in d["enemies"]:
+		if d["ais"][e].busy():
+			attackers += 1
+	for e in d["enemies"]:
+		if frozen or not fighting:
+			e.intent = {}
+			continue
+		var ai = d["ais"][e]
+		var was: bool = ai.busy()
+		e.intent = ai.decide(e.target(), was or attackers < Hotel.MAX_ATTACKERS)
+		if not was and ai.busy():
+			attackers += 1
+	for k in d["heroes"].size():
+		var h = d["heroes"][k]
+		if k == int(d["ctrl"]) and human != null:
+			h.intent = human
+		elif frozen or not h.alive():
+			h.intent = {}
+		else:
+			h.intent = _bot_intent(d, h, fighting)
+	for a in d["allies"]:
+		a.intent = {} if frozen else _bot_intent(d, a, fighting)
+
+
+## 봇: 싸울 상대가 있으면 bot.gd, 없으면(들어서는 중 · 방을 넘음) 조작하는 사람 곁으로
+static func _bot_intent(d: Dictionary, me, fighting: bool) -> Dictionary:
+	var tg = me.target()
+	if not fighting or tg == null:
+		var lead = d["heroes"][d["ctrl"]]
+		if lead == me or not lead.alive():
+			return {}
+		var gap: float = me.dist_to(lead)
+		return {"move": me.dir_to(lead) * 0.7 if gap > 1.6 else Vector2.ZERO, "face": me.facing}
+	var b = d["bots"][me]
+	b.foe = tg
+	b.foes = _foes_of(d, me)
+	return b.decide()
+
+
+static func _after(d: Dictionary) -> void:
+	var w = d["world"]
+	for e in w.events.duplicate():
+		if e[0] == "phase2" and d["enemies"].has(e[1]):
+			_line(d, "phase2", 2.6)
+	for e in d["yield"].keys():
+		if e.alive() and not e.inert and e.hp <= e.hp_max * float(d["yield"][e]) + 0.001:
+			e.inert = true                              # 고집에 밀려 길을 내준다 — 칼을 거두고 비켜선다(062)
+			e.set_state("idle")
+			e.intent = {}
+			w.events.append(["yield", e])
+			_line(d, "yield", 3.2)
+	var lead = d["heroes"][d["ctrl"]]
+	if not lead.alive():
+		if swap(d):
+			w.events.append(["line", str(Lines.at("ch11.down")), "", 1.6])
+	var alive := 0
+	for h in d["heroes"]:
+		if h.alive():
+			alive += 1
+	if alive == 0 and w.over == "":
+		w.over = "lose"
+		w.hitstop = maxi(w.hitstop, 30)
+	if d["stage"] == "fight" and w.over == "":
+		var left := 0
+		for e in d["enemies"]:
+			if e.alive() and not e.inert:
+				left += 1
+		if left == 0:
+			d["stage"] = "clear"
+			d["t"] = 0
+			d["cleared"] += 1
+			d["times"][d["room"]["id"]] = d["fight_t"]
+			for h in d["heroes"]:
+				if h.alive():
+					h.hp = minf(h.hp_max, h.hp + h.hp_max * Hotel.HEAL_ON_CLEAR)
+			_line(d, "clear", 2.4)
+	_focus(d)
+
+
+## 화면에 보일 두 사람: hero = 조작하는 사람, boss = 방의 큰 적(살아 있으면) → 아니면 조작하는 사람에게 가장 가까운 적
+static func _focus(d: Dictionary) -> void:
+	var h = d["heroes"][d["ctrl"]]
+	d["hero"] = h
+	var want := str(d["room"].get("boss", ""))
+	var best = null
+	var bd := INF
+	for e in d["enemies"]:
+		if not e.alive() or e.inert:
+			continue
+		var dd: float = h.dist_to(e) - (100.0 if e.char_id == want else 0.0)
+		if dd < bd:
+			bd = dd
+			best = e
+	d["boss"] = best
+
+
+## 그림 없이 끝까지(또는 frames 까지) — 시험 · 자동 점검
+static func simulate(seed_value: int, frames: int, opts := {}) -> Dictionary:
+	var d := make(seed_value, opts)
+	var w = d["world"]
+	var n := 0
+	while n < frames and w.over == "":
+		step(d)
+		w.events.clear()
+		n += 1
+	return summary(d, n)
+
+
+static func summary(d: Dictionary, n: int) -> Dictionary:
+	var w = d["world"]
+	var hp: Array = []
+	for h in d["heroes"]:
+		hp.append(snappedf(h.hp, 0.01))
+	return {"frames": n, "over": w.over, "room": str(d["room"]["id"]), "cleared": d["cleared"], "heroes_hp": hp,
+		"times": d["times"].duplicate(), "stats": w.stats.duplicate()}
