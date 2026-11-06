@@ -81,6 +81,11 @@ var gauge_rate := 1.0
 var buf_skill := 0
 var skill_paid := 0.0            # 마지막 기술에 쓴 칸 수 (엇엇박 피해가 비례)
 var hp_floor := 0.0              # 체력이 최대 체력의 이 비율 아래로 내려가지 않는다 (백도찬 첫 엇박 장면)
+# 여러 사람 판(11장) — 결투(duel.gd)는 백도찬만 finisher_cap · phase2_at 을 쓴다
+var can_parry := true            # 칼날 쳐내기(타이밍 패리)는 김신 · 백도찬만 — 다른 사람은 막기만 (castle_common 김신 book)
+var finisher_cap := 0.0          # 제압 피해 상한(최대 체력 비율, 0 = 없음) — 백도찬 0.08
+var phase := 1
+var phase2_at := 0.0             # 체력이 이 비율이 되면 2차(0 = 2차 없음)
 
 
 func set_target(f) -> void:
@@ -136,7 +141,7 @@ func iframes() -> bool:
 
 
 func parry_open() -> bool:
-	return state == "parry" and t <= PARRY_WINDOW + parry_bonus + parry_extra
+	return can_parry and state == "parry" and t <= PARRY_WINDOW + parry_bonus + parry_extra
 
 
 ## 예고: [종류, 판정까지 남은 프레임] — 종류 parry(흰 !) · unblock(빨간 !). 예고가 없으면 [].

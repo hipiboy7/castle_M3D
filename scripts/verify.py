@@ -38,7 +38,7 @@ COMMON_SRC = os.environ.get("CASTLE_COMMON") or os.path.join(os.path.dirname(ROO
 ASSETS = os.path.join(ROOT, "assets")
 # CLAUDE.md 2-1절 TDD 등급 — 함수 단위 커버리지를 재는 파일 (main.gd 흐름은 노드가 있어 자동 결투 단계가 본다)
 COV_FILES = {
-    "A": ["src/data/common.gd", "src/data/skills.gd", "src/data/moves.gd", "src/combat/world.gd", "src/combat/fighter.gd"],
+    "A": ["src/data/common.gd", "src/data/skills.gd", "src/data/moves.gd", "src/data/addendum.gd", "src/combat/world.gd", "src/combat/fighter.gd"],
     "B": ["src/combat/duel.gd", "src/combat/boss_ai.gd", "src/combat/bot.gd"],
 }
 COV_MIN = {"A": 0.90, "B": 0.70}

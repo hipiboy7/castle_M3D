@@ -145,6 +145,7 @@ func test_offbeat2_spends_all_and_self_cost() -> void:
 	var h = d["hero"]
 	var b = d["boss"]
 	d["world"].phase = 2                                    # 1차 바닥(55%)에 막히지 않게
+	d["boss"].phase = 2
 	_learn(d)
 	h.skill_idx = h.skill_index("offbeat2")
 	h.gauge = 4.0 * Common.bar_points()
@@ -195,6 +196,7 @@ func test_offbeat2_beats_offbeat() -> void:
 	var b = d["boss"]
 	_learn(d)
 	d["world"].phase = 2
+	d["boss"].phase = 2
 	h.gauge = 5.0 * Common.bar_points()
 	h.skill_idx = h.skill_index("offbeat2")
 	_tick(d, {}, {"use": "s_offbeat"})                     # 백도찬 엇박(판정 17)

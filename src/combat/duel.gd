@@ -46,6 +46,8 @@ static func make(seed_value: int) -> Dictionary:
 	b.run_speed = BOSS["run"]
 	b.stagger_len = BOSS["stagger"]
 	b.poise = BOSS["poise"]
+	b.finisher_cap = World.FINISHER_CAP_BOSS
+	b.phase2_at = World.PHASE2_AT
 	b.rank = str(Common.character(Skills.BOSS_ID)["rank"])          # 보스는 게이지 없이 패턴으로 기술을 쓴다(gauge_max 0)
 	b.pos = Vector2(2.2, -0.5)
 	b.facing = Vector2(-1, 0)

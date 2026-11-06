@@ -30,6 +30,7 @@ var slowmo := 0                          # 남은 슬로모션 로직 프레임 
 var events: Array = []                   # [종류, ...] — 그림 · 소리가 매 프레임 가져가고 비운다
 var bounds := Rect2(-6.6, -3.6, 13.2, 7.4)
 var over := ""                           # "" / win / lose
+var end_on_ko := true                    # 결투: 누가 쓰러지면 판이 끝난다. 여러 사람 판(stage.gd)은 false — 판 끝은 stage 가 정한다
 var phase := 1
 var pending: Array = []                  # 미룬 맞음 [공격자, 맞는 사람, 기술, 맞은 자리, 남은 프레임]
 var stats := {"hits": 0, "parries": 0, "boss_parries": 0, "dodges": 0, "blocks": 0, "staggers": 0,
@@ -120,6 +121,13 @@ func _in_hit(a, d) -> bool:
 	var body: float = Fighter.BODY_R
 	if str(mv["shape"]) == "spin":
 		return a.pos.distance_to(d.pos) <= radius + body
+	if str(mv["shape"]) == "shot":
+		# 총: 앞으로 뻗은 선분(사거리 reach) 위 어디든 — 몸 반지름 + 탄 굵기(radius) 안이면 맞는다
+		var to2: Vector2 = d.pos - a.pos
+		var along := to2.dot(a.facing)
+		if along < 0.0 or along > reach:
+			return false
+		return (to2 - a.facing * along).length() <= radius + body
 	var center: Vector2 = a.pos + a.facing * reach
 	if center.distance_to(d.pos) <= radius + body:
 		return true
@@ -204,8 +212,8 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 	var push: Vector2 = a.dir_to(d)
 	var dmg: float = float(mv["damage"]) * a.dmg_k
 	if str(mv["name"]).ends_with("finisher") and d.state == "stagger":
-		if d.is_boss:
-			dmg = minf(dmg, d.hp_max * FINISHER_CAP_BOSS)
+		if d.finisher_cap > 0.0:
+			dmg = minf(dmg, d.hp_max * d.finisher_cap)
 		d.hp -= dmg
 		d.posture = 0.0
 		d.get_down()
@@ -309,8 +317,9 @@ func _stagger(f) -> void:
 func _check_hp(d, a = null) -> void:
 	if d.hp_floor > 0.0:
 		d.hp = maxf(d.hp, d.hp_max * d.hp_floor)
-	if d.is_boss and phase == 1 and d.hp <= d.hp_max * PHASE2_AT:
-		d.hp = d.hp_max * PHASE2_AT
+	if d.phase2_at > 0.0 and d.phase == 1 and d.hp <= d.hp_max * d.phase2_at:
+		d.hp = d.hp_max * d.phase2_at
+		d.phase = 2
 		phase = 2
 		hitstop = maxi(hitstop, PHASE2_FREEZE)
 		events.append(["phase2", d])
@@ -320,8 +329,11 @@ func _check_hp(d, a = null) -> void:
 		events.append(["ko", d])
 		if a != null:
 			a.gain("ko")                          # 쓰러뜨리면 게이지 (common gauge.gain.ko — 1:1 은 판이 끝나 화면엔 안 보인다)
-		over = "lose" if not d.is_boss else "win"
-		hitstop = maxi(hitstop, 30)
+		if end_on_ko:
+			over = "lose" if not d.is_boss else "win"
+			hitstop = maxi(hitstop, 30)
+		else:
+			hitstop = maxi(hitstop, 12)
 
 
 ## 맞은 자리 (3D: x, 높이, z) — 불꽃 · 번쩍임이 여기서 난다
