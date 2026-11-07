@@ -56,7 +56,10 @@ if grep -E "Program linking failed" emu/logcat.txt | head -3 | grep .; then
   exit 1
 fi
 pid=$(adb shell pidof "$PKG" | tr -d '\r')
-if grep -E "FATAL EXCEPTION|SCRIPT ERROR|USER SCRIPT ERROR" emu/logcat.txt; then
+# 우리 앱의 오류만 본다 — FATAL EXCEPTION 은 바로 다음 줄 'Process: <패키지>' 가 이 앱일 때만(에뮬레이터 안 다른 앱 — Gmail 등 —
+# 이 죽어도 실패로 보지 않는다: run #57 2026-11-08 com.google.android.gm DeadObjectException)
+if grep -A1 "FATAL EXCEPTION" emu/logcat.txt | grep -q "Process: $PKG" || grep -E "SCRIPT ERROR|USER SCRIPT ERROR" emu/logcat.txt; then
+  grep -A3 "FATAL EXCEPTION" emu/logcat.txt | grep -B1 -A2 "Process: $PKG" || true
   echo "logcat 에 오류가 있다"
   exit 1
 fi
