@@ -16,6 +16,8 @@ var bones := {}                  # 이름 → 번호
 var sheen_hair = null            # 머리 윤기 — 이 색의 큰 머리 껍질 _blob 은 앞쪽 위 띠 정점을 sheen_col 로(_sheen_on)
 var sheen_col := Color.WHITE
 var gpos := {}                   # 이름 → 쉬는 자세 위치(뼈대 공간)
+const FEM_HEAD := Vector3(0.112, 0.13, 0.117)   # 여성 머리 타원체(갸름하게 — 남성 0.12 · 0.13 · 0.12)
+const FACE_LIFT := 0.0007                       # 얼굴 조각(_patch)이 머리 겉면에서 뜨는 기본 높이(머리 단위 — 살과 겹쳐 깜빡이지 않게)
 
 
 func _initialize() -> void:
@@ -211,7 +213,10 @@ func _body(lk: Dictionary) -> void:
 		_blob(g["neck"] + Vector3(0.055 * wide, 0.04, -0.01), Vector3(0.012, 0.045, 0.025), lk["neck_tattoo"], "neck")
 	var hk: float = 1.55 * float(lk.get("head", 1.0))
 	var hc: Vector3 = g["head"] + Vector3(0, 0.06 * hk, 0)
-	_blob(hc, Vector3(0.12, 0.13, 0.12) * hk, skin, "head")
+	if fem:
+		_head_fem(hc, FEM_HEAD * hk, skin)                          # 여성은 갸름하게 + 턱으로 좁아지는 V 라인
+	else:
+		_blob(hc, Vector3(0.12, 0.13, 0.12) * hk, skin, "head")
 	if lk.get("mask") != null:
 		_mask(lk, hc, hk)
 	else:
@@ -262,6 +267,116 @@ func _body(lk: Dictionary) -> void:
 
 
 func _face(lk: Dictionary, hc: Vector3, hk: float) -> void:
+	if lk.get("female", false):
+		_face_fem(lk, hc, hk)
+	else:
+		_face_male(lk, hc, hk)
+	_face_marks(lk, hc, hk)
+
+
+## 여성 얼굴(2026-11-07 폰 "오지인이 대표 미인 캐릭터인데 너무 못생김" — 원작 카드 초상 하성_오지인 · 차수민 대조).
+## 전에는 눈 · 코 · 입이 얼굴에서 솟은 작은 타원체라 게임의 검은 외곽선(puppet_glb next_pass grow)이 하나하나를 둘러
+## 동그란 왕눈 · 고리 두른 코가 됐다. 이제 겉면을 따라 휜 한 겹 판(_patch)이라 외곽선이 안 걸린다 — 그린 듯한 얼굴: 가는 아몬드 눈(흰자 · 짙은 눈동자 · 눈빛 · 굵은 윗눈꺼풀 선과 올라간 눈꼬리) · 가는 아치 눈썹 · 작은 코 그늘 ·
+## 도톰한 입술 · 옅은 볼 · 금 고리 귀걸이(piercing). 눈 높이 eye_h ≤ 0.008 은 날카로운 눈(오지인)
+func _face_fem(lk: Dictionary, hc: Vector3, hk: float) -> void:
+	var sk: Color = lk["skin"]
+	var R := FEM_HEAD * hk
+	var sharp: bool = float(lk.get("eye_h", 0.011)) <= 0.008
+	var eh := 0.0062 if sharp else 0.0075                           # 눈 반높이
+	var eye: Color = lk.get("eye_col", Color(0.1, 0.06, 0.05))
+	var lash := Color(0.04, 0.03, 0.035)
+	var brow: Color = Looks.hair_lift(lk["hair"]).darkened(0.2)
+	for sx in [-1.0, 1.0]:
+		var e := Vector3(0.042 * sx, 0.004, -0.11)
+		_patch(hc, R, e, 0.0175, eh, 0.0012, 4.0 * sx, Color(0.97, 0.96, 0.94), hk)                       # 흰자
+		_patch(hc, R, e + Vector3(-0.002 * sx, -0.0008, 0), 0.0078, eh * 1.02, 0.0022, 0.0, eye, hk)        # 눈동자
+		_patch(hc, R, e + Vector3(0.0015 * sx, 0.0025, 0), 0.0024, 0.0024, 0.0032, 0.0, Color.WHITE, hk)   # 눈빛
+		_patch(hc, R, e + Vector3(0.0015 * sx, eh * 0.95, 0), 0.0205, 0.0032, 0.003, 8.0 * sx, lash, hk)   # 윗눈꺼풀 선
+		_patch(hc, R, e + Vector3(0.0215 * sx, eh * 1.5, 0), 0.0075, 0.0022, 0.003, 30.0 * sx, lash, hk)   # 올라간 눈꼬리
+		_patch(hc, R, e + Vector3(0.003 * sx, -eh * 1.05, 0), 0.011, 0.0012, 0.0008, -4.0 * sx, sk.darkened(0.28), hk)   # 아랫눈꺼풀(옅게)
+		var b := Vector3(0.044 * sx, 0.035 if sharp else 0.038, -0.11)                                    # 눈썹: 안쪽은 오르고 바깥 끝이 내려오는 아치
+		_patch(hc, R, b + Vector3(-0.006 * sx, 0, 0), 0.014, 0.0026, 0.002, 8.0 * sx, brow, hk)
+		_patch(hc, R, b + Vector3(0.0145 * sx, -0.0016, 0), 0.0095, 0.002, 0.002, -18.0 * sx, brow, hk)
+		_patch(hc, R, Vector3(0.058 * sx, -0.028, -0.1), 0.016, 0.009, 0.0008, 0.0, sk.lerp(Color(0.95, 0.5, 0.52), 0.2), hk)   # 옅은 볼
+		if lk.get("piercing", false):                               # 금 고리 귀걸이(looks.json piercing ring #c8a040 — 오지인 · 차수민)
+			var ear := _on_ell(hc, R, Vector3(sx, -0.32, 0.05))
+			_line(ear + Vector3(0, -0.004, 0) * hk, ear + Vector3(0.004 * sx, -0.03, -0.004) * hk, 0.0035 * hk, Color(0.86, 0.68, 0.3), "head")
+	_patch(hc, R, Vector3(0, -0.02, -0.12), 0.0055, 0.0075, 0.0035, 0.0, sk.darkened(0.04), hk)           # 작은 코(콧등 끝)
+	_patch(hc, R, Vector3(0, -0.031, -0.12), 0.0065, 0.0014, 0.0012, 0.0, sk.darkened(0.3), hk)          # 콧망울 그늘
+	var lips: Color = lk.get("lips", sk.lerp(Color(0.8, 0.36, 0.4), 0.45))
+	_patch(hc, R, Vector3(0, -0.0515, -0.12), 0.0145, 0.0038, 0.0026, 0.0, lips.darkened(0.12), hk)       # 윗입술
+	_patch(hc, R, Vector3(0, -0.0595, -0.12), 0.0125, 0.0048, 0.0034, 0.0, lips, hk)                      # 아랫입술(도톰하게)
+	_patch(hc, R, Vector3(0, -0.0552, -0.12), 0.0125, 0.0009, 0.0036, 0.0, lips.darkened(0.55), hk)      # 입술 사이 선
+
+
+## 얼굴 겉면에 붙인 조각(머리 단위): 머리 타원체 R 위 dir 쪽에 겉면을 따라 휜 얇은 한 겹 판 — 가로 반폭 rx · 세로 반폭 ry 의 타원,
+## 겉면에서 lift 만큼 떠 있다(겹치는 조각은 lift 로 위아래). 한 겹 앞면뿐이라 외곽선 판(뒷면만 그린다)에 안 걸린다 — 작은 덩어리를
+## 붙이면 외곽선이 하나하나를 굵게 둘러 왕눈 · 고리 코가 됐다(2026-11-07). tilt: 얼굴 앞에서 본 기울기(도, + 는 +x 끝이 올라감)
+func _patch(hc: Vector3, R: Vector3, dir: Vector3, rx: float, ry: float, lift: float, tilt: float, col: Color, hk: float) -> void:
+	var p := _on_ell(hc, R, dir)
+	var n := _ell_normal(hc, R, p)
+	var tx := n.cross(Vector3.UP).normalized()
+	var ty := tx.cross(n)
+	var a := deg_to_rad(tilt)
+	var bx := tx * cos(a) + ty * sin(a)
+	var by := -tx * sin(a) + ty * cos(a)
+	var seg := 14
+	var rings := 3
+	var grid: Array = []
+	for i in rings + 1:
+		var rho := float(i) / rings
+		var row: Array = []
+		for j in seg:
+			var u := TAU * j / seg
+			var q := _on_ell(hc, R, p - hc + (bx * cos(u) * rx + by * sin(u) * ry) * rho * hk)
+			row.append(q + _ell_normal(hc, R, q) * (lift + FACE_LIFT) * hk)
+		grid.append(row)
+	for i in rings:
+		for j in seg:
+			var j2 := (j + 1) % seg
+			_tri_out(grid[i][j], grid[i + 1][j], grid[i + 1][j2], n, col)
+			_tri_out(grid[i][j], grid[i + 1][j2], grid[i][j2], n, col)
+
+
+## 여성 머리: 타원체의 아래쪽(뺨 → 턱)을 좁히고 조금 늘인 한 덩어리(턱을 덧붙이면 외곽선이 턱에 금을 그었다 — 2026-11-07).
+## 얼굴 조각(_patch)은 타원체 R 위에 놓는다 — 좁힌 아래쪽에서는 조금 떠도 lift 보다 작다(뺨 · 입술 자리)
+func _head_fem(c: Vector3, r: Vector3, col: Color) -> void:
+	var seg := 16
+	var rings := 10
+	var grid: Array = []
+	for i in rings + 1:
+		var v := PI * i / rings
+		var row: Array = []
+		for j in seg:
+			var u := TAU * j / seg
+			var n := Vector3(sin(v) * cos(u), cos(v), sin(v) * sin(u))
+			var low := maxf(0.0, -n.y)
+			var p := Vector3(n.x * r.x * (1.0 - 0.3 * pow(low, 1.6)), n.y * r.y * (1.0 + 0.06 * low), n.z * r.z * (1.0 - 0.08 * pow(low, 2.0)))
+			row.append([c + p, ["head"], [1.0]])
+		grid.append(row)
+	for i in rings:
+		for j in seg:
+			var j2 := (j + 1) % seg
+			_quad(grid[i][j], grid[i][j2], grid[i + 1][j2], grid[i + 1][j], [col], [])
+
+
+## 타원체 겉면 점 q 의 바깥 법선
+func _ell_normal(c: Vector3, R: Vector3, q: Vector3) -> Vector3:
+	var d := q - c
+	return Vector3(d.x / (R.x * R.x), d.y / (R.y * R.y), d.z / (R.z * R.z)).normalized()
+
+
+## 삼각형 하나(머리 뼈) — 앞면이 n 쪽(바깥)을 보게 감기 방향을 맞춘다
+func _tri_out(a: Vector3, b: Vector3, c: Vector3, n: Vector3, col: Color) -> void:
+	if (b - a).cross(c - a).dot(n) > 0.0:
+		var t := b
+		b = c
+		c = t
+	for v in [a, b, c]:
+		_vert(v, col, ["head"], [1.0])
+
+
+func _face_male(lk: Dictionary, hc: Vector3, hk: float) -> void:
 	var eye: Color = lk.get("eye_col", Color(0.06, 0.05, 0.05))
 	var eh: float = 0.007 if float(lk.get("eye_h", 0.011)) <= 0.006 else (0.012 if float(lk.get("eye_h", 0.011)) < 0.009 else 0.02)   # 실눈 · 가는 눈 · 보통
 	var brow_k: float = lk.get("brow_k", 1.0)
@@ -269,14 +384,11 @@ func _face(lk: Dictionary, hc: Vector3, hk: float) -> void:
 	for sx in [-1.0, 1.0]:
 		var ec: Color = Color(0.9, 0.9, 0.88) if blind == ("l" if sx < 0.0 else "r") or lk.get("blank_eyes", false) else eye   # 먼 눈 · 동공 없는 흰자(샤모)
 		_blob(hc + Vector3(0.045 * sx, 0.01, -0.112) * hk, Vector3(0.02, eh, 0.01) * hk, ec, "head")
-		if lk.get("female", false):                                 # 속눈썹(눈 위 짙은 선 · 바깥 끝이 올라감)
-			_line(hc + Vector3(0.028 * sx, 0.012 + eh, -0.117) * hk, hc + Vector3(0.068 * sx, 0.02 + eh, -0.107) * hk, 0.004 * hk,
-				Color(0.05, 0.04, 0.05), "head")
 		_blob(hc + Vector3(0.045 * sx, 0.045, -0.108) * hk, Vector3(0.026, 0.006 * brow_k, 0.01) * hk, lk["hair"].darkened(0.1), "head")
 	_blob(hc + Vector3(0, -0.02, -0.118) * hk, Vector3(0.016, 0.022, 0.016) * hk, lk["skin"].darkened(0.08), "head")
 	if lk.get("stubble", false):                                    # 턱 수염 그늘 — looks.json facial_hair stubble 일 때만
 		_blob(hc + Vector3(0, -0.09, -0.06) * hk, Vector3(0.082, 0.032, 0.058) * hk, skin_stubble(lk), "head")   # 턱선을 따라 얇게
-	if lk.get("lips") != null:                                      # 붉은 입술(오지인)
+	if lk.get("lips") != null:                                      # 입술 색(여성은 _face_fem)
 		_blob(hc + Vector3(0, -0.06, -0.116) * hk, Vector3(0.018, 0.006, 0.008) * hk, lk["lips"], "head")
 	var beard: Color = lk.get("beard_col", lk["hair"])             # 수염 색(looks.json facial_hair_color — 없으면 머리색)
 	if lk.get("beard", false):
@@ -293,6 +405,10 @@ func _face(lk: Dictionary, hc: Vector3, hk: float) -> void:
 			_line(_on_head(hc, hk, Vector3(0.1 * sx, -0.005, -0.055)), jaw, 0.013 * hk, beard, "head")
 			if lk.get("goatee", false):
 				_line(jaw, _on_head(hc, hk, Vector3(0.022 * sx, -0.12, -0.09)), 0.011 * hk, beard, "head")
+
+
+## 얼굴 표시(남녀 공통): 피어싱 · 안대 · 복면 · 흉터
+func _face_marks(lk: Dictionary, hc: Vector3, hk: float) -> void:
 	if lk.get("face_ring") != null:                                 # 입술 · 눈썹 피어싱(라텔 · 판테라)
 		_blob(hc + Vector3(0.016, -0.068, -0.118) * hk, Vector3(0.007, 0.007, 0.006) * hk, lk["face_ring"], "head")
 	if lk.get("eyepatch") != null:                                  # 안대(남일호) — 눈 위 검은 판 + 끈
@@ -433,7 +549,9 @@ func _props(lk: Dictionary, hc: Vector3, hk: float) -> void:
 func _hair(lk: Dictionary, hc: Vector3, hk: float, hair: Color) -> void:
 	var style := str(lk.get("hair_style", "short"))
 	_sheen_on(lk, hair, style)
-	if style == "spiky":
+	if style == "bun" or (lk.get("female", false) and style in ["ponytail", "long", "bob"]):
+		_hair_fem(lk, hc, hk, hair, style)
+	elif style == "spiky":
 		_blob(hc + Vector3(0, 0.05, 0.01) * hk, Vector3(0.125, 0.09, 0.125) * hk, hair, "head")
 		for k in 9:
 			var a := TAU * k / 9.0
@@ -479,13 +597,6 @@ func _hair(lk: Dictionary, hc: Vector3, hk: float, hair: Color) -> void:
 			if lk.get("hat") in ["headband", "bandana"]:              # 이마 띠가 앞머리에 묻히지 않게(라텔 — 띠 위로 부푼 머리)
 				break
 			_blob(hc + Vector3(-0.06 + 0.04 * k, 0.05 - 0.01 * (k % 2), -0.112) * hk, Vector3(0.03, 0.035, 0.02) * hk, hair, "head")
-	elif style == "bun":
-		# 뒤로 틀어 올린 낮은 쪽머리 + 얼굴 옆 앞 가닥(오지인)
-		_blob(hc + Vector3(0, 0.06, 0.025) * hk, Vector3(0.126, 0.085, 0.125) * hk, hair, "head")
-		_blob(hc + Vector3(0, 0.0, 0.06) * hk, Vector3(0.115, 0.1, 0.08) * hk, hair, "head")
-		_blob(hc + Vector3(0, 0.01, 0.16) * hk, Vector3(0.062, 0.056, 0.05) * hk, hair, "head")   # 쪽(뒤에서 보이게 크게)
-		for sx in [-1.0, 1.0]:
-			_cone(_on_head(hc, hk, Vector3(0.08 * sx, 0.08, -0.08)), _on_head(hc, hk, Vector3(0.11 * sx, -0.09, -0.05)), 0.02 * hk, hair, "head")
 	elif style == "undercut":
 		# 옆 · 뒤를 짧게 민 투블럭(hair2) 위로 뒤로 넘긴 머리(서진태 금발 · 윤덕수)
 		_blob(hc + Vector3(0, 0.035, 0.015) * hk, Vector3(0.125, 0.1, 0.125) * hk, lk.get("hair2", hair), "head")
@@ -523,7 +634,11 @@ func _hair(lk: Dictionary, hc: Vector3, hk: float, hair: Color) -> void:
 				_blob(hc + Vector3(0.1 * sx, 0.01, 0.04) * hk, Vector3(0.04, 0.07, 0.07) * hk, hair, "head")
 		if lk.get("hair_long", false):                              # 긴 머리를 뒤로 묶은 꼬리 · 땋은 머리(비손)
 			_cone(hc + Vector3(0, -0.02, 0.13) * hk, hc + Vector3(0, -0.3, 0.17) * hk, 0.04 * hk, hair, "head")
-		if style == "slick_fringe":
+		if style == "slick_fringe" and lk.get("female", false):    # 이마로 흘러내린 앞 가닥(링링) — 겉면에 붙인 가는 조각(원뿔은 외곽선이 W 자로 찍혔다)
+			for k in 3:
+				_patch(hc, FEM_HEAD * hk, Vector3(-0.034 + 0.026 * k, 0.07 - 0.004 * k, -0.11), 0.0055, 0.03, 0.004 + 0.0005 * k,
+					-18.0 + 6.0 * k, hair, hk)
+		elif style == "slick_fringe":
 			for k in 3:
 				var b: Vector3 = hc + Vector3(-0.03 + 0.03 * k, 0.09, -0.11) * hk
 				_cone(b, b + Vector3(0.005, -0.07, -0.01) * hk, 0.012 * hk, hair, "head")
@@ -532,6 +647,46 @@ func _hair(lk: Dictionary, hc: Vector3, hk: float, hair: Color) -> void:
 				var x := -0.084 + 0.028 * k
 				_cone(_on_head(hc, hk, Vector3(x * 0.9, 0.12, -0.06)), _on_head(hc, hk, Vector3(x * 1.05 + 0.006, 0.03, -0.12)),
 					0.026 * hk, hair, "head")
+	sheen_hair = null
+
+
+## 여성 머리(2026-11-07 폰 '오지인 못생김' — 카드 초상 하성_오지인 · 차수민 대조): 껍질을 뒤 · 위로 물려 이마를 드러내고(바가지
+## 앞머리 · 헬멧처럼 보였다), 옆 가르마에서 넘긴 앞머리 결 + 얼굴 옆으로 흘러내린 가는 앞 가닥(_patch — 겉면에 붙인 한 겹이라
+## 외곽선이 굵게 안 두른다). bun — 낮은 쪽머리(오지인) · ponytail — 뒤로 묶은 꼬리(이리원 · 마리나) · long — 등까지 늘어진 생머리
+## (리사 · 유세희, hair_long 이면 더 길게) · bob — 턱선 단발 + 가운데서 갈라진 시스루 앞머리(차수민)
+func _hair_fem(lk: Dictionary, hc: Vector3, hk: float, hair: Color, style: String) -> void:
+	var hr := FEM_HEAD * hk if lk.get("female", false) else Vector3(0.12, 0.13, 0.12) * hk
+	var ln := 1.7 if lk.get("hair_long", false) else 1.0
+	if style == "bob":
+		_blob(hc + Vector3(0, 0.06, 0.022) * hk, Vector3(0.124, 0.094, 0.126) * hk, hair, "head")
+		_blob(hc + Vector3(0, -0.045, 0.03) * hk, Vector3(0.128, 0.11, 0.105) * hk, hair, "head")             # 턱선까지 내려오는 종 모양 옆 · 뒤
+		for sx in [-1.0, 1.0]:
+			for k in 3:                                                                                     # 가운데서 갈라진 앞머리 가닥
+				_patch(hc, hr, Vector3((0.014 + 0.022 * k) * sx, 0.078 - 0.006 * k, -0.1), 0.009, 0.026, 0.004 + 0.0005 * k,
+					(-10.0 - 8.0 * k) * sx, hair, hk)
+		sheen_hair = null
+		return
+	_blob(hc + Vector3(0, 0.064, 0.03) * hk, Vector3(0.119, 0.088, 0.122) * hk, hair, "head")
+	if style != "long":                                             # 가르마에서 넘긴 앞머리 결(살짝 볼륨 — 생머리는 없이)
+		_blob(hc + Vector3(0.008, 0.094, -0.024) * hk, Vector3(0.08, 0.03, 0.066) * hk, hair, "head")
+	_blob(hc + Vector3(0, 0.0, 0.065) * hk, Vector3(0.108, 0.1, 0.075) * hk, hair, "head")
+	var strand := 1.0                                               # 앞 가닥 길이(턱까지 = 1)
+	if style == "bun":                                              # 낮은 쪽머리(뒤에서 보이게 크게) + 틀어 감은 결
+		_blob(hc + Vector3(0, -0.02, 0.155) * hk, Vector3(0.066, 0.056, 0.052) * hk, hair, "head")
+		_blob(hc + Vector3(0.012, -0.012, 0.196) * hk, Vector3(0.036, 0.03, 0.022) * hk, hair, "head")
+	elif style == "ponytail":                                       # 뒤통수 높이 묶음 + 늘어진 꼬리(굵게)
+		_blob(hc + Vector3(0, 0.03, 0.14) * hk, Vector3(0.04, 0.04, 0.035) * hk, hair, "head")
+		_line(hc + Vector3(0, 0.0, 0.17) * hk, hc + Vector3(0, -0.2, 0.19) * hk, 0.036 * hk, hair, "head")
+		strand = 0.7
+	else:                                                           # long — 등으로 늘어진 생머리 + 어깨 앞으로 오는 옆머리
+		_blob(hc + Vector3(0, -0.06 - 0.09 * (ln - 1.0), 0.07) * hk, Vector3(0.118, 0.15 * ln, 0.075) * hk, hair, "head")
+		for sx in [-1.0, 1.0]:
+			_blob(hc + Vector3(0.1 * sx, -0.06 - 0.06 * (ln - 1.0), 0.025) * hk, Vector3(0.03, 0.12 * ln, 0.06) * hk, hair, "head")
+	for sx in [-1.0, 1.0]:                                          # 앞 가닥: 관자놀이 → 광대 → 턱선(겹치게 이어 붙인다)
+		_patch(hc, hr, Vector3(0.084 * sx, 0.04, -0.082), 0.0042, 0.036, 0.004, 12.0 * sx, hair, hk)
+		_patch(hc, hr, Vector3(0.094 * sx, -0.02, -0.072), 0.0036, 0.04 * strand, 0.0045, 2.0 * sx, hair, hk)
+		if strand >= 1.0:
+			_patch(hc, hr, Vector3(0.086 * sx, -0.068, -0.08), 0.003, 0.03, 0.005, -14.0 * sx, hair, hk)
 	sheen_hair = null
 
 

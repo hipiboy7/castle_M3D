@@ -178,7 +178,7 @@ const LOOKS := {
 	#        검은 하이힐 · 카타나. 긴소매라 outfit vest(몸통 · 팔 모두 블라우스 색)
 	"ojiin": {"outfit": "vest", "suit": Color(0.17, 0.17, 0.18), "pants": Color(0.42, 0.24, 0.24), "shirt": Color(0.17, 0.17, 0.18), "collar": "open",
 		"skirt": true, "skin": Color(0.95, 0.88, 0.83), "hair": Color(0.05, 0.05, 0.06), "hair_style": "bun", "piercing": true,
-		"lips": Color(0.62, 0.24, 0.3), "big": false, "scale": 0.93, "wide": 0.84, "shoulder": 0.82, "depth": 0.85, "limb": 0.78, "head": 0.98,
+		"lips": Color(0.72, 0.22, 0.27), "big": false, "scale": 0.93, "wide": 0.84, "shoulder": 0.82, "depth": 0.85, "limb": 0.78, "head": 0.98,
 		"eye_h": 0.008, "brow_k": 0.7, "weapon_r": "katana", "weapon_l": "", "guard": "long"},
 	#  김재훈(0.97 · 0.89 보통): 실눈 · 붉은 갈색 투블럭 올백 · 녹회색 조끼 · 회색 셔츠 · 검은 넥타이 · 갈색 구두 · 은색 자동권총
 	"kimjaehoon": {"outfit": "vest", "suit": Color(0.42, 0.44, 0.41), "pants": Color(0.42, 0.44, 0.41), "shirt": Color(0.6, 0.6, 0.63),
@@ -282,7 +282,8 @@ static func look(name: String) -> Dictionary:
 		lk["wide"] = minf(wd, EXTRA_MAX_WIDE)
 		if lk.has("shoulder"):
 			lk["shoulder"] = minf(float(lk["shoulder"]), EXTRA_MAX_WIDE)
-	else:                                             # 메인은 덩치(몸 · 어깨 너비)를 MAIN_WIDE 배 — 그림 A(GLB) · B(도트)는 다시 구워야 따른다
+	elif not lk.get("female", false):                 # 메인은 덩치(몸 · 어깨 너비)를 MAIN_WIDE 배 — 그림 A(GLB) · B(도트)는 다시 구워야 따른다
+		# 여성은 빼고 표 그대로(2026-11-07 폰 '오지인 못생김' — 덩치를 키우면 가녀린 몸매가 둔해진다)
 		if lk.has("shoulder"):
 			lk["shoulder"] = float(lk["shoulder"]) * MAIN_WIDE
 		lk["wide"] = wd * MAIN_WIDE
