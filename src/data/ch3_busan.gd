@@ -21,7 +21,7 @@ const CANON := {
 	"ballerino_cage": {"fight": "fight:woojin_vasily", "place": "club_ballerino"},
 	"busan_arcade": {"fight": "fight:jintae_pyoyoung", "place": "busan"},
 	"busan_night": {"fight": "fight:bulhwi", "place": "busan"},
-	"rolling_ball": {"fight": "fight:kimshin_bulgom", "place": "busan"},
+	"rolling_ball": {"fight": "fight:kimshin_bulgom", "place": "rollingball"},
 	"moseunggyu_office": {"fight": "fight:pyoyoung_moseunggyu", "place": "busan"},
 	"busan_street": {"fight": "fight:kimshin_odohwa", "place": "busan"},
 	"busan_end": {"fight": "", "place": "busan"},

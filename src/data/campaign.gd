@@ -14,6 +14,15 @@ const Prologue = preload("res://src/data/prologue.gd")
 const Hoeam = preload("res://src/data/hoeam.gd")
 const Haseong = preload("res://src/data/haseong.gd")
 const Ch3 = preload("res://src/data/ch3_busan.gd")
+const Ch4 = preload("res://src/data/ch4_russia.gd")
+const Ch5 = preload("res://src/data/ch5_baekui.gd")
+const Ch6a = preload("res://src/data/ch6a_ship.gd")
+const Ch7 = preload("res://src/data/ch7_talks.gd")
+const Ch8 = preload("res://src/data/ch8_port.gd")
+const Ch9 = preload("res://src/data/ch9_casino.gd")
+const Ch10 = preload("res://src/data/ch10_hwajin.gd")
+const Ch12 = preload("res://src/data/ch12_church.gd")
+const Ch13 = preload("res://src/data/ch13_museum.gd")
 const Lines = preload("res://src/data/lines.gd")
 
 ## 시험판: 만든 장은 차례와 상관없이 모두 열어 둔다(폰 확인에서 아무 장이나 바로 — 본편 배포 때 false 로)
@@ -24,12 +33,21 @@ const CHAPTERS := [
 	{"id": "ch1", "no": 1, "kind": "stage", "event": "beat:yundeoksu", "table": "hoeam", "view": "town"},
 	{"id": "ch2", "no": 2, "kind": "stage", "event": "", "table": "haseong", "view": "haseong"},
 	{"id": "ch3", "no": 3, "kind": "stage", "event": "", "table": "ch3", "view": "world"},
+	{"id": "ch4", "no": 4, "kind": "stage", "event": "", "table": "ch4", "view": "world"},
+	{"id": "ch5", "no": 5, "kind": "stage", "event": "", "table": "ch5", "view": "world"},
+	{"id": "ch6a", "no": 6, "kind": "stage", "event": "", "table": "ch6a", "view": "world"},
 	{"id": "ch6", "no": 6, "kind": "duel", "event": "duel_offbeat:baekdochan"},
+	{"id": "ch7", "no": 7, "kind": "stage", "event": "", "table": "ch7", "view": "world"},
+	{"id": "ch8", "no": 8, "kind": "stage", "event": "", "table": "ch8", "view": "world"},
+	{"id": "ch9", "no": 9, "kind": "stage", "event": "", "table": "ch9", "view": "world"},
+	{"id": "ch10", "no": 10, "kind": "stage", "event": "", "table": "ch10", "view": "world"},
 	{"id": "ch11", "no": 11, "kind": "stage", "event": "raid:castle_hotel", "table": "hotel", "view": "hotel"},
+	{"id": "ch12", "no": 12, "kind": "stage", "event": "", "table": "ch12", "view": "world"},
+	{"id": "ch13", "no": 13, "kind": "stage", "event": "", "table": "ch13", "view": "world"},
 ]
 
 ## 장 표 이름 → 표(스크립트의 const 를 읽는다 — ROOMS · ROLES · HEROES · EVENT · PERIOD · LINES · CROWD_ID · 시간 값)
-const TABLES := {"prologue": Prologue, "hoeam": Hoeam, "haseong": Haseong, "hotel": Hotel, "ch3": Ch3}
+const TABLES := {"prologue": Prologue, "hoeam": Hoeam, "haseong": Haseong, "hotel": Hotel, "ch3": Ch3, "ch4": Ch4, "ch5": Ch5, "ch6a": Ch6a, "ch7": Ch7, "ch8": Ch8, "ch9": Ch9, "ch10": Ch10, "ch12": Ch12, "ch13": Ch13}
 
 ## 옛 실행 인자(--mode duel|stage) → 장 id
 const MODE_ALIAS := {"duel": "ch6", "stage": "ch11"}
@@ -73,6 +91,16 @@ static func view(id: String) -> String:
 ## [이름, 한 줄] — lines.json chapters.<id>
 static func title(id: String):
 	return Lines.at("chapters." + id)
+
+
+## 짧은 이름(싸움 중 메뉴의 작은 카드 — 장이 많을 때): 프롤로그 · N장 · 한 장을 앞 · 뒤로 나눈 앞쪽(id 끝 a)은 'N장 앞'
+static func short_title(id: String) -> String:
+	var c := chapter(id)
+	if c.is_empty():
+		return ""
+	if int(c["no"]) == 0:
+		return str(title(id)[0])
+	return "%d장%s" % [int(c["no"]), " 앞" if id.ends_with("a") else ""]
 
 
 ## 실행 인자 · 옛 이름 → 할 수 있는 장 id(못 하는 장이면 "")

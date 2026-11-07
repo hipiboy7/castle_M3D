@@ -21,17 +21,39 @@ var items: Array = []           # [{"id": 장 id, "title", "sub", "state": open 
 var _last_safe := Rect2()
 
 
-## 안전 영역 · 카드 수 → {"cont": 이어하기 자리, "cards": [카드 자리]} — 화면 가운데 아래쪽
+## 안전 영역 · 카드 수 → {"cont": 이어하기 자리, "cards": [카드 자리]} — 화면 가운데 아래쪽.
+## 카드가 ROW_MAX 보다 많으면(3 ~ 13장 — 2026-11-08 장 15개) 여러 줄로 낮게(ROWS_H): 카드 덩어리는 안전 영역 아래 끝에 붙이고
+## 이어하기는 그 위에
+const ROW_MAX := 6
+const PER_ROW := 5
+const ROWS_H := 64.0
+const ROWS_GAP := 10.0
+
+
 static func layout(sa: Rect2, n: int) -> Dictionary:
 	var c := sa.get_center()
 	var cont_r := Rect2(c.x - CONT.x * 0.5, c.y - 20.0, CONT.x, CONT.y)
 	var cards: Array = []
-	if n > 0:
+	if n <= 0:
+		return {"cont": cont_r, "cards": cards}
+	if n <= ROW_MAX:
 		var w := minf(CARD_W_MAX, (sa.size.x - 80.0 - GAP * (n - 1)) / n)
 		var total := w * n + GAP * (n - 1)
 		var x0 := c.x - total * 0.5
 		for i in n:
 			cards.append(Rect2(x0 + i * (w + GAP), c.y + 100.0, w, CARD_H))
+		return {"cont": cont_r, "cards": cards}
+	var rows := ceili(float(n) / PER_ROW)
+	var w2 := minf(CARD_W_MAX, (sa.size.x - 80.0 - GAP * (PER_ROW - 1)) / PER_ROW)
+	var block := rows * ROWS_H + (rows - 1) * ROWS_GAP
+	var y0 := sa.end.y - 16.0 - block
+	cont_r.position.y = minf(cont_r.position.y, y0 - 14.0 - CONT.y)
+	for i in n:
+		var row := i / PER_ROW
+		var in_row := mini(PER_ROW, n - row * PER_ROW)
+		var total2 := w2 * in_row + GAP * (in_row - 1)
+		var x1 := c.x - total2 * 0.5
+		cards.append(Rect2(x1 + (i % PER_ROW) * (w2 + GAP), y0 + row * (ROWS_H + ROWS_GAP), w2, ROWS_H))
 	return {"cont": cont_r, "cards": cards}
 
 
@@ -80,6 +102,12 @@ func _draw() -> void:
 		draw_rect(r, COL_CARD if open else Color(COL_CARD, 0.45))
 		draw_rect(r, COL_EDGE if open else Color(COL_EDGE, 0.15), false, 2.0)
 		var tc := COL_TEXT if open else COL_DIM
+		if r.size.y < CARD_H:                          # 여러 줄(낮은 카드): 이름 한 줄 + 깬 횟수(작은 글)
+			draw_string(font, r.position + Vector2(8, 30), str(it["title"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 20, tc)
+			var small := str(it.get("mark", "")) if str(it.get("mark", "")) != "" else str(it["sub"])
+			draw_string(font, r.position + Vector2(8, 54), small, HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 15,
+				COL_MARK if open and str(it.get("mark", "")) != "" else COL_DIM)
+			continue
 		draw_string(font, r.position + Vector2(8, 40), str(it["title"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 24, tc)
 		draw_string(font, r.position + Vector2(8, 72), str(it["sub"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 18, COL_DIM)
 		if str(it.get("mark", "")) != "":

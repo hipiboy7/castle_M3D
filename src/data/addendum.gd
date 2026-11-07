@@ -211,7 +211,12 @@ static func canon_fallback(id: String) -> Dictionary:
 		rank = any
 	if name == "" and rank == "":
 		return {}
-	return {"id": id, "name": name if name != "" else id, "rank": rank if rank != "" else "건달급", "stats": {}, "skills": [],
+	if rank == "":
+		rank = "건달급"
+	# 능력치는 기술(막는 확률 — derive guard)만 등급으로(건달급 40 → 한 등급마다 +3, 톱 79). 힘 · 맷집 · 속도는 기준 80(1배) —
+	# 손맛은 장 표 ROLES(hp · dmg_k)가 정한다
+	var idx: int = maxi(0, Common.ranks().find(rank))
+	return {"id": id, "name": name if name != "" else id, "rank": rank, "stats": {"기술": 40 + idx * 3}, "skills": [],
 		"can_parry": false, "src": "1층 없음 — castle_common looks.json 이름 · ranks.json 강함표 등급(3 ~ 13장, 3D)"}
 
 

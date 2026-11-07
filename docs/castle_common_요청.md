@@ -1,5 +1,6 @@
 # castle_common 요청 — castle M 3D → castle_common (누적)
 
+> 정정 이력: 2026-11-08 (3) — 27 · 28 · 29행 더함(3 ~ 13장 — 사용자 2026-11-08 "3장부터 13장까지 중단없이 모두 다 진행").
 > 정정 이력: 2026-11-08 (2) — 25 · 26행 지움(castle_common c3ed030 공통 반영 — 사용자 2026-11-08 "25 · 26 둘 다 공통으로 올려"). 지금 열린 줄 없음.
 > 정정 이력: 2026-11-08 — 23 · 24행 지움(castle_common 79 · 80차 반영 — looks.json · 2장 인물 5 · 남궁혁 rank), 25 · 26행 더함(rc.2 폰 피드백 묶음 B — 사용자 2026-11-07).
 > 정정 이력: 2026-11-06 — 1 ~ 4 · 12 · 20 ~ 22행 지움(castle_common 72차가 직접 — `b7e1065`: 기절 `stun_rel_sec` 넷 · `stun_hit` · `beats` 공통(사용자 답58 #5 '공통으로') · 기획서 00 결정 7 · 03 S5 · games.json 이 판 canon 받기 · `data/characters.json` 0 · 1장 인물 7). 23행(looks)은 castle_common 이 받아 진행 중.
@@ -14,3 +15,6 @@
 
 | # | 위치 | 파일:id | 칸 | 지금 값 | 바랄 값 | 근거 | 급함 |
 |---|---|---|---|---|---|---|---|
+| 27 | 데이터 | `data/characters.json` — 3 ~ 13장 이름 있는 적 | 인물 줄 | 없음(3D 는 looks.json 이름 + ranks.json 강함표 등급으로 대체 — `src/data/addendum.gd` canon_fallback, 능력치는 기술만 등급으로 · 나머지 80) | 인물 줄(rank · stats · weapons · skills): 바실리 · 불곰 · 모승규 · 오도화 · 남일호 · 마사 · 샤이어 · 똘배 · 드미트리 · 구스타프 · 바리스타 · 장호 · 코모도 · 스케일단장 · 마크 · 바이슨 · 판테라 · 앤디청 · 은보 · 라텔 · 도우첸 · 한태철 · 링링 · 유우성 · 마준영 · 그롤라 · 엄지 · 검지 · 최혁진 · 도학수 · 어광득 · 사인진 | 3D 3 ~ 13장 장 표(`src/data/ch3_busan.gd` ~ `ch13_museum.gd`) — 손맛은 3층 ROLES 로 맞췄다 | 보통 |
+| 28 | 데이터 | `data/characters.json` — pyoyoung · richeon · ryujihak · mahakyoung | rank · stats | null(이름만) | 강함표 대표 등급(표영 (1부) 전국구 · 리천 톱 · 류지학 시기별 · 마학영 톱) · 능력치 | 3D 는 null 이면 강함표로 채움(addendum.character) — 표영은 3장에서 조작 인물 | 보통 |
+| 29 | 데이터 | `data/ranks.json` strength | 줄 | 드미트리 · 장호 · 도우첸 · 검지 없음 | 3D 장 표 NPCS 값: 드미트리 전국구 · 장호 조장급 · 도우첸 외성 하위(피우진이 이기면 외성 하위가 되므로) · 검지 내성 하위(엄지 짝) — 후보 | 3D 3 · 4 · 10 · 12장 | 낮음 |

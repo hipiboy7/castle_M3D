@@ -36,10 +36,29 @@ static func _row(sa: Rect2, n: int, y: float) -> Array:
 	return out
 
 
+## 장이 ROW_MAX 보다 많으면(3 ~ 13장 — 장 15개) 장 줄을 낮은 카드(SMALL_H) 여러 줄로(줄마다 PER_ROW) — 이름은 짧게(main.gd)
+const ROW_MAX := 8
+const PER_ROW := 8
+const SMALL_H := 46.0
+const SMALL_GAP := 8.0
+
+
+static func _rows(sa: Rect2, n: int, y: float) -> Array:
+	var out: Array = []
+	var w := minf(W_MAX, (sa.size.x - 80.0 - GAP * (PER_ROW - 1)) / PER_ROW)
+	for i in n:
+		var row := i / PER_ROW
+		var in_row := mini(PER_ROW, n - row * PER_ROW)
+		var x0 := sa.get_center().x - (w * in_row + GAP * (in_row - 1)) * 0.5
+		out.append(Rect2(x0 + (i % PER_ROW) * (w + GAP), y + row * (SMALL_H + SMALL_GAP), w, SMALL_H))
+	return out
+
+
 ## 안전 영역 · 장 수 · 스테이지 수 → {"chapters": [자리], "stages": [자리], "resume": 자리, "title": 자리}
 static func layout(sa: Rect2, n_ch: int, n_st: int) -> Dictionary:
 	var c := sa.get_center()
-	return {"chapters": _row(sa, n_ch, c.y - 160.0), "stages": _row(sa, n_st, c.y - 10.0),
+	var chs: Array = _row(sa, n_ch, c.y - 160.0) if n_ch <= ROW_MAX else _rows(sa, n_ch, c.y - 172.0)
+	return {"chapters": chs, "stages": _row(sa, n_st, c.y - 10.0),
 		"resume": Rect2(c.x - BTN.x - GAP * 0.5, c.y + 140.0, BTN.x, BTN.y),
 		"title": Rect2(c.x + GAP * 0.5, c.y + 140.0, BTN.x, BTN.y)}
 
@@ -92,7 +111,8 @@ func _draw() -> void:
 	draw_string(font, Vector2(sa.position.x, sa.get_center().y - 200.0), heading, HORIZONTAL_ALIGNMENT_CENTER, sa.size.x, 30, COL_TEXT)
 	for i in chapters.size():
 		var c: Dictionary = chapters[i]
-		_card(font, L["chapters"][i], str(c["title"]), c["id"] == picked, bool(c["open"]))
+		var r: Rect2 = L["chapters"][i]
+		_card(font, r, str(c["title"]), c["id"] == picked, bool(c["open"]), 22 if r.size.y >= CARD_H else 18)
 	for i in stages.size():
 		var st: Dictionary = stages[i]
 		_card(font, L["stages"][i], str(st["title"]) + (" ◀" if st.get("now", false) else ""), false, true, 20)

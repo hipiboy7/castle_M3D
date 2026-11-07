@@ -45,16 +45,27 @@ func test_title_menu_layout() -> void:
 			if i > 0:
 				check(cards[i].position.x >= cards[i - 1].end.x, "카드 %d 가 앞 카드와 안 겹친다" % i)
 	check(TitleMenu.layout(Rect2(0, 0, 1280, 720), 0)["cards"].is_empty(), "카드가 없으면 빈 줄")
+	# 장 15개(3 ~ 13장 — 2026-11-08): 여러 줄 · 안전 영역 안 · 서로 · 이어하기와 안 겹침
+	for sa in [Rect2(0, 0, 1280, 720), Rect2(44, 0, 1800, 700), Rect2(0, 0, 1280, 1067)]:
+		var L := TitleMenu.layout(sa, 15)
+		var cards: Array = L["cards"]
+		check(cards.size() == 15 and cards[14].position.y > cards[0].position.y, "열다섯 장은 여러 줄")
+		check(sa.encloses(L["cont"]), "이어하기가 안전 영역 안(여러 줄) %s" % sa)
+		for i in cards.size():
+			check(sa.encloses(cards[i]) and not cards[i].intersects(L["cont"]), "카드 %d 안전 영역 안 · 이어하기와 안 겹침 %s" % [i, sa])
+			for j in i:
+				check(not cards[i].intersects(cards[j]), "카드 %d · %d 안 겹침" % [i, j])
 
 
 ## 싸움 중 메뉴(스테이지 고르기): 장 줄 · 스테이지 줄 · 계속 · 처음 화면 — 커버 · 펼친 화면에서 안전 영역 안 · 안 겹침
 func test_stage_menu_layout() -> void:
 	for sa in [Rect2(0, 0, 1280, 720), Rect2(44, 0, 1800, 700), Rect2(0, 0, 1280, 1067)]:
-		var L := StageMenu.layout(sa, 4, 5)
-		var all: Array = L["chapters"] + L["stages"] + [L["resume"], L["title"]]
-		check(L["chapters"].size() == 4 and L["stages"].size() == 5, "장 넷 · 스테이지 다섯")
-		for i in all.size():
-			check(sa.encloses(all[i]), "자리 %d 가 안전 영역 안 %s %s" % [i, sa, all[i]])
-			for k in range(i + 1, all.size()):
-				check(not all[i].intersects(all[k]), "자리 %d · %d 가 안 겹친다 %s" % [i, k, sa])
+		for nn in [[4, 5], [15, 8]]:                  # 장 15개(3 ~ 13장)면 장 줄이 두 줄 · 방 8개(2장)
+			var L := StageMenu.layout(sa, nn[0], nn[1])
+			var all: Array = L["chapters"] + L["stages"] + [L["resume"], L["title"]]
+			check(L["chapters"].size() == nn[0] and L["stages"].size() == nn[1], "장 %d · 스테이지 %d" % nn)
+			for i in all.size():
+				check(sa.encloses(all[i]), "자리 %d 가 안전 영역 안 %s %s" % [i, sa, all[i]])
+				for k in range(i + 1, all.size()):
+					check(not all[i].intersects(all[k]), "자리 %d · %d 가 안 겹친다 %s" % [i, k, sa])
 

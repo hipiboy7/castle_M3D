@@ -577,7 +577,8 @@ func _fill_stage_menu() -> void:
 	smenu.buttons = {"resume": str(ml["resume"]), "title": str(ml["title"])}
 	smenu.chapters = []
 	for id in Campaign.ids():
-		smenu.chapters.append({"id": id, "title": str(Campaign.title(id)[0]), "open": Save.unlocked(save, id)})
+		var long_t: bool = Campaign.playable_ids().size() <= StageMenu.ROW_MAX     # 장이 많으면 작은 카드 두 줄 — 짧은 이름
+		smenu.chapters.append({"id": id, "title": str(Campaign.title(id)[0]) if long_t else Campaign.short_title(id), "open": Save.unlocked(save, id)})
 	smenu.picked = menu_ch
 	var now := int(d.get("room_i", 0)) if kind == "stage" else 0
 	smenu.stages = []

@@ -15,7 +15,7 @@ const Town3d = preload("res://src/view/town3d.gd")
 const Haseong3d = preload("res://src/view/haseong3d.gd")
 const World3d = preload("res://src/view/world3d.gd")
 ## 지금 할 수 있는 장(장 목록 campaign.gd 와 같아야 한다 — 장을 더하면 여기도)
-const PLAYABLE := ["ch0", "ch1", "ch2", "ch3", "ch6", "ch11"]
+const PLAYABLE := ["ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6a", "ch6", "ch7", "ch8", "ch9", "ch10", "ch11", "ch12", "ch13"]
 const Haseong = preload("res://src/data/haseong.gd")
 const Stage = preload("res://src/combat/stage.gd")
 
@@ -47,6 +47,8 @@ func test_chapter_list() -> void:
 	check(Campaign.from_mode("ch1") == "ch1" and Campaign.from_mode("x") == "", "장 id 는 그대로 · 없는 이름은 빈칸")
 	check(Campaign.table("ch11") != null and Campaign.table("ch6") == null, "여러 사람 판만 장 표가 있다")
 	check(Campaign.kind("ch6") == "duel" and Campaign.kind("ch11") == "stage" and Campaign.kind("nope") == "", "장 종류")
+	check(Campaign.short_title("ch3") == "3장" and Campaign.short_title("ch6a") == "6장 앞" and Campaign.short_title("ch0") == "프롤로그"
+		and Campaign.short_title("nope") == "", "짧은 이름(싸움 중 메뉴 작은 카드)")
 
 
 ## 장 데이터 검사 — 장 표(hotel.gd 등)의 모든 id 가 1층(castle_common · 덧붙임) · 3층 표 · 외형 · 대사 · 진행에 있다
@@ -149,11 +151,11 @@ func test_next_chapter_and_unlock() -> void:
 	check(Save.next_chapter(s) == "ch2", "1장을 깨면 2장")
 	Save.record_clear(s, "ch2", 9000)
 	Save.record_clear(s, "ch6", 3000)
-	check(Save.next_chapter(s) == "ch11", "6장을 깨면 11장")
-	Save.record_clear(s, "ch11", 9000)
-	check(Save.next_chapter(s) == "ch11", "끝 장을 깨면 끝 장 그대로")
-	s["last"] = "ch6"
-	check(Save.next_chapter(s) == "ch11", "마지막으로 깬 장의 다음 장")
+	check(Save.next_chapter(s) == "ch7", "6장(결투)을 깨면 7장")
+	Save.record_clear(s, "ch13", 9000)
+	check(Save.next_chapter(s) == "ch13", "끝 장(13장)을 깨면 끝 장 그대로")
+	s["last"] = "ch11"
+	check(Save.next_chapter(s) == "ch12", "마지막으로 깬 장의 다음 장")
 	s["last"] = "nope"
 	check(Save.next_chapter(s) == "ch0", "마지막 장이 못 하는 장이면 첫 장")
 	# rc.2 폰(2026-11-07): 카드로 1장부터 깨면(프롤로그는 안 깸) 이어하기가 2장이어야 — 옛 규칙은 안 깬 첫 장(프롤로그)으로 갔다
