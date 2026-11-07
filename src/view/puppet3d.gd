@@ -158,6 +158,11 @@ func _build() -> void:
 			_mesh(cs, _cyl(0.062, 0.066, 0.04), shirt, Vector3(0, 0.205, -0.004))
 		if lk.get("tie") != null:
 			_mesh(cs, _box(Vector3(0.036, 0.24, 0.014)), _mat(lk["tie"], 0.5, 0.2), Vector3(0, 0.085, -0.127))
+		if lk.get("coat_collar") != null:                        # 겉옷 깃 색(outfit.outer.collar — 마준영 베이지 깃): V 를 따라 넓은 깃 + 목 뒤
+			var ccm := _mat(lk["coat_collar"], 0.9, 0.0)
+			for sx in [-1.0, 1.0]:
+				_mesh(cs, _capsule(0.026, 0.26), ccm, Vector3(0.068 * sx, 0.11, -0.118), Vector3(0, 0, 14 * sx))
+			_mesh(cs, _capsule(0.032, 0.28 * wide), ccm, Vector3(0, 0.2, 0.04), Vector3(0, 0, 90))
 	if lk.get("badge") != null:                                  # 옷깃 금 배지 (왼쪽 가슴)
 		_mesh(cs, _cyl(0.014, 0.014, 0.008), _mat(lk["badge"], 0.2, 0.2, 0.9), Vector3(-0.085, 0.16, -0.122), Vector3(90, 0, 0))
 	if lk.get("holster") != null:
@@ -283,7 +288,7 @@ func _face(lk: Dictionary, skin: Material, eye: Material, dark: Material, hair: 
 			_scar(J["head"], kind, _mat(Looks.scar_col(lk), 0.7, 0.0))
 	_hair(J["head"], hair, str(lk.get("hair_style", "short")))
 	if lk.get("hat") != null:
-		_hat(J["head"], str(lk["hat"]), _mat(lk.get("hat_col", Color(0.2, 0.2, 0.22)), 0.9, 0.2))
+		_hat(J["head"], str(lk["hat"]), _mat(lk.get("hat_col", Color(0.2, 0.2, 0.22)), 0.9, 0.2), lk.get("hat_band"))
 	if lk.get("beard", false):                                   # 짧은 턱수염 · 콧수염 (신겐)
 		var bm := _mat(lk.get("beard_col", lk["hair"]), 0.7, 0.0)
 		_mesh(J["head"], _box(Vector3(0.07, 0.03, 0.03)), bm, Vector3(0, -0.085, -0.075))
@@ -297,6 +302,10 @@ func _face(lk: Dictionary, skin: Material, eye: Material, dark: Material, hair: 
 		var gm := _mat(lk.get("beard_col", lk["hair"]), 0.7, 0.0)
 		_mesh(J["head"], _box(Vector3(0.034, 0.05, 0.024)), gm, Vector3(0, -0.098, -0.072), Vector3(18, 0, 0))
 		_mesh(J["head"], _box(Vector3(0.04, 0.009, 0.01)), gm, Vector3(0, -0.033, -0.104))
+	if lk.get("sideburns", false):                               # 구레나룻(귀 앞 ~ 턱 모서리 — 크리사 · 이환 · 마준영)
+		var sbm := _mat(lk.get("beard_col", lk["hair"]), 0.7, 0.0)
+		for sx in [-1.0, 1.0]:
+			_mesh(J["head"], _box(Vector3(0.012, 0.07, 0.018)), sbm, Vector3(0.094 * sx, -0.035, -0.036), Vector3(-15, 0, 8 * sx))
 	if lk.get("bandage") != null:                                # 머리띠처럼 감은 흰 붕대 (강만재 — 앞 화 부상)
 		var bd := TorusMesh.new()
 		bd.inner_radius = 0.094
@@ -325,6 +334,9 @@ func _scar(head: Node3D, kind: String, m: Material) -> void:
 		_mesh(head, _box(Vector3(0.006, 0.03, 0.006)), m, Vector3(0.012, -0.072, -0.088), Vector3(16, 0, 0))
 	elif kind == "brow":
 		_mesh(head, _box(Vector3(0.007, 0.06, 0.007)), m, Vector3(0.04, 0.052, -0.094), Vector3(-24, 0, 10))
+	elif kind == "x":                                            # 콧등에서 엇갈리는 긴 두 줄(최민욱 — 이마 · 눈썹에서 양뺨까지)
+		_mesh(head, _box(Vector3(0.006, 0.14, 0.006)), m, Vector3(-0.004, 0.022, -0.1), Vector3(0, 0, -42))
+		_mesh(head, _box(Vector3(0.006, 0.12, 0.006)), m, Vector3(0.012, 0.0, -0.1), Vector3(0, 0, 45))
 	elif kind == "double":
 		for k in 2:
 			_mesh(head, _box(Vector3(0.006, 0.042, 0.006)), m, Vector3(-0.056 - 0.012 * k, -0.024 - 0.012 * k, -0.09 + 0.006 * k),
@@ -335,7 +347,7 @@ func _scar(head: Node3D, kind: String, m: Material) -> void:
 
 
 ## 모자: beanie — 챙 없는 니트 비니(인수 · 신태진 · 남구 청년회), bucket — 챙이 아래로 처진 벙거지
-func _hat(head: Node3D, kind: String, m: Material) -> void:
+func _hat(head: Node3D, kind: String, m: Material, band = null) -> void:
 	if kind == "beanie":
 		_mesh(head, _sphere(0.116, 0.2), m, Vector3(0, 0.074, 0.014), Vector3(-6, 0, 0), Vector3(1.02, 0.68, 1.04))
 		_mesh(head, _cyl(0.114, 0.117, 0.026), m, Vector3(0, 0.062, 0.01), Vector3(-8, 0, 0), Vector3(1.0, 1.0, 1.04))   # 접어 올린 단(눈썹 위 — 앞머리가 보이게)
@@ -354,6 +366,8 @@ func _hat(head: Node3D, kind: String, m: Material) -> void:
 	elif kind == "fedora":                                       # 중절모: 몸통 + 둘레 챙
 		_mesh(head, _cyl(0.09, 0.1, 0.08), m, Vector3(0, 0.13, 0.01))
 		_mesh(head, _cyl(0.17, 0.17, 0.012), m, Vector3(0, 0.085, 0.01))
+		if band != null:                                          # 띠(headwear.band — 김황 흰 페도라 검은 띠)
+			_mesh(head, _cyl(0.094, 0.098, 0.022), _mat(band, 0.8, 0.0), Vector3(0, 0.1, 0.01))
 	elif kind == "hood":                                         # 후드: 머리 뒤 · 옆 · 위
 		_mesh(head, _sphere(0.13, 0.27), m, Vector3(0, 0.02, 0.04), Vector3.ZERO, Vector3(1.05, 1.0, 0.95))
 

@@ -145,6 +145,8 @@ def convert(lk, cid="", roster=False, female=False):
             d["outfit"] = "robe"
         elif ok == "vest":
             d["outfit"] = "vest"         # 조끼 — 팔은 셔츠 소매
+        if rgb(outer.get("collar")):
+            d["coat_collar"] = lift(rgb(outer["collar"]))   # 겉옷 깃 색(77차 outfit.outer.collar — 마준영 베이지 깃)
         if ok == "leather_jacket":
             d["leather"] = True
         if roster and ok in ("bomber", "track_jacket", "hoodie", "parka", "padded", "cardigan"):
@@ -219,7 +221,10 @@ def convert(lk, cid="", roster=False, female=False):
     # 흉터 자리(+ 로 여럿 — make_models · puppet3d _scar 가 가는 선으로 그린다): double 왼뺨 두 줄 · nose 콧등 ~ 왼뺨 + 턱 ·
     # eye_l · eye_r 눈 세로 · brow 이마 · cheek_l · cheek_r 뺨 사선 한 줄 · chin 입술 아래 ~ 턱
     kinds = []
-    if len([s for s in scars if s in ("left_cheek", "right_cheek")]) >= 2 or two:
+    xnose = any(s.get("where") == "nose_bridge" and s.get("shape") == "x" for s in sl)
+    if xnose and "left_cheek" in scars and "right_cheek" in scars:
+        kinds.append("x")                 # 콧등에서 엇갈려 이마 · 양뺨까지 긴 두 줄(최민욱 — 77차)
+    elif len([s for s in scars if s in ("left_cheek", "right_cheek")]) >= 2 or two:
         kinds.append("double")
     elif "nose_bridge" in scars:
         kinds.append("nose")
@@ -233,7 +238,7 @@ def convert(lk, cid="", roster=False, female=False):
         kinds.append("eye_l" if "left_eye" in scars else "eye_r")    # 눈썹 위에서 눈을 지나 뺨으로 세로 한 줄(황보민철)
         if roster and "left_eye" in scars and "right_eye" in scars:
             kinds.append("eye_r")
-    if "forehead" in scars:
+    if "forehead" in scars and "x" not in kinds:
         kinds.append("brow")
     if ("lip" in scars or "chin" in scars) and "nose" not in kinds:
         kinds.append("chin")
@@ -245,12 +250,16 @@ def convert(lk, cid="", roster=False, female=False):
     d["beard"] = "beard" in fh
     d["mustache"] = "mustache" in fh
     d["goatee"] = "goatee" in fh
+    if "sideburns" in fh:
+        d["sideburns"] = True             # 구레나룻 · 턱끈 수염(크리사 · 이환 · 마준영 — 77차)
     if h.get("blind_eye") in ("left", "right"):
         d["blind_eye"] = h["blind_eye"][0]   # 인물 자기 쪽 — 그 눈은 흰자
     hw = h.get("headwear") or {}
     if hw.get("kind") in HAT:
         d["hat"] = HAT[hw["kind"]]
         d["hat_col"] = lift(rgb(hw.get("color"))) or (0.2, 0.2, 0.22)
+        if rgb(hw.get("band")):
+            d["hat_band"] = rgb(hw["band"])   # 모자 띠 색(77차 head.headwear.band — 김황 흰 페도라 검은 띠)
     acc = {a.get("kind"): a for a in lk.get("accessories") or []}
     for a in lk.get("accessories") or []:
         if a.get("kind") == "other" and a.get("where") == "lips" and rgb(a.get("color")):

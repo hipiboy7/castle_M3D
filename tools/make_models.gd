@@ -182,9 +182,16 @@ func _body(lk: Dictionary) -> void:
 			_blob(g["chest"] + Vector3(0, 0.2 - 0.04 * vk, -bz * 0.97), Vector3(0.03, 0.05, 0.02) * vk, skin, "chest")
 		if lk.get("tie") != null:
 			_blob(g["chest"] + Vector3(0, 0.08, -bz * 0.97 - 0.012), Vector3(0.022, 0.11, 0.015), lk["tie"], "chest")
+		var has_cc: bool = lk.get("coat_collar") != null            # 겉옷 깃 색(outfit.outer.collar — 마준영 롱코트 베이지 깃): 넓은 깃 + 목 뒤 깃
+		var lap: Color = suit.darkened(0.3)
+		if has_cc:
+			lap = lk["coat_collar"]
 		for sx in [-1.0, 1.0]:
-			_line(g["chest"] + Vector3(0.075 * sx, 0.25, -bz * 0.78), g["chest"] + Vector3((pw + 0.005) * sx, 0.0, -bz * 1.02), 0.01,
-				suit.darkened(0.3), "chest")
+			_line(g["chest"] + Vector3(0.075 * sx, 0.25, -bz * 0.78), g["chest"] + Vector3((pw + 0.005) * sx, 0.0, -bz * 1.02),
+				0.026 if has_cc else 0.01, lap, "chest")
+		if has_cc:
+			var cc: Color = lk["coat_collar"]
+			_blob(g["chest"] + Vector3(0, 0.25, bz * 0.35), Vector3(0.14 * wide, 0.045, 0.08), cc, "chest")
 	if lk.get("holster") != null:                                   # 등 X자 가죽 멜빵 + 앞 어깨끈(백도찬 · 황보민철)
 		var hcol: Color = lk["holster"]
 		for sx in [-1.0, 1.0]:
@@ -280,6 +287,12 @@ func _face(lk: Dictionary, hc: Vector3, hk: float) -> void:
 			_blob(hc + Vector3(0.034 * sx, -0.056, -0.106) * hk, Vector3(0.007, 0.014, 0.008) * hk, beard, "head")
 	if lk.get("goatee", false):                                     # 염소수염(김성준)
 		_blob(hc + Vector3(0, -0.11, -0.092) * hk, Vector3(0.024, 0.034, 0.02) * hk, beard, "head")
+	if lk.get("sideburns", false):                                  # 구레나룻 — 귀 앞에서 턱 모서리로(염소수염이 있으면 턱끈처럼 턱 끝까지 — 크리사)
+		for sx in [-1.0, 1.0]:
+			var jaw := _on_head(hc, hk, Vector3(0.072 * sx, -0.085, -0.08))
+			_line(_on_head(hc, hk, Vector3(0.1 * sx, -0.005, -0.055)), jaw, 0.013 * hk, beard, "head")
+			if lk.get("goatee", false):
+				_line(jaw, _on_head(hc, hk, Vector3(0.022 * sx, -0.12, -0.09)), 0.011 * hk, beard, "head")
 	if lk.get("face_ring") != null:                                 # 입술 · 눈썹 피어싱(라텔 · 판테라)
 		_blob(hc + Vector3(0.016, -0.068, -0.118) * hk, Vector3(0.007, 0.007, 0.006) * hk, lk["face_ring"], "head")
 	if lk.get("eyepatch") != null:                                  # 안대(남일호) — 눈 위 검은 판 + 끈
@@ -319,6 +332,12 @@ func _scar(kind: String, hc: Vector3, hk: float, col: Color) -> void:
 	elif kind == "eye_l" or kind == "eye_r":                         # 눈썹 위에서 눈을 지나 뺨으로 세로 한 줄(인물 자기 쪽)
 		var ex := -0.045 if kind == "eye_l" else 0.045
 		_line(_on_head(hc, hk, Vector3(ex, 0.07, -0.11)), _on_head(hc, hk, Vector3(ex * 1.05, -0.04, -0.11)), r, col, "head")
+	elif kind == "x":                                                # 콧등에서 엇갈리는 긴 두 줄(최민욱): 오른 이마 → 왼뺨 · 왼 눈썹 안 → 오른뺨
+		var m := _on_head(hc, hk, Vector3(0.0, 0.015, -0.12))
+		_line(_on_head(hc, hk, Vector3(0.06, 0.095, -0.1)), m, r, col, "head")
+		_line(m, _on_head(hc, hk, Vector3(-0.075, -0.045, -0.1)), r, col, "head")
+		_line(_on_head(hc, hk, Vector3(-0.022, 0.06, -0.115)), m, r, col, "head")
+		_line(m, _on_head(hc, hk, Vector3(0.075, -0.05, -0.1)), r, col, "head")
 	elif kind == "double":
 		for k in 2:
 			var o := Vector3(-0.014 * k, -0.016 * k, 0)
@@ -393,7 +412,7 @@ func _props(lk: Dictionary, hc: Vector3, hk: float) -> void:
 		elif kind == "fedora":                                      # 중절모: 높은 몸통 + 둘레 챙 + 띠
 			_blob(hc + Vector3(0, 0.13, 0.01) * hk, Vector3(0.115, 0.075, 0.115) * hk, hcol, "head")
 			_blob(hc + Vector3(0, 0.08, 0.01) * hk, Vector3(0.19, 0.014, 0.19) * hk, hcol, "head")
-			_blob(hc + Vector3(0, 0.095, 0.01) * hk, Vector3(0.12, 0.016, 0.12) * hk, hcol.darkened(0.65), "head")
+			_blob(hc + Vector3(0, 0.095, 0.01) * hk, Vector3(0.12, 0.016, 0.12) * hk, lk.get("hat_band", hcol.darkened(0.65)), "head")   # 띠(headwear.band — 김황 검은 띠)
 		elif kind == "hood":                                        # 후드: 머리 뒤 · 옆 · 위를 감싼다(얼굴은 보이게)
 			_blob(hc + Vector3(0, 0.03, 0.05) * hk, Vector3(hr + 0.03, 0.16, 0.13) * hk, hcol, "head")
 		elif kind == "helmet":
