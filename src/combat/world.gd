@@ -256,9 +256,9 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 		shake = maxi(shake, 6)
 		events.append(["lethal", d, at, frac, lethal])
 		stats["boss_offbeats" if a.is_boss else "offbeats"] += 1
-	# 한 방: 기술의 kill_top(그 등급 이하) · 등급 차 ONE_SHOT_GAP 이상 — 조작 인물 · 방의 보스는 빼고(보스전은 보통 피해로 —
+	# 한 방: 기술의 ko_rank(그 등급 이하) · 등급 차 one_shot_gap 이상 — 조작 인물 · 방의 보스는 빼고(보스전은 보통 피해로 —
 	# 위빙 · 오리지널이 보스를 두 번에 눕혀 2장 신태진전이 17초에 끝났다, 봇 판 2026-11-08)
-	if lethal == "" and not d.oneshot_immune and (Skills.kills(mv, a.rank, d.rank) or Skills.one_shot(a.rank, d.rank, false)):
+	if lethal == "" and not d.oneshot_immune and (Skills.kills(mv, d.rank) or Skills.one_shot(a.rank, d.rank, false)):
 		dmg = maxf(dmg, d.hp)
 		events.append(["oneshot", d, at])
 	d.hp -= dmg

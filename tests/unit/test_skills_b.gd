@@ -3,13 +3,12 @@ extends "res://tests/helpers.gd"
 ## 근거리 급소 베기 · 난무 · 피우진 미친 코어 카운터 · 등급 차 한 방(3D 덧붙임). A 등급 — 손 입력으로 world.tick 을 돌린다.
 ## 판은 6장 결투(김신 내성 중위 대 백도찬 톱)를 빌려 쓰고, 등급 · 무적 플래그는 시험마다 바꿔 끼운다.
 
-const Addendum = preload("res://src/data/addendum.gd")
 
 
 func _use(d: Dictionary, sid: String) -> void:
 	var h = d["hero"]
 	if h.skill_index(sid) < 0:
-		h.skills.append({"id": sid, "name": sid, "move": str(Addendum.skill(sid).get("move", Skills.MOVE_OF.get(sid, ""))), "cost": 0.0})
+		h.skills.append({"id": sid, "name": sid, "move": str(Skills.MOVE_OF[sid]), "cost": 0.0})
 	h.skill_idx = h.skill_index(sid)
 	_tick(d, {"skill": true})
 
@@ -113,12 +112,12 @@ func test_vanish_step_unblockable_by_rank() -> void:
 func test_jintae_original_and_storm() -> void:
 	var d := _close(0.8)
 	_as_mob(d["boss"], "외성 하위")
-	_use(d, "jintae_original")
+	_use(d, "jin_original")
 	_run(d, 40)
 	check(not d["boss"].alive(), "서진태 오리지널 — 외성 하위 이하 한 방")
 	var d2 := _close(0.8)
 	_as_mob(d2["boss"], "외성 중위")
-	_use(d2, "jintae_original")
+	_use(d2, "jin_original")
 	_run(d2, 40)
 	check(d2["boss"].alive() and _events(d2, "hit").size() == 3, "외성 중위는 세 대를 맞고 버틴다 (%d대)" % _events(d2, "hit").size())
 	var mv: Dictionary = Moves.get_move("s_jt_storm")

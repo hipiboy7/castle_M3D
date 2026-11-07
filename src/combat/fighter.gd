@@ -98,7 +98,7 @@ var finisher_cap := 0.0          # 제압 피해 상한(최대 체력 비율, 0 
 var phase := 1
 var phase2_at := 0.0             # 체력이 이 비율이 되면 2차(0 = 2차 없음)
 var inert := false               # 싸움에서 빠졌다(신겐이 길을 내줌) — 치지도 맞지도 않는다
-var oneshot_immune := false      # 한 방(등급 차 skills.gd ONE_SHOT_GAP · 기술 kill_top)을 안 받는다 — 조작 인물 · 방의 보스(판이 정한다)
+var oneshot_immune := false      # 한 방(등급 차 common.one_shot · 기술 ko_rank)을 안 받는다 — 조작 인물 · 방의 보스(판이 정한다)
 
 
 func set_target(f) -> void:

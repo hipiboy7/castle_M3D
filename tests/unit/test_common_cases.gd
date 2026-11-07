@@ -6,7 +6,7 @@ extends RefCounted
 const Common = preload("res://src/data/common.gd")
 const CASES := "res://data/common/cases/rules_cases.json"
 const EPS := 1e-9
-const N_FN := 13                 # 시험 함수 수 (bars_for … progress_at)
+const N_FN := 15                 # 시험 함수 수 (bars_for … progress_at — c3ed030 에 one_shot · skill_ko)
 
 var failures: Array = []
 
@@ -32,6 +32,8 @@ func _call(fn: String, a: Array):
 		"rank_damage_k": return Common.rank_damage_k(a[0], a[1])
 		"shrugs_off": return Common.shrugs_off(a[0], a[1])
 		"immune_lower": return Common.immune_lower(a[0], a[1])
+		"one_shot": return Common.one_shot(a[0], a[1])
+		"skill_ko": return Common.skill_ko(a[0], a[1])
 		"stun_sec": return Common.stun_sec(a[0], a[1], a[2])
 		"lethal_fraction": return Common.lethal_fraction(a[0], a[1], a[2], a[3])
 		"roulette_reflects": return Common.roulette_reflects(a[0], a[1])

@@ -314,6 +314,66 @@
       "refs": ["p1:026/053-056"],
       "conf": "ai",
       "provisional": true
+    },
+    {
+      "id": "amur_triple",
+      "name": "아무르 티그로 3연타",
+      "users": ["kimshin"],
+      "src": "castle M 3D 요청 25 — 사용자 2026-11-07(3D rc.2 폰 피드백) · 공통으로 사용자 2026-11-08 · data/skills.json · 80차",
+      "refs": [],
+      "conf": "guess",
+      "provisional": true,
+      "note": "게임에서 먼저 정한 기술(사용자) — 원작에 같은 이름 · 동작이 있는지는 판독으로 확인"
+    },
+    {
+      "id": "amur_dash",
+      "name": "아무르 티그로 대시",
+      "users": ["kimshin"],
+      "src": "castle M 3D 요청 25 — 사용자 2026-11-07(3D rc.2 폰 피드백) · 공통으로 사용자 2026-11-08 · data/skills.json · 80차",
+      "refs": [],
+      "conf": "guess",
+      "provisional": true,
+      "note": "게임에서 먼저 정한 기술(사용자) — 원작에 같은 이름 · 동작이 있는지는 판독으로 확인"
+    },
+    {
+      "id": "amur_weaving",
+      "name": "아무르 티그로 위빙",
+      "users": ["kimshin"],
+      "src": "castle M 3D 요청 25 — 사용자 2026-11-07(3D rc.2 폰 피드백) · 공통으로 사용자 2026-11-08 · data/skills.json · 80차",
+      "refs": [],
+      "conf": "guess",
+      "provisional": true,
+      "note": "게임에서 먼저 정한 기술(사용자) — 원작에 같은 이름 · 동작이 있는지는 판독으로 확인"
+    },
+    {
+      "id": "jintae_vital",
+      "name": "근거리 급소 베기",
+      "users": ["jintae"],
+      "src": "castle M 3D 요청 25 — 사용자 2026-11-07(3D rc.2 폰 피드백) · 공통으로 사용자 2026-11-08 · data/skills.json · 80차",
+      "refs": [],
+      "conf": "guess",
+      "provisional": true,
+      "note": "게임에서 먼저 정한 기술(사용자) — 원작에 같은 이름 · 동작이 있는지는 판독으로 확인"
+    },
+    {
+      "id": "jintae_storm",
+      "name": "서진태 난무",
+      "users": ["jintae"],
+      "src": "castle M 3D 요청 25 — 사용자 2026-11-07(3D rc.2 폰 피드백) · 공통으로 사용자 2026-11-08 · data/skills.json · 80차",
+      "refs": [],
+      "conf": "guess",
+      "provisional": true,
+      "note": "게임에서 먼저 정한 기술(사용자) — 원작에 같은 이름 · 동작이 있는지는 판독으로 확인"
+    },
+    {
+      "id": "woojin_core_counter",
+      "name": "미친 코어 카운터",
+      "users": ["woojin"],
+      "src": "castle M 3D 요청 25 — 사용자 2026-11-07(3D rc.2 폰 피드백) · 공통으로 사용자 2026-11-08 · data/skills.json · 80차",
+      "refs": [],
+      "conf": "guess",
+      "provisional": true,
+      "note": "게임에서 먼저 정한 기술(사용자) — 원작에 같은 이름 · 동작이 있는지는 판독으로 확인"
     }
   ]
 }

@@ -67,7 +67,7 @@ static func _hero(id: String, T):
 	_base(f, T.ROLES[id], st)
 	f.moveset = T.ROLES[id]["moveset"]
 	f.can_parry = bool(c.get("can_parry", false))
-	f.skills = Skills.hero_entries(id, pr[1], f.rank)      # 공통 진행 기술 + 3D 덧붙임(아무르 티그로 · 서진태 · 피우진 — 묶음 B)
+	f.skills = Skills.entries(pr[1], f.rank)      # castle_common 진행 기술(동작이 있는 것 — 묶음 B 기술은 c3ed030 부터 공통)
 	f.oneshot_immune = true
 	f.gauge_max = Common.bars_for(f.rank) * Common.bar_points()
 	f.gauge_rate = Common.gauge_rate(f.rank, st.get("기술"))
@@ -117,7 +117,9 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 		var sk: Array = []
 		for sid in c.get("skills", []):
 			var s := Addendum.skill(sid)
-			sk.append({"id": sid, "name": str(s["name"]), "move": str(s["move"]), "cost": 1.0})
+			var mv_name := str(Skills.MOVE_OF.get(sid, s.get("move", "")))   # 공통 기술(묶음 B 조작 인물 기술 — 1장 아군 서진태)은 MOVE_OF
+			if mv_name != "":
+				sk.append({"id": sid, "name": str(s["name"]), "move": mv_name, "cost": 1.0})
 		f.skills = sk
 		f.gauge_max = Common.bars_for(f.rank) * Common.bar_points()
 		f.gauge_rate = Common.gauge_rate(f.rank, Addendum.stats_at(id, T.PERIOD).get("기술"))

@@ -121,7 +121,7 @@ func _pick_skill(d: float) -> int:
 	var order: Array = []
 	match str(foe.state):
 		"stun", "recoil":
-			order = ["offbeat2", "offbeat", "offbeat_rev", "triple", "amur_weaving", "jintae_original", "amur_triple"]
+			order = ["offbeat2", "offbeat", "offbeat_rev", "triple", "amur_weaving", "jin_original", "amur_triple"]
 		"hitstun":
 			order = ["kickarts", "amur_triple", "jintae_vital"]
 		_:
