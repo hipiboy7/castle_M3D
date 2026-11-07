@@ -18,6 +18,7 @@ var sheen_col := Color.WHITE
 var gpos := {}                   # 이름 → 쉬는 자세 위치(뼈대 공간)
 const FEM_HEAD := Vector3(0.112, 0.13, 0.117)   # 여성 머리 타원체(갸름하게 — 남성 0.12 · 0.13 · 0.12)
 const FACE_LIFT := 0.0007                       # 얼굴 조각(_patch)이 머리 겉면에서 뜨는 기본 높이(머리 단위 — 살과 겹쳐 깜빡이지 않게)
+var tris := 0                    # 마지막으로 만든 메시의 삼각형 수(MODEL 줄 — 폰 예산 확인)
 
 
 func _initialize() -> void:
@@ -32,7 +33,7 @@ func _initialize() -> void:
 		done[path] = true
 		var t0 := Time.get_ticks_msec()
 		var err := _make(Looks.look(id), path)      # 원작 대조 겉모습(looks_common)을 덮은 표
-		print("MODEL %s %s %dms" % [path, "ok" if err == OK else "error %d" % err, Time.get_ticks_msec() - t0])
+		print("MODEL %s %s %dms %d tris" % [path, "ok" if err == OK else "error %d" % err, Time.get_ticks_msec() - t0, tris])
 	quit(0)
 
 
@@ -80,6 +81,7 @@ func _make(lk: Dictionary, path: String) -> int:
 	st.index()
 	st.generate_normals()
 	var mesh := st.commit()
+	tris = mesh.surface_get_array_index_len(0) / 3
 	var mi := MeshInstance3D.new()
 	mi.name = "Body"
 	mi.mesh = mesh
@@ -139,9 +141,28 @@ func _body(lk: Dictionary) -> void:
 	# 몸통 관의 앞뒤 두께(dz)는 골반 · 가슴 타원체와 겉면이 맞게 — 관이 더 두꺼우면 가슴 아래 턱 · 검은 띠(외곽선)가 생기고
 	# 셔츠 앞판이 관 속에 묻혔다(전인물 외형 검토 2026-11-06). bz = 가슴 앞 겉면(머리 · 셔츠 앞판 자리)
 	var bz := 0.15 * depth * maxf(1.0, wide)
-	_blob(g["hips"] + Vector3(0, -0.02, 0), Vector3(0.17 * wide * hip_k, 0.13, 0.13 * depth * maxf(1.0, wide * 0.95)), pants, "hips")
-	_tube(g["hips"], g["chest"] + Vector3(0, 0.05, 0), 0.16 * wide * (0.84 if fem else 1.0), 0.19 * wide, top, "spine", "hips", "chest", depth * 0.8)
-	_blob(g["chest"] + Vector3(0, 0.1, 0), Vector3(0.23 * wide * (0.92 if fem else 1.0), 0.16, bz), top, "chest")
+	# 몸통은 한 겹 관(_loft) 두 벌 — 바지(골반) + 겉옷(밑단 ~ 목). 전에는 골반 · 허리 · 가슴 덩어리 셋이 겹쳐 허리에 턱이 지고
+	# 외곽선이 마디마다 그어졌다(폰 리뷰 2026-11-07 '울퉁불퉁'). 단면 너비 표 _torso_prof — 가슴 앞 겉면은 그대로 bz(셔츠 앞판 · 넥타이 자리)
+	var hz := 0.13 * depth * maxf(1.0, wide * 0.95)
+	var prof := _torso_prof(wide, float(lk.get("shoulder", wide)), hip_k, 0.84 if fem else 1.0, 0.92 if fem else 1.0, hz, bz)
+	var hem := -0.09                                                # 겉옷 밑단(골반 뼈 기준 높이) — 정장 · 코트는 엉덩이를 덮는다
+	if jacket:
+		hem = -0.005                                                # 봄버 · 트랙: 허리 밴드
+	elif shirt_only or vest:
+		hem = 0.025                                                 # 바지에 넣은 셔츠 · 조끼 + 허리띠
+	var thigh_out := 0.095 * wide + 0.095 * limb * wide             # 허벅지 바깥 끝 — 겉옷 밑단이 그보다 넓게(다리가 뚫고 나오지 않게)
+	_torso_loft(prof, [-0.14, -0.1, -0.05, 0.0, 0.05, 0.1, 0.14], 0.0, pants, -1.0, -1.0, 0.04, 0.03)
+	var ys: Array = [hem, hem + 0.012]
+	var yy := hem + 0.055
+	while yy < 0.48:
+		ys.append(yy)
+		yy += 0.06
+	ys.append_array([0.505, 0.53, 0.545])
+	_torso_loft(prof, ys, 0.008, top, thigh_out + 0.012, 0.122, -1.0, 0.03)
+	if jacket:
+		_torso_loft(prof, [hem - 0.002, hem + 0.045], 0.016, top.darkened(0.25), thigh_out + 0.018, 0.128, -1.0, -1.0)   # 허리 밴드(골지)
+	elif shirt_only or vest:
+		_torso_loft(prof, [0.0, 0.045], 0.014, lk.get("belt", pants.darkened(0.55)), -1.0, -1.0, -1.0, -1.0)            # 허리띠
 	if fem:                                                         # 가슴
 		for sx in [-1.0, 1.0]:
 			_blob(g["chest"] + Vector3(0.068 * sx * wide, 0.06, -bz * 0.68), Vector3(0.07 * wide, 0.065, 0.07 * depth), top, "chest")
@@ -229,31 +250,86 @@ func _body(lk: Dictionary) -> void:
 		var sh: Vector3 = g["sh_" + side]
 		var el: Vector3 = g["el_" + side]
 		var ha: Vector3 = g["hand_" + side]
-		_blob(sh, Vector3(0.085, 0.08, 0.08) * limb, arm if vest or sleeveless else top, "sh_" + side)   # 조끼 · 민소매는 어깨도 소매 · 맨살
-		_tube(sh, el, 0.065 * limb, 0.055 * limb, arm, "sh_" + side, "chest", "el_" + side)
-		if (shirt_only and not lk.get("long_sleeve", false)) or (vest and lk.get("rolled", false)):
-			# 소매 걷음: 아래팔은 맨살 + 팔꿈치 아래 걷어 올린 소매 뭉치 · 팔뚝 문신(비스듬히 감긴 띠)
-			_tube(el, ha, 0.055 * limb, 0.045 * limb, skin, "el_" + side, "sh_" + side, "hand_" + side)
+		var sb: String = "sh_" + side
+		var eb: String = "el_" + side
+		var hb: String = "hand_" + side
+		var sx := 1.0 if side == "r" else -1.0
+		var up := Vector3.UP
+		var rolled: bool = (shirt_only and not lk.get("long_sleeve", false)) or (vest and lk.get("rolled", false))
+		var fore: Color = skin if rolled else arm
+		# 정장 · 코트 소매 끝에 셔츠 소맷부리(흰 띠 — 겉옷과 셔츠가 갈라 보이게)
+		var cuff = shirt if not (shirt_only or vest or sleeveless or jacket or robe) and not shirt.is_equal_approx(arm) else null
+		_blob(sh + Vector3(-0.008 * sx, -0.01, 0), Vector3(0.068, 0.062, 0.067) * limb, arm if vest or sleeveless else top, sb)   # 조끼 · 민소매는 어깨도 소매 · 맨살
+		# 팔: 어깨 ~ 손목 한 줄 관(팔꿈치에서 끊기지 않게 — 위팔 · 아래팔 가중치를 팔꿈치 둘레에서 나눈다) + 팔꿈치 속 채움 공
+		var ap: Array = [
+			[sh + up * 0.03, 0.056 * limb, [sb, "chest"], [0.5, 0.5], arm],
+			[sh, 0.064 * limb, [sb, "chest"], [0.75, 0.25], arm],
+			[sh.lerp(el, 0.3), 0.066 * limb, [sb], [1.0], arm],
+			[sh.lerp(el, 0.72), 0.06 * limb, [sb], [1.0], arm],
+			[el + up * 0.04, 0.056 * limb, [sb, eb], [0.8, 0.2], arm],
+			[el, 0.054 * limb, [sb, eb], [0.5, 0.5], arm],
+		]
+		if rolled:
+			ap.append([el, 0.054 * limb, [sb, eb], [0.5, 0.5], fore])
+		ap.append_array([
+			[el - up * 0.04, 0.055 * limb, [eb, sb], [0.8, 0.2], fore],
+			[el.lerp(ha, 0.35), 0.056 * limb, [eb], [1.0], fore],
+			[el.lerp(ha, 0.75), 0.049 * limb, [eb], [1.0], fore],
+		])
+		if cuff != null:
+			ap.append_array([[ha + up * 0.04, 0.05 * limb, [eb], [1.0], fore], [ha + up * 0.04, 0.043 * limb, [eb], [1.0], cuff],
+				[ha + up * 0.005, 0.043 * limb, [eb, hb], [0.6, 0.4], cuff], [ha - up * 0.015, 0.041 * limb, [eb, hb], [0.5, 0.5], cuff]])
+		else:
+			ap.append_array([[ha + up * 0.01, 0.044 * limb, [eb, hb], [0.6, 0.4], fore], [ha - up * 0.015, 0.042 * limb, [eb, hb], [0.5, 0.5], fore]])
+		_limb(ap, 0.02, 0.01)
+		_sq_blob(el, Vector3.ONE * 0.051 * limb, 2.0, shirt if rolled else arm, eb, 10, 6)
+		if rolled:
+			# 소매 걷음: 팔꿈치 아래 걷어 올린 소매 뭉치 · 팔뚝 문신(비스듬히 감긴 띠)
 			_blob(el + Vector3(0, -0.04, 0), Vector3(0.068, 0.04, 0.068) * limb, shirt, "el_" + side)
 			if lk.get("tattoo") != null and (tat_side == side or tat_side == "both"):
 				var tc: Color = lk["tattoo"].lerp(skin, 0.25)
 				for k in 3:
 					var p: Vector3 = el.lerp(ha, 0.35 + 0.18 * k)
 					_tube(p + Vector3(0, 0.012, 0), p - Vector3(0, 0.012, 0), 0.053 * limb - 0.003 * k, 0.053 * limb - 0.003 * k, tc, "el_" + side)
-		else:
-			_tube(el, ha, 0.055 * limb, 0.045 * limb, arm, "el_" + side, "sh_" + side, "hand_" + side)
-		_blob(ha + Vector3(0, -0.05, 0), Vector3(0.055, 0.065, 0.05) * limb, lk.get("gloves", skin), "hand_" + side)   # 장갑(명부)
+		# 주먹: 각이 조금 진 둥근 상자 + 엄지(손바닥이 몸 쪽 -x·sx 을 본다)
+		var hand_col: Color = lk.get("gloves", skin)                # 장갑(명부)
+		_sq_blob(ha + Vector3(0, -0.058, -0.004) * limb, Vector3(0.042, 0.056, 0.054) * limb, 3.0, hand_col, hb)
+		_limb([[ha + Vector3(-sx * 0.03, -0.035, -0.036) * limb, 0.016 * limb, [hb], [1.0], hand_col],
+			[ha + Vector3(-sx * 0.022, -0.075, -0.05) * limb, 0.014 * limb, [hb], [1.0], hand_col]], 0.012, 0.012, 8)
 		var wrist = lk.get("bracelet_" + side, lk.get("bracelet"))  # 손목 금 팔찌 · 검은 밴드
 		if wrist != null:
 			_tube(ha + Vector3(0, 0.035, 0), ha + Vector3(0, 0.005, 0), 0.052 * limb, 0.05 * limb, wrist, "el_" + side)
 		if lk.get("rings") != null:                                 # 손가락 금반지(군터)
-			_blob(ha + Vector3(0, -0.085, -0.03), Vector3(0.05, 0.014, 0.025) * limb, lk["rings"], "hand_" + side)
+			_blob(ha + Vector3(0, -0.085, -0.045) * limb, Vector3(0.05, 0.014, 0.025) * limb, lk["rings"], "hand_" + side)
 		var th: Vector3 = g["th_" + side]
 		var kn: Vector3 = g["kn_" + side]
 		var ft: Vector3 = g["ft_" + side]
-		var sx := 1.0 if side == "r" else -1.0
-		_tube(th, kn, 0.095 * limb * wide, 0.072 * limb, pants, "th_" + side, "hips", "kn_" + side)
-		_tube(kn, ft, 0.07 * limb, 0.055 * limb, skin if skirt or shorts else pants, "kn_" + side, "th_" + side, "ft_" + side)
+		var tb: String = "th_" + side
+		var kb: String = "kn_" + side
+		var fb: String = "ft_" + side
+		var bare := skirt or shorts                                 # 정강이 맨살
+		var shin: Color = skin if bare else pants
+		var lr := 0.095 * limb * wide
+		# 다리: 엉덩이 속 ~ 발목 한 줄 관(허벅지 · 무릎 · 종아리) + 무릎 속 채움 공. 맨살 정강이는 무릎 위 반바지 단에서 색이 바뀐다
+		var lp: Array = [
+			[th + up * 0.06, lr * 0.86, ["hips", tb], [0.5, 0.5], pants],
+			[th, lr * 0.93, [tb, "hips"], [0.65, 0.35], pants],
+			[th.lerp(kn, 0.25), lr * 0.97, [tb], [1.0], pants],
+			[th.lerp(kn, 0.62), 0.08 * limb * lerpf(1.0, wide, 0.5), [tb], [1.0], pants],
+		]
+		if bare:
+			lp.append_array([[kn + up * 0.07, 0.08 * limb, [tb, kb], [0.85, 0.15], pants], [kn + up * 0.07, 0.071 * limb, [tb, kb], [0.85, 0.15], shin]])
+		lp.append_array([
+			[kn + up * 0.04, 0.072 * limb, [tb, kb], [0.8, 0.2], shin],
+			[kn, 0.07 * limb, [tb, kb], [0.5, 0.5], shin],
+			[kn - up * 0.05, 0.07 * limb, [kb, tb], [0.8, 0.2], shin],
+			[kn.lerp(ft, 0.3), (0.073 if bare else 0.069) * limb, [kb], [1.0], shin],
+			[kn.lerp(ft, 0.75), (0.058 if bare else 0.062) * limb, [kb], [1.0], shin],
+			[ft + up * 0.04, (0.052 if bare else 0.06) * limb, [kb, fb], [0.7, 0.3], shin],
+			[ft, (0.05 if bare else 0.059) * limb, [kb, fb], [0.5, 0.5], shin],
+		])
+		_limb(lp, 0.02, 0.01)
+		_sq_blob(kn, Vector3.ONE * 0.066 * limb, 2.0, shin, kb, 10, 6)
 		if long_coat:                                               # 옷자락 앞 자락 — 허벅지를 덮는다
 			_tube(th + Vector3(0, 0.02, 0), kn + Vector3(0, 0.04, 0), 0.105 * limb * wide, 0.09 * limb * wide, top, "th_" + side, "hips")
 		if lk.get("stripe") != null:                                # 트랙 바지 옆줄(서진태)
@@ -261,9 +337,7 @@ func _body(lk: Dictionary) -> void:
 			var o1 := Vector3(sx * 0.07 * limb, 0, 0)
 			_tube(th + o0, kn + o1, 0.013, 0.013, lk["stripe"], "th_" + side, "", "kn_" + side)
 			_tube(kn + o1, ft + Vector3(sx * 0.054 * limb, 0, 0), 0.013, 0.013, lk["stripe"], "kn_" + side, "th_" + side, "ft_" + side)
-		_blob(ft + Vector3(0, -0.02, -0.06), Vector3(0.06, 0.045, 0.12) * sqrt(limb), shoe, "ft_" + side)
-		if lk.get("sole") != null:                                  # 운동화 밑창
-			_blob(ft + Vector3(0, -0.05, -0.06), Vector3(0.064, 0.016, 0.128) * sqrt(limb), lk["sole"], "ft_" + side)
+		_shoe(ft, sqrt(limb), shoe, lk.get("sole"), fb)
 
 
 func _face(lk: Dictionary, hc: Vector3, hk: float) -> void:
@@ -820,6 +894,174 @@ func _cone(base: Vector3, tip: Vector3, r: float, col: Color, bone: String) -> v
 		var p1 := base + (side * cos(a1) + fwd * sin(a1)) * r
 		for p in [p0, p1, tip]:
 			_vert(p, col, [bone], [1.0])
+
+
+## 신발: 뒤꿈치 → 발끝 단면 관(바닥이 평평하고 앞이 낮아지는 구두 · 운동화 모양) + 밑창(sole — 조금 넓게 둘러 보이게)
+func _shoe(ft: Vector3, s: float, col: Color, sole, bone: String) -> void:
+	var bottom := -0.065 * s
+	var rows := [[0.06, 0.028, 0.04], [0.04, 0.044, 0.052], [-0.01, 0.048, 0.057], [-0.08, 0.037, 0.061], [-0.14, 0.03, 0.058], [-0.175, 0.022, 0.047]]
+	var rings: Array = []
+	var srings: Array = []
+	for r in rows:
+		var h: float = r[1] * s
+		var w: float = r[2] * s
+		rings.append([ft + Vector3(0, bottom + h + (0.01 * s if sole != null else 0.0), r[0] * s), h, w, [bone], [1.0], col])
+		srings.append([ft + Vector3(0, bottom + 0.011 * s, r[0] * s * 1.03), 0.012 * s, w + 0.006 * s, [bone], [1.0], sole])
+	_loft(rings, 2.6, 12, 0.015, 0.02)
+	if sole != null:
+		_loft(srings, 3.0, 12, 0.006, 0.006)
+
+
+## 몸통 단면 표: [골반 뼈 기준 높이, 옆 반지름, 앞뒤 반지름] — 엉덩이 · 허리 · 가슴 · 어깨 · 목 밑. waist_k · chest_k 는 여성 허리 · 가슴
+func _torso_prof(wide: float, sh_wide: float, hip_k: float, waist_k: float, chest_k: float, hz: float, bz: float) -> Array:
+	var sw := maxf(0.225 * wide, 0.215 * sh_wide) * chest_k
+	return [
+		[-0.14, 0.11 * wide * hip_k, hz * 0.7],
+		[-0.09, 0.152 * wide * hip_k, hz * 0.93],
+		[-0.02, 0.16 * wide * hip_k, hz],
+		[0.1, 0.158 * wide * waist_k, hz * 0.94],
+		[0.22, 0.186 * wide * lerpf(waist_k, chest_k, 0.5), bz * 0.97],
+		[0.33, 0.215 * wide * chest_k, bz],
+		[0.42, sw, bz * 0.98],
+		[0.47, sw * 0.93, bz * 0.88],
+		[0.505, 0.165 * wide, bz * 0.7],
+		[0.53, 0.1 * wide, bz * 0.5],
+		[0.545, 0.066 * wide, 0.06],
+	]
+
+
+## 단면 표를 높이 y 에서 부드럽게(Catmull-Rom) 읽는다 → Vector2(옆, 앞뒤)
+func _prof_at(prof: Array, y: float) -> Vector2:
+	var n := prof.size()
+	if y <= prof[0][0]:
+		return Vector2(prof[0][1], prof[0][2])
+	if y >= prof[n - 1][0]:
+		return Vector2(prof[n - 1][1], prof[n - 1][2])
+	var i := 0
+	while prof[i + 1][0] < y:
+		i += 1
+	var t: float = (y - prof[i][0]) / (prof[i + 1][0] - prof[i][0])
+	var out := Vector2.ZERO
+	for k in 2:
+		var p0: float = prof[maxi(i - 1, 0)][k + 1]
+		var p1: float = prof[i][k + 1]
+		var p2: float = prof[i + 1][k + 1]
+		var p3: float = prof[mini(i + 2, n - 1)][k + 1]
+		out[k] = 0.5 * (2.0 * p1 + (p2 - p0) * t + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t * t + (3.0 * p1 - p0 - 3.0 * p2 + p3) * t * t * t)
+	return out
+
+
+## 몸통 관 한 벌: 높이 ys(골반 뼈 기준)마다 단면 + grow(옷 두께). min_a · min_b > 0 이면 밑단을 그만큼 벌려(엉덩이를 덮는 자락)
+## 위로 0.16 에 걸쳐 몸에 붙인다. 가중치: 골반 → 허리(spine) → 가슴(chest)
+func _torso_loft(prof: Array, ys: Array, grow: float, col: Color, min_a: float, min_b: float, cap0: float, cap1: float) -> void:
+	var h: Vector3 = gpos["hips"]
+	var rings: Array = []
+	for y in ys:
+		var s := _prof_at(prof, y) + Vector2(grow, grow)
+		if min_a > 0.0:
+			var k := clampf((y - float(ys[0])) / 0.16, 0.0, 1.0)
+			s.x = maxf(s.x, lerpf(min_a, s.x, k))
+			s.y = maxf(s.y, lerpf(min_b, s.y, k))
+		var bw: Array
+		if y <= 0.0:
+			bw = [["hips"], [1.0]]
+		elif y < 0.12:
+			bw = [["hips", "spine"], [1.0 - y / 0.12, y / 0.12]]
+		elif y < 0.22:
+			bw = [["spine"], [1.0]]
+		elif y < 0.34:
+			var t: float = (y - 0.22) / 0.12
+			bw = [["spine", "chest"], [1.0 - t, t]]
+		else:
+			bw = [["chest"], [1.0]]
+		rings.append([h + Vector3(0, y, 0), s.x, s.y, bw[0], bw[1], col])
+	_loft(rings, 2.5, 16, cap0, cap1)
+
+
+## 팔 · 다리 한 줄 관: 점 [위치, 반지름, 뼈 목록, 가중치, 색] 을 이어(관절에서 끊기지 않게) — 둥근 단면
+func _limb(pts: Array, cap0: float, cap1: float, seg := 12) -> void:
+	var rings: Array = []
+	for p in pts:
+		rings.append([p[0], p[1], p[1], p[2], p[3], p[4]])
+	_loft(rings, 2.0, seg, cap0, cap1)
+
+
+## 단면 고리를 이어 붙인 매끈한 관(몸통 · 팔다리 · 신발 — 마디마다 따로 만든 관 · 뚜껑이 굽힐 때 튀어나와 '울퉁불퉁한 덩어리'로
+## 보였다 — 폰 리뷰 2026-11-07). ring = [중심, 옆 반지름, 앞뒤 반지름, 뼈 목록, 가중치, 색]. 단면은 초타원(sq 2 = 타원, 클수록
+## 각진 옷 실루엣). 같은 자리에 색만 다른 고리를 두 번 두면 색 경계가 번지지 않고 또렷하다. 축 · 감기 방향은 _tube 와 같다.
+func _loft(rings: Array, sq: float, seg: int, cap0: float, cap1: float) -> void:
+	var up: Vector3 = (rings[rings.size() - 1][0] - rings[0][0]).normalized()
+	var side := up.cross(Vector3.FORWARD if absf(up.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT).normalized()
+	var fwd := side.cross(up).normalized()
+	var e := 2.0 / sq
+	var rows: Array = []
+	for rg in rings:
+		var row: Array = []
+		for j in seg:
+			var u := TAU * j / seg
+			var cu := cos(u)
+			var su := sin(u)
+			var p: Vector3 = rg[0] + side * signf(cu) * pow(absf(cu), e) * rg[1] + fwd * signf(su) * pow(absf(su), e) * rg[2]
+			row.append([p, rg[3], rg[4], rg[5]])
+		rows.append(row)
+	for i in rows.size() - 1:
+		for j in seg:
+			var j2 := (j + 1) % seg
+			var a: Array = rows[i][j]
+			var b: Array = rows[i + 1][j]
+			var c: Array = rows[i + 1][j2]
+			var d: Array = rows[i][j2]
+			for v in [a, c, b, a, d, c]:
+				_vert(v[0], v[3], v[1], v[2])
+	if cap0 >= 0.0:                                                  # 끝 뚜껑 — 축 바깥으로 cap 만큼 둥글게 부푼 부채꼴
+		_dome(rows[0], rings[0][0] - up * cap0, true)
+	if cap1 >= 0.0:
+		_dome(rows[rows.size() - 1], rings[rings.size() - 1][0] + up * cap1, false)
+
+
+## 고리 하나를 가운데 점 c 로 닫는다(가운데 · 중간 고리 두 겹 — 납작한 뚜껑 모서리가 외곽선으로 각지게 보이지 않게)
+func _dome(row: Array, c: Vector3, flip: bool) -> void:
+	var c0: Vector3 = Vector3.ZERO
+	for v in row:
+		c0 += v[0]
+	c0 /= row.size()
+	var mid: Array = []
+	for v in row:
+		mid.append([v[0].lerp(c0, 0.45) + (c - c0) * 0.7, v[1], v[2], v[3]])
+	for j in row.size():
+		var j2 := (j + 1) % row.size()
+		var a: Array = row[j]
+		var b: Array = row[j2]
+		var m0: Array = mid[j]
+		var m1: Array = mid[j2]
+		var cv: Array = [c, a[1], a[2], a[3]]
+		var tri: Array = [[a, b, m1], [a, m1, m0], [m0, m1, cv]] if flip else [[a, m1, b], [a, m0, m1], [m0, cv, m1]]
+		for t in tri:
+			for v in t:
+				_vert(v[0], v[3], v[1], v[2])
+
+
+## 초타원체(각이 조금 진 둥근 상자 — 주먹 · 밑창). n 2 = 타원체, 클수록 상자
+func _sq_blob(c: Vector3, r: Vector3, n: float, col: Color, bone: String, seg := 12, rings := 8) -> void:
+	var e := 2.0 / n
+	var grid: Array = []
+	for i in rings + 1:
+		var v := PI * i / rings
+		var row: Array = []
+		for j in seg:
+			var u := TAU * j / seg
+			var sv := sin(v)
+			var cv := cos(v)
+			var k := signf(sv) * pow(absf(sv), e)
+			var x := k * signf(cos(u)) * pow(absf(cos(u)), e)
+			var z := k * signf(sin(u)) * pow(absf(sin(u)), e)
+			row.append(c + Vector3(x * r.x, signf(cv) * pow(absf(cv), e) * r.y, z * r.z))
+		grid.append(row)
+	for i in rings:
+		for j in seg:
+			var j2 := (j + 1) % seg
+			for p in [grid[i][j], grid[i + 1][j2], grid[i][j2], grid[i][j], grid[i + 1][j], grid[i + 1][j2]]:
+				_vert(p, col, [bone], [1.0])
 
 
 ## a → b 가는 줄(흉터 · 사슬 · 모피 깃) — a · b 를 끝으로 하는 기운 타원체 하나(조각을 이으면 외곽선이 마디마다 생긴다)

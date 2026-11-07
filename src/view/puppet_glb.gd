@@ -51,18 +51,21 @@ func _find_skeleton(n: Node) -> Skeleton3D:
 func _toon() -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.vertex_color_use_as_albedo = true
+	# 툰 단: 거칠기가 낮을수록 명암 경계가 또렷하다(0.6 은 흐릿한 그러데이션이라 '덩어리'처럼 보였다 — 폰 리뷰 2026-11-07).
+	# 반사광은 작고 약하게(검은 정장에 흰 얼룩이 생기지 않게), 테두리 빛은 옷 색을 따라(검은 옷의 몸 윤곽이 배경에서 떨어져 보이게)
 	m.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
 	m.specular_mode = BaseMaterial3D.SPECULAR_TOON
-	m.roughness = 0.6
+	m.roughness = 0.42
+	m.metallic_specular = 0.25
 	m.rim_enabled = true
-	m.rim = 0.35
-	m.rim_tint = 0.4
-	var ol := StandardMaterial3D.new()                  # 외곽선
+	m.rim = 0.45
+	m.rim_tint = 0.55
+	var ol := StandardMaterial3D.new()                  # 외곽선 — 짙은 남색(순검정보다 덜 딱딱하다), 몸이 매끈해져 조금 가늘게
 	ol.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	ol.albedo_color = Color(0.02, 0.02, 0.03)
+	ol.albedo_color = Color(0.03, 0.03, 0.06)
 	ol.cull_mode = BaseMaterial3D.CULL_FRONT
 	ol.grow = true
-	ol.grow_amount = 0.012
+	ol.grow_amount = 0.01
 	m.next_pass = ol
 	mats.append(m)                                      # 맞음 번쩍임 · 엇엇박 달아오름(인형의 _update_flash)이 이 재질에도
 	m.emission_enabled = true
