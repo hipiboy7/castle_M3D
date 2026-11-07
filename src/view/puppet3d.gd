@@ -265,31 +265,60 @@ func _face(lk: Dictionary, skin: Material, eye: Material, dark: Material, hair: 
 	_face_rest(lk, hair)
 
 
+## 남성 얼굴(2026-11-08 사용자 "남성 얼굴도 진행해" — 그림 A make_models _face_male 과 같은 구성): 상자 눈 · 상자 턱 대신 얼굴 곡면에
+## 붙인 납작한 조각 — 가늘고 날카로운 눈(흰자 · 짙은 눈동자 · 굵은 윗눈꺼풀 선이 바깥으로 길게) · 눈 가까이 낮고 굵은 눈썹(brow_tilt 만큼
+## 바깥 끝이 올라간다 — 김신, brow_k 굵기 — 윤덕수) · 작은 코 + 콧등 그늘 · 일자 입 + 아랫입술 그늘 · 턱(jaw 면 넓고 각지게).
+## 눈 높이 eye_h: ≤ 0.006 실눈 · ≤ 0.008 날카로운 눈 · 나머지 보통. 먼 눈(blind_eye) · 흰자 눈(blank_eyes — 샤모)
 func _face_male(lk: Dictionary, skin: Material, eye: Material, dark: Material) -> void:
-	_mesh(J["head"], _box(Vector3(0.022, 0.036, 0.022)), skin, Vector3(0, -0.012, -0.104))     # 코
-	if lk.get("jaw", false):                                     # 각진 턱
-		_mesh(J["head"], _box(Vector3(0.13, 0.05, 0.1)), skin, Vector3(0, -0.07, -0.035))
-	if lk.get("stubble", false):                                 # 턱 수염 그늘 — looks.json facial_hair 에 stubble 이 있을 때만(김신은 없음)
-		_mesh(J["head"], _sphere(0.092, 0.1), _mat(lk["skin"].lerp(lk["hair"], 0.3).darkened(0.12), 0.8, 0.0), Vector3(0, -0.068, -0.03),
-			Vector3.ZERO, Vector3(1, 1, 0.9))
-	var eye_h: float = lk.get("eye_h", 0.011)                   # 김신 가는 눈
-	# 눈썹 · 입 — 얼굴이 밋밋하지 않게(rc.2 폰 리뷰 6). brow_tilt: 눈썹 끝을 올린 각(김신 날카로운 눈매) · brow_k: 굵기(윤덕수 굵은 눈썹)
+	var h: Node3D = J["head"]
+	var sk: Color = lk["skin"]
+	if lk.get("jaw", false):                                     # 각진 턱: 넓고 납작한 턱 덩어리(상자 모서리 대신 둥근 네모)
+		_mesh(h, _sphere(0.08, 0.12), skin, Vector3(0, -0.058, -0.03), Vector3(-8, 0, 0), Vector3(1.12, 0.85, 0.78))
+	else:
+		_mesh(h, _sphere(0.075, 0.12), skin, Vector3(0, -0.055, -0.03), Vector3(-10, 0, 0), Vector3(1.0, 0.9, 0.83))
+	if lk.get("stubble", false):                                 # 턱 수염 그늘 — looks.json facial_hair 에 stubble 이 있을 때만(김신은 없음), 옅게
+		_mesh(h, _sphere(0.5, 1.0), _mat(sk.lerp(lk["hair"], 0.22).darkened(0.08), 0.8, 0.0), Vector3(0, -0.074, -0.048),
+			Vector3(-25, 0, 0), Vector3(0.112, 0.05, 0.088))
+	# 코는 덩어리 없이 선으로(작은 공은 테두리 빛 rim 이 고리를 그려 '0' 처럼 보였다)
+	_mesh(h, _capsule(0.0011, 0.02), _mat(sk.darkened(0.18), 0.8, 0.0), Vector3(-0.0095, -0.009, -0.1035), Vector3(0, -6, -8))   # 콧등 그늘
+	_mesh(h, _box(Vector3(0.016, 0.0028, 0.004)), _mat(sk.darkened(0.38), 0.8, 0.0), Vector3(0, -0.027, -0.104))   # 코끝 아래 선
+	var eh_k := float(lk.get("eye_h", 0.011))
+	var eh: float = 0.008 if eh_k <= 0.006 else (0.012 if eh_k <= 0.008 else 0.015)   # 눈 높이(실눈 · 날카로운 눈 · 보통)
+	var white := _mat(Color(0.95, 0.94, 0.92), 0.6, 0.0)
+	var lash := _mat(Color(0.05, 0.035, 0.035), 0.5, 0.0)
+	var brow := _mat(Looks.hair_lift(lk["hair"]).darkened(0.3), 0.7, 0.0)
+	var shine := _mat(Color(0.95, 0.95, 0.95), 0.3, 0.0)
 	var brow_tilt: float = lk.get("brow_tilt", 6.0)
 	var brow_k: float = lk.get("brow_k", 1.0)
+	var blind := str(lk.get("blind_eye", ""))                   # 먼 눈(인물 자기 쪽 l · r — 흰자에 흐린 눈동자)
+	var blind_m := _mat(Color(0.72, 0.73, 0.74), 0.5, 0.0)
 	for sx in [-1.0, 1.0]:
-		_mesh(J["head"], _box(Vector3(0.034, 0.009 * brow_k, 0.012)), _mat(lk["hair"], 0.6, 0.0), Vector3(0.038 * sx, 0.03, -0.098),
-			Vector3(0, 0, brow_tilt * sx))
-	var lips = lk.get("lips")                                    # 입(붉은 입술 — 오지인)
-	_mesh(J["head"], _box(Vector3(0.032, 0.005 if lips == null else 0.008, 0.008)),
-		_mat(lk["skin"].darkened(0.4) if lips == null else lips, 0.7, 0.0), Vector3(0, -0.046, -0.097))
-	var blind := str(lk.get("blind_eye", ""))                   # 먼 눈(인물 자기 쪽 l · r — 흰자만)
-	var blind_m := _mat(Color(0.9, 0.9, 0.88), 0.5, 0.0)
-	for sx in [-1.0, 1.0]:
-		_mesh(J["head"], _sphere(0.022, 0.044), skin, Vector3(0.103 * sx, -0.004, 0.006))     # 귀
-		var em := blind_m if blind == ("l" if sx < 0.0 else "r") or lk.get("blank_eyes", false) else eye   # 먼 눈 · 흰자 눈(샤모)
-		_mesh(J["head"], _box(Vector3(0.024, eye_h, 0.012)), em, Vector3(0.037 * sx, 0.008, -0.096))
+		var yw: float = -20.0 * sx                                     # 얼굴 곡면을 따라 바깥으로 돌린다
+		var ec: Vector3 = Vector3(0.037 * sx, 0.003, -0.0985)
+		_mesh(h, _sphere(0.5, 1.0), white, ec, Vector3(0, yw, 3 * sx), Vector3(0.036, eh, 0.007))                          # 흰자
+		if not lk.get("blank_eyes", false):                       # 흰자 눈(샤모)은 눈동자 없음
+			var dead := blind == ("l" if sx < 0.0 else "r")
+			_mesh(h, _sphere(0.5, 1.0), blind_m if dead else eye, ec + Vector3(-0.0015 * sx, 0.0004, -0.0012), Vector3(0, yw, 0),
+				Vector3(0.014, eh, 0.007))                                                                             # 눈동자
+			if eh > 0.008 and not dead:
+				_mesh(h, _sphere(0.5, 1.0), shine, ec + Vector3(0.001 * sx, eh * 0.18, -0.0034), Vector3(0, yw, 0), Vector3(0.003, 0.003, 0.003))   # 눈빛
+		_mesh(h, _capsule(0.0032, 0.036), lash, ec + Vector3(0.0005 * sx, eh * 0.45, -0.0016), Vector3(0, yw, 90 + 4 * sx))   # 굵은 윗눈꺼풀 선
+		_mesh(h, _capsule(0.0022, 0.012), lash, ec + Vector3(0.0195 * sx, eh * 0.28, -0.0004), Vector3(0, yw, 90 - 10 * sx))  # 바깥으로 뺀 눈꼬리
+		_mesh(h, _capsule(0.001, 0.018), _mat(sk.darkened(0.3), 0.8, 0.0), ec + Vector3(0.003 * sx, -eh * 0.5, -0.001),
+			Vector3(0, yw, 90 - 3 * sx))                                                                                  # 아랫눈꺼풀(옅게)
+		# 눈썹: 눈 가까이 낮고 굵은 일자 — 안쪽 끝이 굵고 brow_tilt 만큼 바깥이 올라간다
+		var bt: float = brow_tilt * 0.7 * sx
+		var bc: Vector3 = Vector3(0.039 * sx, 0.022, -0.0975)
+		_mesh(h, _capsule(0.0038 * brow_k, 0.04), brow, bc, Vector3(0, yw, 90 + bt))
+		_mesh(h, _capsule(0.0048 * brow_k, 0.016), brow, bc + Vector3(-0.012 * sx, -0.0012 * signf(brow_tilt), 0.001), Vector3(0, yw, 90 + bt))
+		_mesh(h, _sphere(0.022, 0.044), skin, Vector3(0.103 * sx, -0.004, 0.006))     # 귀
 		if lk.get("piercing", false):                            # 귀 검은 스터드
-			_mesh(J["head"], _sphere(0.007, 0.014), dark, Vector3(0.112 * sx, -0.024, 0.0))
+			_mesh(h, _sphere(0.007, 0.014), dark, Vector3(0.112 * sx, -0.024, 0.0))
+	# 입: 일자 선(입술 색 lips 가 있으면 그 색) · 아랫입술 그늘
+	var lips = lk.get("lips")
+	_mesh(h, _capsule(0.0022 if lips == null else 0.0035, 0.032), _mat(sk.darkened(0.5) if lips == null else (lips as Color).darkened(0.25), 0.7, 0.0),
+		Vector3(0, -0.047, -0.0975), Vector3(-8, 0, 90))
+	_mesh(h, _capsule(0.0014, 0.01), _mat(sk.darkened(0.1), 0.8, 0.0), Vector3(0, -0.056, -0.0952), Vector3(-12, 0, 90))
 
 
 ## 여성 얼굴(2026-11-07 폰 "오지인이 대표 미인 캐릭터인데 너무 못생김" — 원작 카드 초상 하성_오지인 · 차수민): 가는 아몬드 눈
@@ -347,23 +376,24 @@ func _face_rest(lk: Dictionary, hair: Material) -> void:
 	_hair(J["head"], hair, str(lk.get("hair_style", "short")))
 	if lk.get("hat") != null:
 		_hat(J["head"], str(lk["hat"]), _mat(lk.get("hat_col", Color(0.2, 0.2, 0.22)), 0.9, 0.2), lk.get("hat_band"))
+	# 수염은 턱 · 윗입술 곡면에 붙인 납작한 조각(상자는 얼굴에서 각지게 튀어나왔다 — 2026-11-08). 색 beard_col(looks.json facial_hair_color)
+	var bcol: Color = Looks.hair_lift(lk.get("beard_col", lk["hair"])).darkened(0.1)
 	if lk.get("beard", false):                                   # 짧은 턱수염 · 콧수염 (신겐)
-		var bm := _mat(lk.get("beard_col", lk["hair"]), 0.7, 0.0)
-		_mesh(J["head"], _box(Vector3(0.07, 0.03, 0.03)), bm, Vector3(0, -0.085, -0.075))
-		_mesh(J["head"], _box(Vector3(0.05, 0.01, 0.012)), bm, Vector3(0, -0.032, -0.104))
+		var bm := _mat(bcol, 0.8, 0.0)
+		_mesh(J["head"], _sphere(0.5, 1.0), bm, Vector3(0, -0.072, -0.062), Vector3(-30, 0, 0), Vector3(0.088, 0.055, 0.07))
+		_mesh(J["head"], _capsule(0.0045, 0.042), bm, Vector3(0, -0.035, -0.1), Vector3(-10, 0, 90))
 	if lk.get("mustache", false):                                # 끝이 처진 콧수염 (군터)
-		var mm := _mat(lk.get("beard_col", lk["hair"]), 0.7, 0.0)
-		_mesh(J["head"], _box(Vector3(0.06, 0.014, 0.014)), mm, Vector3(0, -0.031, -0.104))
+		var mm := _mat(bcol, 0.8, 0.0)
+		_mesh(J["head"], _capsule(0.005, 0.04), mm, Vector3(0, -0.036, -0.101), Vector3(-10, 0, 90))
 		for sx in [-1.0, 1.0]:
-			_mesh(J["head"], _box(Vector3(0.01, 0.03, 0.012)), mm, Vector3(0.031 * sx, -0.044, -0.098), Vector3(0, 0, -12 * sx))
+			_mesh(J["head"], _capsule(0.0042, 0.024), mm, Vector3(0.021 * sx, -0.047, -0.096), Vector3(-10, -18 * sx, 24 * sx))
 	if lk.get("goatee", false):                                  # 염소수염 (김성준)
-		var gm := _mat(lk.get("beard_col", lk["hair"]), 0.7, 0.0)
-		_mesh(J["head"], _box(Vector3(0.034, 0.05, 0.024)), gm, Vector3(0, -0.098, -0.072), Vector3(18, 0, 0))
-		_mesh(J["head"], _box(Vector3(0.04, 0.009, 0.01)), gm, Vector3(0, -0.033, -0.104))
+		var gm := _mat(bcol, 0.8, 0.0)
+		_mesh(J["head"], _capsule(0.01, 0.036), gm, Vector3(0, -0.075, -0.088), Vector3(-30, 0, 0), Vector3(1.0, 1.0, 0.6))
 	if lk.get("sideburns", false):                               # 구레나룻(귀 앞 ~ 턱 모서리 — 크리사 · 이환 · 마준영)
-		var sbm := _mat(lk.get("beard_col", lk["hair"]), 0.7, 0.0)
+		var sbm := _mat(bcol, 0.8, 0.0)
 		for sx in [-1.0, 1.0]:
-			_mesh(J["head"], _box(Vector3(0.012, 0.07, 0.018)), sbm, Vector3(0.094 * sx, -0.035, -0.036), Vector3(-15, 0, 8 * sx))
+			_mesh(J["head"], _capsule(0.007, 0.07), sbm, Vector3(0.094 * sx, -0.035, -0.036), Vector3(-15, 0, 8 * sx), Vector3(1.0, 1.0, 0.7))
 	if lk.get("bandage") != null:                                # 머리띠처럼 감은 흰 붕대 (강만재 — 앞 화 부상)
 		var bd := TorusMesh.new()
 		bd.inner_radius = 0.094
@@ -380,28 +410,28 @@ func _face_rest(lk: Dictionary, hair: Material) -> void:
 
 
 ## 흉터 자리: nose — 콧등에서 왼뺨 광대로 내려가는 사선 + 입술 아래 ~ 턱 세로(김대건) · brow — 이마에서 눈썹으로(군터) ·
-## double — 왼뺨 사선 두 줄(강만재)
+## double — 왼뺨 사선 두 줄(강만재). 납작한 가는 띠(두께 0.0025 — 막대처럼 솟아 보이지 않게, 2026-11-08)
 func _scar(head: Node3D, kind: String, m: Material) -> void:
 	if kind == "cheek_l" or kind == "cheek_r":                    # 뺨 사선 한 줄(인물 자기 쪽 — 왼뺨 -x)
 		var sx := -1.0 if kind == "cheek_l" else 1.0
-		_mesh(head, _box(Vector3(0.005, 0.046, 0.005)), m, Vector3(0.06 * sx, -0.03, -0.088), Vector3(0, -30 * sx, 18 * sx))
+		_mesh(head, _box(Vector3(0.0042, 0.046, 0.0025)), m, Vector3(0.06 * sx, -0.03, -0.088), Vector3(0, -30 * sx, 18 * sx))
 	elif kind == "chin":                                         # 입술 아래 ~ 턱 세로
-		_mesh(head, _box(Vector3(0.005, 0.03, 0.005)), m, Vector3(0.012, -0.072, -0.088), Vector3(16, 0, 0))
+		_mesh(head, _box(Vector3(0.0042, 0.03, 0.0025)), m, Vector3(0.012, -0.072, -0.088), Vector3(16, 0, 0))
 	elif kind == "nose":
-		_mesh(head, _box(Vector3(0.007, 0.075, 0.007)), m, Vector3(-0.028, -0.004, -0.1), Vector3(0, -20, 58))
-		_mesh(head, _box(Vector3(0.006, 0.03, 0.006)), m, Vector3(0.012, -0.072, -0.088), Vector3(16, 0, 0))
+		_mesh(head, _box(Vector3(0.0042, 0.075, 0.0025)), m, Vector3(-0.028, -0.004, -0.1), Vector3(0, -20, 58))
+		_mesh(head, _box(Vector3(0.0042, 0.03, 0.0025)), m, Vector3(0.012, -0.072, -0.088), Vector3(16, 0, 0))
 	elif kind == "brow":
-		_mesh(head, _box(Vector3(0.007, 0.06, 0.007)), m, Vector3(0.04, 0.052, -0.094), Vector3(-24, 0, 10))
+		_mesh(head, _box(Vector3(0.0042, 0.06, 0.0025)), m, Vector3(0.04, 0.052, -0.094), Vector3(-24, 0, 10))
 	elif kind == "x":                                            # 콧등에서 엇갈리는 긴 두 줄(최민욱 — 이마 · 눈썹에서 양뺨까지)
-		_mesh(head, _box(Vector3(0.006, 0.14, 0.006)), m, Vector3(-0.004, 0.022, -0.1), Vector3(0, 0, -42))
-		_mesh(head, _box(Vector3(0.006, 0.12, 0.006)), m, Vector3(0.012, 0.0, -0.1), Vector3(0, 0, 45))
+		_mesh(head, _box(Vector3(0.0042, 0.14, 0.0025)), m, Vector3(-0.004, 0.022, -0.1), Vector3(0, 0, -42))
+		_mesh(head, _box(Vector3(0.0042, 0.12, 0.0025)), m, Vector3(0.012, 0.0, -0.1), Vector3(0, 0, 45))
 	elif kind == "double":
 		for k in 2:
-			_mesh(head, _box(Vector3(0.006, 0.042, 0.006)), m, Vector3(-0.056 - 0.012 * k, -0.024 - 0.012 * k, -0.09 + 0.006 * k),
+			_mesh(head, _box(Vector3(0.0042, 0.042, 0.0025)), m, Vector3(-0.056 - 0.012 * k, -0.024 - 0.012 * k, -0.09 + 0.006 * k),
 				Vector3(0, -30, 52))
 	elif kind == "eye_l" or kind == "eye_r":                      # 눈썹 위에서 눈을 지나 뺨으로 세로 한 줄(황보민철 — 인물 자기 쪽)
 		var ex := -0.037 if kind == "eye_l" else 0.037
-		_mesh(head, _box(Vector3(0.006, 0.085, 0.006)), m, Vector3(ex, 0.0, -0.1), Vector3(-8, 0, 0))
+		_mesh(head, _box(Vector3(0.0042, 0.085, 0.0025)), m, Vector3(ex, 0.0, -0.1), Vector3(-8, 0, 0))
 
 
 ## 모자: beanie — 챙 없는 니트 비니(인수 · 신태진 · 남구 청년회), bucket — 챙이 아래로 처진 벙거지
