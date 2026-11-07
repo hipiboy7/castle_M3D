@@ -451,7 +451,8 @@ def missing_art():
     out = []
     for cid in roster_ids():
         for rel in ("models/%s_a.glb" % cid, "sprites/%s_b.png" % cid, "sprites/%s_b.json" % cid):
-            if not os.path.exists(os.path.join(ROOT, "assets", "roster", rel)):
+            # 3 ~ 13장 장 표에 나오는 인물은 APK 폴더(assets/models · sprites)로 옮겼다(src/view/looks.gd STAGED)
+            if not os.path.exists(os.path.join(ROOT, "assets", "roster", rel)) and not os.path.exists(os.path.join(ROOT, "assets", rel)):
                 out.append(rel)
     return out
 

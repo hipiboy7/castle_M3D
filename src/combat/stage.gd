@@ -59,7 +59,9 @@ static func _base(f, role: Dictionary, stats: Dictionary) -> void:
 ## 사람(김신 · 피우진): 등급 · 기술은 castle_common 진행(11장 앞까지), 칼날 쳐내기는 characters.json can_parry
 static func _hero(id: String, T):
 	var c := Addendum.character(id)
-	var pr: Array = Common.progress(id, Common.events_until(Common.stage_of(T.EVENT)))
+	var pr: Array = [str(c["rank"]), []]               # castle_common 에 등급이 없는 인물(표영 — 3장)은 진행 없이 1층 대체 등급
+	if Common.character(id).get("rank") != null and Common.character(id).has("rank"):
+		pr = Common.progress(id, Common.events_until(Common.stage_of(T.EVENT)))
 	var f = Fighter.new(str(c["name"]), 0)
 	f.char_id = id
 	f.rank = pr[0]
@@ -80,10 +82,12 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 	var T = d["tbl"]
 	var c := Addendum.character(id)
 	var role: Dictionary = T.ROLES[id]
-	var f = Fighter.new(str(c["name"]), team)
+	var over: Dictionary = npc_over(T, id)
+	var f = Fighter.new(str(over.get("name", c["name"])), team)
 	f.char_id = id
-	f.rank = Addendum.rank_at(id, T.PERIOD)
-	_base(f, role, Addendum.stats_at(id, T.PERIOD))
+	f.rank = str(over.get("rank", Addendum.rank_at(id, T.PERIOD)))
+	var st: Dictionary = over.get("stats", Addendum.stats_at(id, T.PERIOD))
+	_base(f, role, st)
 	f.can_parry = bool(c.get("can_parry", false))
 	f.pos = pos
 	f.facing = Vector2(-1, 0) if team == 1 else Vector2(1, 0)
@@ -109,7 +113,7 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 			f.hp_floor = float(role["yield_at"])      # 길을 내주기 전에는 이 밑으로 안 내려간다
 		elif role.has("hp_floor"):
 			f.hp_floor = float(role["hp_floor"])      # 쓰러뜨릴 수 없는 적(따돌리기 방 — 2장 남궁혁)
-		var g: float = Addendum.derive(Addendum.stats_at(id, T.PERIOD))["guard"]
+		var g: float = Addendum.derive(st)["guard"]
 		d["ais"][f] = EnemyAI.new(f, str(extra.get("ai", role["ai"])), _rng(int(d["seed"]) * 131 + int(d["room_i"]) * 17 + i), g)
 		d["enemies"].append(f)
 	else:
@@ -122,13 +126,19 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 				sk.append({"id": sid, "name": str(s["name"]), "move": mv_name, "cost": 1.0})
 		f.skills = sk
 		f.gauge_max = Common.bars_for(f.rank) * Common.bar_points()
-		f.gauge_rate = Common.gauge_rate(f.rank, Addendum.stats_at(id, T.PERIOD).get("기술"))
+		f.gauge_rate = Common.gauge_rate(f.rank, st.get("기술"))
 		var b = Bot.new(f, null, _rng(int(d["seed"]) * 977 + i))
 		b.generic_skills = true
 		d["bots"][f] = b
 		d["allies"].append(f)
 	d["world"].add(f)
 	return f
+
+
+## 장 표 NPCS(3 ~ 13장 — 그 장 시점의 등급 · 능력치 · 화면 이름, 3D 덧붙임)가 1층을 덮는다. 칸이 없는 장 표는 빈 표
+static func npc_over(T, id: String) -> Dictionary:
+	var m: Dictionary = T.get_script_constant_map().get("NPCS", {})
+	return m.get(id, {})
 
 
 static func _line(d: Dictionary, key: String, secs := 2.6, delay := 0.0) -> void:
@@ -244,6 +254,8 @@ static func step(d: Dictionary, human = null) -> void:
 					_line(d, "end", 5.0)
 				elif d["room"].has("escape"):
 					_line(d, "guide", 3.5)
+				elif d["room"].has("talk"):
+					_say(d)
 		"fight":
 			d["fight_t"] += 1
 		"clear":
@@ -395,7 +407,9 @@ static func _after(d: Dictionary) -> void:
 					d["lose_line"] = [str(tl[0]), str(tl[1])]
 				_focus(d)
 				return
-		if left == 0 or got_away:
+		if left == 0 and d["room"].has("talk") and float(d["fight_t"]) < talk_secs(d) * 60.0:
+			pass                                         # 대화 방: 대사가 다 지나갈 때까지 머문다
+		elif left == 0 or got_away:
 			d["stage"] = "clear"
 			d["t"] = 0
 			d["cleared"] += 1
@@ -411,8 +425,30 @@ static func _after(d: Dictionary) -> void:
 				w.events.append(["escape", lead])
 				_line(d, "escape", 2.8)
 			else:
-				_line(d, "clear", 2.4)
+				if not d["room"].has("talk"):
+					_line(d, "clear", 2.4)
 	_focus(d)
+
+
+## 대화 방(방 표 talk — 5 · 7장처럼 싸움 없는 장면): 대사 rooms.<방>.say(줄마다 [제목, 작은 글, (refs)])를 SAY_SECS 마다 하나씩.
+## 머무는 시간 = 줄 수 × SAY_SECS(방 표 talk 값이 더 길면 그것). 끝나면 clear 글 없이 다음 방
+const SAY_SECS := 3.4
+
+
+static func _say(d: Dictionary) -> void:
+	var v = Lines.at("%s.rooms.%s.say" % [d["tbl"].LINES, d["room"]["id"]])
+	if not v is Array:
+		return
+	for k in v.size():
+		var ln = v[k]
+		if ln is Array and ln.size() >= 2:
+			d["world"].events.append(["line", str(ln[0]), str(ln[1]), SAY_SECS - 0.2, k * SAY_SECS])
+
+
+static func talk_secs(d: Dictionary) -> float:
+	var v = Lines.at("%s.rooms.%s.say" % [d["tbl"].LINES, d["room"]["id"]])
+	var n: int = v.size() if v is Array else 0
+	return maxf(float(d["room"].get("talk", 0.0)), n * SAY_SECS)
 
 
 ## 화면에 보일 두 사람: hero = 조작하는 사람, boss = 방의 큰 적(살아 있으면) → 아니면 조작하는 사람에게 가장 가까운 적

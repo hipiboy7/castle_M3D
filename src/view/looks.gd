@@ -250,6 +250,11 @@ const ART := {
 ## 명부(roster — 장 표에 아직 안 쓰는 looks.json 인물, looks_common ROSTER) 그림 자리. APK 에서 뺀다(export_presets.cfg exclude_filter
 ## assets/roster/*) — 편집기 · 시험 · 도구에서만 있고, 폰에서는 has_art 가 거짓이라 관절 인형으로 그린다
 const ROSTER_DIR := "res://assets/roster"
+## 3 ~ 13장 장 표에 나오는 명부 인물(그림 A · B 를 APK 에 넣는다 — 도트는 굳힌 명부 시트를 그대로 옮김, 사용자 2026-11-08 '그림 B 굳힘')
+const STAGED := ["vasily", "pyoyoung", "namilho", "bulgom", "moseunggyu", "odohwa", "masa", "shire", "ttolbae", "deumiteuri",
+	"gustav", "barista", "jangho", "komodo", "keurisa", "medvedi", "ratel", "immuyeol", "choeminuk", "scaledanjang", "mark", "ryujihak",
+	"andycheong", "eunbo", "bison", "pantera", "akila", "richeon", "douchen", "hantaecheol", "yuwoosung", "lingling", "majunyeong",
+	"grolla", "eomji", "geomji", "choehyeokjin", "mahakyoung", "dohaksu", "eogwangdeuk", "sainjin", "jeongseono", "hide", "seungyeong"]
 
 
 ## 그림 A · B 자리(장 이름 ART + 명부). 없으면 빈 표
@@ -257,8 +262,16 @@ static func art_of(name: String) -> Dictionary:
 	if ART.has(name):
 		return ART[name]
 	if LooksCommon.ROSTER.has(name):
+		# 3 ~ 13장 장 표에 나오는 명부 인물은 그림을 assets/models · sprites 로 옮겨 APK 에 넣는다(STAGED — tools/stage_art.py)
+		if STAGED.has(name):
+			return {"glb": "res://assets/models/%s_a.glb" % name, "dots": "res://assets/sprites/%s_b" % name}
 		return {"glb": "%s/models/%s_a.glb" % [ROSTER_DIR, name], "dots": "%s/sprites/%s_b" % [ROSTER_DIR, name]}
 	return {}
+
+
+## 외형 이름이 있는가(장 표 검사) — 손 표 LOOKS 또는 명부(castle_common looks.json — Looks.look 이 기본값으로 채운다)
+static func known(name: String) -> bool:
+	return LOOKS.has(name) or LooksCommon.ROSTER.has(name)
 
 
 ## 그림을 만드는 이름 전부(make_models · make_sprites · shot_looks) — 장 이름 다음에 명부

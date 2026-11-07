@@ -109,6 +109,9 @@
 | `sprites/castle_g4_leader_b.json` | 〃 | 그림 B 경호대 최후의 4인 리더(11장) |
 | `sprites/ds_member_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/ds_member_a.glb`) | 그림 B DS 씨큐리티 정장(0 · 1장 엑스트라) |
 | `sprites/ds_member_b.json` | 〃 | 그림 B DS 씨큐리티 정장(0 · 1장 엑스트라) |
+| `models/*_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` · 3 ~ 13장 장 표에 나오는 명부 인물을 `roster/` 에서 옮김(2026-11-08 — 이름 `src/view/looks.gd` STAGED). 장 이름 줄이 따로 있는 파일도 이 무리에 든다 | 그림 A 3 ~ 13장 인물(APK 에 든다) |
+| `sprites/*_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` · 명부 시트를 그대로 옮김(그림 B 굳힘 — 다시 굽지 않음, CLAUDE.md 1절) | 그림 B 3 ~ 13장 인물 |
+| `sprites/*_b.json` | 〃 — 도트 시트 칸 이름 · 크기 | 그림 B 3 ~ 13장 인물 |
 | `roster/models/*_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06 전인물 외형 — 명부 인물 = castle_common `data/looks.json` 의 장 표에 아직 안 쓰는 인물, 이름 = looks.json id · `src/view/looks_common.gd` ROSTER). **APK 에서 뺀다**(`export_presets.cfg` exclude_filter `assets/roster/*`) | 그림 A 명부 인물(편집기 · 시험 · 도구만 — 폰은 관절 인형) |
 | `roster/sprites/*_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`roster/models/<이름>_a.glb`) · APK 에서 뺀다 | 그림 B 명부 인물 |
 | `roster/sprites/*_b.json` | 〃 — 도트 시트 칸 이름 · 크기 | 그림 B 명부 인물 |

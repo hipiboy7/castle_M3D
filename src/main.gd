@@ -33,9 +33,10 @@ const Arena = preload("res://src/view/arena3d.gd")
 const Hotel3d = preload("res://src/view/hotel3d.gd")
 const Town3d = preload("res://src/view/town3d.gd")
 const Haseong3d = preload("res://src/view/haseong3d.gd")
+const World3d = preload("res://src/view/world3d.gd")
 const Moves = preload("res://src/data/moves.gd")
 ## 장 무대 그림(campaign.gd CHAPTERS view) → 그림 클래스 — 모두 build(theme, bounds, detail) 를 갖는다(LSP)
-const VIEWS := {"hotel": Hotel3d, "town": Town3d, "haseong": Haseong3d}
+const VIEWS := {"hotel": Hotel3d, "town": Town3d, "haseong": Haseong3d, "world": World3d}
 const Fx = preload("res://src/view/fx3d.gd")
 const Cam = preload("res://src/view/camera_rig.gd")
 const Sound = preload("res://src/view/sound.gd")

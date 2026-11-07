@@ -17,7 +17,8 @@ const Common = preload("res://src/data/common.gd")
 const PERIOD_CH11 := "hwajin"
 
 ## 이름 없는 엑스트라(인물 표 · canon 에 없다 — 장 데이터 검사가 canon 인물 id 를 보지 않는 것)
-const EXTRAS := ["castle_guard", "gunter_guard", "ds_member", "ds_raider", "haseong_suit", "haseong_guard", "namgu_youth"]
+const EXTRAS := ["castle_guard", "gunter_guard", "ds_member", "ds_raider", "haseong_suit", "haseong_guard", "namgu_youth",
+	"street_thug", "gang_blade", "gang_brute", "pro_fighter", "elite_guard"]
 
 const CHARACTERS := {
 	"shingen": {"id": "shingen", "name": "사사키 신겐", "rank": "내성 상위", "weapons": ["맨손", "칼", "대도"],
@@ -99,6 +100,18 @@ const CHARACTERS := {
 		"stats": {"힘": 50, "속도": 50, "기술": 42, "맷집": 50}, "skills": [],
 		"src": "3D 덧붙임 엑스트라(원작 fight:gyeonghotim 대표실 앞 특별 경호팀 p1:025-026)",
 		"provisional": ["rank", "stats"]},
+	# 3 ~ 13장 엑스트라(2026-11-08) — 이름 없는 무리 다섯 갈래. 방 표 덧붙임(look · name · ai)으로 장마다 옷 · 이름을 바꾼다
+	# (교도소 재소자 · 부산 조직원 · 화진 습격조 · 야쿠자 · 교회 경호대 …). 등급은 무리의 대표값(장 표 NPCS 로 덮을 수 있다)
+	"street_thug": {"id": "street_thug", "name": "건달", "rank": "건달급", "weapons": ["맨손", "몽둥이"],
+		"stats": {"힘": 44, "속도": 44, "기술": 34, "맷집": 44}, "skills": [], "src": "3D 덧붙임 엑스트라(3 ~ 13장 무리)", "provisional": ["rank", "stats"]},
+	"gang_blade": {"id": "gang_blade", "name": "칼잡이", "rank": "조장급", "weapons": ["칼"],
+		"stats": {"힘": 50, "속도": 52, "기술": 44, "맷집": 48}, "skills": [], "src": "3D 덧붙임 엑스트라(3 ~ 13장 무리)", "provisional": ["rank", "stats"]},
+	"gang_brute": {"id": "gang_brute", "name": "거구", "rank": "조장급", "weapons": ["맨손"],
+		"stats": {"힘": 60, "속도": 40, "기술": 36, "맷집": 60}, "skills": [], "src": "3D 덧붙임 엑스트라(3 ~ 13장 무리)", "provisional": ["rank", "stats"]},
+	"pro_fighter": {"id": "pro_fighter", "name": "격투가", "rank": "네임드", "weapons": ["맨손"],
+		"stats": {"힘": 58, "속도": 60, "기술": 56, "맷집": 58}, "skills": [], "src": "3D 덧붙임 엑스트라(3 ~ 13장 — 케이지 · 이스크라 · 사천왕 부하)", "provisional": ["rank", "stats"]},
+	"elite_guard": {"id": "elite_guard", "name": "경호대", "rank": "경호대급", "weapons": ["맨손", "칼", "총"],
+		"stats": {"힘": 64, "속도": 62, "기술": 60, "맷집": 62}, "skills": [], "src": "3D 덧붙임 엑스트라(3 ~ 13장 — 캐슬 경호대 · 교회전)", "provisional": ["rank", "stats"]},
 	"namgu_youth": {"id": "namgu_youth", "name": "남구청년회", "rank": "건달급", "weapons": ["맨손"],
 		"stats": {"힘": 42, "속도": 44, "기술": 32, "맷집": 44}, "skills": [],
 		"src": "3D 덧붙임 엑스트라(원작 fight:haseong_lobby 남구청년회 사람들 — 서진태 쪽 p1:024-028)",
@@ -162,9 +175,47 @@ static func _has_common(id: String) -> bool:
 	return false
 
 
-## 인물 — castle_common 에 있으면 그 값이 먼저, 빈 칸(skills [] · 모르는 능력치)만 여기서 채운다
+## 인물 — castle_common 에 있으면 그 값이 먼저, 빈 칸(skills [] · 모르는 능력치)만 여기서 채운다.
+## 둘 다에 없는 인물(3 ~ 13장의 이름 있는 적 — 바실리 · 구스타프 …)은 castle_common 2층에서 이름(looks.json name) · 등급(ranks.json
+## strength_ref — 조건 없는 줄이 먼저)만 채운다. 능력치는 빈 표(= 기준 80, 1배)라 손맛은 장 표 ROLES(hp · dmg_k)가 정한다
 static func character(id: String) -> Dictionary:
 	var out: Dictionary = CHARACTERS.get(id, {}).duplicate(true)
+	if out.is_empty() and not _has_common(id):
+		return canon_fallback(id)
+	out = _with_common(id, out)
+	if str(out.get("rank", "")) in ["", "<null>"] or out.get("rank") == null:   # castle_common 에 이름만 있는 인물(표영 · 리천 · 마학영 …)
+		out["rank"] = str(canon_fallback(id).get("rank", "건달급"))
+	if not out.get("stats") is Dictionary:
+		out["stats"] = {}
+	return out
+
+
+## 1층 표에 없는 인물 — 이름 · 등급만(없으면 빈 표). 장 표 NPCS 가 등급 · 능력치를 덮을 수 있다(stage._npc)
+static func canon_fallback(id: String) -> Dictionary:
+	var name := ""
+	for lk in Common._j("looks").get("looks", []):
+		if str(lk.get("id", "")) == id:
+			name = str(lk.get("name", ""))
+			break
+	var rank := ""
+	var any := ""
+	for r in Common._j("ranks").get("strength_ref", []):
+		if str(r.get("char", "")) != id:
+			continue
+		if any == "":
+			any = str(r["rank"])
+		if not r.has("cond"):
+			rank = str(r["rank"])
+			break
+	if rank == "":
+		rank = any
+	if name == "" and rank == "":
+		return {}
+	return {"id": id, "name": name if name != "" else id, "rank": rank if rank != "" else "건달급", "stats": {}, "skills": [],
+		"can_parry": false, "src": "1층 없음 — castle_common looks.json 이름 · ranks.json 강함표 등급(3 ~ 13장, 3D)"}
+
+
+static func _with_common(id: String, out: Dictionary) -> Dictionary:
 	if _has_common(id):
 		var c: Dictionary = Common.character(id)
 		for k in c:
