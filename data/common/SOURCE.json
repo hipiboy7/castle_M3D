@@ -1,12 +1,12 @@
 {
   "_about": "castle_common 복사본 — 손으로 고치지 않는다. 받기: py -3.12 D:/claude/fun/castle_common/tools/sync.py castle_M3D",
-  "castle_common": "7775032bcfcd44a9f5ddda9867793efd1aac0954",
+  "castle_common": "bdcc3b7955243622046e03d624872ac3e7650a35",
   "files": {
     "characters.json": "5e973e2fa9f9dd0b3af4d09a110f3094832a3387b4ea4ab894ff0be0015d3571",
     "looks.json": "876d4158429f986615d76bc4be9fb15f805fe95a7759cfba0cf9df7d18d21e86",
     "progression.json": "e10cf38dde0c9251a54f48d3915d29bdc2c9d0077154e2a291ec265e1112d740",
     "ranks.json": "e76e425d231a789a70d263b8abb8c7895f2134da518db907be9ca789d651593b",
-    "rules.json": "fbf122dcedb135d0290987a6122dce186c83cee6dcf0ab184a17cce3cd4d513c",
+    "rules.json": "48e3b5810293e99bde2353818d73c3498e6ea480b21bad2bce160f62fee2cf79",
     "skills.json": "b403e5fb9a02f7b0a1fd415d58ed8196fd5de48ac7241419fe096390ab27db9c",
     "cases/rules_cases.json": "1830ea92f91c6a4e771f373806b24c3b9af0ba98314ed94383d3a113c9ce3265",
     "canon/episodes/001.json": "eb6e7685c0a92758cd0d6b9cb191fa4b93f64d8528391840e352a850b201df39",
@@ -272,7 +272,7 @@
     "canon/fights.json": "42be7581f8868fd86835fa075fbe33fa21d6e94df3081f37dac0049aa047a763",
     "canon/glossary.json": "3b7dc9908d7ba44681c920e15124be233d6d940a1b78b275c2f936cde45fec0e",
     "canon/locations.json": "f0165c551bbe3ca29a334624f7ec2ece76b7e4f8a8aa267a9bd4e5a508a44261",
-    "canon/techniques.json": "7bad542449d0145f2458e57acd6811f099a2d3b54e13ba1064c1fb6e11bc55e3",
+    "canon/techniques.json": "266a3187b41c998b3decfc1efd830e044c17f9e7f0cf3e65321967cfe04d10d7",
     "docs/개발규격/README.md": "d75049214448d9173b3402521794bc391273db711df01b0a3ee90646fac5a4c9",
     "docs/개발규격/sdlc_넘길것.md": "ff54a7af5a33a1f72ca3843e8e41151118c33b75543dc80b67b9d2dd23be0803",
     "docs/개발규격/게임개발규격.md": "f203586deae9c5e96aaa3c4db149eef58f0a92e7f716db9a2fb34e11a57a06ad",
