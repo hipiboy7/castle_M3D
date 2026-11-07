@@ -5,6 +5,7 @@
 **이 폴더에서 Claude Code 를 따로 열어 개발한다** — 3D 일은 이 폴더 세션에서, 2D 본편 일은 castle_M 폴더 세션에서(2026-10-26 사용자).
 이 문서만으로 일할 수 있게 썼다. 여기 없는 규칙은 개발 규격(받은 사본 `data/common/docs/개발규격/` — `캐슬_게임공통.md` · `게임개발규격.md`)의 해당 절을 찾아 읽는다(전체를 읽지 않는다). 우선순위: 사용자 답(기획서 00 결정 10 포함) → 이 문서 → 기획서(castle_common `docs/기획서/03`) → 규격.
 
+> 정정 이력: 2026-11-08 — 1절 그림 B(도트)는 굳혀 둔다 · 다시 굽지 않음(사용자 "그림은 다시 (b)로 … 다 개발이 끝나면 그 이후에 추가하던지").
 > 정정 이력: 2026-11-06 (8) — S5 묶음 4(2장 하성 본사 — 사용자 답 등급 · 남궁혁 A · 추천 범위): 0절 무엇, 1절 stage(방마다 조작 인물 · 따돌리기) · 장 표 haseong · 무대 haseong3d.
 > 정정 이력: 2026-11-06 (7) — S5 묶음 2 · 3(프롤로그 · 1장 — 사용자 "묶음 2,3 동시에 진행해"): 0절 무엇, 1절 장 표 · 무대 그림(town3d · set3d).
 > 정정 이력: 2026-11-06 (6) — #9 결정(3D 본편화 · 그림 A — 사용자 "1, 2, 3 추천대로"): 0절 무엇, 1절 campaign · save · title_menu.
@@ -54,7 +55,7 @@
 - 캐릭터를 GLB 로 바꿀 때: `update_from(f, dt, frozen)` 를 가진 그림 클래스를 새로 만들어 `src/main.gd` 에서 바꿔 끼운다(판정은 그대로)
 - `assets/` 자산 — 출처 목록 `assets/ASSETS.md`(새 파일은 여기 한 줄, verify 가 본다)
 - `scripts/` 검증 · Godot 받기 · 에뮬레이터 점검(CI 경로 필터에 들어 있다), `tools/` 개발 도우미(경로 필터 밖 — 바꿔도 CI 가 안 돈다)
-- 그림 A · B(S3): `tools/make_models.gd`(헤드리스 — GLB `assets/models/<id>_a.glb`) · `tools/make_sprites.gd`(가상 화면 `tools/xvfb_run.sh` — 도트 시트 `assets/sprites/<id>_b.png/json`). 고치면 두 도구를 다시 돌리고 `--import`. 게임은 `--art puppet|a|b` · 처음 화면 '그림' 버튼. 수치 조정은 `tests/sim_stage.gd`(11장 봇 6판) · `tests/sim.gd`(6장)
+- 그림 A · B(S3): `tools/make_models.gd`(헤드리스 — GLB `assets/models/<id>_a.glb`) · `tools/make_sprites.gd`(가상 화면 `tools/xvfb_run.sh` — 도트 시트 `assets/sprites/<id>_b.png/json`). 외형을 고치면 `make_models.gd` 만 다시 돌리고 `--import` — **그림 B(도트)는 굳혀 둔다**(다시 굽지 않음 · A 와 모습이 어긋나도 둔다, 개발이 끝난 뒤 다시 다룬다 — 사용자 2026-11-08 "너무 시간이 오래 걸리네", 한 번에 117장 약 20분). 게임은 `--art puppet|a|b` · 처음 화면 '그림' 버튼. 수치 조정은 `tests/sim_stage.gd`(11장 봇 6판) · `tests/sim.gd`(6장)
 
 ## 2. 검증
 - 전체 검증: `python3.11 scripts/verify.py` (약 20초 — 공통 데이터(도장 · castle_common 비교) · 자산 출처 · 가져오기 · 테스트(공통 cases 1,464줄 포함) · 자동 결투 3판. 출력에 ERROR · WARNING · Leaked 가 있으면 실패). 커밋 전에 반드시. 마일스톤 끝 · 태그 전에는 `--strict`(castle_common 이 앞서 있으면 실패)
