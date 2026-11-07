@@ -474,9 +474,10 @@ const M := {
 	"ng_jab": {"label": "연타", "startup": 9, "active": 9, "recovery": 12, "damage": 6, "reach": 13, "radius": 10,
 		"arc": 50, "lunge": 8, "hits": 3, "knockback": 0.8, "hitstop": 4, "posture": 8, "telegraph": "parry", "shape": "punch",
 		"sfx": "swing"},                                                                                       # 025 몸 젖혀 흘린 뒤 주먹 연타('퍼버벅')
+	# 너클 카운터에 맞으면 기절(아랫급 1초 · 같은 급 · 윗급 0.83초 — rc.2 폰 "안 무서움, 맞으면 스턴" 2026-11-07, 3D 덧붙임)
 	"ng_counter": {"label": "너클 카운터", "startup": 7, "active": 3, "recovery": 14, "damage": 16, "reach": 14, "radius": 10,
 		"lunge": 8, "knockback": 4.4, "hitstop": 10, "posture": 22, "telegraph": "parry", "shape": "punch", "sfx": "kick",
-		"hit_sfx": "hit_heavy", "shake": 4, "skill": true, "skill_id": "namgung_knuckle_counter"},               # 024 낮춰 파고들며 흘리기 → 품 안 반격 · 028/088-089 흘리고 갈비 훅
+		"hit_sfx": "hit_heavy", "shake": 4, "skill": true, "skill_id": "namgung_knuckle_counter", "stun_3d": [60, 50]},               # 024 낮춰 파고들며 흘리기 → 품 안 반격 · 028/088-089 흘리고 갈비 훅
 	"ng_hook": {"label": "너클 훅", "startup": 18, "active": 4, "recovery": 18, "damage": 18, "reach": 14, "radius": 12,
 		"arc": 140, "lunge": 8, "knockback": 5.4, "hitstop": 11, "posture": 26, "telegraph": "parry", "shape": "punch", "sfx": "kick",
 		"hit_sfx": "hit_heavy", "shake": 5, "skill": true, "skill_id": "namgung_knuckle_hook"},                 # 029/117-118 둥근 궤적 훅('콰아앙') · 030/010 원 궤적

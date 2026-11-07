@@ -73,15 +73,14 @@ static func cleared(s: Dictionary, id: String) -> bool:
 	return s["cleared"].has(id)
 
 
-## 이어하기: 장 차례에서 아직 안 깬 첫 장 → 다 깼으면 마지막으로 한 장 → 그것도 못 하면 첫 장
+## 이어하기: 마지막으로 깬 장(last)의 다음 장 → 그게 끝 장이면 그 장 → 깬 장이 없거나 못 하는 장이면 첫 장.
+## (옛 규칙 '안 깬 첫 장'은 카드로 1장부터 깨면 프롤로그로 돌아갔다 — rc.2 폰 2026-11-07)
 static func next_chapter(s: Dictionary) -> String:
 	var ids := Campaign.playable_ids()
-	for id in ids:
-		if not cleared(s, id):
-			return id
-	if Campaign.playable(str(s["last"])):
-		return str(s["last"])
-	return ids[0]
+	var i := ids.find(str(s["last"]))
+	if i < 0:
+		return ids[0]
+	return ids[mini(i + 1, ids.size() - 1)]
 
 
 ## 장이 열렸나 — 할 수 있는 장이고(준비 중이 아니고), 시험판(OPEN_ALL)이거나 차례 규칙이 맞으면

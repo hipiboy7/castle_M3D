@@ -277,6 +277,15 @@ static func look(name: String) -> Dictionary:
 	if LooksCommon.BY_NAME.has(base):        # 원작 조각 대조 겉모습(castle_common data/looks.json — 사용자 답58)
 		lk.merge(LooksCommon.BY_NAME[base], true)
 	lk["scale"] = shown_scale(base, float(lk.get("scale", 1.06 if lk.get("big", false) else 1.0)))
+	var wd: float = float(lk.get("wide", 1.08 if lk.get("big", false) else 1.0))
+	if EXTRA_LOOKS.has(base):                         # 무리는 몸 너비를 EXTRA_MAX_WIDE 까지만(큰 경호원 · 거구도 메인보다 작게)
+		lk["wide"] = minf(wd, EXTRA_MAX_WIDE)
+		if lk.has("shoulder"):
+			lk["shoulder"] = minf(float(lk["shoulder"]), EXTRA_MAX_WIDE)
+	else:                                             # 메인은 덩치(몸 · 어깨 너비)를 MAIN_WIDE 배 — 그림 A(GLB) · B(도트)는 다시 구워야 따른다
+		if lk.has("shoulder"):
+			lk["shoulder"] = float(lk["shoulder"]) * MAIN_WIDE
+		lk["wide"] = wd * MAIN_WIDE
 	if base == name:
 		return lk
 	lk.merge(art_of(base), true)
@@ -286,17 +295,23 @@ static func look(name: String) -> Dictionary:
 ## 화면 키(사용자 2026-11-06 "메인 케릭터들 크기는 비 메인 케릭터들보다 크게 그러나 지금보다 작게해주고, 머리가 너무크니까
 ## 머리 사이즈는 더 작게"): 표의 scale(인물끼리의 키 차 — 김신 1.04 · 백도찬 1.2 · 거구 보스 1.28)은 그대로 두고 화면에서만
 ## 메인(이름 있는 인물)은 MAIN_BASE 위로 차이를 MAIN_SPREAD 만큼 줄여 그리고, 엑스트라(EXTRA_LOOKS — 이름 없는 무리)는 표 그대로.
-## 머리는 HEAD_K 배(관절 인형 머리 마디 · GLB 머리 뼈 — puppet3d · puppet_glb). 도트(그림 B)는 시트에 구워져 다시 만들 때 따른다
-const MAIN_BASE := 1.03
+## 머리는 HEAD_K 배(관절 인형 머리 마디 · GLB 머리 뼈 — puppet3d · puppet_glb). 도트(그림 B)는 시트에 구워져 다시 만들 때 따른다.
+## rc.2 폰(2026-11-07 "메인은 무리보다 덩치가 조금 더 컸으면 · 머리는 '머리만' 조금 더 작게 · 관절 인형이 그나마 낫다"):
+## MAIN_BASE 1.03 → 1.05 · 메인 몸 너비 MAIN_WIDE · HEAD_K 0.82 → 0.75 · 무리는 키 EXTRA_MAX_SCALE · 너비 EXTRA_MAX_WIDE 까지만
+## (표의 큰 무리 — 하성 경호팀 1.1 · 4인 1.14 · 군터 거구 1.22 — 가 메인 1.05 보다 커 보였다)
+const MAIN_BASE := 1.05
 const MAIN_SPREAD := 0.5
-const HEAD_K := 0.82
+const MAIN_WIDE := 1.07
+const EXTRA_MAX_SCALE := 1.0
+const EXTRA_MAX_WIDE := 1.04
+const HEAD_K := 0.75
 const EXTRA_LOOKS := ["guard", "g4", "g4_leader", "gunter_suit", "gunter_bald", "gunter_uzi", "gunter_brute", "ds_suit", "ds_raider",
 	"haseong_suit", "haseong_guard", "namgu_youth"]
 
 
 static func shown_scale(base: String, s: float) -> float:
 	if EXTRA_LOOKS.has(base):
-		return s
+		return minf(s, EXTRA_MAX_SCALE)
 	return MAIN_BASE + maxf(0.0, s - 1.04) * MAIN_SPREAD
 
 

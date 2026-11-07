@@ -61,27 +61,47 @@ func test_ch11_still_swaps() -> void:
 	check(Stage.swap(d) and d["hero"] == d["heroes"][1] and Stage.partner(d) == d["heroes"][0], "11장: 교대하면 짝이 바뀐다")
 
 
-func test_escape_room_by_time() -> void:
+func test_escape_room_timeout_loses() -> void:
+	# rc.2 폰(2026-11-07 사용자): 버티기로 넘으면 안 된다 — 정해진 초 안에 오른쪽 끝 문에 못 닿으면 그 방은 못 깬다(진다)
 	var i := _room_of("upper_corridor")
 	var d := Stage.make(3, {"chapter": "ch2", "room": i})
 	var kim = d["heroes"][0]
 	var boss = d["boss"]
 	check(boss != null and boss.char_id == "namgunghyuk" and boss.hp_floor > 0.0, "위층 복도: 남궁혁 — 쓰러뜨릴 수 없다(hp_floor)")
 	check(Stage.escape_left(d) < 0.0, "들어서는 동안은 남은 초가 없다")
-	_past_intro(d)
+	var guide := false
+	for n in 200:
+		Stage.step(d, {})
+		if d["world"].events.any(func(e): return e[0] == "line" and str(e[1]).contains("문")):
+			guide = true
+		d["world"].events.clear()
+		if d["stage"] == "fight":
+			break
+	check(guide, "싸움이 시작되면 안내 글(문으로 빠져나가라)이 뜬다")
 	var secs: float = Haseong.ROOMS[i]["escape"]["secs"]
-	check(absf(Stage.escape_left(d) - secs) < 0.1, "싸움이 시작되면 남은 초 = %.0f (%.2f)" % [secs, Stage.escape_left(d)])
-	var escaped := false
+	check(secs <= 10.0 and absf(Stage.escape_left(d) - secs) < 0.1, "남은 초 = %.0f — 10초 안 (%.2f)" % [secs, Stage.escape_left(d)])
 	for n in int(secs * 60.0) + 5:
 		kim.hp = kim.hp_max                                # 버티기만(맞아도 안 쓰러지게)
 		Stage.step(d, {})
-		if d["world"].events.any(func(e): return e[0] == "escape"):
-			escaped = true
 		d["world"].events.clear()
-		if d["stage"] == "clear":
+		if d["world"].over != "":
 			break
-	check(escaped and d["stage"] == "clear" and boss.alive() and boss.inert, "%.0f초 버티면 남궁혁을 두고 방을 넘는다 %s" % [secs, d["stage"]])
+	check(d["world"].over == "lose" and d["stage"] != "clear", "%.0f초 안에 문에 못 닿으면 진다 — over=%s stage=%s" % [secs, d["world"].over, d["stage"]])
+	check(d.get("lose_line", []).size() >= 2, "시간 초과 패배 글이 따로 있다")
 	check(boss.hp >= boss.hp_max * boss.hp_floor - 0.01, "남궁혁 체력은 바닥 밑으로 안 내려간다")
+
+
+func test_escape_room_bot_runs_to_exit() -> void:
+	# 봇(자동 플레이)도 버티지 않고 문으로 달린다
+	var i := _room_of("upper_corridor")
+	var d := Stage.make(5, {"chapter": "ch2", "room": i})
+	var secs: float = Haseong.ROOMS[i]["escape"]["secs"]
+	for n in 75 + int(secs * 60.0) + 200:
+		Stage.step(d)
+		d["world"].events.clear()
+		if d["stage"] == "clear" or d["world"].over != "":
+			break
+	check(d["stage"] == "clear" and d["world"].over == "", "봇이 %.0f초 안에 문에 닿는다 — stage=%s over=%s" % [secs, d["stage"], d["world"].over])
 
 
 func test_escape_room_by_exit() -> void:

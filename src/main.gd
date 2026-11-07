@@ -63,6 +63,7 @@ var _fake_swap := false
 var _esc_hint := false
 var _switch_to: Array = []                 # 메뉴로 고른 [장, 방] — mode "switch" 가 SWITCH_WAIT 프레임 뒤 판을 바꾼다
 const SWITCH_WAIT := 2
+const RESULT_AUTO := 600        # 이긴 결과 화면: 안 눌러도 10초 뒤 처음 화면(rc.2 폰: 2장 끝 화면이 굳은 것처럼 보였다 — 끝 방 글과 결과 글이 같아서)
 var _mouse_was := false
 var _fake_art := false
 var headless := false
@@ -401,6 +402,8 @@ func _back() -> void:
 
 ## 앱이 내려가면(홈 · 전화 · 화면 끔) 소리를 끄고, 사람이 싸우는 중이면 멈춘다. 돌아오면 소리만 켠다(멈춤은 사람이 푼다)
 func _app_hidden(hidden: bool) -> void:
+	_trace("APP %s mode=%s paused=%s menu=%s screen=%s frame=%d" % ["hide" if hidden else "show", mode, paused, menu_open,
+		str(get_viewport().get_visible_rect().size), frames])     # 폰 · 에뮬레이터 logcat — 화면 끄고 켠 뒤 검은 화면(rc.2) 조사
 	AudioServer.set_bus_mute(0, hidden)
 	if hidden and not menu_open and Nav.pause_on_hide(mode, paused):      # 메뉴가 열려 있으면 이미 멈춰 있다
 		_set_paused(true)
@@ -718,7 +721,7 @@ func _physics_process(_dt: float) -> void:
 				seed_now += 1
 				_new_run(chapter)
 				_start("demo")
-			elif not args["autoplay"] and mode_t > 60 and _pressed_anything():
+			elif not args["autoplay"] and mode_t > 60 and (_pressed_anything() or (last_win and mode_t > RESULT_AUTO)):
 				seed_now += 1
 				if last_win:
 					_new_run(Save.next_chapter(save))      # 이겼으면 처음 화면 — 이어하기가 다음 장
@@ -785,6 +788,8 @@ func _end_fight(result: String) -> void:
 	_apply_speed()
 	_save_replay(REPLAY_LAST)
 	touch.show_swap = false
+	touch.show_fight = false                            # 결과 화면은 싸움 버튼 없이 — 아무 데나 누르면 다음(버튼을 눌러도 같다)
+	touch.show_pause = false
 	results.append(_summary())
 	var key: String = "ch6" if kind == "duel" else str(d["tbl"].LINES)
 	last_win = result == "win" and played
@@ -794,13 +799,16 @@ func _end_fight(result: String) -> void:
 	if result == "win":
 		if pup.has(d["hero"]):
 			pup[d["hero"]].victory = true
-		var wm = Lines.at("ch6.win") if kind == "duel" else Lines.at("%s.rooms.%s.end" % [key, d["room"]["id"]])
+		var wm = Lines.at("ch6.win")
+		if kind == "stage":                             # 끝 방 글은 끝 방에서 이미 보였다 — 결과는 '깸' + 다음(같은 글이면 굳은 것처럼 보였다, rc.2)
+			wm = [str(Lines.at("result")["win_title"]) % str(Campaign.title(chapter)[0]),
+				str(Lines.at("result")["win_next"]) % str(Campaign.title(Save.next_chapter(save))[0])]
 		hud.message(str(wm[0]), str(wm[1]), 9999.0)
 		snd.song("victory", false)
 	else:
 		if d["boss"] != null and pup.has(d["boss"]):
 			pup[d["boss"]].victory = true
-		var lm: Array = Lines.at(key + ".lose")
+		var lm: Array = d["lose_line"] if d.get("lose_line", []).size() >= 2 else Lines.at(key + ".lose")   # 따돌리기 시간 초과는 따로
 		hud.message(lm[0], lm[1], 9999.0)
 		snd.song("gameover", false)
 	var rl = Lines.at("result")

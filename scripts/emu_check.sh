@@ -66,3 +66,24 @@ if [ -z "$pid" ]; then
   exit 1
 fi
 echo "OK — 앱이 살아 있음 (pid $pid)"
+
+# ---- 화면 끄고 켜기 (rc.2 폰 2026-11-07: "화면 잠깐 껐다 켜면 검은 화면에서 버튼이 안 먹음") — 판정에 넣지 않고 기록만
+# 데모 중 한 번 눌러 싸움으로 → 화면 끔 8초 → 켬 · 잠금 풀기 → 찍기 → 한 번 눌러(일시정지 풀기) → 찍기. logcat 은 emu/logcat_resume.txt
+# (main.gd 가 "APP hide|show …" · "PAUSE …" · "MODE …" 를 찍는다). 에뮬레이터는 3D 셰이더가 깨지므로(T-4) 글 · 버튼 · 로그 위주로 본다
+W=$(adb shell wm size | sed -nE 's/.*: ([0-9]+)x([0-9]+).*/\1 \2/p' | tail -1)
+set -- $W
+tx=$(( ${2:-1080} / 2 )); ty=$(( ${1:-2400} / 2 ))       # 가로로 돌려 둔 화면의 가운데(wm size 는 세로 기준 너비 x 높이)
+adb logcat -c
+adb shell input tap "$tx" "$ty"; sleep 15
+adb shell input keyevent KEYCODE_SLEEP; sleep 8
+adb shell input keyevent KEYCODE_WAKEUP; sleep 2
+adb shell wm dismiss-keyguard; sleep 12
+adb exec-out screencap -p > emu/emu_5_resume.png
+adb shell input tap "$tx" "$ty"; sleep 12
+adb exec-out screencap -p > emu/emu_6_resume_tap.png
+adb logcat -d > emu/logcat_resume.txt
+echo "--- 화면 끄고 켜기 (기록만) ---"
+grep -E "APP (hide|show)|PAUSE |MODE |FPS_LOG" emu/logcat_resume.txt | sed -E 's/.*(APP |PAUSE |MODE |FPS_LOG)/\1/' | tail -12 || true
+grep -E "FATAL EXCEPTION|SCRIPT ERROR|Force quitting|EGL_BAD|eglMakeCurrent|surface" emu/logcat_resume.txt | head -10 || true
+[ -n "$(adb shell pidof "$PKG" | tr -d '\r')" ] && echo "끄고 켠 뒤 앱 살아 있음" || echo "끄고 켠 뒤 앱이 죽었다"
+exit 0

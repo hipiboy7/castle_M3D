@@ -146,10 +146,15 @@ func test_next_chapter_and_unlock() -> void:
 	Save.record_clear(s, "ch6", 3000)
 	check(Save.next_chapter(s) == "ch11", "6장을 깨면 11장")
 	Save.record_clear(s, "ch11", 9000)
+	check(Save.next_chapter(s) == "ch11", "끝 장을 깨면 끝 장 그대로")
 	s["last"] = "ch6"
-	check(Save.next_chapter(s) == "ch6", "다 깨면 마지막으로 한 장")
+	check(Save.next_chapter(s) == "ch11", "마지막으로 깬 장의 다음 장")
 	s["last"] = "nope"
 	check(Save.next_chapter(s) == "ch0", "마지막 장이 못 하는 장이면 첫 장")
+	# rc.2 폰(2026-11-07): 카드로 1장부터 깨면(프롤로그는 안 깸) 이어하기가 2장이어야 — 옛 규칙은 안 깬 첫 장(프롤로그)으로 갔다
+	var u := Save.fresh()
+	Save.record_clear(u, "ch1", 9000)
+	check(Save.next_chapter(u) == "ch2", "프롤로그를 건너뛰고 1장을 깨도 이어하기는 2장 — %s" % Save.next_chapter(u))
 	var t := Save.fresh()
 	check(Save.unlocked(t, "ch0") and not Save.unlocked(t, "nope"), "첫 장은 열림 · 없는 장은 잠김")
 	check(Save.unlocked(t, "ch11") == Campaign.OPEN_ALL, "11장은 시험판(OPEN_ALL)이면 처음부터 열림")

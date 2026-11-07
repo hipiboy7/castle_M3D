@@ -73,7 +73,7 @@ const ROLES := {
 }
 
 ## 방 — 칸 뜻은 hotel.gd ROOMS. 덧붙임: cast(이 방에 나오는 조작 인물 id — heroes 자리도 이 차례) · kit(조작 인물 id → ROLES 의
-## 다른 줄 — 동작 · 외형만 바꿔 낀다) · escape(따돌리기: secs 버티거나 exit 안에 들어서면 방을 넘는다 — 적은 쓰러뜨리지 않아도 된다)
+## 다른 줄 — 동작 · 외형만 바꿔 낀다) · escape(따돌리기: secs 안에 exit 안에 들어서면 방을 넘는다 — 적은 쓰러뜨리지 않아도 된다, 못 들어서면 진다)
 const ROOMS := [
 	{"id": "site_night", "theme": "site_alley", "bounds": Rect2(-5.6, -2.4, 11.2, 4.8), "cast": ["kimshin"], "kit": {"kimshin": "kimshin_bare"},
 		"heroes": [Vector2(-3.0, 0.2)], "allies": [],
@@ -95,7 +95,7 @@ const ROOMS := [
 	{"id": "upper_corridor", "theme": "haseong_upper", "bounds": Rect2(-7.0, -2.0, 14.0, 4.0), "cast": ["kimshin"],
 		"heroes": [Vector2(-5.4, 0.0)], "allies": [],
 		"enemies": [["namgunghyuk", Vector2(0.6, 0.0)]], "boss": "namgunghyuk",
-		"escape": {"secs": 40.0, "exit": Rect2(5.6, -2.0, 1.4, 4.0)}},
+		"escape": {"secs": 10.0, "exit": Rect2(5.6, -2.0, 1.4, 4.0)}},
 	{"id": "junkyard_night", "theme": "junkyard_night", "bounds": Rect2(-6.4, -2.8, 12.8, 5.6), "cast": ["kimshin"],
 		"heroes": [Vector2(-3.6, 0.2)], "allies": [],
 		"enemies": [["sintaejin", Vector2(2.4, 0.0)]], "boss": "sintaejin"},

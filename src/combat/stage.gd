@@ -6,7 +6,8 @@ extends RefCounted
 ## world · hero(지금 조작하는 사람) · boss(화면 위 큰 막대에 보일 적, 없으면 null) + kind "stage" · heroes · enemies · allies.
 ## 방 · 역할 · 시점은 장 표(src/data/campaign.gd 가 장 id 로 고른다 — ch0 prologue · ch1 hoeam · ch11 hotel), 1층(등급 · 능력치 · 기술)은 castle_common → 없으면 src/data/addendum.gd(3D 덧붙임).
 ## 판 끝: 마지막 방(end)에 닿으면 win, 방에 나온 조작하는 사람이 다 쓰러지면 lose(world.over). 신겐은 체력 yield_at 에서 길을 내준다(062).
-## 따돌리기 방(방 표 escape — 2장 남궁혁 030/013-024): secs 를 버티거나 exit 안에 들어서면 적이 남아도 방을 넘는다.
+## 따돌리기 방(방 표 escape — 2장 남궁혁 030/013-024): secs 안에 exit 안에 들어서면 적이 남아도 방을 넘고, 못 들어서면 진다
+## (버티기로는 안 넘는다 — rc.2 폰 2026-11-07 사용자). 싸움이 시작될 때 안내 글(방 대사 guide), 시간 초과 패배 글은 d["lose_line"].
 ## 신호(world.events 에 더함): ["room", 방 번호] · ["line", 제목, 작은 글, 초, (늦춤 초)] · ["swap", 새로 조작하는 사람] · ["yield", 적] · ["escape", 사람]
 
 const Fighter = preload("res://src/combat/fighter.gd")
@@ -236,6 +237,8 @@ static func step(d: Dictionary, human = null) -> void:
 				d["t"] = 0
 				if d["stage"] == "end":
 					_line(d, "end", 5.0)
+				elif d["room"].has("escape"):
+					_line(d, "guide", 3.5)
 		"fight":
 			d["fight_t"] += 1
 		"clear":
@@ -320,8 +323,21 @@ static func _intents(d: Dictionary, human) -> void:
 		a.intent = {} if frozen else _bot_intent(d, a, fighting)
 
 
-## 봇: 싸울 상대가 있으면 bot.gd, 없으면(들어서는 중 · 방을 넘음) 조작하는 사람 곁으로
+## 봇: 싸울 상대가 있으면 bot.gd, 없으면(들어서는 중 · 방을 넘음) 조작하는 사람 곁으로.
+## 따돌리기 방의 조작 인물은 예고에만 답하고(쳐내기 · 구르기) 나머지는 출구로 달린다
 static func _bot_intent(d: Dictionary, me, fighting: bool) -> Dictionary:
+	var es: Dictionary = d["room"].get("escape", {})
+	if fighting and not es.is_empty() and d["heroes"].has(me):
+		var it: Dictionary = {"face": me.facing}
+		if me.target() != null:
+			var bb = d["bots"][me]
+			bb.foe = me.target()
+			bb.foes = _foes_of(d, me)
+			it = bb.decide()
+		if not (it.get("parry", false) or it.get("parry_held", false) or it.get("roll", false)):
+			var to: Vector2 = (es["exit"] as Rect2).get_center() - me.pos
+			it = {"move": to.normalized(), "face": to.normalized()}
+		return it
 	var tg = me.target()
 	if not fighting or tg == null:
 		var lead = d["heroes"][d["ctrl"]]
@@ -366,7 +382,14 @@ static func _after(d: Dictionary) -> void:
 		var es: Dictionary = d["room"].get("escape", {})
 		var got_away := false
 		if not es.is_empty() and left > 0:
-			got_away = float(d["fight_t"]) >= float(es["secs"]) * 60.0 or (lead.alive() and (es["exit"] as Rect2).has_point(lead.pos))
+			got_away = lead.alive() and (es["exit"] as Rect2).has_point(lead.pos)
+			if not got_away and float(d["fight_t"]) >= float(es["secs"]) * 60.0:
+				w.over = "lose"                             # 시간 안에 못 빠져나갔다
+				var tl = Lines.at("%s.rooms.%s.timeout" % [d["tbl"].LINES, d["room"]["id"]])
+				if tl is Array and tl.size() >= 2:
+					d["lose_line"] = [str(tl[0]), str(tl[1])]
+				_focus(d)
+				return
 		if left == 0 or got_away:
 			d["stage"] = "clear"
 			d["t"] = 0
