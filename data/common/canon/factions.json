@@ -803,9 +803,8 @@
       "name": "채홍",
       "aliases": [],
       "refs": ["131/016@1240"],
-      "conf": "ai",
-      "provisional": true,
-      "src": "공식 인물 카드 · 관계도(sources/character_profile/ — 판독 work/profile/profiles.json · docs/인물프로필_분석.md) · 사용자 답59(윈도우)(docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) — work/pilot/apply_profile.py(74차)",
+      "conf": "user",
+      "src": "공식 인물 카드 · 관계도(sources/character_profile/ — 판독 work/profile/profiles.json · docs/인물프로필_분석.md) · 사용자 답59(윈도우)(docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) — work/pilot/apply_profile.py(74차) · 검수 OK(사용자 2026-11-04 답37 — docs/인터뷰/2026-11-04_자산화_답변37.md)",
       "note": "천일도 카드 ABOUT '당대 최고의 전국구 조직 채홍'(천일도가 들어가 세를 키운 곳). 2부 131 회상의 '대국 요정 채홍'(장소 locations chaehong · fight:chaehong_seupgyeok)은 같은 이름의 건물 — 조직과 건물이 같은 이름인지 원작 확인 전"
     }
   ]

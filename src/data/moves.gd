@@ -17,6 +17,11 @@ const DEFAULTS := {
 	"next": "", "cancel": -1, "telegraph": "", "shape": "slash", "sfx": "swing", "hit_sfx": "hit",
 	"shake": 0, "hits": 1, "side": 0.0, "skill": false, "feints": [], "any_state": false, "hand": "R",      # hand: 치는 손 · 발 (R · L)
 	"guard_break": false, "skill_id": "", "stun_3d": [], "fx": "", "whiff": 0, "brake": 0,
+	"iframes": false, "unblock_top": "", "kill_top": "", "vs_high": [], "zigzag": false, "seq": [], "stance": 0, "stance_hit": "",
+	# (rc.2 폰 피드백 묶음 B — 3D 덧붙임 기술, 2026-11-08) iframes: 판정이 끝날 때까지 무적 / unblock_top: 맞는 쪽 등급이 이 등급
+	# 이하면 막기 · 쳐내기를 뚫는다 / kill_top: 맞는 쪽 등급이 이 이하면 한 대에 쓰러진다(보스는 2차 · 바닥 규칙을 그대로 탄다) /
+	# vs_high: [등급, 배율] 맞는 쪽이 그 등급 이상이면 피해 · 체간 × 배율(등급 차로 깎이지도 않는다) / zigzag: side 를 한쪽 → 반대쪽 /
+	# seq: 여러 대(hits)의 대마다 자세 모양(그림 — puppet3d) / stance: 준비 앞 이 프레임 동안 마주 본 공격을 받아 넘기고 stance_hit 로 맞받는다
 	# guard_break: 막기 · 쳐내기를 뚫는다 / skill_id: castle_common skills.json 의 기술 id — get_move 가 effects 에서
 	# lethal(엇박 계열 피해 종류, common lethal_fraction) · self_cost(맞혔을 때 쓴 사람이 잃는 체력 비율)를 채우고, 기절 초는
 	# skills.gd stun_frames 가 common stun_sec 로 본다 / stun_3d: **3D 덧붙임** 기절 프레임 [아랫급에게, 같은 급 · 윗급에게] —
@@ -35,15 +40,53 @@ const M := {
 	"k_thrust": {"label": "찌르기", "startup": 6, "active": 4, "recovery": 16, "damage": 12, "reach": 18, "radius": 8,
 		"lunge": 8, "knockback": 3.2, "hitstop": 7, "posture": 18, "shape": "thrust", "sfx": "slash",
 		"hit_sfx": "hit_heavy", "shake": 3},
-	"k_dash": {"label": "돌진 찌르기", "startup": 5, "active": 6, "recovery": 14, "damage": 10, "reach": 16, "radius": 9,
-		"lunge": 28, "knockback": 3.6, "hitstop": 6, "posture": 16, "shape": "thrust", "sfx": "slash",
-		"hit_sfx": "hit_heavy", "shake": 2},
+	# 아무르 티그로 대시(rc.2 폰 묶음 B): 빠르게 낮게 내달리며 찌른다 — 대시 버튼 + 공격(달리다 공격해도 같다)
+	"k_dash": {"label": "아무르 티그로 대시", "startup": 4, "active": 6, "recovery": 14, "damage": 13, "reach": 16, "radius": 9,
+		"lunge": 36, "knockback": 3.8, "hitstop": 7, "posture": 18, "shape": "thrust_low", "sfx": "slash",
+		"hit_sfx": "hit_heavy", "shake": 3},
 	"k_counter": {"label": "반격 베기", "startup": 2, "active": 3, "recovery": 10, "damage": 15, "reach": 15, "radius": 11,
 		"arc": 80, "lunge": 6, "posture": 24, "hitstop": 7, "shape": "slash", "sfx": "slash", "hit_sfx": "hit_heavy",
 		"shake": 2},
 	"k_finisher": {"label": "제압", "startup": 3, "active": 4, "recovery": 18, "damage": 40, "reach": 16, "radius": 10,
 		"lunge": 8, "knockback": 4.0, "hitstop": 16, "posture": 0, "shape": "cross", "sfx": "slash",
 		"hit_sfx": "hit_heavy", "shake": 6},
+	# ---- rc.2 폰 피드백 묶음 B(사용자 2026-11-07) — 3D 덧붙임 기술(1층 이름은 addendum.gd SKILLS · castle_common 요청)
+	# 아무르 티그로 3연타: 하복부에 주먹 세 대('쾅, 쾅, 쾅') — 셋째 대에 0.5초 기절, 외성 하위 이상에게 큰 타격(× 1.6)
+	"s_amur3": {"label": "아무르 티그로 3연타", "startup": 4, "active": 15, "recovery": 14, "damage": 9, "reach": 13, "radius": 9,
+		"arc": 60, "lunge": 8, "knockback": 0.6, "hitstop": 9, "posture": 16, "hits": 3, "shape": "punch", "sfx": "kick",
+		"hit_sfx": "hit_heavy", "shake": 4, "skill": true, "skill_id": "amur_triple", "fx": "amur3", "stun_3d": [30, 30],
+		"vs_high": ["외성 하위", 1.6], "seq": ["punch", "punch_L", "punch"]},
+	# 아무르 티그로 위빙: 상체를 흔들어 공격을 다 흘리며(무적) 세 대 — 외성 상위 이하는 한 방
+	"s_weave": {"label": "아무르 티그로 위빙", "startup": 6, "active": 18, "recovery": 12, "damage": 10, "reach": 13, "radius": 10,
+		"arc": 70, "lunge": 10, "knockback": 1.4, "hitstop": 7, "posture": 14, "hits": 3, "shape": "punch", "sfx": "swing",
+		"hit_sfx": "hit_heavy", "shake": 3, "skill": true, "skill_id": "amur_weaving", "iframes": true, "kill_top": "외성 상위",
+		"seq": ["punch_L", "punch", "punch_L"]},
+	# 좌우로 사라지는 스텝(castle_common vanish_step): 무적으로 좌우로 비켜 들며 두 번 찌른다 — 내성 중위 이하는 못 막는다
+	"s_vanish": {"label": "좌우로 사라지는 스텝", "startup": 12, "active": 10, "recovery": 12, "damage": 11, "reach": 15, "radius": 9,
+		"lunge": 10, "side": 16, "zigzag": true, "hits": 2, "knockback": 1.8, "hitstop": 6, "posture": 16, "shape": "thrust",
+		"sfx": "slash", "hit_sfx": "hit_heavy", "shake": 2, "skill": true, "skill_id": "vanish_step", "iframes": true,
+		"unblock_top": "내성 중위", "seq": ["thrust", "thrust"]},
+	# 서진태 오리지널: 오른손으로 왼쪽 · 왼손으로 오른쪽 · 오른손으로 찌르기 — 외성 하위 이하 한 방
+	"s_jt_original": {"label": "서진태 오리지널", "startup": 4, "active": 18, "recovery": 14, "damage": 10, "reach": 14, "radius": 10,
+		"arc": 90, "lunge": 10, "knockback": 1.6, "hitstop": 6, "posture": 14, "hits": 3, "shape": "slash", "sfx": "slash",
+		"hit_sfx": "hit_heavy", "shake": 3, "skill": true, "skill_id": "jintae_original", "kill_top": "외성 하위",
+		"seq": ["slash", "slash_back_L", "thrust"]},
+	# 근거리 급소 베기: 붙어 있을 때 빠르게 — 짧은 사거리 · 큰 체간
+	"s_jt_vital": {"label": "근거리 급소 베기", "startup": 2, "active": 3, "recovery": 10, "damage": 16, "reach": 9, "radius": 10,
+		"arc": 90, "lunge": 2, "knockback": 2.2, "hitstop": 8, "posture": 26, "shape": "slash_back", "hand": "L", "sfx": "knife",
+		"hit_sfx": "hit_heavy", "shake": 2, "skill": true, "skill_id": "jintae_vital"},
+	# 서진태 난무: 제자리에서 돌며 가까이 있는 사람을 모두 벤다(세 바퀴)
+	"s_jt_storm": {"label": "서진태 난무", "startup": 8, "active": 21, "recovery": 16, "damage": 9, "reach": 0, "radius": 30,
+		"knockback": 2.4, "hitstop": 5, "posture": 12, "hits": 3, "shape": "spin", "sfx": "slash", "hit_sfx": "hit_heavy",
+		"shake": 4, "skill": true, "skill_id": "jintae_storm"},
+	# 피우진 미친 코어 카운터: 몸을 낮춰 받을 자세(stance) — 그 사이 마주 본 공격이 오면 흘리고 코어로 강하게 맞받아 1초 기절.
+	# 아무것도 안 오면 짧게 한 대만 내지른다
+	"s_wj_core": {"label": "미친 코어 카운터", "startup": 20, "active": 3, "recovery": 12, "damage": 10, "reach": 12, "radius": 9,
+		"lunge": 4, "knockback": 2.0, "hitstop": 6, "posture": 14, "shape": "punch", "sfx": "swing", "hit_sfx": "hit_heavy",
+		"skill": true, "skill_id": "woojin_core_counter", "stance": 18, "stance_hit": "s_wj_core_hit"},
+	"s_wj_core_hit": {"label": "미친 코어 카운터", "startup": 2, "active": 4, "recovery": 14, "damage": 22, "reach": 13, "radius": 10,
+		"arc": 70, "lunge": 8, "knockback": 5.0, "hitstop": 14, "posture": 30, "shape": "punch", "sfx": "kick", "hit_sfx": "hit_heavy",
+		"shake": 6, "skill": true, "skill_id": "woojin_core_counter", "stun_3d": [60, 60], "parryable": false},
 	# 김신 · 백도찬 기술 (src/data/skills.gd — 김신은 게이지를 쓴다). 엇박 계열은 막기 · 쳐내기를 뚫고, 맞으면 기절,
 	# 헛치면(whiff) 큰 동작 그대로 잠시 멈춰 역공을 받는다 — 폰 리뷰 3차(2026-10-27), 3D 초안에서 먼저 시험
 	# 엇박 찌르기: 한 박자 멈칫(잔상)한 뒤 찌르는 팔 · 다리가 같은 쪽으로 깊고 길게 쭉 뻗는다
@@ -538,6 +581,7 @@ static func get_move(name: String) -> Dictionary:
 	var fx: Dictionary = Addendum.skill(d["skill_id"]).get("effects", {}) if d["skill_id"] != "" else {}
 	d["lethal"] = str(fx.get("lethal", ""))
 	d["self_cost"] = float(fx.get("self_cost", 0.0))
+	d["immune_lower"] = bool(fx.get("immune_lower", false))      # 아랫급의 공격에 무적(castle_common vanish_step — world.gd)
 	for k in ["reach", "radius", "lunge", "side"]:
 		d[k] = float(d[k]) * PX
 	d["damage"] = float(d["damage"])

@@ -20,6 +20,13 @@ const ROLL_BUFFER := 5
 const COUNTER_T := 24            # 쳐내기 성공 뒤 반격 베기를 낼 수 있는 프레임
 const DOWN_T := 70               # 제압당해 넘어진 뒤 일어나기까지
 const RUN_AFTER := 10            # 스틱을 끝까지 이만큼 밀면 달리기 → 공격은 돌진 찌르기
+## 대시 버튼(rc.2 폰 2026-11-07 — 사용자 '대시 버튼 따로 · 대시 + 공격 = 특별기'): 누르면 DASH_T 프레임 동안 DASH_K × 달리기 빠르기로
+## 스틱 쪽(없으면 보는 쪽)으로 내달린다. 대시 중이거나 끝난 뒤 DASH_GRACE 프레임 안에 공격하면 moveset dash(인물마다 대시기).
+## 무적은 없다(무적은 구르기)
+const DASH_T := 12
+const DASH_K := 1.8
+const DASH_GRACE := 10
+const DASH_BUFFER := 5
 const BODY_R := 0.3
 const POSTURE_REGEN := 0.22      # 체간 회복(프레임당), 마지막 체간 피해 뒤 REGEN_AFTER 부터
 const REGEN_AFTER := 90
@@ -66,6 +73,10 @@ var counter_ready := 0
 var flick_t := 0                 # 쳐내기 성공 동작(그림용)
 var roll_dir := Vector2.ZERO
 var running_t := 0
+var buf_dash := 0
+var dash_t := 0
+var dash_grace := 0
+var dash_dir := Vector2.ZERO
 var speed_now := 0.0             # 지난 프레임 움직인 빠르기 (m/초, 그림용)
 var move_vec := Vector2.ZERO     # 지난 프레임 움직인 방향 (그림용)
 var flash := 0
@@ -87,6 +98,7 @@ var finisher_cap := 0.0          # 제압 피해 상한(최대 체력 비율, 0 
 var phase := 1
 var phase2_at := 0.0             # 체력이 이 비율이 되면 2차(0 = 2차 없음)
 var inert := false               # 싸움에서 빠졌다(신겐이 길을 내줌) — 치지도 맞지도 않는다
+var oneshot_immune := false      # 한 방(등급 차 skills.gd ONE_SHOT_GAP · 기술 kill_top)을 안 받는다 — 조작 인물 · 방의 보스(판이 정한다)
 
 
 func set_target(f) -> void:
@@ -138,7 +150,14 @@ func in_recovery() -> bool:
 
 
 func iframes() -> bool:
+	if state == "attack" and move.get("iframes", false):
+		return t <= int(move["startup"]) + int(move["active"])        # 무적 기술(위빙 · 사라지는 스텝) — 판정이 끝날 때까지
 	return state == "roll" and t >= ROLL_IFRAMES.x and t <= ROLL_IFRAMES.y
+
+
+## 카운터 자세(move.stance): 준비 앞 stance 프레임 동안 마주 본 공격을 받아 넘긴다(world.gd 가 보고 stance_hit 로 맞받는다)
+func stance_open() -> bool:
+	return state == "attack" and int(move.get("stance", 0)) > 0 and t <= int(move["stance"])
 
 
 func parry_open() -> bool:
@@ -174,6 +193,8 @@ func buffer_inputs() -> void:
 		buf_roll = ROLL_BUFFER
 	if intent.get("skill", false):
 		buf_skill = ATTACK_BUFFER
+	if intent.get("dash", false):
+		buf_dash = DASH_BUFFER
 	_pick_skill_input()
 
 
@@ -192,6 +213,9 @@ func _decay_buffers() -> void:
 	buf_attack = ATTACK_BUFFER if intent.get("attack", false) else maxi(0, buf_attack - 1)
 	buf_parry = PARRY_BUFFER if intent.get("parry", false) else maxi(0, buf_parry - 1)
 	buf_roll = ROLL_BUFFER if intent.get("roll", false) else maxi(0, buf_roll - 1)
+	buf_dash = DASH_BUFFER if intent.get("dash", false) else maxi(0, buf_dash - 1)
+	if dash_grace > 0:
+		dash_grace -= 1
 
 
 func tick() -> void:
@@ -210,6 +234,8 @@ func tick() -> void:
 	var use: String = intent.get("use", "")
 	if use != "" and (state == "stagger" or state == "hitstun") and Moves.get_move(use)["any_state"]:
 		start_move(use)
+	if state != "idle" and state != "move":
+		dash_t = 0                                     # 맞거나 막히면 대시가 끊긴다
 	match state:
 		"idle", "move":
 			_tick_free()
@@ -248,6 +274,16 @@ func tick() -> void:
 
 func _tick_free() -> void:
 	var mv: Vector2 = intent.get("move", Vector2.ZERO)
+	if dash_t > 0:
+		_tick_dash()
+		return
+	if buf_dash > 0:
+		buf_dash = 0
+		dash_dir = mv.normalized() if mv.length() > 0.2 else facing
+		dash_t = DASH_T
+		events.append(["dash", self])
+		_tick_dash()
+		return
 	if buf_roll > 0:
 		_start_roll(mv.normalized() if mv.length() > 0.2 else -facing)
 		return
@@ -285,6 +321,27 @@ func _tick_free() -> void:
 		state = "idle"
 
 
+## 대시: 내달리는 동안 공격 · 기술 · 구르기 · 막기로 끊을 수 있다. 끝나면 DASH_GRACE 동안 공격 = 대시기
+func _tick_dash() -> void:
+	if buf_attack > 0 and moveset.has("dash"):
+		dash_t = 0
+		start_move(moveset["dash"])
+		return
+	if buf_skill > 0 and _try_skill():
+		dash_t = 0
+		return
+	if buf_roll > 0 or buf_parry > 0:
+		dash_t = 0
+		return
+	dash_t -= 1
+	facing = dash_dir
+	pos += dash_dir * run_speed * DASH_K / 60.0
+	state = "move"
+	running_t = RUN_AFTER
+	if dash_t <= 0:
+		dash_grace = DASH_GRACE
+
+
 ## 반격 베기(쳐내기 직후) · 제압(상대가 빈틈) — 연타 중이어도 이것이 먼저다
 func _special_attack() -> String:
 	if counter_ready > 0 and moveset.has("counter"):
@@ -299,7 +356,8 @@ func _pick_attack() -> String:
 	var special := _special_attack()
 	if special != "":
 		return special
-	if running_t >= RUN_AFTER and moveset.has("dash"):
+	if (running_t >= RUN_AFTER or dash_grace > 0) and moveset.has("dash"):
+		dash_grace = 0
 		return moveset["dash"]
 	return moveset.get("combo", "")
 
@@ -317,7 +375,10 @@ func _tick_attack() -> void:
 		pos += facing * lunge / float(s + a)
 	var side: float = move["side"]
 	if side != 0.0 and t <= s:
-		pos += Vector2(-facing.y, facing.x) * side / float(s)
+		var sgn := 1.0
+		if move.get("zigzag", false):
+			sgn = 2.0 if t <= s / 2 else -2.0              # 좌우로 사라지는 스텝: 한쪽으로 갔다가 반대쪽으로(제자리에서 비켜 들어간다)
+		pos += Vector2(-facing.y, facing.x) * side * sgn / float(s)
 	if int(move["hits"]) > 1 and is_active():
 		var step := maxi(1, a / int(move["hits"]))
 		if (t - s - 1) % step == 0:

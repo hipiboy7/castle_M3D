@@ -72,8 +72,9 @@ func test_duel_values_from_common() -> void:
 	var got := []
 	for sk in h.skills:
 		got.append([sk["id"], sk["name"], sk["cost"]])
-	check(got == [["kickarts", "각법", 1.0], ["triple", "리천식 삼연타", 1.0]],
-		"처음 기술 — 동작이 있는 것만(스텝 · 촌경 빠짐) %s" % [got])
+	check(got == [["kickarts", "각법", 1.0], ["vanish_step", "좌우로 사라지는 스텝", 1.0], ["amur_triple", "아무르 티그로 3연타", 1.0],
+		["amur_weaving", "아무르 티그로 위빙", 2.0]],
+		"처음 기술 — 공통 진행(각법 · 사라지는 스텝, 삼연타 · 촌경은 리천전 뒤) + 3D 덧붙임 아무르 티그로 %s" % [got])
 	_learn(d)
 	got = []
 	for sk in h.skills:

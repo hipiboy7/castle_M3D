@@ -43,6 +43,7 @@ var buttons := [
 	{"id": "roll", "label": "구르기", "r": 64.0, "off": Vector2(-120, -320)},
 	{"id": "skill", "label": "기술", "r": 60.0, "off": Vector2(-300, -270)},
 	{"id": "skill_next", "label": "바꾸기", "r": 44.0, "off": Vector2(-440, -330)},
+	{"id": "dash", "label": "대시", "r": 52.0, "off": Vector2(-450, -70)},      # 대시 + 베기 = 대시기(rc.2 폰 묶음 B)
 	{"id": "pause", "label": "멈춤", "r": 34.0, "off": Vector2(-56, 92), "at": "tr"},
 	{"id": "speed", "label": "×1", "r": 34.0, "off": Vector2(-56, 180), "at": "tr"},
 	{"id": "menu", "label": "메뉴", "r": 34.0, "off": Vector2(-144, 92), "at": "tr"},

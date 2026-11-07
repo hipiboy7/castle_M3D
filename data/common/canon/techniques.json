@@ -224,6 +224,96 @@
       "conf": "ai",
       "provisional": true,
       "note": "크리사가 마지막에 쓰려던, 턱이 아니라 목젖을 노리는 손 기술 — 메드베디가 피우진에게 가르치겠다고 함 · 1부 판독 첫 화 p1:056"
+    },
+    {
+      "id": "namgung_knuckle_counter",
+      "name": "너클 낀 주먹 카운터",
+      "users": ["namgunghyuk"],
+      "src": "castle M 3D 요청 24(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 79차",
+      "refs": ["p1:024/136-138", "p1:025/035-045", "p1:028/088-089"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "namgung_knuckle_hook",
+      "name": "너클 훅",
+      "users": ["namgunghyuk"],
+      "src": "castle M 3D 요청 24(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 79차",
+      "refs": ["p1:029/117-118", "p1:030/010"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "sintaejin_sweep",
+      "name": "장도 수평 베기",
+      "users": ["sintaejin"],
+      "src": "castle M 3D 요청 24(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 79차",
+      "refs": ["p1:031/112-114"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "sintaejin_second_blade",
+      "name": "숨긴 두 번째 칼",
+      "users": ["sintaejin"],
+      "src": "castle M 3D 요청 24(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 79차",
+      "refs": ["p1:032/032-038"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "sintaejin_pistol",
+      "name": "코앞 권총",
+      "users": ["sintaejin"],
+      "src": "castle M 3D 요청 24(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 79차",
+      "refs": ["p1:031/106-119", "p1:032/054-057"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "hwangbo_face_counter",
+      "name": "얼굴 스치기 베기",
+      "users": ["hwangbomincheol"],
+      "src": "castle M 3D 요청 24(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 79차",
+      "refs": ["p1:026/004-005"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "hwangbo_bait",
+      "name": "왼다리 미끼 찌르기",
+      "users": ["hwangbomincheol"],
+      "src": "castle M 3D 요청 24(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 79차",
+      "refs": ["p1:027/172-178"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "iseul_throw",
+      "name": "붙잡아 후려 날리기",
+      "users": ["iseul"],
+      "src": "castle M 3D 요청 24(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 79차",
+      "refs": ["p1:026/000-001"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "iseul_double_slam",
+      "name": "양팔 머리 낚아채 메다꽂기",
+      "users": ["iseul"],
+      "src": "castle M 3D 요청 24(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 79차",
+      "refs": ["p1:028/065-069"],
+      "conf": "ai",
+      "provisional": true
+    },
+    {
+      "id": "ojiin_skirt_dagger",
+      "name": "치마 뒤 단검",
+      "users": ["ojiin"],
+      "src": "castle M 3D 요청 24(2026-11-06 · 3D 후보 — 원작 moves 판독에서 고름) · data/skills.json · 79차",
+      "refs": ["p1:026/053-056"],
+      "conf": "ai",
+      "provisional": true
     }
   ]
 }

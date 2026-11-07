@@ -1,5 +1,5 @@
 {
-  "_about": "인물 외형 표 — 엔진과 상관없음(2D 도트 · 3D 모델이 같이 씀 · castle M 3D 요청 23 · 사용자 답58 '웹툰 원작에 나오는 캐릭터들을 다시 확인해서 그려'). 인물마다 base(대표 차림) + periods(장별로 다른 칸만 — diff 를 base 위에 덮어씀) + fight(싸움 스타일 · 자세). 값은 원작 조각을 직접 보고 적은 AI 판독(conf ai — refs = 본 조각, 색은 조각에서 뽑은 가운데값). 정한 목록은 enums — 판은 이 말을 자기 그림 부품으로 옮긴다(목록 밖 모양은 *_note 글). rel_height · rel_bulk = 김신 1.0 대비(공식 카드가 있으면 height_cm · weight_kg 로 계산 — rel_bulk = 체중비 / 키비). profile = 공식 인물 카드(sources/character_profile — sync 하지 않음). ref_image = 대표 원작 조각(이 저장소 work/ — 판과 나란히 비교용, sync 하지 않음). gender = m · f(76차). 76차 새 칸 head.facial_hair_color(수염 색 — 없으면 머리색에서) · head.blank_eyes(동공 없이 흰자) · head.makeup.lips(입술 색) · outfit.inner(겉옷 안 정장 — 모르는 판은 무시). 77차 새 칸 head.headwear.band(모자 띠 색) · outfit.outer.collar(겉옷 깃 색) — 없으면 판이 본색으로. 이름 없는 사람은 id 가 _ 로 시작(generic). 생성물 — work/looks/build.py(손으로 고치지 않는다: l2/<id>.json 을 고친다).",
+  "_about": "인물 외형 표 — 엔진과 상관없음(2D 도트 · 3D 모델이 같이 씀 · castle M 3D 요청 23 · 사용자 답58 '웹툰 원작에 나오는 캐릭터들을 다시 확인해서 그려'). 인물마다 base(대표 차림) + periods(장별로 다른 칸만 — diff 를 base 위에 덮어씀) + fight(싸움 스타일 · 자세). 값은 원작 조각을 직접 보고 적은 AI 판독(conf ai — refs = 본 조각, 색은 조각에서 뽑은 가운데값). 정한 목록은 enums — 판은 이 말을 자기 그림 부품으로 옮긴다(목록 밖 모양은 *_note 글). rel_height · rel_bulk = 김신 1.0 대비(공식 카드가 있으면 height_cm · weight_kg 로 계산 — rel_bulk = 체중비 / 키비). profile = 공식 인물 카드(sources/character_profile — sync 하지 않음). ref_image = 대표 원작 조각(이 저장소 work/ — 판과 나란히 비교용, sync 하지 않음). gender = m · f(76차). 76차 새 칸 head.facial_hair_color(수염 색 — 없으면 머리색에서) · head.blank_eyes(동공 없이 흰자) · head.makeup.lips(입술 색) · outfit.inner(겉옷 안 정장 — 모르는 판은 무시). 77차 새 칸 head.headwear.band(모자 띠 색) · outfit.outer.collar(겉옷 깃 색) — 없으면 판이 본색으로. 79차 새 칸 head.eye_color(눈동자 색 — 뚜렷할 때만, 없으면 판 기본) · head.face(young · adult · old — 얼굴 나이 인상, 없으면 adult). 이름 없는 사람은 id 가 _ 로 시작(generic). 생성물 — work/looks/build.py(손으로 고치지 않는다: l2/<id>.json 을 고친다).",
   "src": "2026-11-06 73차 — 사용자 답58(docs/인터뷰/2026-11-06_자산화_답변58.md) · castle M 3D 요청 23 · L2 원작 대조(work/looks/brief.md)",
   "chapters": {
     "0": "프롤로그(1부 001~002)",
@@ -48,6 +48,7 @@
     "eyes": ["narrow", "sharp", "normal", "big", "droopy", "closed"],
     "brows": ["thin", "normal", "thick"],
     "jaw": ["sharp", "square", "round"],
+    "face": ["young", "adult", "old"],
     "facial_hair": ["stubble", "beard", "goatee", "mustache", "sideburns"],
     "scar_where": [
       "left_cheek",
@@ -432,8 +433,8 @@
         "head": {
           "hair_style": "slick_fringe",
           "hair_len": "short",
-          "hair_color": "#423838",
-          "hair_note": "짙은 갈색을 뒤로 넘김 · 앞 가닥 몇 줄, 싸우면 흘러내림",
+          "hair_color": "#2e2a2c",
+          "hair_note": "회흑 머리를 뒤로 넘김 · 앞 가닥 몇 줄, 싸우면 흘러내림 — 카드 · 1부 관계도 · 7기둥 · 조직도 4장 모두 회흑(갈색으로 보이는 컷은 조명)",
           "skin": "#e0d2d0",
           "eyes": "narrow",
           "brows": "normal",
@@ -479,7 +480,6 @@
           "label": "1부 1장 상징 컷 — 흰 셔츠 · 가는 넥타이 · 넥타이핀 · 양쪽 숄더 홀스터",
           "refs": ["p1:012/016@3200"],
           "diff": {
-            "head": {"hair_color": null, "hair_note": "청색 톤 상징 컷이라 검게 보임"},
             "outfit": {"tie": null},
             "accessories": [
               {"kind": "other", "where": "tie", "color": null, "note": "넥타이핀"},
@@ -2101,7 +2101,7 @@
           "weight_kg": 79
         },
         "head": {
-          "hair_style": "slick_fringe",
+          "hair_style": "wavy_back",
           "hair_len": "medium",
           "hair_color": "#46292d",
           "hair_note": "붉은 기 도는 짙은 갈색 · 뒤로 넘기고 긴 가닥을 이마 · 뺨으로 늘어뜨림(뒤로 갈수록 장발 · 2부엔 뒤로 묶음)",
@@ -4541,11 +4541,11 @@
           "weight_kg": 79
         },
         "head": {
-          "hair_style": "undercut",
+          "hair_style": "slick",
           "hair_len": "short",
-          "hair_color": "#bfb79f",
+          "hair_color": "#e0c060",
           "hair_color2": "#514c4b",
-          "hair_note": "옆 · 뒤는 검게 바짝 민 투블럭, 위 금발을 뒤로 넘겨 세움(뻗친 가닥) — 뿌리 쪽 옆머리는 검은색 · hair_color2 = 검게 바짝 민 옆 · 뒤(76차 — 003/024 #514c4b · 037/051 #4d493d)",
+          "hair_note": "금발 올백(공식 카드 · 79차 castle_M 요청 18 — undercut 으로 그리면 밝은 머리가 민머리처럼 보임). 옆 · 뒤 뿌리 쪽은 검게 짧게 민 투블럭(hair_color2 — 76차 003/024 #514c4b · 037/051 #4d493d) · 위 금발을 뒤로 넘겨 세움(뻗친 가닥)",
           "skin": "#d5beb0",
           "eyes": "sharp",
           "brows": "normal",
@@ -4579,7 +4579,7 @@
           "label": "1부 초반 — 금발 웨이브 · 밝은 재킷 사복",
           "refs": ["p1:003/030"],
           "diff": {
-            "head": {"hair_style": "wavy_back"},
+            "head": {"hair_style": "slick"},
             "outfit": {
               "outer": {"kind": "blazer", "color": null, "pattern": "plain"},
               "shirt": {"kind": "tshirt", "color": "#111111"},
@@ -4593,7 +4593,7 @@
           "label": "1부 후반 전투 차림 — 검은 긴소매 · 어깨 홀스터 · 회색 카고",
           "refs": ["p1:090/004@7400"],
           "diff": {
-            "head": {"hair_color": "#cfc9b0"},
+            "head": {"hair_color": "#e0c060"},
             "outfit": {
               "outer": {"kind": "none"},
               "shirt": {"kind": "tshirt", "color": "#25262b"},
@@ -5616,7 +5616,7 @@
       "name": "김신",
       "gender": "m",
       "base": {
-        "label": "대표 차림 — 2부 보스",
+        "label": "대표 차림 — 1부 귀국 · 공식 카드(검은 터틀넥 + 검은 정장 재킷 · 앞머리)",
         "build": {
           "rel_height": 1.0,
           "rel_bulk": 1.0,
@@ -5627,29 +5627,31 @@
           "weight_kg": 86
         },
         "head": {
-          "hair_style": "slick_fringe",
+          "hair_style": "fringe",
           "hair_len": "short",
-          "hair_color": "#040306",
-          "hair_note": "옆 · 뒤 짧게 · 위는 뒤로 넘김 · 앞머리 한두 가닥. 흐트러지면 앞머리가 눈썹을 덮는다(1부 · 2부 싸움)",
+          "hair_color": "#3a3a44",
+          "hair_note": "귀를 덮는 회흑색 앞머리(올백 아님 · 눈썹까지) — 공식 카드. 원작 조각은 먹이 짙어 거의 검게 보이지만(008/181 #040306) 그리면 헬멧 덩어리가 된다 → 회흑(79차 castle_M 요청 15). 2부 정장 시기는 짧게 빗어 넘긴 머리(period)",
           "skin": "#e8cebd",
-          "eyes": "narrow",
+          "eyes": "sharp",
           "brows": "normal",
-          "jaw": "square",
+          "jaw": "sharp",
           "facial_hair": [],
           "scars": [],
           "glasses": null,
           "piercings": [{"where": "left_ear", "kind": "stud", "color": null}],
-          "headwear": null
+          "headwear": null,
+          "eye_color": "#9fb2c4",
+          "face": "young"
         },
         "outfit": {
           "outer": {"kind": "suit_jacket", "color": "#282d30", "pattern": "plain"},
-          "shirt": {"kind": "dress_shirt", "color": "#fefefe"},
-          "tie": "#292d30",
+          "shirt": {"kind": "turtleneck", "color": "#1a181b"},
+          "tie": null,
           "pants": {"kind": "slacks", "color": "#1a181b"},
           "shoes": {"kind": "dress", "color": null},
           "gloves": null
         },
-        "accessories": [{"kind": "badge", "where": "left_lapel", "color": null}],
+        "accessories": [],
         "weapons": [
           {
             "name": "톱니 등날 군용 단검",
@@ -5660,8 +5662,8 @@
           },
           {"name": "은색 슬라이드 소음기 권총", "kind": "pistol", "length": "short", "grip": "forward", "hands": "right"}
         ],
-        "signature": ["짧은 올백 + 앞머리 가닥(흐트러지면 눈 덮는 앞머리)", "가는 눈 · 엷은 미소", "검은 정장 · 흰 셔츠 · 검은 넥타이"],
-        "color_from": "008/181"
+        "signature": ["귀를 덮는 회흑 앞머리 · 옅은 회청색 눈", "28살 앳된 매끈한 얼굴(수염 · 흉터 없음)", "검은 터틀넥 + 검은 정장 재킷"],
+        "color_from": "profile:김신.jpg · 008/181(옷)"
       },
       "periods": [
         {
@@ -5676,16 +5678,6 @@
               "tie": null,
               "shoes": {"kind": "boots", "color": null}
             },
-            "accessories": []
-          }
-        },
-        {
-          "chapters": ["1"],
-          "label": "1부 귀국 — 검은 터틀넥 + 검은 정장 재킷",
-          "refs": ["p1:003/010"],
-          "diff": {
-            "head": {"hair_style": "fringe", "facial_hair": []},
-            "outfit": {"shirt": {"kind": "turtleneck", "color": "#1a181b"}, "tie": null},
             "accessories": []
           }
         },
@@ -5707,6 +5699,19 @@
               {"kind": "holster", "where": "shoulders_x", "color": "#4c4648"},
               {"kind": "belt_buckle", "where": "waist", "color": null}
             ]
+          }
+        },
+        {
+          "chapters": ["8", "9", "10", "12", "13"],
+          "label": "2부 보스 — 짧게 빗어 넘긴 머리 · 검은 정장 · 흰 셔츠 · 검은 넥타이 · 옷깃 배지",
+          "refs": ["008/181", "065/100"],
+          "diff": {
+            "head": {
+              "hair_style": "slick_fringe",
+              "hair_note": "옆 · 뒤 짧게 · 위는 뒤로 넘김 · 앞머리 한두 가닥. 흐트러지면 앞머리가 눈썹을 덮는다(1부 · 2부 싸움)"
+            },
+            "outfit": {"shirt": {"kind": "dress_shirt", "color": "#fefefe"}, "tie": "#292d30"},
+            "accessories": [{"kind": "badge", "where": "left_lapel", "color": null}]
           }
         },
         {
@@ -5734,7 +5739,9 @@
         "p1:003/010",
         "p1:089/005@8600",
         "052/025",
-        "065/100"
+        "065/100",
+        "p1:003/012@0",
+        "p1:002/025@975"
       ],
       "ref_image": "work/looks/ref/kimshin.png",
       "profile": "sources/character_profile/김신.jpg",
@@ -7806,7 +7813,7 @@
         "head": {
           "hair_style": "fringe",
           "hair_len": "medium",
-          "hair_color": "#98aab4",
+          "hair_color": "#a4a8ae",
           "hair_note": "청회색(은회색) 덥수룩한 머리 · 앞머리가 눈을 덮음. 2부 초반(003)은 목덜미 뒷머리가 검은 투톤 울프컷(작은 꽁지), 065 무렵엔 뒷머리도 회색으로 짧아 보임",
           "skin": "#e6dcd2",
           "eyes": "narrow",
@@ -9642,9 +9649,9 @@
         },
         "head": {
           "hair_style": "long",
-          "hair_len": "medium",
+          "hair_len": "long",
           "hair_color": "#2a2929",
-          "hair_note": "가운데 가르마 · 어깨 가까운 검은 장발을 뒤로 넘기고 앞머리 몇 가닥이 얼굴로 흘러내림 · 싸울 땐 정수리 상투(topknot)",
+          "hair_note": "가운데 가르마 · 어깨 아래로 내려오는 검은 장발을 뒤로 넘기고 앞머리 몇 가닥이 얼굴로 흘러내림 · 싸울 땐 정수리 상투(topknot)",
           "skin": "#e0cbbe",
           "eyes": "sharp",
           "brows": "normal",
@@ -9714,7 +9721,7 @@
               "shirt": {"kind": "open_shirt", "color": "#fdfcfd"},
               "tie": null
             },
-            "head": {"glasses": {"kind": "sunglasses_square", "lens": "#2a2426"}}
+            "head": {"glasses": null}
           }
         },
         {

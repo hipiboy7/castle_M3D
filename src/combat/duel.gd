@@ -30,7 +30,8 @@ static func make(seed_value: int) -> Dictionary:
 	h.stagger_len = HERO["stagger"]
 	h.moveset = {"combo": "k_slash1", "dash": "k_dash", "counter": "k_counter", "finisher": "k_finisher"}
 	h.rank = kim[0]
-	h.skills = Skills.entries(kim[1], h.rank)
+	h.skills = Skills.hero_entries(Skills.HERO_ID, kim[1], h.rank)
+	h.oneshot_immune = true
 	h.gauge_max = Common.bars_for(h.rank) * Common.bar_points()
 	h.gauge_rate = Common.gauge_rate(h.rank, Common.tech_of(Skills.HERO_ID))
 	h.gauge = Skills.KIM_START_BARS * Common.bar_points()
@@ -39,6 +40,7 @@ static func make(seed_value: int) -> Dictionary:
 	var b = Fighter.new(str(Common.character(Skills.BOSS_ID)["name"]), 1)
 	b.char_id = Skills.BOSS_ID
 	b.is_boss = true
+	b.oneshot_immune = true
 	b.hp = BOSS["hp"]
 	b.hp_max = BOSS["hp"]
 	b.posture_max = BOSS["posture"]

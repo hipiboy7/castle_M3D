@@ -963,7 +963,7 @@ func _attack_pose(f) -> Dictionary:
 			if t >= int(fr) and t < int(fr) + 4:
 				p = _lerp_pose(w, s, 0.7)       # 멈칫: 치는 척만 하고 몸은 다시 준비로
 		return p
-	if t <= su + ac and str(mv["fx"]) == "triple":
+	if t <= su + ac and (str(mv["fx"]) == "triple" or not (mv.get("seq", []) as Array).is_empty()):
 		return _triple_pose(mv, t - su)
 	if t <= su + ac:
 		var u2 := float(t - su) / maxf(1.0, ac)
@@ -1017,6 +1017,12 @@ func _triple_pose(mv: Dictionary, ta: int) -> Dictionary:
 	var k := mini(hits - 1, (ta - 1) / seg)
 	var u := float((ta - 1) % seg + 1) / seg
 	var keys: Array = shape_keys["punch_L"] if k % 2 == 1 else shape_keys["punch"]
+	var seq: Array = mv.get("seq", [])
+	if not seq.is_empty():                             # 대마다 모양(묶음 B — 서진태 오리지널 베기 · 되베기 · 찌르기 등)
+		var nm := str(seq[mini(k, seq.size() - 1)])
+		if nm == "slash_back_L" and weapon_l == null:
+			nm = "slash_back_R"
+		keys = shape_keys.get(nm, keys)
 	var e := minf(1.0, u * 3.0) if u < 0.34 else 1.0 - 0.6 * (u - 0.34) / 0.66
 	var p := _lerp_pose(keys[0], keys[1], e)
 	if k == hits - 1:

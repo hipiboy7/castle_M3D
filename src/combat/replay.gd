@@ -14,7 +14,7 @@ const Stage = preload("res://src/combat/stage.gd")
 const VERSION := 1                       # 기록 형식 버전 — 칸 뜻이 바뀌면 올린다(옛 기록은 돌리지 않는다)
 const CHECK_EVERY := 60                  # 중간 해시 간격(1초)
 const AXIS := 127                        # 막대 한 축의 칸 수
-const BITS := ["attack", "parry", "parry_held", "roll", "skill", "skill_next", "swap"]   # 순서 = 비트 자리(바꾸면 VERSION)
+const BITS := ["attack", "parry", "parry_held", "roll", "skill", "skill_next", "swap", "dash"]   # 순서 = 비트 자리(바꾸면 VERSION — 끝에 더하는 것은 옛 기록과 같다)
 
 
 ## 사람 입력 → 양자화한 입력(빠진 단추는 false, 막대 길이는 1 까지)

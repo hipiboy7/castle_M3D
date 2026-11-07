@@ -206,7 +206,7 @@ func _parse_args() -> void:
 func _setup_input() -> void:
 	var keys := {
 		"left": [KEY_A, KEY_LEFT], "right": [KEY_D, KEY_RIGHT], "up": [KEY_W, KEY_UP], "down": [KEY_S, KEY_DOWN],
-		"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_L, KEY_C],
+		"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_C], "dash": [KEY_L, KEY_SHIFT],
 		"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B], "pause": [KEY_ESCAPE, KEY_P], "swap": [KEY_TAB, KEY_Q],
 		"pick_1": [KEY_1], "pick_2": [KEY_2], "art": [KEY_3], "bench": [KEY_4], "accept": [KEY_ENTER, KEY_KP_ENTER],
 		"speed": [KEY_F], "menu": [KEY_M],
@@ -359,9 +359,9 @@ func _start(m: String) -> void:
 	elif kind == "duel":
 		var fm: Array = Lines.at("ch6.fight")
 		hud.message(fm[0], fm[1], 2.5)
-		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 K(누르고) · 구르기 Space · 기술 U · 기술 바꾸기 I · 속도 F")
+		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 K(누르고) · 구르기 Space · 대시 L · 기술 U · 기술 바꾸기 I · 속도 F")
 	else:
-		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 · 막기 K · 구르기 Space · 기술 U · 바꾸기 I · 교대 Tab · 속도 F")
+		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 · 막기 K · 구르기 Space · 대시 L · 기술 U · 바꾸기 I · 교대 Tab · 속도 F")
 	if not snd.song_playing():
 		snd.song("boss")
 
@@ -760,6 +760,7 @@ func _player_intent() -> Dictionary:
 		"parry": Input.is_action_just_pressed("parry") or e.has("parry"),
 		"parry_held": Input.is_action_pressed("parry") or touch.held("parry"),
 		"roll": Input.is_action_just_pressed("roll") or e.has("roll"),
+		"dash": Input.is_action_just_pressed("dash") or e.has("dash"),
 		"skill": Input.is_action_just_pressed("skill") or e.has("skill"),
 		"skill_next": Input.is_action_just_pressed("skill_next") or e.has("skill_next"),
 		"swap": swap,

@@ -121,12 +121,14 @@ func _pick_skill(d: float) -> int:
 	var order: Array = []
 	match str(foe.state):
 		"stun", "recoil":
-			order = ["offbeat2", "offbeat", "offbeat_rev", "triple"]
+			order = ["offbeat2", "offbeat", "offbeat_rev", "triple", "amur_weaving", "jintae_original", "amur_triple"]
 		"hitstun":
-			order = ["kickarts"]
+			order = ["kickarts", "amur_triple", "jintae_vital"]
 		_:
 			if foe.in_recovery():
-				order = ["kickarts"]
+				order = ["kickarts", "vanish_step", "jintae_vital"]
+	if order.is_empty() and foes.filter(func(f): return f.alive() and not f.inert and me.dist_to(f) < 1.6).size() >= 3:
+		order = ["jintae_storm"]                     # 셋 이상 붙어 있으면 난무(묶음 B)
 	for id in order:
 		var i: int = me.skill_index(id)
 		if i >= 0 and me.can_pay(me.skills[i]):

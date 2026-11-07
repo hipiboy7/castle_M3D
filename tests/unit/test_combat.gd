@@ -257,6 +257,7 @@ func test_triple_three_hits() -> void:
 	var d := _close(0.8)
 	var h = d["hero"]
 	var b = d["boss"]
+	h.skills.append(Skills.entry("triple", h.rank))           # 6장 김신은 아직 모른다(리천전에서 얻음 — castle_common 79차) — 시험만 끼운다
 	h.skill_idx = h.skill_index("triple")                   # 리천식 삼연타: 판정 15프레임에 세 번
 	_tick(d, {"skill": true})
 	_run(d, 60)

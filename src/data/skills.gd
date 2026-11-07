@@ -14,16 +14,41 @@ const BOSS_ID := "baekdochan"
 const DUEL_EVENT := "duel_offbeat:baekdochan"
 
 ## 기술 id(castle_common skills.json) → 이 판 동작(moves.gd). 여기 없는 기술은 이 판에 동작이 없어 고를 수 없다
-## (김신 처음 기술 중 vanish_step 좌우로 사라지는 스텝 · inch 촌경 — 받은 데이터에는 있다)
+## (inch 촌경 — 받은 데이터에는 있다. vanish_step 좌우로 사라지는 스텝은 rc.2 폰 묶음 B 에서 동작을 얻었다)
 const MOVE_OF := {"kickarts": "s_kick", "triple": "s_triple", "offbeat": "s_offbeat", "offbeat2": "s_offbeat2",
-	"offbeat_rev": "s_offbeat_rev"}
+	"offbeat_rev": "s_offbeat_rev", "vanish_step": "s_vanish"}
+
+## **3D 덧붙임** 등급 차 한 방(rc.2 폰 2026-11-07 사용자 '김신은 10강 아래급들은 다 원콤이 되어야 함 · 약한 캐릭터들을 팍팍
+## 쓸어버리는 느낌'): 치는 쪽이 맞는 쪽보다 이만큼 이상 윗급이면 보통 공격도 한 대에 쓰러진다(김신 내성 중위 → 준10강 이하).
+## 조작 인물 · 방의 보스는 빼고(oneshot_immune — 판이 정한다). castle_common 에 올릴지는 사용자(요청 줄)
+const ONE_SHOT_GAP := 5
 
 ## 처음 게이지: 초안은 4칸으로 시작해 기술을 바로 써 볼 수 있게 한다 — 본편은 1칸 (3층 · 잠정)
 const KIM_START_BARS := 4.0
+const HERO_START_BARS := 2.0      # 다른 조작 인물(서진태 · 피우진) — 묶음 B 에서 기술이 생겨 바로 써 볼 수 있게(잠정)
 
 ## 백도찬 엇박 (castle_M `castle_m/data/bosses.py` · `duels.py`, 3층 보스 패턴): 체력 90% 이하에서 처음(그때까지 체력은
 ## 80% 아래로 안 내려간다), 그 뒤 쿨다운마다. 첫 엇박에 맞은 김신은 체력 25% 아래로 안 내려간다(보여 주는 한 방)
 const BAEK_OFFBEAT := {"first_hp": 0.9, "hold_hp": 0.8, "cd": [1200, 720], "demo_floor": 0.25, "slowmo": 40}
+
+
+static func one_shot(att_rank: String, def_rank: String, immune: bool) -> bool:
+	return not immune and att_rank != "" and def_rank != "" and Common.rank_gap(att_rank, def_rank) >= ONE_SHOT_GAP
+
+
+## 기술의 kill_top: 맞는 쪽 등급이 그 이하면 한 대에 쓰러진다(위빙 · 서진태 오리지널)
+static func kills(mv: Dictionary, att_rank: String, def_rank: String) -> bool:
+	var top := str(mv.get("kill_top", ""))
+	return top != "" and def_rank != "" and Common.rank_at_most(def_rank, top)
+
+
+## 조작 인물이 고를 수 있는 기술 = castle_common 진행의 기술(동작이 있는 것) + 3D 덧붙임 기술(addendum HERO_SKILLS — 비용은 그 표)
+static func hero_entries(char_id: String, ids: Array, rank: String) -> Array:
+	var out := entries(ids, rank)
+	for sid in Addendum.HERO_SKILLS.get(char_id, []):
+		var sk := Addendum.skill(sid)
+		out.append({"id": sid, "name": str(sk["name"]), "move": str(sk["move"]), "cost": float(sk.get("cost", 1.0))})
+	return out
 
 
 ## 고를 수 있는 기술 한 칸 — 이름은 skills.json, 비용은 skill_cost(쓰는 사람 등급). cost -1 = 전부(all_min_bars 칸 이상일 때)

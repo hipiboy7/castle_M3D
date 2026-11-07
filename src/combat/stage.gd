@@ -67,10 +67,11 @@ static func _hero(id: String, T):
 	_base(f, T.ROLES[id], st)
 	f.moveset = T.ROLES[id]["moveset"]
 	f.can_parry = bool(c.get("can_parry", false))
-	f.skills = Skills.entries(pr[1], f.rank)
+	f.skills = Skills.hero_entries(id, pr[1], f.rank)      # 공통 진행 기술 + 3D 덧붙임(아무르 티그로 · 서진태 · 피우진 — 묶음 B)
+	f.oneshot_immune = true
 	f.gauge_max = Common.bars_for(f.rank) * Common.bar_points()
 	f.gauge_rate = Common.gauge_rate(f.rank, st.get("기술"))
-	f.gauge = (Skills.KIM_START_BARS if id == Skills.HERO_ID else 0.0) * Common.bar_points()
+	f.gauge = minf(f.gauge_max, (Skills.KIM_START_BARS if id == Skills.HERO_ID else Skills.HERO_START_BARS) * Common.bar_points())
 	return f
 
 
@@ -174,6 +175,8 @@ static func _enter(d: Dictionary, i: int) -> void:
 		_npc(d, a[0], 0, a[1])
 	for e in room["enemies"]:
 		_npc(d, e[0], 1, e[1], e[2] if e.size() > 2 else {})
+	for e in d["enemies"]:
+		e.oneshot_immune = e.char_id == str(room.get("boss", ""))     # 방의 보스는 등급 차 한 방을 안 받는다
 	if i == 0 and int(d["crowd"]) > 0:
 		for k in int(d["crowd"]):                    # 성능 점검: 경호원을 둥글게 더 세운다
 			var a := TAU * k / float(d["crowd"])

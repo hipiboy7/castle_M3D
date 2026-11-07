@@ -683,6 +683,166 @@
     {"fn": "skill_cost", "args": ["guilhwa_forearm", "톱"], "want": 1.0},
     {"fn": "skill_cost", "args": ["guilhwa_forearm", "재앙"], "want": 1.0},
     {"fn": "can_learn", "args": ["guilhwa_forearm", "건달급", null], "want": true},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "건달급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "조장급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "네임드"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "경호대급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "전국구"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "이스크라 평 킬러급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "준10강"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "외성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "외성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "외성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "내성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "내성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "내성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "톱"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_counter", "재앙"], "want": 1.0},
+    {"fn": "can_learn", "args": ["namgung_knuckle_counter", "건달급", null], "want": true},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "건달급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "조장급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "네임드"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "경호대급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "전국구"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "이스크라 평 킬러급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "준10강"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "외성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "외성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "외성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "내성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "내성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "내성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "톱"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["namgung_knuckle_hook", "재앙"], "want": 1.0},
+    {"fn": "can_learn", "args": ["namgung_knuckle_hook", "건달급", null], "want": true},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "건달급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "조장급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "네임드"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "경호대급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "전국구"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "이스크라 평 킬러급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "준10강"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "외성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "외성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "외성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "내성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "내성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "내성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "톱"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_sweep", "재앙"], "want": 1.0},
+    {"fn": "can_learn", "args": ["sintaejin_sweep", "건달급", null], "want": true},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "건달급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "조장급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "네임드"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "경호대급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "전국구"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "이스크라 평 킬러급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "준10강"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "외성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "외성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "외성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "내성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "내성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "내성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "톱"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_second_blade", "재앙"], "want": 1.0},
+    {"fn": "can_learn", "args": ["sintaejin_second_blade", "건달급", null], "want": true},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "건달급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "조장급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "네임드"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "경호대급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "전국구"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "이스크라 평 킬러급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "준10강"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "외성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "외성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "외성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "내성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "내성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "내성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "톱"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["sintaejin_pistol", "재앙"], "want": 1.0},
+    {"fn": "can_learn", "args": ["sintaejin_pistol", "건달급", null], "want": true},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "건달급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "조장급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "네임드"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "경호대급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "전국구"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "이스크라 평 킬러급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "준10강"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "외성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "외성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "외성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "내성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "내성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "내성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "톱"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_face_counter", "재앙"], "want": 1.0},
+    {"fn": "can_learn", "args": ["hwangbo_face_counter", "건달급", null], "want": true},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "건달급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "조장급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "네임드"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "경호대급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "전국구"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "이스크라 평 킬러급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "준10강"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "외성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "외성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "외성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "내성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "내성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "내성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "톱"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["hwangbo_bait", "재앙"], "want": 1.0},
+    {"fn": "can_learn", "args": ["hwangbo_bait", "건달급", null], "want": true},
+    {"fn": "skill_cost", "args": ["iseul_throw", "건달급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "조장급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "네임드"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "경호대급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "전국구"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "이스크라 평 킬러급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "준10강"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "외성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "외성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "외성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "내성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "내성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "내성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "톱"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_throw", "재앙"], "want": 1.0},
+    {"fn": "can_learn", "args": ["iseul_throw", "건달급", null], "want": true},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "건달급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "조장급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "네임드"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "경호대급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "전국구"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "이스크라 평 킬러급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "준10강"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "외성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "외성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "외성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "내성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "내성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "내성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "톱"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["iseul_double_slam", "재앙"], "want": 1.0},
+    {"fn": "can_learn", "args": ["iseul_double_slam", "건달급", null], "want": true},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "건달급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "조장급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "네임드"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "경호대급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "전국구"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "이스크라 평 킬러급"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "준10강"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "외성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "외성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "외성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "내성 하위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "내성 중위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "내성 상위"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "톱"], "want": 1.0},
+    {"fn": "skill_cost", "args": ["ojiin_skirt_dagger", "재앙"], "want": 1.0},
+    {"fn": "can_learn", "args": ["ojiin_skirt_dagger", "건달급", null], "want": true},
     {"fn": "rank_damage_k", "args": ["건달급", "건달급"], "want": 1.0},
     {"fn": "shrugs_off", "args": ["건달급", "건달급"], "want": false},
     {"fn": "rank_damage_k", "args": ["건달급", "조장급"], "want": 1.0},
@@ -1659,92 +1819,72 @@
     {"fn": "roulette_reflects", "args": ["내성 하위", "내성 상위"], "want": true},
     {"fn": "roulette_reflects", "args": ["내성 하위", "톱"], "want": true},
     {"fn": "roulette_reflects", "args": ["내성 하위", "재앙"], "want": true},
-    {
-      "fn": "progress_at",
-      "args": ["kimshin", 0, false],
-      "want": ["내성 중위", ["kickarts", "vanish_step", "inch", "triple"]]
-    },
-    {
-      "fn": "progress_at",
-      "args": ["kimshin", 1, false],
-      "want": ["내성 중위", ["kickarts", "vanish_step", "inch", "triple"]]
-    },
-    {
-      "fn": "progress_at",
-      "args": ["kimshin", 2, false],
-      "want": ["내성 상위", ["kickarts", "vanish_step", "inch", "triple"]]
-    },
-    {
-      "fn": "progress_at",
-      "args": ["kimshin", 3, false],
-      "want": ["내성 상위", ["kickarts", "vanish_step", "inch", "triple"]]
-    },
-    {
-      "fn": "progress_at",
-      "args": ["kimshin", 4, false],
-      "want": ["내성 상위", ["kickarts", "vanish_step", "inch", "triple"]]
-    },
+    {"fn": "progress_at", "args": ["kimshin", 0, false], "want": ["내성 중위", ["kickarts", "vanish_step"]]},
+    {"fn": "progress_at", "args": ["kimshin", 1, false], "want": ["내성 중위", ["kickarts", "vanish_step"]]},
+    {"fn": "progress_at", "args": ["kimshin", 2, false], "want": ["내성 상위", ["kickarts", "vanish_step"]]},
+    {"fn": "progress_at", "args": ["kimshin", 3, false], "want": ["내성 상위", ["kickarts", "vanish_step"]]},
+    {"fn": "progress_at", "args": ["kimshin", 4, false], "want": ["내성 상위", ["kickarts", "vanish_step"]]},
     {
       "fn": "progress_at",
       "args": ["kimshin", 5, false],
-      "want": ["내성 상위", ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev"]]
+      "want": ["내성 상위", ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev"]]
     },
     {
       "fn": "progress_at",
       "args": ["kimshin", 6, false],
-      "want": ["톱", ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev"]]
+      "want": ["톱", ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev"]]
     },
     {
       "fn": "progress_at",
       "args": ["kimshin", 7, false],
-      "want": ["톱", ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev"]]
+      "want": ["톱", ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev"]]
     },
     {
       "fn": "progress_at",
       "args": ["kimshin", 8, false],
-      "want": ["톱", ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev"]]
+      "want": ["톱", ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev"]]
     },
     {
       "fn": "progress_at",
       "args": ["kimshin", 9, false],
-      "want": ["톱", ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev"]]
+      "want": ["톱", ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev"]]
     },
     {
       "fn": "progress_at",
       "args": ["kimshin", 10, false],
-      "want": ["재앙", ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev"]]
+      "want": ["재앙", ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev", "inch", "triple"]]
     },
     {
       "fn": "progress_at",
       "args": ["kimshin", 11, false],
-      "want": ["재앙", ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev"]]
+      "want": ["재앙", ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev", "inch", "triple"]]
     },
     {
       "fn": "progress_at",
       "args": ["kimshin", 12, false],
-      "want": ["재앙", ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev"]]
+      "want": ["재앙", ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev", "inch", "triple"]]
     },
     {
       "fn": "progress_at",
       "args": ["kimshin", 13, false],
-      "want": ["재앙", ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev"]]
+      "want": ["재앙", ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev", "inch", "triple"]]
     },
     {
       "fn": "progress_at",
       "args": ["kimshin", 14, false],
-      "want": ["재앙", ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev"]]
+      "want": ["재앙", ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev", "inch", "triple"]]
     },
     {
       "fn": "progress_at",
       "args": ["kimshin", 15, false],
-      "want": ["재앙", ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev"]]
+      "want": ["재앙", ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev", "inch", "triple"]]
     },
     {
       "fn": "progress_at",
       "args": ["kimshin", 15, true],
       "want": [
         "재앙",
-        ["kickarts", "vanish_step", "inch", "triple", "offbeat", "offbeat2", "offbeat_rev", "jesus_zone"]
+        ["kickarts", "vanish_step", "offbeat", "offbeat2", "offbeat_rev", "inch", "triple", "jesus_zone"]
       ]
     },
     {"fn": "progress_at", "args": ["jintae", 0, false], "want": ["외성 하위", []]},
@@ -1759,11 +1899,31 @@
     {"fn": "progress_at", "args": ["jintae", 9, false], "want": ["외성 상위", ["jin_original"]]},
     {"fn": "progress_at", "args": ["jintae", 10, false], "want": ["외성 상위", ["jin_original"]]},
     {"fn": "progress_at", "args": ["jintae", 11, false], "want": ["외성 상위", ["jin_original", "roulette"]]},
-    {"fn": "progress_at", "args": ["jintae", 12, false], "want": ["내성 하위", ["jin_original", "roulette"]]},
-    {"fn": "progress_at", "args": ["jintae", 13, false], "want": ["내성 하위", ["jin_original", "roulette"]]},
-    {"fn": "progress_at", "args": ["jintae", 14, false], "want": ["내성 하위", ["jin_original", "roulette"]]},
-    {"fn": "progress_at", "args": ["jintae", 15, false], "want": ["내성 하위", ["jin_original", "roulette"]]},
-    {"fn": "progress_at", "args": ["jintae", 15, true], "want": ["내성 하위", ["jin_original", "roulette"]]},
+    {
+      "fn": "progress_at",
+      "args": ["jintae", 12, false],
+      "want": ["내성 하위", ["jin_original", "roulette", "inch"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["jintae", 13, false],
+      "want": ["내성 하위", ["jin_original", "roulette", "inch"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["jintae", 14, false],
+      "want": ["내성 하위", ["jin_original", "roulette", "inch"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["jintae", 15, false],
+      "want": ["내성 하위", ["jin_original", "roulette", "inch"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["jintae", 15, true],
+      "want": ["내성 하위", ["jin_original", "roulette", "inch"]]
+    },
     {
       "fn": "progress_at",
       "args": ["baekdochan", 0, false],
@@ -1967,6 +2127,91 @@
       "fn": "progress_at",
       "args": ["shingen", 15, true],
       "want": ["내성 상위", ["shingen_daegeuk", "shingen_dive", "shingen_frontkick", "shingen_leap"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 0, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 1, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 2, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 3, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 4, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 5, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 6, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 7, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 8, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 9, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 10, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 11, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 12, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 13, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 14, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 15, false],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["namgunghyuk", 15, true],
+      "want": ["외성 하위", ["namgung_knuckle_counter", "namgung_knuckle_hook"]]
     },
     {"fn": "progress_at", "args": ["hayabusa", 0, false], "want": ["준10강", ["hayabusa_arc", "hayabusa_low"]]},
     {"fn": "progress_at", "args": ["hayabusa", 1, false], "want": ["준10강", ["hayabusa_arc", "hayabusa_low"]]},
@@ -2273,6 +2518,227 @@
     {"fn": "progress_at", "args": ["kimhyeokju", 13, false], "want": ["네임드", []]},
     {"fn": "progress_at", "args": ["kimhyeokju", 14, false], "want": ["네임드", []]},
     {"fn": "progress_at", "args": ["kimhyeokju", 15, false], "want": ["네임드", []]},
-    {"fn": "progress_at", "args": ["kimhyeokju", 15, true], "want": ["네임드", []]}
+    {"fn": "progress_at", "args": ["kimhyeokju", 15, true], "want": ["네임드", []]},
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 0, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 1, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 2, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 3, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 4, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 5, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 6, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 7, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 8, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 9, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 10, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 11, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 12, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 13, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 14, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 15, false],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["sintaejin", 15, true],
+      "want": ["준10강", ["sintaejin_sweep", "sintaejin_second_blade", "sintaejin_pistol"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 0, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 1, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 2, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 3, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 4, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 5, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 6, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 7, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 8, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 9, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 10, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 11, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 12, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 13, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 14, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 15, false],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {
+      "fn": "progress_at",
+      "args": ["hwangbomincheol", 15, true],
+      "want": ["전국구", ["hwangbo_face_counter", "hwangbo_bait"]]
+    },
+    {"fn": "progress_at", "args": ["iseul", 0, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 1, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 2, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 3, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 4, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 5, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 6, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 7, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 8, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 9, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 10, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 11, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 12, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 13, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 14, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 15, false], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["iseul", 15, true], "want": ["전국구", ["iseul_throw", "iseul_double_slam"]]},
+    {"fn": "progress_at", "args": ["ojiin", 0, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 1, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 2, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 3, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 4, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 5, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 6, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 7, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 8, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 9, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 10, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 11, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 12, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 13, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 14, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 15, false], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["ojiin", 15, true], "want": ["경호대급", ["ojiin_skirt_dagger"]]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 0, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 1, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 2, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 3, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 4, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 5, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 6, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 7, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 8, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 9, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 10, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 11, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 12, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 13, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 14, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 15, false], "want": ["건달급", []]},
+    {"fn": "progress_at", "args": ["kimjaehoon", 15, true], "want": ["건달급", []]}
   ]
 }

@@ -46,16 +46,6 @@
         },
         {
           "field": "learn",
-          "value": "inch",
-          "part": "castle1",
-          "ep": 1,
-          "event": null,
-          "refs": [],
-          "conf": "ai",
-          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
-        },
-        {
-          "field": "learn",
           "value": "jesus_zone",
           "part": "castle1",
           "ep": 1,
@@ -68,16 +58,6 @@
         {
           "field": "learn",
           "value": "kickarts",
-          "part": "castle1",
-          "ep": 1,
-          "event": null,
-          "refs": [],
-          "conf": "ai",
-          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
-        },
-        {
-          "field": "learn",
-          "value": "triple",
           "part": "castle1",
           "ep": 1,
           "event": null,
@@ -208,6 +188,26 @@
         {
           "field": "rank",
           "value": "재앙",
+          "part": "castle2",
+          "ep": 41,
+          "event": "beat:richeon",
+          "refs": ["041/097-101"],
+          "conf": "user",
+          "src": "data/progression.json steps(사용자 확정)"
+        },
+        {
+          "field": "learn",
+          "value": "inch",
+          "part": "castle2",
+          "ep": 41,
+          "event": "beat:richeon",
+          "refs": ["041/097-101"],
+          "conf": "user",
+          "src": "data/progression.json steps(사용자 확정)"
+        },
+        {
+          "field": "learn",
+          "value": "triple",
           "part": "castle2",
           "ep": 41,
           "event": "beat:richeon",
@@ -404,6 +404,16 @@
         {
           "field": "rank",
           "value": "내성 하위",
+          "part": "castle2",
+          "ep": 51,
+          "event": "beat:yuwoosung",
+          "refs": ["047/003-107", "048/000-045"],
+          "conf": "user",
+          "src": "data/progression.json steps(사용자 확정)"
+        },
+        {
+          "field": "learn",
+          "value": "inch",
           "part": "castle2",
           "ep": 51,
           "event": "beat:yuwoosung",
@@ -1405,6 +1415,26 @@
           "refs": [],
           "conf": "user",
           "src": "data/ranks.json 강함표 '남궁혁'(사용자 확정)"
+        },
+        {
+          "field": "learn",
+          "value": "namgung_knuckle_counter",
+          "part": "castle1",
+          "ep": 23,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
+        },
+        {
+          "field": "learn",
+          "value": "namgung_knuckle_hook",
+          "part": "castle1",
+          "ep": 23,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
         },
         {
           "field": "alive",
@@ -4523,6 +4553,36 @@
           "src": "data/ranks.json 강함표 '신태진'(사용자 확정)"
         },
         {
+          "field": "learn",
+          "value": "sintaejin_pistol",
+          "part": "castle1",
+          "ep": 23,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
+        },
+        {
+          "field": "learn",
+          "value": "sintaejin_second_blade",
+          "part": "castle1",
+          "ep": 23,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
+        },
+        {
+          "field": "learn",
+          "value": "sintaejin_sweep",
+          "part": "castle1",
+          "ep": 23,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
+        },
+        {
           "field": "faction",
           "value": null,
           "part": "castle1",
@@ -7429,6 +7489,26 @@
           "refs": [],
           "conf": "user",
           "src": "data/ranks.json 강함표 '황보민철'(사용자 확정)"
+        },
+        {
+          "field": "learn",
+          "value": "hwangbo_bait",
+          "part": "castle1",
+          "ep": 24,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
+        },
+        {
+          "field": "learn",
+          "value": "hwangbo_face_counter",
+          "part": "castle1",
+          "ep": 24,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
         }
       ],
       "src": "ranks.json 강함표 전국구 (사용자 2026-10-17) · 1부 답9 (work/pilot_p1/답변_p1_09.md — 사용자 2026-11-03) · 검수 OK(사용자 2026-11-04 답37 — docs/인터뷰/2026-11-04_자산화_답변37.md) · refs = 판독 첫 등장 위치(work/pilot · work/pilot_p1 NNN.json characters — 답38 #2, apply_review.py)",
@@ -8378,13 +8458,33 @@
         },
         {
           "field": "rank",
-          "value": "경호대급",
+          "value": "전국구",
           "part": "castle1",
           "ep": 21,
           "event": null,
           "refs": [],
           "conf": "user",
           "src": "data/ranks.json 강함표 '이슬'(사용자 확정)"
+        },
+        {
+          "field": "learn",
+          "value": "iseul_double_slam",
+          "part": "castle1",
+          "ep": 21,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
+        },
+        {
+          "field": "learn",
+          "value": "iseul_throw",
+          "part": "castle1",
+          "ep": 21,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
         },
         {
           "field": "faction",
@@ -8816,6 +8916,16 @@
           "src": "data/ranks.json 강함표 '오지인'(사용자 확정)"
         },
         {
+          "field": "learn",
+          "value": "ojiin_skirt_dagger",
+          "part": "castle1",
+          "ep": 22,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
+        },
+        {
           "field": "faction",
           "value": "haseong",
           "part": "castle1",
@@ -8918,6 +9028,14 @@
       },
       "relations": [
         {
+          "to": "kimdaegeon",
+          "kind": "원수",
+          "what": "김대건 얼굴의 상처를 낸 인물(회암시의 김대건 · 차수민과 악연)",
+          "refs": [],
+          "conf": "user",
+          "src": "강창석 카드 비고 · 공식 인물 카드 · 관계도(sources/character_profile/ — 판독 work/profile/profiles.json · docs/인물프로필_분석.md) · 사용자 답59(윈도우)(docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) — work/pilot/apply_profile.py(74차)"
+        },
+        {
           "to": "yundeoksu",
           "kind": "상관",
           "what": "옛 오른팔이었으나 훗날 배신해 죽임",
@@ -8932,14 +9050,6 @@
           "refs": ["p1:023/029"],
           "conf": "ai",
           "src": "packs/strategy 관계 중 사실 종류 — work/pilot/relations_canon.py(71차)"
-        },
-        {
-          "to": "kimdaegeon",
-          "kind": "원수",
-          "what": "김대건 얼굴의 상처를 낸 인물(회암시의 김대건 · 차수민과 악연)",
-          "refs": [],
-          "conf": "user",
-          "src": "강창석 카드 비고 · 공식 인물 카드 · 관계도(sources/character_profile/ — 판독 work/profile/profiles.json · docs/인물프로필_분석.md) · 사용자 답59(윈도우)(docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) — work/pilot/apply_profile.py(74차)"
         }
       ],
       "status_by_ep": [
@@ -16836,10 +16946,9 @@
           "src": "공식 인물 카드 · 관계도(sources/character_profile/ — 판독 work/profile/profiles.json · docs/인물프로필_분석.md) · 사용자 답59(윈도우)(docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) — work/pilot/apply_profile.py(74차)"
         }
       ],
-      "src": "공식 인물 카드 · 관계도(sources/character_profile/ — 판독 work/profile/profiles.json · docs/인물프로필_분석.md) · 사용자 답59(윈도우)(docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) — work/pilot/apply_profile.py(74차)",
+      "src": "공식 인물 카드 · 관계도(sources/character_profile/ — 판독 work/profile/profiles.json · docs/인물프로필_분석.md) · 사용자 답59(윈도우)(docs/인터뷰/2026-11-06_자산화_답변59_윈도우.md) — work/pilot/apply_profile.py(74차) · 검수 OK(사용자 2026-11-04 답37 — docs/인터뷰/2026-11-04_자산화_답변37.md)",
       "refs": ["017/042-043", "017/061", "017/081-117"],
-      "conf": "ai",
-      "provisional": true,
+      "conf": "user",
       "nationality": null,
       "parts": ["castle2"],
       "note": "이름은 2부 일본 관계도(関西 · 구로다 옆 칸)에서만 — 017 본문 · OCR 에 '케빈'이 없다. 영어로 욕함 · 신겐이 던진 칼에 꿰뚫림(017/112-122 — 죽음으로 보임). 093/040@1056 회상의 '케빈'(올리브 군복 · 짧은 머리)은 다른 사람(마 형제 쪽 과거로 봄 — 원작 확인 전)",

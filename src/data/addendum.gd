@@ -150,9 +150,30 @@ const SKILLS := {
 		"desc": "상대를 마주 붙잡고 오른팔을 크게 휘둘러 후려쳐 날려 보낸다('으라아앗!')", "refs": ["026/000-001"]},
 	"iseul_double_slam": {"id": "iseul_double_slam", "name": "양팔 머리 낚아채 메다꽂기", "owner": "iseul", "move": "s_is_slam",
 		"desc": "좌우에서 들어오는 둘의 머리를 양팔로 동시에 감아 쥐고 바닥에 내리꽂는다", "refs": ["028/065-069"]},
+	# ---- rc.2 폰 피드백 묶음 B(사용자 2026-11-07) — 조작 인물 기술. 이름 · 효과 글은 사용자 말 그대로, 동작(3층)은 moves.gd.
+	# castle_common 에 올릴지는 사용자(요청 줄). cost = 게이지 칸(이 판 잠정)
+	"amur_triple": {"id": "amur_triple", "name": "아무르 티그로 3연타", "owner": "kimshin", "move": "s_amur3", "cost": 1.0,
+		"desc": "하복부를 쾅, 쾅, 쾅 세 번 친다 — 0.5초 기절 · 외성 이상에게 큰 타격", "src": "사용자 2026-11-07"},
+	"amur_dash": {"id": "amur_dash", "name": "아무르 티그로 대시", "owner": "kimshin", "move": "k_dash", "cost": 0.0,
+		"desc": "빠르게 낮게 대시하며 찌르기 — 대시 버튼 + 공격(게이지 없음)", "src": "사용자 2026-11-07"},
+	"amur_weaving": {"id": "amur_weaving", "name": "아무르 티그로 위빙", "owner": "kimshin", "move": "s_weave", "cost": 2.0,
+		"desc": "공격을 다 피하면서 세 대 — 외성 이하는 맞으면 한 방", "src": "사용자 2026-11-07"},
+	"jintae_original": {"id": "jintae_original", "name": "서진태 오리지널", "owner": "jintae", "move": "s_jt_original", "cost": 2.0,
+		"desc": "3단 연속 베기 — 오른손으로 왼쪽 · 왼손으로 오른쪽 · 오른손으로 찌르기. 외성 하위 이하 한 방", "src": "사용자 2026-11-07"},
+	"jintae_vital": {"id": "jintae_vital", "name": "근거리 급소 베기", "owner": "jintae", "move": "s_jt_vital", "cost": 1.0,
+		"desc": "가까이 붙어 있을 때 빠르게 급소를 벤다", "src": "사용자 2026-11-07"},
+	"jintae_storm": {"id": "jintae_storm", "name": "서진태 난무", "owner": "jintae", "move": "s_jt_storm", "cost": 3.0,
+		"desc": "가까이 있는 모든 사람을 베어 버린다", "src": "사용자 2026-11-07"},
+	"woojin_core_counter": {"id": "woojin_core_counter", "name": "미친 코어 카운터", "owner": "woojin", "move": "s_wj_core", "cost": 1.0,
+		"desc": "받을 자세에서 들어온 공격을 흘리고 강하게 맞받아 1초 기절", "src": "사용자 2026-11-07"},
 	"ojiin_skirt_dagger": {"id": "ojiin_skirt_dagger", "name": "치마 뒤 단검", "owner": "ojiin", "move": "oj_dagger",
 		"desc": "치마 뒤에 숨긴 단검으로 등 뒤를 기습한다 — 원작은 떠올리기만 하고 김신의 눈길에 멈춘다(상상 컷)", "refs": ["026/053-056"]},
 }
+
+
+## 조작 인물이 castle_common 진행 기술에 더해 쓰는 3D 덧붙임 기술(순서 = 기술 바꾸기 차례). 좌우로 사라지는 스텝은 공통 기술(vanish_step)
+const HERO_SKILLS := {"kimshin": ["amur_triple", "amur_weaving"], "jintae": ["jintae_original", "jintae_vital", "jintae_storm"],
+	"woojin": ["woojin_core_counter"]}
 
 
 static func _has_common(id: String) -> bool:

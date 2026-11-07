@@ -236,6 +236,96 @@
       "desc": "팔꿈치 · 팔뚝으로 얼굴을 세 번 연달아 친다",
       "refs": ["057/042-079"],
       "src": "3D 후보(castle M 3D 요청 17 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름) · 70차 추천대로(답53)"
+    },
+    {
+      "id": "namgung_knuckle_counter",
+      "name": "너클 낀 주먹 카운터",
+      "owner": "namgunghyuk",
+      "weapons": ["맨손"],
+      "desc": "낮춰 파고들거나 몸을 젖혀 주먹을 흘린 뒤 너클 낀 주먹으로 맞받는다",
+      "refs": ["p1:024/136-138", "p1:025/035-045", "p1:028/088-089"],
+      "src": "3D 후보(castle M 3D 요청 24 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름 · refs 는 1부라 p1: 붙임) · 79차 추천대로(답53)"
+    },
+    {
+      "id": "namgung_knuckle_hook",
+      "name": "너클 훅",
+      "owner": "namgunghyuk",
+      "weapons": ["맨손"],
+      "desc": "오른 주먹을 크게 젖혔다가 둥근 궤적으로 휩쓰는 너클 훅",
+      "refs": ["p1:029/117-118", "p1:030/010"],
+      "src": "3D 후보(castle M 3D 요청 24 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름 · refs 는 1부라 p1: 붙임) · 79차 추천대로(답53)"
+    },
+    {
+      "id": "sintaejin_sweep",
+      "name": "장도 수평 베기",
+      "owner": "sintaejin",
+      "weapons": ["쌍칼"],
+      "desc": "두 손으로 쥔 장도를 어깨 높이에서 수평으로 크게 휘두른다",
+      "refs": ["p1:031/112-114"],
+      "src": "3D 후보(castle M 3D 요청 24 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름 · refs 는 1부라 p1: 붙임) · 79차 추천대로(답53)"
+    },
+    {
+      "id": "sintaejin_second_blade",
+      "name": "숨긴 두 번째 칼",
+      "owner": "sintaejin",
+      "weapons": ["쌍칼"],
+      "desc": "얼굴 찌르기 · 수평 베기로 시선을 끈 뒤 허리 뒤 가로 칼집의 칼을 왼손으로 뽑아 찌른다 — 못 막는다",
+      "refs": ["p1:032/032-038"],
+      "src": "3D 후보(castle M 3D 요청 24 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름 · refs 는 1부라 p1: 붙임) · 79차 추천대로(답53)"
+    },
+    {
+      "id": "sintaejin_pistol",
+      "name": "코앞 권총",
+      "owner": "sintaejin",
+      "weapons": ["칼/총"],
+      "desc": "칼과 다른 손의 권총을 코앞에서 겨눠 쏜다 — 못 막는다(구른다)",
+      "refs": ["p1:031/106-119", "p1:032/054-057"],
+      "src": "3D 후보(castle M 3D 요청 24 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름 · refs 는 1부라 p1: 붙임) · 79차 추천대로(답53)"
+    },
+    {
+      "id": "hwangbo_face_counter",
+      "name": "얼굴 스치기 베기",
+      "owner": "hwangbomincheol",
+      "weapons": ["쌍칼"],
+      "desc": "돌진해 오는 상대에게 맞받아 오른손 칼로 얼굴 높이를 가로로 벤다",
+      "refs": ["p1:026/004-005"],
+      "src": "3D 후보(castle M 3D 요청 24 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름 · refs 는 1부라 p1: 붙임) · 79차 추천대로(답53)"
+    },
+    {
+      "id": "hwangbo_bait",
+      "name": "왼다리 미끼 찌르기",
+      "owner": "hwangbomincheol",
+      "weapons": ["쌍칼"],
+      "desc": "다친 왼다리로 중심이 무너지는 척 끌어들이고 파고드는 순간 찌른다('그대로 시마이!') — 읽히면 크게 빈다",
+      "refs": ["p1:027/172-178"],
+      "src": "3D 후보(castle M 3D 요청 24 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름 · refs 는 1부라 p1: 붙임) · 79차 추천대로(답53)"
+    },
+    {
+      "id": "iseul_throw",
+      "name": "붙잡아 후려 날리기",
+      "owner": "iseul",
+      "weapons": ["맨손"],
+      "desc": "상대를 마주 붙잡고 오른팔을 크게 휘둘러 후려쳐 날려 보낸다('으라아앗!')",
+      "refs": ["p1:026/000-001"],
+      "src": "3D 후보(castle M 3D 요청 24 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름 · refs 는 1부라 p1: 붙임) · 79차 추천대로(답53)"
+    },
+    {
+      "id": "iseul_double_slam",
+      "name": "양팔 머리 낚아채 메다꽂기",
+      "owner": "iseul",
+      "weapons": ["맨손"],
+      "desc": "좌우에서 들어오는 둘의 머리를 양팔로 동시에 감아 쥐고 바닥에 내리꽂는다",
+      "refs": ["p1:028/065-069"],
+      "src": "3D 후보(castle M 3D 요청 24 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름 · refs 는 1부라 p1: 붙임) · 79차 추천대로(답53)"
+    },
+    {
+      "id": "ojiin_skirt_dagger",
+      "name": "치마 뒤 단검",
+      "owner": "ojiin",
+      "weapons": ["칼"],
+      "desc": "치마 뒤에 숨긴 단검으로 등 뒤를 기습한다 — 원작은 떠올리기만 하고 김신의 눈길에 멈춘다(상상 컷)",
+      "refs": ["p1:026/053-056"],
+      "src": "3D 후보(castle M 3D 요청 24 · `src/data/addendum.gd` SKILLS — 원작 canon/episodes moves 판독에서 고름 · refs 는 1부라 p1: 붙임) · 79차 추천대로(답53)"
     }
   ]
 }

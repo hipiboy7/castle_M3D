@@ -67,7 +67,8 @@ func apply(d: Dictionary) -> void:
 					var last := no >= int(mv2["hits"])
 					var ap: Node3D = pup.get(_attacker(w, e[1]), pup.get(d["hero"]))
 					fx.impact(e[2], ap.yaw, last)
-					fx.pop(e[2] + Vector3(0, 0.25 + no * 0.1, 0) + cam.global_basis.x * (no - 2) * 0.3, "%d%s" % [no, "!" if last else ""],
+					var word := "쾅!" if str(mv2["fx"]) == "amur3" else "%d%s" % [no, "!" if last else ""]    # 아무르 티그로 3연타 '쾅, 쾅, 쾅'
+					fx.pop(e[2] + Vector3(0, 0.25 + no * 0.1, 0) + cam.global_basis.x * (no - 2) * 0.3, word,
 						Color(1.0, 0.8, 0.45) if last else Color(1.0, 0.95, 0.8), 80 if last else 56, 0.6)
 					if last:
 						cam.punch_zoom(0.9)
@@ -105,6 +106,15 @@ func apply(d: Dictionary) -> void:
 				fx.pop(Vector3(e[1].pos.x, 2.7, e[1].pos.y), str(e[2]), Color(0.75, 0.9, 1.0), 44, 2.0)
 				snd.play("shine", -2.0, 0.7)
 				snd.play("wind", -6.0, 1.2)
+			"oneshot":
+				fx.pop(e[2] + Vector3(0, 0.55, 0) - cam.global_basis.x * 0.6, "한 방!", Color(1.0, 0.85, 0.5), 56, 0.8)
+			"counter_catch":
+				fx.parry(e[2])
+				fx.pop(e[2] + Vector3(0, 0.5, 0), "카운터!", Color(1.0, 0.7, 0.4), 64, 0.9)
+				snd.play("counter", -2.0, 0.9)
+				cam.punch_zoom(0.9)
+			"dash":
+				snd.play("wind", -10.0, 1.5)
 			"pierce":
 				fx.pop(e[2] + Vector3(0, 0.45, 0), "가드 관통!", Color(1.0, 0.78, 0.47), 60, 0.9)
 			"stun":

@@ -35,7 +35,10 @@
     "punch:F",
     "cross:W",
     "cross:S",
-    "cross:F"
+    "cross:F",
+    "thrust_low:W",
+    "thrust_low:S",
+    "thrust_low:F"
   ],
   "look_y": 1.05,
   "made_by": "tools/make_sprites.gd",
