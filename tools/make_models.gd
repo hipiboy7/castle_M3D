@@ -254,7 +254,7 @@ func _body(lk: Dictionary) -> void:
 		var fore: Color = skin if rolled else arm
 		# 정장 · 코트 소매 끝에 셔츠 소맷부리(흰 띠 — 겉옷과 셔츠가 갈라 보이게)
 		var cuff = shirt if not (shirt_only or vest or sleeveless or jacket or robe) and not shirt.is_equal_approx(arm) else null
-		_blob(sh + Vector3(-0.004 * sx, -0.008, 0), Vector3(0.072, 0.066, 0.07) * limb, arm if vest or sleeveless else top, sb)   # 조끼 · 민소매는 어깨도 소매 · 맨살
+		_blob(sh + Vector3(-0.008 * sx, -0.01, 0), Vector3(0.068, 0.062, 0.067) * limb, arm if vest or sleeveless else top, sb)   # 조끼 · 민소매는 어깨도 소매 · 맨살
 		# 팔: 어깨 ~ 손목 한 줄 관(팔꿈치에서 끊기지 않게 — 위팔 · 아래팔 가중치를 팔꿈치 둘레에서 나눈다) + 팔꿈치 속 채움 공
 		var ap: Array = [
 			[sh + up * 0.03, 0.056 * limb, [sb, "chest"], [0.5, 0.5], arm],
