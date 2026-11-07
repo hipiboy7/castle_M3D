@@ -6609,7 +6609,8 @@
         "078/038@2000",
         "091/052",
         "092/002@950",
-        "092/002@1300"
+        "092/002@1300",
+        "092/002@800"
       ],
       "ref_image": "work/looks/ref/majunyeong.png",
       "profile": null,
@@ -9650,7 +9651,7 @@
           "jaw": "square",
           "facial_hair": ["stubble"],
           "scars": [{"where": "nose_bridge", "shape": "line"}],
-          "glasses": {"kind": "sunglasses_square", "lens": "#2a2426"},
+          "glasses": null,
           "piercings": [{"where": "left_ear", "kind": "stud", "color": "#111111"}],
           "headwear": null
         },
@@ -9712,7 +9713,8 @@
               "outer": {"kind": "none"},
               "shirt": {"kind": "open_shirt", "color": "#fdfcfd"},
               "tie": null
-            }
+            },
+            "head": {"glasses": {"kind": "sunglasses_square", "lens": "#2a2426"}}
           }
         },
         {
@@ -9764,7 +9766,8 @@
         "056/089",
         "056/046-047",
         "023/034@450",
-        "023/048"
+        "023/048",
+        "023/034"
       ],
       "ref_image": "work/looks/ref/woojin.png",
       "profile": "sources/character_profile/피우진.jpg",
@@ -9976,8 +9979,8 @@
         "head": {
           "hair_style": "undercut",
           "hair_len": "short",
-          "hair_color": "#1d1c1d",
-          "hair_note": "옆 · 뒤 짧게 밀고 위를 뒤로 넘김",
+          "hair_color": "#3b2d26",
+          "hair_note": "옆 · 뒤 짧게 밀고 위를 뒤로 넘김 · 색은 아주 짙은 갈색(78차 — p1:008/019 중립광 #49372c · 공식 카드 먹빛 #161415 · 밝은 면 #856a63 의 사이)",
           "skin": "#c8aa95",
           "eyes": "sharp",
           "brows": "thick",
@@ -10036,7 +10039,8 @@
         "p1:006/027@700",
         "p1:008/017",
         "p1:008/019@2700",
-        "p1:015/052"
+        "p1:015/052",
+        "p1:008/019@2730"
       ],
       "ref_image": "work/looks/ref/yundeoksu.png",
       "profile": "sources/character_profile/DS씨큐리티_윤덕수.jpg",

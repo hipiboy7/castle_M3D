@@ -1,9 +1,9 @@
 {
   "_about": "castle_common 복사본 — 손으로 고치지 않는다. 받기: py -3.12 D:/claude/fun/castle_common/tools/sync.py castle_M3D",
-  "castle_common": "663410509763bfc0dc4e34da72dbfbe3b779e349",
+  "castle_common": "4b88bc60e78d5007fb172452073f400e1513db00",
   "files": {
     "characters.json": "8410356bf2ab9ddd9ea24e551bdb0b2750c84220b9e90d66ebaa89fb55a1f12c",
-    "looks.json": "2f9cd98b8c7a3194ca6ffc08efd12c755b813fa3720559d73c9e8fefc6948fca",
+    "looks.json": "221826325f3f1a0173773e5dd17f3acc32c51933302149f1a477689a33a4aee6",
     "progression.json": "948d33d7627c8008a3dbf1ddbc76468d6b9f6d8e029c478be0c01eb95bffabe4",
     "ranks.json": "3552685dbbdf29ff2505b102e186cc95bb81e042f8f8c2f6a36e73753a5bb266",
     "rules.json": "bf6460802531f80e7265e142ff229997bff6b466162c792c15b521667fed2745",

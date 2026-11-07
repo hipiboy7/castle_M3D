@@ -137,10 +137,10 @@ const LOOKS := {
 		"skin": Color(0.64, 0.47, 0.34), "hair": Color(0.06, 0.06, 0.07), "hair_style": "buzz", "bandage": Color(0.95, 0.95, 0.93),
 		"scar": "double", "piercing": true, "big": true, "scale": 1.22, "wide": 1.4, "depth": 1.45, "limb": 1.45, "head": 0.95,
 		"jaw": true, "weapon_r": "", "weapon_l": "", "guard": "box"},
-	#  윤덕수(p1:019-020 거리 중앙선 · DS 대표): 어두운 피부 · 옆을 짧게 민 언더컷에 뒤로 넘긴 검은 머리 · 굵은 눈썹 · 각진 턱 ·
-	#        귀걸이 · 오른 팔뚝 문신의 근육질 거구 → 재킷을 벗고 넥타이를 푼 흰 셔츠(소매 걷음) · 회청색 바지 · 손목 검은 밴드,
+	#  윤덕수(p1:019-020 거리 중앙선 · DS 대표): 어두운 피부 · 옆을 짧게 민 언더컷에 뒤로 넘긴 아주 짙은 갈색 머리(78차) · 굵은 눈썹 · 각진 턱 ·
+	#        귀걸이 · 오른 팔뚝 문신의 근육질 거구 → 재킷을 벗고 넥타이를 푼 흰 셔츠(소매 걷음) · 회색 슬랙스(공통 #4d4f56 — 78차) · 손목 검은 밴드,
 	#        싸움 끝에 넘긴 머리가 풀려 늘어진다(2차 — loose)
-	"yundeoksu": {"outfit": "shirt", "suit": Color(0.9, 0.92, 0.95), "pants": Color(0.3, 0.34, 0.42), "shirt": Color(0.9, 0.92, 0.95),
+	"yundeoksu": {"outfit": "shirt", "suit": Color(0.9, 0.92, 0.95), "pants": Color(0.36, 0.37, 0.4), "shirt": Color(0.9, 0.92, 0.95),
 		"tie": Color(0.42, 0.42, 0.46), "skin": Color(0.6, 0.43, 0.31), "hair": Color(0.05, 0.05, 0.06), "hair2": Color(0.24, 0.2, 0.18),
 		"hair_style": "undercut", "loose": true, "brow_k": 1.7, "piercing": true, "tattoo": Color(0.18, 0.2, 0.26), "tattoo_side": "r",
 		"bracelet_l": Color(0.05, 0.05, 0.06), "buckle": Color(0.75, 0.76, 0.8),
