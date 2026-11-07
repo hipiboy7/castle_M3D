@@ -9,8 +9,10 @@
 - rc.4(de4bb58 · run #51 성공 — 에뮬레이터 끄고 켠 뒤 앱 살아 있음, APP hide/show 기록은 안 남음)
 - C(서브에이전트 2 · worktree — 사용자 "둘다 subagent 활용"): 여성 얼굴 판(_face_fem — 외곽선 고리 없는 그린 얼굴 · 오지인) + 그림 A 몸(_loft 몸통 · 팔다리 · 툰 재질) 합침 d78cb87 · 도트 117 다시. 남성 얼굴은 예전 방식(고리 눈 · 코)
 - castle_common c3ed030 받음(요청 25 · 26 공통 반영 — 사용자가 castle_common 세션에 "둘 다 공통으로 올려"): 기술은 공통 진행 · common.one_shot · skill_ko · 서진태 오리지널 = jin_original(6장 코모도전 뒤) — c4e169e
-- 다음: ① push · v0.6.0-rc.5 → 폰 확인 ② 남성 얼굴도 판 얼굴로(사용자 답) ③ 3장
+- rc.5(96adec4 · run #53 성공). 사용자: 그림 B 계속(c) → 곧 (b) "너무 오래 걸림 — 개발 끝난 뒤" → 도트 굳힘(CLAUDE.md 1절)
+- 남성 얼굴(서브에이전트 — 판 얼굴 _stroke · _head_male · 색안경 · 흉터 · 수염 판, 8ba6796 → 합침 53c2b2f · GLB 109) · castle_common 7775032 받음(canon 만) · v0.6.0-rc.6(83fed6d · run #55 성공)
+- 다음: ① rc.6 폰 확인 ② 3장(청주 교도소 · 블라디보스토크 케이지 · 부산). 세션 시작 때 castle_common 01ea412f(canon 기술 3차) 받기
 - 새 세션 첫 프롬프트:
 ```
-castle_M_3D(브랜치 impl-draft1) CLAUDE.md 0-1절 순서대로 시작하고 history/2026-11-08_Claude_rc2피드백_묶음AB.md 를 읽어라. v0.6.0-rc.5 폰 확인: <결과>. 결과를 반영하고 다음(남성 얼굴 · 3장)을 진행해라.
+castle_M_3D(브랜치 impl-draft1) CLAUDE.md 0-1절 순서대로 시작하고 history/2026-11-08_Claude_rc2피드백_묶음AB.md 를 읽어라. v0.6.0-rc.6 폰 확인: <결과>. 결과를 반영하고 3장을 시작해라.
 ```
