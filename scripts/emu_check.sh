@@ -84,4 +84,15 @@ echo "--- 화면 끄고 켜기 (기록만) ---"
 grep -E "APP (hide|show)|PAUSE |MODE |FPS_LOG|OnPause|OnResume|Not Responding" emu/logcat_resume.txt | sed -E 's/.*(APP |PAUSE |MODE |FPS_LOG|OnPause|OnResume|Application Not Responding)/\1/' | tail -14 || true
 grep -E "FATAL EXCEPTION|SCRIPT ERROR|Force quitting|EGL_BAD|eglMakeCurrent|context lost|GLES" emu/logcat_resume.txt | grep -i -E "godot|castlem3d|GLES|context" | head -10 || true
 [ -n "$(adb shell pidof "$PKG" | tr -d '\r')" ] && echo "끄고 켠 뒤 앱 살아 있음" || echo "끄고 켠 뒤 앱이 죽었다"
+
+# ---- 홈으로 갔다 돌아오기 (rc.4 폰 2026-11-09: 화면 껐다 켜면 계속 검은 화면 — run #64 의 위 끄고 켜기는 액티비티가 멈추지
+# 않았다: logcat 에 APP hide 가 없음). 홈 키는 onPause · onStop 을 확실히 부른다 → 앱 아이콘으로 다시 → 기다렸다 찍기. 기록만
+adb logcat -c
+adb shell input keyevent KEYCODE_HOME; sleep 10
+adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 > /dev/null; sleep 30
+adb exec-out screencap -p > emu/emu_6_home_back.png
+adb logcat -d > emu/logcat_home.txt
+echo "--- 홈 갔다 오기 (기록만) ---"
+grep -E "APP (hide|show)|PAUSE |FPS_LOG|Restarting|restart|ProcessPhoenix|newcontext|Force quitting|context" emu/logcat_home.txt | grep -iE "godot|castlem3d|phoenix|context" | cut -c1-200 | tail -14 || true
+[ -n "$(adb shell pidof "$PKG" | tr -d '\r')" ] && echo "홈 갔다 온 뒤 앱 살아 있음" || echo "홈 갔다 온 뒤 앱이 죽었다"
 exit 0
