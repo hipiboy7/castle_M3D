@@ -29,6 +29,7 @@ var fps: Label
 var msg: Label
 var sub: Label
 var hint: Label
+var hint_y_fn = null              # 안내 글 높이를 정하는 함수(-1 = 기본 맨 아래) — 처음 화면은 장 카드 위로(main.gd)
 var _msg_t := 0.0
 var _boss_w := 560.0
 var _hero_w := 300.0
@@ -123,6 +124,10 @@ func _layout() -> void:
 	msg.position = Vector2(cx - 500, sa.position.y + sa.size.y * 0.5 - 150)
 	sub.position = Vector2(cx - 500, sa.position.y + sa.size.y * 0.5 - 70)
 	hint.position = Vector2(cx - 500, sa.end.y - 46)
+	if hint_y_fn != null:                              # 처음 화면 장 카드가 세 줄이면 맨 아래 글이 카드에 겹쳤다(2026-11-09)
+		var y: float = hint_y_fn.call()
+		if y >= 0.0:
+			hint.position.y = y
 	for hn in _hero_nodes:
 		hn[0].position = sa.position + hn[1]
 

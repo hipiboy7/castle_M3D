@@ -13,6 +13,8 @@ const Common = preload("res://src/data/common.gd")
 
 const PARRY_HITSTOP := 9
 const PARRY_SHAKE := 4
+# 막기로 받는 피해 배율 — 이 판 값(3층). castle_common rules.json guard.damage_k 는 0.7 이지만 쓰지 않는다:
+# 폰 리뷰로 맞춰 온 손맛(막기가 확실히 덜 아프게)을 지킨다(사용자 2026-11-09 '추천대로' — 지금 0.2 유지).
 const BLOCK_DMG_K := 0.2
 const BLOCK_POSTURE_K := 0.8
 const FINISHER_CAP_BOSS := 0.08          # 보스에게 제압 피해는 최대 체력의 8%

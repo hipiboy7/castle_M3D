@@ -9,6 +9,7 @@ var headless := false
 var sfx := {}
 var players: Array = []
 var music: AudioStreamPlayer
+var current := ""               # 지금 곡 이름(같은 곡을 처음부터 다시 틀지 않게 — main.gd _music)
 
 
 func setup(is_headless: bool) -> void:
@@ -40,6 +41,7 @@ func play(n: String, db := 0.0, pitch := 1.0) -> void:
 
 
 func song(n: String, loop := true) -> void:
+	current = n
 	if headless:
 		return
 	var s = load("res://assets/music/%s.ogg" % n)

@@ -55,6 +55,12 @@ func test_title_menu_layout() -> void:
 			check(sa.encloses(cards[i]) and not cards[i].intersects(L["cont"]), "카드 %d 안전 영역 안 · 이어하기와 안 겹침 %s" % [i, sa])
 			for j in i:
 				check(not cards[i].intersects(cards[j]), "카드 %d · %d 안 겹침" % [i, j])
+		# 안내 글(hud hint 30px 높이 · 1000 폭) — 이어하기 · 카드와 안 겹치고 안전 영역 안, 제목(가운데 - 150 ~ - 80) 아래(2026-11-09)
+		var hy := TitleMenu.hint_y_of(sa, 15)
+		var hr := Rect2(sa.get_center().x - 500.0, hy, 1000.0, 30.0)
+		check(hy >= sa.position.y and not hr.intersects(L["cont"]) and cards.all(func(c): return not hr.intersects(c)),
+			"안내 글이 이어하기 · 카드와 안 겹친다 %s" % sa)
+		check(hy >= sa.get_center().y - 80.0, "안내 글이 제목 아래 %s %.0f" % [sa, hy])
 
 
 ## 싸움 중 메뉴(스테이지 고르기): 장 줄 · 스테이지 줄 · 계속 · 처음 화면 — 커버 · 펼친 화면에서 안전 영역 안 · 안 겹침
@@ -62,10 +68,23 @@ func test_stage_menu_layout() -> void:
 	for sa in [Rect2(0, 0, 1280, 720), Rect2(44, 0, 1800, 700), Rect2(0, 0, 1280, 1067)]:
 		for nn in [[4, 5], [15, 8]]:                  # 장 15개(3 ~ 13장)면 장 줄이 두 줄 · 방 8개(2장)
 			var L := StageMenu.layout(sa, nn[0], nn[1])
-			var all: Array = L["chapters"] + L["stages"] + [L["resume"], L["title"]]
+			var all: Array = L["chapters"] + L["stages"] + [L["resume"], L["title"], L["difficulty"]]
 			check(L["chapters"].size() == nn[0] and L["stages"].size() == nn[1], "장 %d · 스테이지 %d" % nn)
 			for i in all.size():
 				check(sa.encloses(all[i]), "자리 %d 가 안전 영역 안 %s %s" % [i, sa, all[i]])
 				for k in range(i + 1, all.size()):
 					check(not all[i].intersects(all[k]), "자리 %d · %d 가 안 겹친다 %s" % [i, k, sa])
 
+
+
+## 실행 인자(src/launch.gd — main.gd 에서 뗌 2026-11-09): 기본값 · 각 인자 · --events · --shots · --safe
+func test_launch_args() -> void:
+	const Launch = preload("res://src/launch.gd")
+	check(Launch.parse(PackedStringArray([])) == Launch.defaults(), "인자 없으면 기본값")
+	var a := Launch.parse(PackedStringArray(["--autoplay", "--mode", "ch4", "--room", "3", "--seed", "7", "--seconds", "2.5",
+		"--events", "30:press,120:menupick_difficulty", "--shots", "/tmp/x:60,120", "--safe", "90,0,0,40", "--art", "b"]))
+	check(a["autoplay"] and a["mode"] == "ch4" and a["room"] == 3 and a["seed"] == 7 and a["seconds"] == 2.5 and a["art"] == "b", "값 인자")
+	check(a["events"] == {30: "press", 120: "menupick_difficulty"}, "--events 프레임:일")
+	check(a["shot_dir"] == "/tmp/x" and a["shots"] == [60, 120], "--shots 폴더:프레임들")
+	check(a["safe"] == Vector4(90, 0, 0, 40), "--safe 는 safe 칸으로")
+	check(Launch.KEYS.has("difficulty") and Launch.KEYS.has("menu"), "키 표")

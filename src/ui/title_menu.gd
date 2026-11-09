@@ -57,6 +57,17 @@ static func layout(sa: Rect2, n: int) -> Dictionary:
 	return {"cont": cont_r, "cards": cards}
 
 
+## 안내 글(hud hint) 높이 — 이어하기 위(카드 · 이어하기와 안 겹치게). 보이지 않으면 -1
+func hint_y() -> float:
+	if not visible:
+		return -1.0
+	return hint_y_of(SafeArea.rect(get_viewport()), items.size())
+
+
+static func hint_y_of(sa: Rect2, n: int) -> float:
+	return float(layout(sa, n)["cont"].position.y) - 36.0
+
+
 ## 누른 자리 → "continue" · 장 id · ""(빈 곳)
 func hit(p: Vector2) -> String:
 	if not visible:

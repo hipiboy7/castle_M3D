@@ -269,3 +269,24 @@ func _ep_exists(r: String) -> bool:
 		return false
 	var f := ("p1_" if m.get_string(1) != "" else "") + m.get_string(2)
 	return FileAccess.file_exists("res://data/common/canon/episodes/%s.json" % f)
+
+
+## 음악(2026-11-09 — 장마다 곡): 모든 장의 곡 · 마지막 보스 방 곡 · 처음 화면 · 끝 곡 파일이 있고, 방에 따라 고른다
+func test_chapter_songs() -> void:
+	for id in Campaign.playable_ids():
+		var rooms: int = Campaign.table(id).ROOMS.size() if Campaign.kind(id) == "stage" else 1
+		for i in rooms:
+			var s := Campaign.song_for(id, i)
+			check(ResourceLoader.exists("res://assets/music/%s.ogg" % s), "%s 방 %d 곡 %s 파일" % [id, i, s])
+	for s in [Campaign.TITLE_SONG, Campaign.ENDING_SONG, "victory", "gameover"]:
+		check(ResourceLoader.exists("res://assets/music/%s.ogg" % s), "곡 %s 파일" % s)
+	check(Campaign.song_for("ch6", 0) == "boss", "6장 결투는 boss")
+	check(Campaign.song_for("ch5", 0) == "sad" and Campaign.song_for("ch7", 0) == "resolve", "대화 장은 장 곡")
+	var r12: Array = Campaign.table("ch12").ROOMS
+	var last := -1
+	for i in r12.size():
+		if str(r12[i].get("boss", "")) != "":
+			last = i
+	check(Campaign.song_for("ch12", last) == "final" and Campaign.song_for("ch12", 0) == "dungeon", "12장 최종 보스 방만 final")
+	check(Campaign.song_for("ch1", 0) == "street", "1장 첫 방은 거리 곡")
+	check(Campaign.song_for("zzz", 0) == "battle", "모르는 장은 battle")

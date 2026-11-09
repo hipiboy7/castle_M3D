@@ -7,6 +7,7 @@ extends RefCounted
 ##             world: src/view/world3d.gd 3 ~ 13장 무대 표)
 ##   soon  — 아직 만들지 않은 장(처음 화면에 '준비 중'으로만)
 ## event: 그 장이 끝날 때의 진행 사건(castle_common progression.json) — 그 장 사람의 등급 · 기술은 이 사건 앞까지의 진행.
+## song: 그 장의 음악(assets/music/<이름>.ogg) — 장의 마지막 보스 방은 boss_song(없으면 boss), 결투는 song 그대로(song_for · 2026-11-09).
 ## 장 이름 · 한 줄은 data/story/lines.json chapters.<id>(글은 코드에 적지 않는다). 장을 더할 때는 여기 한 줄 + 장 표 + 글.
 
 const Hotel = preload("res://src/data/hotel.gd")
@@ -29,21 +30,21 @@ const Lines = preload("res://src/data/lines.gd")
 const OPEN_ALL := true
 
 const CHAPTERS := [
-	{"id": "ch0", "no": 0, "kind": "stage", "event": "", "table": "prologue", "view": "town"},
-	{"id": "ch1", "no": 1, "kind": "stage", "event": "beat:yundeoksu", "table": "hoeam", "view": "town"},
-	{"id": "ch2", "no": 2, "kind": "stage", "event": "", "table": "haseong", "view": "haseong"},
-	{"id": "ch3", "no": 3, "kind": "stage", "event": "", "table": "ch3", "view": "world"},
-	{"id": "ch4", "no": 4, "kind": "stage", "event": "", "table": "ch4", "view": "world"},
-	{"id": "ch5", "no": 5, "kind": "stage", "event": "", "table": "ch5", "view": "world"},
-	{"id": "ch6a", "no": 6, "kind": "stage", "event": "", "table": "ch6a", "view": "world"},
-	{"id": "ch6", "no": 6, "kind": "duel", "event": "duel_offbeat:baekdochan"},
-	{"id": "ch7", "no": 7, "kind": "stage", "event": "", "table": "ch7", "view": "world"},
-	{"id": "ch8", "no": 8, "kind": "stage", "event": "", "table": "ch8", "view": "world"},
-	{"id": "ch9", "no": 9, "kind": "stage", "event": "", "table": "ch9", "view": "world"},
-	{"id": "ch10", "no": 10, "kind": "stage", "event": "", "table": "ch10", "view": "world"},
-	{"id": "ch11", "no": 11, "kind": "stage", "event": "raid:castle_hotel", "table": "hotel", "view": "hotel"},
-	{"id": "ch12", "no": 12, "kind": "stage", "event": "", "table": "ch12", "view": "world"},
-	{"id": "ch13", "no": 13, "kind": "stage", "event": "", "table": "ch13", "view": "world"},
+	{"id": "ch0", "no": 0, "kind": "stage", "event": "", "table": "prologue", "view": "town", "song": "street"},
+	{"id": "ch1", "no": 1, "kind": "stage", "event": "beat:yundeoksu", "table": "hoeam", "view": "town", "song": "street"},
+	{"id": "ch2", "no": 2, "kind": "stage", "event": "", "table": "haseong", "view": "haseong", "song": "battle"},
+	{"id": "ch3", "no": 3, "kind": "stage", "event": "", "table": "ch3", "view": "world", "song": "dungeon"},
+	{"id": "ch4", "no": 4, "kind": "stage", "event": "", "table": "ch4", "view": "world", "song": "tension"},
+	{"id": "ch5", "no": 5, "kind": "stage", "event": "", "table": "ch5", "view": "world", "song": "sad"},
+	{"id": "ch6a", "no": 6, "kind": "stage", "event": "", "table": "ch6a", "view": "world", "song": "port"},
+	{"id": "ch6", "no": 6, "kind": "duel", "event": "duel_offbeat:baekdochan", "song": "boss"},
+	{"id": "ch7", "no": 7, "kind": "stage", "event": "", "table": "ch7", "view": "world", "song": "resolve"},
+	{"id": "ch8", "no": 8, "kind": "stage", "event": "", "table": "ch8", "view": "world", "song": "port"},
+	{"id": "ch9", "no": 9, "kind": "stage", "event": "", "table": "ch9", "view": "world", "song": "battle"},
+	{"id": "ch10", "no": 10, "kind": "stage", "event": "", "table": "ch10", "view": "world", "song": "tension"},
+	{"id": "ch11", "no": 11, "kind": "stage", "event": "raid:castle_hotel", "table": "hotel", "view": "hotel", "song": "battle"},
+	{"id": "ch12", "no": 12, "kind": "stage", "event": "", "table": "ch12", "view": "world", "song": "dungeon", "boss_song": "final"},
+	{"id": "ch13", "no": 13, "kind": "stage", "event": "", "table": "ch13", "view": "world", "song": "battle"},
 ]
 
 ## 장 표 이름 → 표(스크립트의 const 를 읽는다 — ROOMS · ROLES · HEROES · EVENT · PERIOD · LINES · CROWD_ID · 시간 값)
@@ -86,6 +87,25 @@ static func table(id: String):
 ## 여러 사람 판의 무대 그림 이름(main.gd VIEWS) — 없으면 hotel
 static func view(id: String) -> String:
 	return str(chapter(id).get("view", "hotel"))
+
+
+## 음악 이름: 결투 · 대화 장은 그 장 song, 여러 사람 판은 장의 마지막 보스 방(boss 가 있는 마지막 방)이면 boss_song(기본 boss),
+## 나머지 방은 song. 모르는 장은 battle. 처음 화면 TITLE_SONG · 마지막 장을 깼을 때 ENDING_SONG(main.gd)
+const TITLE_SONG := "title"
+const ENDING_SONG := "ending"
+
+
+static func song_for(id: String, room_i: int) -> String:
+	var c := chapter(id)
+	var song := str(c.get("song", "battle"))
+	if kind(id) != "stage":
+		return song
+	var rooms: Array = table(id).ROOMS
+	var last := -1
+	for i in rooms.size():
+		if str(rooms[i].get("boss", "")) != "" and not rooms[i].has("talk"):
+			last = i
+	return str(c.get("boss_song", "boss")) if last >= 0 and room_i == last else song
 
 
 ## [이름, 한 줄] — lines.json chapters.<id>

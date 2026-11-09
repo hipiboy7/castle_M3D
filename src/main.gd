@@ -23,6 +23,7 @@ const Duel = preload("res://src/combat/duel.gd")
 const Stage = preload("res://src/combat/stage.gd")
 const Replay = preload("res://src/combat/replay.gd")
 const Difficulty = preload("res://src/data/difficulty.gd")
+const Launch = preload("res://src/launch.gd")
 const Campaign = preload("res://src/data/campaign.gd")
 const Save = preload("res://src/data/save.gd")
 const Lines = preload("res://src/data/lines.gd")
@@ -57,8 +58,7 @@ const REPLAY_LAST := "user://replay_last.json"
 const SAVE_PATH := "user://save.json"
 const BASE_TICKS := 60          # project.godot physics_ticks_per_second — 로직 한 칸 = 1/60 초(게임 속도 ×1)
 
-var args := {"autoplay": false, "seconds": 0.0, "seed": 1, "shots": [], "shot_dir": "", "touch": false, "trace": false,
-	"events": {}, "mode": "ch6", "room": 0, "crowd": 0, "art": "", "replay": "", "save_replay": "", "save": ""}
+var args := Launch.defaults()
 var paused := false
 var _fake_press := false
 var _fake_swap := false
@@ -69,6 +69,7 @@ const RESULT_AUTO := 600        # 이긴 결과 화면: 안 눌러도 10초 뒤 
 var _mouse_was := false
 var _fake_art := false
 var _fake_difficulty := false
+var _menu_diff0 := ""             # 싸움 중 메뉴를 열 때의 난이도 — 바뀌었으면 닫을 때 지금 스테이지를 다시
 var headless := false
 var mode := "title"
 var kind := "duel"              # 지금 판 종류 (duel · stage — campaign.gd kind)
@@ -104,11 +105,13 @@ var evfx
 func _ready() -> void:
 	headless = DisplayServer.get_name() == "headless"
 	process_mode = Node.PROCESS_MODE_ALWAYS        # 일시정지(get_tree().paused) 중에도 본체 · 화면 표시 · 터치는 돈다 — 무대 · 인형 · 연출 · 소리는 멈춘다
-	_parse_args()
+	args = Launch.parse(OS.get_cmdline_user_args())
+	if args.has("safe"):
+		SafeArea.test_insets = args["safe"]
 	if str(args["replay"]) != "":
 		_play_replay(str(args["replay"]))
 		return
-	_setup_input()
+	Launch.setup_input()
 	fx = Fx.new()
 	fx.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(fx)
@@ -120,6 +123,7 @@ func _ready() -> void:
 	add_child(hud)
 	hud.setup()
 	menu = TitleMenu.new()
+	hud.hint_y_fn = func() -> float: return menu.hint_y()
 	hud.root.add_child(menu)
 	menu.visible = false
 	touch = Touch.new()
@@ -147,80 +151,6 @@ func _ready() -> void:
 	else:
 		_new_run(Save.next_chapter(save))
 		_enter_title()
-
-
-func _parse_args() -> void:
-	var a := OS.get_cmdline_user_args()
-	var i := 0
-	while i < a.size():
-		match a[i]:
-			"--autoplay":
-				args["autoplay"] = true
-			"--touch":
-				args["touch"] = true
-			"--trace":
-				args["trace"] = true
-			"--mode":
-				i += 1
-				args["mode"] = a[i]
-			"--room":
-				i += 1
-				args["room"] = int(a[i])
-			"--crowd":
-				i += 1
-				args["crowd"] = int(a[i])
-			"--art":
-				i += 1
-				args["art"] = a[i]
-			"--safe":
-				i += 1
-				var v := a[i].split(",")
-				SafeArea.test_insets = Vector4(float(v[0]), float(v[1]), float(v[2]), float(v[3]))
-			"--events":
-				i += 1
-				for ev in a[i].split(","):
-					var kv := ev.split(":")
-					args["events"][int(kv[0])] = kv[1]
-			"--replay":
-				i += 1
-				args["replay"] = a[i]
-			"--save-replay":
-				i += 1
-				args["save_replay"] = a[i]
-			"--save":
-				i += 1
-				args["save"] = a[i]
-			"--seconds":
-				i += 1
-				args["seconds"] = float(a[i])
-			"--seed":
-				i += 1
-				args["seed"] = int(a[i])
-			"--shots":
-				i += 1
-				var spec: String = a[i]
-				var cut := spec.rfind(":")
-				args["shot_dir"] = spec.substr(0, cut)
-				for s in spec.substr(cut + 1).split(","):
-					args["shots"].append(int(s))
-		i += 1
-
-
-func _setup_input() -> void:
-	var keys := {
-		"left": [KEY_A, KEY_LEFT], "right": [KEY_D, KEY_RIGHT], "up": [KEY_W, KEY_UP], "down": [KEY_S, KEY_DOWN],
-		"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_C], "dash": [KEY_L, KEY_SHIFT],
-		"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B], "pause": [KEY_ESCAPE, KEY_P], "swap": [KEY_TAB, KEY_Q],
-		"pick_1": [KEY_1], "pick_2": [KEY_2], "art": [KEY_3], "bench": [KEY_4], "difficulty": [KEY_5], "accept": [KEY_ENTER, KEY_KP_ENTER],
-		"speed": [KEY_F], "menu": [KEY_M],
-	}
-	for act in keys:
-		if not InputMap.has_action(act):
-			InputMap.add_action(act)
-		for k in keys[act]:
-			var ev := InputEventKey.new()
-			ev.physical_keycode = k
-			InputMap.action_add_event(act, ev)
 
 
 # ----------------------------------------------------------------------
@@ -342,7 +272,7 @@ func _enter_title() -> void:
 	touch.set_label("difficulty", Difficulty.label(save["difficulty"]))
 	hud.set_hint(_title_hint())
 	_trace("MODE title frame=%d" % frames)
-	snd.song("boss")
+	snd.song(Campaign.TITLE_SONG)
 
 
 func _start(m: String) -> void:
@@ -366,8 +296,14 @@ func _start(m: String) -> void:
 		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 K(누르고) · 구르기 Space · 대시 L · 기술 U · 기술 바꾸기 I · 속도 F")
 	else:
 		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 · 막기 K · 구르기 Space · 대시 L · 기술 U · 바꾸기 I · 교대 Tab · 속도 F")
-	if not snd.song_playing():
-		snd.song("boss")
+	_music()
+
+
+## 지금 장 · 방의 곡(src/data/campaign.gd song_for) — 같은 곡이 이미 돌고 있으면 그대로(방을 넘어도 끊기지 않게)
+func _music() -> void:
+	var s := Campaign.song_for(chapter, int(d.get("room_i", 0)) if kind == "stage" else 0)
+	if snd.current != s or not snd.song_playing():
+		snd.song(s)
 
 
 func _trace(line: String) -> void:
@@ -585,6 +521,7 @@ func _set_menu(on: bool) -> void:
 	touch.show_swap = not on and _can_swap()
 	if on:
 		menu_ch = chapter
+		_menu_diff0 = str(save["difficulty"])
 		hud.message("", "", 0.0)                    # 가운데 알림(시작 글 등)이 메뉴 카드 밑으로 비치지 않게
 		_fill_stage_menu()
 	smenu.visible = on
@@ -594,7 +531,7 @@ func _set_menu(on: bool) -> void:
 func _fill_stage_menu() -> void:
 	var ml = Lines.at("menu")
 	smenu.heading = str(ml["heading"])
-	smenu.buttons = {"resume": str(ml["resume"]), "title": str(ml["title"])}
+	smenu.buttons = {"resume": str(ml["resume"]), "title": str(ml["title"]), "difficulty": str(ml["difficulty"]) % Difficulty.label(save["difficulty"])}
 	smenu.chapters = []
 	for id in Campaign.ids():
 		var long_t: bool = Campaign.playable_ids().size() <= StageMenu.ROW_MAX     # 장이 많으면 작은 카드 두 줄 — 짧은 이름
@@ -643,6 +580,20 @@ func _menu_input() -> void:
 		mode = "switch"
 		mode_t = 0
 		touch.show_fight = false
+	elif pick == "difficulty":
+		save["difficulty"] = Difficulty.next(save["difficulty"])
+		_write_save()
+		_trace("DIFFICULTY %s" % save["difficulty"])
+		_fill_stage_menu()
+	elif pick == "resume" and str(save["difficulty"]) != _menu_diff0:
+		# 난이도를 바꾸고 닫으면 지금 스테이지를 새 난이도로 처음부터(판 중간에 배율을 바꾸지 않는다 — 리플레이 기록은 판 시작 opts)
+		_set_menu(false)
+		_switch_to = [chapter, int(d.get("room_i", 0)) if kind == "stage" else 0]
+		mode = "switch"
+		mode_t = 0
+		touch.show_fight = false
+		var rm: String = str(Lines.at("menu")["restart"]) % Difficulty.label(save["difficulty"])
+		hud.message(rm, "", 1.6)
 	elif pick == "resume":
 		_set_menu(false)
 	elif pick == "title":
@@ -795,6 +746,8 @@ func _after_tick() -> void:
 	if w.events.any(func(e): return e[0] == "room"):
 		_build_stage_view()
 		touch.show_swap = mode == "fight" and _can_swap()     # 2장: 방마다 조작 인물이 바뀐다
+		if mode == "fight" or mode == "demo":
+			_music()                                          # 마지막 보스 방에서 곡이 바뀐다
 	var swapped: bool = w.events.any(func(e): return e[0] == "swap" or e[0] == "ko")
 	evfx.apply(d)
 	w.events.clear()
@@ -827,7 +780,8 @@ func _end_fight(result: String) -> void:
 			wm = [str(Lines.at("result")["win_title"]) % str(Campaign.title(chapter)[0]),
 				str(Lines.at("result")["win_next"]) % str(Campaign.title(Save.next_chapter(save))[0])]
 		hud.message(str(wm[0]), str(wm[1]), 9999.0)
-		snd.song("victory", false)
+		var last_ch: bool = Campaign.playable_ids().back() == chapter
+		snd.song(Campaign.ENDING_SONG if last_ch else "victory", false)    # 마지막 장(13장)을 깨면 끝 곡
 	else:
 		if d["boss"] != null and pup.has(d["boss"]):
 			pup[d["boss"]].victory = true

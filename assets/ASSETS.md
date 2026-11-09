@@ -29,6 +29,16 @@
 | `music/boss.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` | 결투 (`src/main.gd` `_music`) |
 | `music/gameover.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` | 짐 (`src/main.gd` `_music`) |
 | `music/victory.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` | 이김 (`src/main.gd` `_music`) |
+| `music/title.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 처음 화면 (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
+| `music/battle.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 2 · 9 · 11 · 13장 싸움 (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
+| `music/street.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 0 · 1장 거리 (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
+| `music/port.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 6장 앞(배 위) · 8장 항구 (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
+| `music/tension.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 4 · 10장 (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
+| `music/sad.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 5장(장례 — 대화) (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
+| `music/final.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 12장 최종 보스 방 (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
+| `music/ending.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 13장을 깼을 때 (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
+| `music/dungeon.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 3 · 12장(교도소 · 교회) (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
+| `music/resolve.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 7장(1부 끝 — 대화) (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
 | `models/kimshin_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06, 외형은 castle_common canon look 글 — conf ai) | 그림 A 김신 (`src/view/puppet_glb.gd`, `--art a`) |
 | `models/shingen_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06, 〃) | 그림 A 사사키 신겐 |
 | `sprites/kimshin_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` 가 `models/kimshin_a.glb` 를 8방향으로 그려 도트로 줄임 | 그림 B 김신 (`src/view/puppet_dot.gd`, `--art b`) |

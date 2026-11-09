@@ -21,7 +21,7 @@ var heading := ""
 var chapters: Array = []         # [{"id", "title", "open"}]
 var stages: Array = []           # [{"room", "title", "now"}] — 고른 장(picked)의 스테이지
 var picked := ""                 # 위 줄에서 고른 장 id
-var buttons := {"resume": "", "title": ""}   # 글 — main.gd 가 lines.json 에서
+var buttons := {"resume": "", "title": "", "difficulty": ""}   # 글 — main.gd 가 lines.json 에서
 var _last_safe := Rect2()
 
 
@@ -54,16 +54,18 @@ static func _rows(sa: Rect2, n: int, y: float) -> Array:
 	return out
 
 
-## 안전 영역 · 장 수 · 스테이지 수 → {"chapters": [자리], "stages": [자리], "resume": 자리, "title": 자리}
+## 안전 영역 · 장 수 · 스테이지 수 → {"chapters": [자리], "stages": [자리], "resume": 자리, "title": 자리, "difficulty": 자리}
+## (아래 버튼 줄: 계속 · 처음 화면 · 난이도 — 난이도는 2026-11-09)
 static func layout(sa: Rect2, n_ch: int, n_st: int) -> Dictionary:
 	var c := sa.get_center()
 	var chs: Array = _row(sa, n_ch, c.y - 160.0) if n_ch <= ROW_MAX else _rows(sa, n_ch, c.y - 172.0)
 	return {"chapters": chs, "stages": _row(sa, n_st, c.y - 10.0),
-		"resume": Rect2(c.x - BTN.x - GAP * 0.5, c.y + 140.0, BTN.x, BTN.y),
-		"title": Rect2(c.x + GAP * 0.5, c.y + 140.0, BTN.x, BTN.y)}
+		"resume": Rect2(c.x - BTN.x * 1.5 - GAP, c.y + 140.0, BTN.x, BTN.y),
+		"title": Rect2(c.x - BTN.x * 0.5, c.y + 140.0, BTN.x, BTN.y),
+		"difficulty": Rect2(c.x + BTN.x * 0.5 + GAP, c.y + 140.0, BTN.x, BTN.y)}
 
 
-## 누른 자리 → "ch:<장 id>" · "room:<방 번호>" · "resume" · "title" · ""
+## 누른 자리 → "ch:<장 id>" · "room:<방 번호>" · "resume" · "title" · "difficulty" · ""
 func hit(p: Vector2) -> String:
 	if not visible:
 		return ""
@@ -74,7 +76,7 @@ func hit(p: Vector2) -> String:
 	for i in stages.size():
 		if L["stages"][i].has_point(p):
 			return "room:%d" % int(stages[i]["room"])
-	for k in ["resume", "title"]:
+	for k in ["resume", "title", "difficulty"]:
 		if L[k].has_point(p):
 			return k
 	return ""
@@ -118,3 +120,4 @@ func _draw() -> void:
 		_card(font, L["stages"][i], str(st["title"]) + (" ◀" if st.get("now", false) else ""), false, true, 20)
 	_card(font, L["resume"], str(buttons["resume"]), false, true, 26)
 	_card(font, L["title"], str(buttons["title"]), false, true, 26)
+	_card(font, L["difficulty"], str(buttons["difficulty"]), false, true, 24)
