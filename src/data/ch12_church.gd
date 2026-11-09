@@ -55,7 +55,7 @@ const ROLES := {
 	"choehyeokjin": {"hp": 500.0, "posture": 200.0, "walk": 1.9, "run": 4.1, "stagger": 75, "poise": 20.0, "ai": "x_brawler", "look": "choehyeokjin", "dmg_k": 1.4},
 	# 마학영(톱 — 최종 보스): 주먹 · 붙잡기 · 역수 단검 · 근거리 권총(x_gun — 거리를 두면 쏜다). 2차에 더 몰아친다
 	"mahakyoung": {"hp": 2600.0, "posture": 900.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 40.0, "finisher_cap": 0.03, "ai": "x_gun",
-		"look": "mahakyoung", "phase2_at": 0.5, "dmg_k": 2.6},
+		"look": "mahakyoung", "phase2_at": 0.5, "dmg_k": 2.3},
 }
 
 const ROOMS := [
