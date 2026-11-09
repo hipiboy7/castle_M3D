@@ -69,6 +69,7 @@ const RESULT_AUTO := 600        # 이긴 결과 화면: 안 눌러도 10초 뒤 
 var _mouse_was := false
 var _fake_art := false
 var _fake_difficulty := false
+var _dev_win := false              # --events N:autowin — 그 뒤 싸움마다 적을 바로 쓰러뜨린다(verify '장 차례' — 0 ~ 13장을 깨며 다음 장이 열리나)
 var _menu_diff0 := ""             # 싸움 중 메뉴를 열 때의 난이도 — 바뀌었으면 닫을 때 지금 스테이지를 다시
 var headless := false
 var mode := "title"
@@ -81,7 +82,7 @@ var menu: Control
 var smenu: Control              # 싸움 중 메뉴 — 스테이지 고르기(src/ui/stage_menu.gd)
 var menu_open := false
 var menu_ch := ""               # 메뉴에서 고른 장(아래 줄 스테이지가 이 장의 것)
-var run_room := 0               # 이 판을 시작한 방(0 이 아니면 — 메뉴로 중간부터 — 깬 장으로 안 친다)
+var run_room := 0               # 이 판을 시작한 방(0 이 아니면 — 메뉴로 중간부터 — 가장 짧은 판에 안 넣는다)
 var _fake_menu := ""
 var demos := 0
 var d: Dictionary = {}
@@ -385,6 +386,8 @@ func _scripted() -> void:
 			_fake_art = true
 		"difficulty":
 			_fake_difficulty = true
+		"autowin":
+			_dev_win = true
 		"speed":
 			save["speed"] = Save.next_speed(float(save["speed"]))
 			_apply_speed()
@@ -394,6 +397,17 @@ func _scripted() -> void:
 		var act:
 			if str(act).begins_with("menupick_"):           # menupick_ch11 · menupick_room3 · menupick_resume · menupick_title
 				_fake_menu = str(act).substr(9)
+
+
+## 개발 시험(--events autowin)만: 방의 적을 쓰러뜨린다 — 방 넘기 · 끝 방 · 깸 · 세이브는 게임 그대로 돈다. 결투는 보스를
+func _dev_knockout() -> void:
+	if kind == "stage":
+		for e in d["enemies"]:
+			if e.alive() and not e.inert:
+				e.die()
+	elif d["boss"] != null and d["boss"].alive() and d["world"].over == "":
+		d["boss"].die()
+		d["world"].over = "win"
 
 
 func _pressed_anything() -> bool:
@@ -680,6 +694,8 @@ func _physics_process(_dt: float) -> void:
 				_new_run(chapter)
 				_start("fight")
 				return
+			if _dev_win and mode == "fight":
+				_dev_knockout()
 			# 슬로모션(백도찬 첫 엇박): 로직을 두 화면에 한 번만 돌린다
 			if d["world"].slowmo <= 0 or frames % 2 == 1:
 				var it = null if mode == "demo" else Replay.quantize(_player_intent())   # 양자화한 입력으로 돌려야 재생이 같다
@@ -769,8 +785,8 @@ func _end_fight(result: String) -> void:
 	results.append(_summary())
 	var key: String = "ch6" if kind == "duel" else str(d["tbl"].LINES)
 	last_win = result == "win" and played
-	if last_win and run_room == 0:                     # 메뉴로 중간 스테이지부터 한 판은 깬 장으로 안 친다
-		Save.record_clear(save, chapter, int(d["world"].frame))
+	if last_win:                                       # 중간 스테이지부터 한 판(난이도 바꿔 다시 · 메뉴로 고름)도 깬 장 — 장은 차례대로만 열려
+		Save.record_clear(save, chapter, int(d["world"].frame) if run_room == 0 else 0)   # 건너뛰기는 없다. 가장 짧은 판은 첫 스테이지부터만(rc.4 폰 "8장 깨도 9장으로 안넘어가")
 		_write_save()
 	if result == "win":
 		if pup.has(d["hero"]):

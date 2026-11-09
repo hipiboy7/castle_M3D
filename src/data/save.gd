@@ -64,10 +64,12 @@ static func dump(s: Dictionary) -> String:
 	return JSON.stringify(s, "\t")
 
 
+## 깬 장 기록 — frames: 판 길이(로직 프레임). 0 = 중간 스테이지부터 한 판(가장 짧은 판은 안 바꾸고 깬 횟수만 — 2026-11-09 rc.4 폰)
 static func record_clear(s: Dictionary, id: String, frames: int) -> void:
 	var e: Dictionary = s["cleared"].get(id, {"count": 0, "best": 0})
 	e["count"] = int(e["count"]) + 1
-	e["best"] = frames if int(e["best"]) <= 0 else mini(int(e["best"]), frames)
+	if frames > 0:
+		e["best"] = frames if int(e["best"]) <= 0 else mini(int(e["best"]), frames)
 	s["cleared"][id] = e
 	s["last"] = id
 

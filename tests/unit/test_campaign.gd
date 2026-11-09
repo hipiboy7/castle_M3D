@@ -173,6 +173,24 @@ func test_next_chapter_and_unlock() -> void:
 	Save.record_clear(t, "ch2", 1)
 	var after2: String = Campaign.ids()[Campaign.ids().find("ch2") + 1]
 	check(Save.unlocked_by_order(t, after2), "2장을 깨면 다음 장(%s)이 열린다" % after2)
+	# 모든 장: 차례대로 깨면 다음 장이 열리고 이어하기가 그 장 — rc.4 폰(2026-11-09 "8장 깨도 9장으로 안넘어가")
+	var all := Save.fresh()
+	var ids := Campaign.playable_ids()
+	for i in ids.size() - 1:
+		check(not Save.unlocked_by_order(all, ids[i + 1]), "%s 를 깨기 전에는 %s 잠김" % [ids[i], ids[i + 1]])
+		Save.record_clear(all, ids[i], 0)
+		check(Save.unlocked_by_order(all, ids[i + 1]) and Save.next_chapter(all) == ids[i + 1],
+			"%s 를 깨면 %s 열림 · 이어하기 %s" % [ids[i], ids[i + 1], Save.next_chapter(all)])
+
+
+## 중간 스테이지부터 한 판(난이도를 바꿔 다시 · 싸움 중 메뉴로 고른 스테이지)도 깬 장 — 가장 짧은 판은 첫 스테이지부터만(frames 0 = 안 잼)
+func test_clear_from_middle_keeps_best() -> void:
+	var s := Save.fresh()
+	Save.record_clear(s, "ch8", 0)
+	check(Save.cleared(s, "ch8") and int(s["cleared"]["ch8"]["best"]) == 0, "중간부터 깨도 깬 장 · 가장 짧은 판은 없음 %s" % s)
+	Save.record_clear(s, "ch8", 5000)
+	Save.record_clear(s, "ch8", 0)
+	check(int(s["cleared"]["ch8"]["count"]) == 3 and int(s["cleared"]["ch8"]["best"]) == 5000, "중간부터 한 판은 가장 짧은 판을 안 바꾼다 %s" % s)
 
 
 ## 게임 속도(사용자 2026-11-06 "싸움이 너무 느린데 게임 속도를 더 빨리 할 수 있는 버튼") — 세이브에 남는 고르기

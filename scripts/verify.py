@@ -28,6 +28,8 @@
                ③ 싸움 중 메뉴(스테이지 고르기) — 6장 싸움 → 메뉴 → 11장 → 넷째 스테이지(회장실 앞)에서 시작 → 메뉴 → 계속
                ② 뒤로 버튼 · 앱 내려감 — 처음 화면 → 데모 → 뒤로 → 처음 → 누름 → 결투 → 내려감(멈춤) → 누름(계속) → 뒤로(멈춤) →
                뒤로(처음 화면) 순서가 --trace 줄에 나온다 (src/ui/nav.gd · main.gd _back · _app_hidden)
+               ④ 장 차례 — 새 세이브에서 이어하기로 0 ~ 13장을 깬다(--events autowin) → 장이 차례대로 열리고 세이브에 모두 깸
+               ⑤ 중간 스테이지 깸 — 7장까지 깬 세이브 → 8장 → 메뉴로 셋째 스테이지 → 깸 → 이어하기 9장
 출력에 SCRIPT ERROR · ERROR: · WARNING: · Leaked 가 하나라도 있으면 실패.
 """
 import fnmatch
@@ -242,18 +244,36 @@ FLOW_EVENTS = "400:back,500:press,700:hide,760:show,800:press,900:back,960:back"
 MENU_EVENTS = "30:press,120:menu,150:menupick_ch11,180:menupick_room3,400:menu,430:menupick_resume"
 MENU_WANT = ["STAGE ch0 room=0", "MODE title", "STAGE ch0 room=0", "MODE fight", "MENU on", "MENU off", "STAGE ch11 room=3",
              "MODE fight", "MENU on", "MENU off"]
+CHAIN_EVENTS = "1:autowin," + ",".join(f"{i * 150}:press" for i in range(1, 240))
+MID_EVENTS = "30:press,120:menu,150:menupick_room2,200:autowin,1000:press,1300:press"
 FLOW_WANT = ["MODE title", "MODE demo", "MODE title", "MODE fight", "PAUSE on", "PAUSE off", "PAUSE on", "PAUSE off", "MODE title"]
 
 
-def open_all_save():
-    """모든 장을 깬 세이브(.tools/save_open.json) — 배포판(campaign.gd OPEN_ALL false)은 차례대로 열리므로, 싸움 중 메뉴로
-    먼 장(11장)에 가는 흐름 시험은 이 세이브로 돈다. 장 id 는 campaign.gd CHAPTERS 에서 읽는다(준비 중 soon 빼고)"""
+def playable_ids():
+    """할 수 있는 장 id(차례대로) — campaign.gd CHAPTERS 에서 읽는다(준비 중 soon 빼고)"""
     with open(os.path.join(ROOT, "src", "data", "campaign.gd"), encoding="utf-8") as f:
-        ids = re.findall(r'\{"id": "(\w+)", "no": \d+, "kind": "(?:duel|stage)"', f.read())
-    path = os.path.join(ROOT, ".tools", "save_open.json")
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump({"v": 1, "cleared": {i: {"count": 1, "best": 1} for i in ids}, "last": ""}, f)
+        return re.findall(r'\{"id": "(\w+)", "no": \d+, "kind": "(?:duel|stage)"', f.read())
+
+
+def save_file(name, ids, last=""):
+    """ids 를 깬 세이브(.tools/<name>) — 없던 파일이면 새로. ids 가 비면 파일을 지운다(새 세이브로 시작)"""
+    path = os.path.join(ROOT, ".tools", name)
+    if os.path.exists(path):
+        os.remove(path)
+    if ids:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"v": 1, "cleared": {i: {"count": 1, "best": 1} for i in ids}, "last": last}, f)
     return path
+
+
+def open_all_save():
+    """모든 장을 깬 세이브 — 배포판(campaign.gd OPEN_ALL false)은 차례대로 열리므로, 싸움 중 메뉴로 먼 장(11장)에 가는 흐름 시험은 이 세이브로"""
+    return save_file("save_open.json", playable_ids())
+
+
+def read_save(path):
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
 
 
 def step_flow(g):
@@ -272,8 +292,23 @@ def step_flow(g):
     ok &= grab("속도 ×1.5", ["--autoplay", "--seconds", "40", "--seed", "1", "--events", "1:speed"])
     ok &= grab("뒤로 · 내려감", ["--seconds", "16", "--trace", "--events", FLOW_EVENTS])
     ok &= grab("메뉴 · 스테이지", ["--seconds", "12", "--trace", "--save", open_all_save(), "--events", MENU_EVENTS])
+    # 장 차례(rc.4 폰 "8장 깨도 9장으로 안넘어가"): 새 세이브 → 이어하기로 0 ~ 13장을 깬다(autowin — 적을 바로 쓰러뜨림, 방 넘기 · 깸 · 세이브는 그대로)
+    ids = playable_ids()
+    chain = save_file("save_chain.json", [])
+    ok &= grab("장 차례", ["--seconds", "600", "--trace", "--save", chain, "--events", CHAIN_EVENTS])
+    # 중간 스테이지부터(싸움 중 메뉴로 고름 · 난이도 바꿔 다시) 깨도 다음 장이 열린다
+    i8 = ids.index("ch8")
+    mid = save_file("save_mid.json", ids[:i8], ids[i8 - 1])
+    ok &= grab("중간 스테이지 깸", ["--seconds", "30", "--trace", "--save", mid, "--events", MID_EVENTS])
     if not ok:
         return False
+    order = []
+    for line in got["장 차례"][2]:
+        if line.startswith("STAGE ") and (not order or order[-1] != line.split()[1]):
+            order.append(line.split()[1])
+    chain_ok = order == ids and sorted(read_save(chain)["cleared"]) == sorted(ids)
+    mid_seq = [x for x in got["중간 스테이지 깸"][2] if x.startswith("STAGE")]
+    mid_ok = read_save(mid)["cleared"].get("ch8") is not None and mid_seq[-1:] == ["STAGE ch9 room=0"] and "STAGE ch8 room=2" in mid_seq
     a, b = got["멈춤 없음"][0], got["2초 멈춤"][0]
     same = a["last"] == b["last"] and a["fights"] == b["fights"] and a["wins"] == b["wins"]
     c = got["속도 ×1.5"][0]
@@ -282,11 +317,13 @@ def step_flow(g):
     seq_ok = seq == FLOW_WANT
     menu_seq = got["메뉴 · 스테이지"][2]
     menu_ok = menu_seq == MENU_WANT and got["메뉴 · 스테이지"][0]["last"].get("room") == "office_door"
-    good = same and same_speed and seq_ok and menu_ok and got["2초 멈춤"][1].count("PAUSE on") == 1
+    good = same and same_speed and seq_ok and menu_ok and chain_ok and mid_ok and got["2초 멈춤"][1].count("PAUSE on") == 1
     msg = ("멈춘 앞뒤 같은 판" if same else f"멈춘 판이 다르다 {a['last']} / {b['last']}") + " · " + \
         ("속도 ×1.5 도 같은 판" if same_speed else f"속도를 바꾸니 판이 다르다 {c} / {a}") + " · " + \
         ("뒤로 · 내려감 순서 맞음" if seq_ok else f"순서가 다르다: {seq}") + " · " + \
-        ("메뉴로 11장 회장실 앞" if menu_ok else f"메뉴 순서가 다르다: {menu_seq}")
+        ("메뉴로 11장 회장실 앞" if menu_ok else f"메뉴 순서가 다르다: {menu_seq}") + " · " + \
+        (f"장 차례 {len(ids)}장 깸 → 다음 장" if chain_ok else f"장 차례가 다르다: {order}") + " · " + \
+        ("8장 중간 스테이지 깸 → 9장" if mid_ok else f"중간 스테이지 깸이 다음 장을 안 연다: {mid_seq}")
     print(f"[{'ok' if good else 'FAIL'}] 흐름 — {msg}")
     return good
 
