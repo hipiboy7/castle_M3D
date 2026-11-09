@@ -31,6 +31,7 @@ var me
 var foe
 var rng: RandomNumberGenerator
 var phase := 1
+var cd_k := 1.0                 # 공격 사이 쉬는 시간 배율(난이도 — src/data/difficulty.gd foe_cd)
 var parry_rate := 0.45
 var vital_rate := 0.2
 var queue: Array = []
@@ -61,7 +62,7 @@ func enter_phase2() -> void:
 	parry_rate = 0.6
 	vital_rate = 0.4
 	dodge_rate = 0.85
-	me.dmg_k = 1.2 * 1.1
+	me.dmg_k *= 1.2 * 1.1                    # 곱한다 — 난이도 배율(src/data/difficulty.gd)이 남게
 	me.parry_extra = 3
 	queue.clear()
 	cooldown = 40
@@ -199,7 +200,7 @@ func _pick() -> void:
 		name = _weighted(WEIGHTS_1 if phase == 1 else WEIGHTS_2)
 	queue = PATTERNS[name].duplicate(true)
 	wait = 0
-	cooldown = (45 + rng.randi_range(0, 35)) if phase == 1 else (28 + rng.randi_range(0, 30))
+	cooldown = int(((45 + rng.randi_range(0, 35)) if phase == 1 else (28 + rng.randi_range(0, 30))) * cd_k)
 
 
 func _weighted(table: Array) -> String:

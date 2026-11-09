@@ -1,5 +1,10 @@
 # castle_common 요청 — castle M 3D → castle_common (누적)
 
+> 정정 이력: 2026-11-08 (3) — 27 · 28 · 29행 더함(3 ~ 13장 — 사용자 2026-11-08 "3장부터 13장까지 중단없이 모두 다 진행").
+> 정정 이력: 2026-11-08 (2) — 25 · 26행 지움(castle_common c3ed030 공통 반영 — 사용자 2026-11-08 "25 · 26 둘 다 공통으로 올려"). 지금 열린 줄 없음.
+> 정정 이력: 2026-11-08 — 23 · 24행 지움(castle_common 79 · 80차 반영 — looks.json · 2장 인물 5 · 남궁혁 rank), 25 · 26행 더함(rc.2 폰 피드백 묶음 B — 사용자 2026-11-07).
+> 정정 이력: 2026-11-06 — 1 ~ 4 · 12 · 20 ~ 22행 지움(castle_common 72차가 직접 — `b7e1065`: 기절 `stun_rel_sec` 넷 · `stun_hit` · `beats` 공통(사용자 답58 #5 '공통으로') · 기획서 00 결정 7 · 03 S5 · games.json 이 판 canon 받기 · `data/characters.json` 0 · 1장 인물 7). 23행(looks)은 castle_common 이 받아 진행 중.
+> 정정 이력: 2026-11-06 — 8 · 9 · 10 · 11 · 13 · 15행 지움(castle_common `92cdd4b` 반영 — `docs/하류요청_반영_2026-11-06.md`), 16 ~ 19행 더함(11장 1층 — 사용자 답 2026-11-06).
 > 정정 이력: 2026-11-05 (2) — 5 · 6 · 7행 지움: castle_common `ab9c8551`(답45 규격 확정)이 반영 — 문서 머리 `<마일스톤 id>_요구사항정의서`(5) · 디버그 키 커밋 유지 가능(6) · 4절 엔진 칸(7). 번호는 그대로 둔다(다른 문서가 1 ~ 4 · 8 ~ 13행을 가리킨다).
 > 정정 이력: 2026-11-05 — S1 공통 받기 뒤: 11행 확인 결과 · 13행 반영 현황 채움, 5행 castle_common `0ff47f5a`(규격 이름 `P{N}_요구사항정의서`) 메모.
 > 정정 이력: 2026-11-04 — 첫 작성(S0 조사 · `docs/기획_차이.md`). 양식은 castle_common `docs/개발규격/캐슬_게임공통.md` 3절. castle_common 이 반영하면 그 줄을 지운다.
@@ -10,15 +15,6 @@
 
 | # | 위치 | 파일:id | 칸 | 지금 값 | 바랄 값 | 근거 | 급함 |
 |---|---|---|---|---|---|---|---|
-| 1 | - | `data/skills.json:offbeat` | `effects.stun_rel_sec` | (없음) | 후보 `[1.5, 1.0]` — **사용자가 "공통으로"라고 정할 때만** | 3D 폰 리뷰 3차(2026-10-27) 사용자 원문 "그래서 당했을 때 맞은 상대는 스턴 상태로 빠져야해" → 3D 에서 먼저 시험(`src/data/moves.gd` `s_offbeat` `stun_rel` [90, 60] 프레임) | 언젠가 |
-| 2 | - | `data/skills.json:offbeat2` | `effects.stun_rel_sec` | (없음) | 후보 `[2.0, 1.5]` — 1과 같음 | 3D 폰 리뷰 3차 · `s_offbeat2` [120, 90] | 언젠가 |
-| 3 | - | `data/skills.json:offbeat_rev` | `effects.stun_rel_sec` | (없음) | 후보 `[0.67, 0.4]` — 1과 같음 | 3D 폰 리뷰 3차 "상대 스턴도 적고" · `s_offbeat_rev` [40, 24] | 언젠가 |
-| 4 | - | `data/skills.json:triple` | `effects` 기절(셋째 대만) | (없음) | 후보 셋째 대 `[1.5, 0.5]` — 칸 이름(예: `stun_rel_sec` + `stun_hit: 3`)은 castle_common 이 정한다. 1과 같음 | 3D 폰 리뷰 2차(2026-10-26) "삼연타 맞고도 각법보다 1/2 정도 스턴 하자" · `s_triple` [90, 30] | 언젠가 |
-| 8 | - | `docs/기획서/03_castle_M3D_3D탑뷰.md` 1절 | 어긋남 ② 설명 | "김신 등급을 내성 상위로 박음(원작은 처음 내성 중위 → 구스타프 이긴 뒤 내성 상위)" | "6장 백도찬전 시점은 진행으로도 내성 상위라 **값은 맞다** — 진행에서 끌어내지 않고 박아 둔 것이 문제" | `ref/rules.py` `progress("kimshin", events_until(4))` = 내성 상위(2026-11-04) · castle_M `DUELS["baekdochan"].hero_events` = `beat:gustav` · `beat:komodo` | 언젠가 |
-| 9 | - | `docs/기획서/03_castle_M3D_3D탑뷰.md` 1절 | 어긋남 목록 | ①②③ | ④ 게이지 배율 절반 — `skills.gd` 2.494 ↔ 공통 `gauge_rate(내성 상위, 95)` 4.988(`fast_rank_k` 2배 빠짐) · ⑤ 얻는 양 `dodge` · `ko` 없음 을 더함 | `docs/기획_차이.md` 4절 · castle_M `roster.py:51` 에는 2배가 있다 | 다음 마일스톤 |
-| 10 | - | `docs/설계서_공통데이터.md` 1절 | castle M 3D 줄 '이미 어긋남' | 8 · 9 와 같은 문장 | 8 · 9 와 같게 | 〃 | 언젠가 |
-| 11 | - | `docs/세션인계.md` '확인된 것' · `CHANGELOG.md` · 기획서 03 1절 | `strength_ref` 를 castle_M3D 가 무시하나 | 미확인 | **확인됨 — 무시한다**: castle_M3D `src/data/common.gd` 는 `ranks.json` 의 `ladder` 만 읽는다(`strength` · `strength_ref` 를 읽지 않음, 모르는 칸이 있어도 오류 없음) | 시험 `tests/test_common_cases.gd` `test_ranks_ignores_unknown_fields`(2026-11-05 통과 · castle_common `8a6acfc` 받음) | 다음 마일스톤 |
-| 12 | - | `rules/기술.md` 2 · 3절 | 엇엇박 > 엇박 | (없음) | (사용자가 "공통으로"라고 정할 때만) "엇박 · 반대발 엇박이 엇엇박을 쓰는 중인 상대에게 닿으면 닿지 않은 것으로 한다 — 엇엇박이 이긴다" | 3D 폰 리뷰 3차 원문 "엇박과 엇엇박 기술이 서로 부딪히면 엇엇박이 무조건 이겨" · `src/combat/world.gd:160` | 언젠가 |
-| 13 | - | `rules/기술.md` · `rules/등급과_게이지.md` 5절 · `README.md` 받는 판 표 | castle M 3D 반영 현황 | 할 일 | castle M 3D: **castle_common `8a6acfc` 받음**(`data/` · `cases/` 는 `c7ba55cd` 와 같다) · 규칙 함수 13개 cases 1,464줄 통과 · 손 복사 값 제거 · 등급 차 강함 · 진행으로 등급 · 비용 공식 · 게이지 배율 4.988 · 얻는 양 dodge · ko · 즉사 구간 · stun_rank 반영 — S1 커밋(`docs/S1_테스트결과서_공통받기.md` 머리). 3D 덧붙임(1 ~ 4 · 12행)은 반영 아님 | 캐슬_게임공통 2절 4항 | 다음 마일스톤 |
-| 14 | - | `docs/개발규격/게임개발규격.md` 7절 | 마일스톤 확인 릴리스 | "마일스톤 확인은 프리릴리스(예: `v0.3.0-rc.1`), 배포는 정식 태그" | "폰 확인용 릴리스는 GitHub 앱 → Releases 맨 위(Latest)에서 바로 받게 Latest 로 둘 수 있다(태그 이름은 `-rc.N` 그대로). 본문에 폰에서 할 일(설치 · 1분 경로 · 확인 목록)" — 판이 고르게 한 줄 | 사용자 2026-11-05 "url 치지 않고, github app 들어가서 바로 릴리즈 다운받게 해줘. 그리고 앞으로 폰에서 해야할 것은 모두 github app >release 에서 다운받아 바로 할 수 있게 해줘" → 이 판은 Latest · `docs/폰확인.md`(`android.yml` release 잡) | 다음 마일스톤 |
-| 15 | - | `games.json:castle_M3D` | `dest` | `castle_M3D/data/common` | `castle_M_3D/data/common`(id `castle_M3D` · `name` 은 그대로 — 저장소 이름과 같다) | 사용자 2026-11-06 "현재 프로젝트 디렉토리명을 castle_M_3D로 바꿔." — 지금 dest 로 받으면 옛 폴더를 새로 만든다. 이 판은 그동안 `sync.py castle_M3D --dest ../castle_M_3D/data/common` 으로 받는다(CLAUDE.md 0절). `docs/개발규격/캐슬_게임공통.md` 4절 판별 표에 폴더 이름이 있으면 같이 | 다음 받기 전 |
+| 27 | 데이터 | `data/characters.json` — 3 ~ 13장 이름 있는 적 | 인물 줄 | 없음(3D 는 looks.json 이름 + ranks.json 강함표 등급으로 대체 — `src/data/addendum.gd` canon_fallback, 능력치는 기술만 등급으로 · 나머지 80) | 인물 줄(rank · stats · weapons · skills): 바실리 · 불곰 · 모승규 · 오도화 · 남일호 · 마사 · 샤이어 · 똘배 · 드미트리 · 구스타프 · 바리스타 · 장호 · 코모도 · 스케일단장 · 마크 · 바이슨 · 판테라 · 앤디청 · 은보 · 라텔 · 도우첸 · 한태철 · 링링 · 유우성 · 마준영 · 그롤라 · 엄지 · 검지 · 최혁진 · 도학수 · 어광득 · 사인진 | 3D 3 ~ 13장 장 표(`src/data/ch3_busan.gd` ~ `ch13_museum.gd`) — 손맛은 3층 ROLES 로 맞췄다 | 보통 |
+| 28 | 데이터 | `data/characters.json` — pyoyoung · richeon · ryujihak · mahakyoung | rank · stats | null(이름만) | 강함표 대표 등급(표영 (1부) 전국구 · 리천 톱 · 류지학 시기별 · 마학영 톱) · 능력치 | 3D 는 null 이면 강함표로 채움(addendum.character) — 표영은 3장에서 조작 인물 | 보통 |
+| 29 | 데이터 | `data/ranks.json` strength | 줄 | 드미트리 · 장호 · 도우첸 · 검지 없음 | 3D 장 표 NPCS 값: 드미트리 전국구 · 장호 조장급 · 도우첸 외성 하위(피우진이 이기면 외성 하위가 되므로) · 검지 내성 하위(엄지 짝) — 후보 | 3D 3 · 4 · 10 · 12장 | 낮음 |

@@ -12,12 +12,14 @@ const BossAI = preload("res://src/combat/boss_ai.gd")
 const Bot = preload("res://src/combat/bot.gd")
 const Skills = preload("res://src/data/skills.gd")
 const Common = preload("res://src/data/common.gd")
+const Difficulty = preload("res://src/data/difficulty.gd")
 
 const HERO := {"hp": 200.0, "posture": 60.0, "walk": 2.1, "run": 4.6, "stagger": 50}
 const BOSS := {"hp": 400.0, "posture": 220.0, "walk": 1.9, "run": 4.0, "stagger": 100, "poise": 12.0}
 
 
-static func make(seed_value: int) -> Dictionary:
+## opts: difficulty(난이도 — 백도찬에게만 배율, src/data/difficulty.gd · 기본 보통)
+static func make(seed_value: int, opts := {}) -> Dictionary:
 	var w = World.new()
 	var kim: Array = Common.progress(Skills.HERO_ID, Common.events_until(Common.stage_of(Skills.DUEL_EVENT)))
 	var h = Fighter.new(str(Common.character(Skills.HERO_ID)["name"]), 0)
@@ -31,6 +33,7 @@ static func make(seed_value: int) -> Dictionary:
 	h.moveset = {"combo": "k_slash1", "dash": "k_dash", "counter": "k_counter", "finisher": "k_finisher"}
 	h.rank = kim[0]
 	h.skills = Skills.entries(kim[1], h.rank)
+	h.oneshot_immune = true
 	h.gauge_max = Common.bars_for(h.rank) * Common.bar_points()
 	h.gauge_rate = Common.gauge_rate(h.rank, Common.tech_of(Skills.HERO_ID))
 	h.gauge = Skills.KIM_START_BARS * Common.bar_points()
@@ -39,6 +42,7 @@ static func make(seed_value: int) -> Dictionary:
 	var b = Fighter.new(str(Common.character(Skills.BOSS_ID)["name"]), 1)
 	b.char_id = Skills.BOSS_ID
 	b.is_boss = true
+	b.oneshot_immune = true
 	b.hp = BOSS["hp"]
 	b.hp_max = BOSS["hp"]
 	b.posture_max = BOSS["posture"]
@@ -46,6 +50,8 @@ static func make(seed_value: int) -> Dictionary:
 	b.run_speed = BOSS["run"]
 	b.stagger_len = BOSS["stagger"]
 	b.poise = BOSS["poise"]
+	b.finisher_cap = World.FINISHER_CAP_BOSS
+	b.phase2_at = World.PHASE2_AT
 	b.rank = str(Common.character(Skills.BOSS_ID)["rank"])          # 보스는 게이지 없이 패턴으로 기술을 쓴다(gauge_max 0)
 	b.pos = Vector2(2.2, -0.5)
 	b.facing = Vector2(-1, 0)
@@ -57,7 +63,9 @@ static func make(seed_value: int) -> Dictionary:
 	r_ai.seed = seed_value
 	var r_bot := RandomNumberGenerator.new()
 	r_bot.seed = seed_value * 7919 + 1
-	return {"world": w, "hero": h, "boss": b, "ai": BossAI.new(b, h, r_ai), "bot": Bot.new(h, b, r_bot)}
+	var ai = BossAI.new(b, h, r_ai)
+	Difficulty.apply_foe(b, ai, opts.get("difficulty", Difficulty.DEFAULT))
+	return {"world": w, "hero": h, "boss": b, "ai": ai, "bot": Bot.new(h, b, r_bot)}
 
 
 ## 한 프레임. hero_intent 가 null 이면 봇이 김신을 움직인다. 역경직 중에는 AI 도 멈춘다(사람 입력만 버퍼에 남는다).

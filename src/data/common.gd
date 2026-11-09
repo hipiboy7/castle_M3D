@@ -160,6 +160,16 @@ static func shrugs_off(def_rank: String, att_rank: String) -> bool:
 	return rank_gap(def_rank, att_rank) >= int(_j("rules")["rank_gap"]["armor_gap"])
 
 
+## 등급 차 한 방: 치는 쪽이 rank_gap.one_shot_gap 등급 이상 위면 보통 공격도 한 대에(조작 인물 · 방의 보스를 뺄지는 판 — skills.gd)
+static func one_shot(att_rank: String, def_rank: String) -> bool:
+	return rank_gap(att_rank, def_rank) >= int(_j("rules")["rank_gap"]["one_shot_gap"])
+
+
+## ko_rank 효과 — 맞는 쪽이 그 등급 이하면 한 방(아무르 티그로 위빙 · 서진태 오리지널)
+static func skill_ko(id: String, def_rank: String) -> bool:
+	return rank_at_most(def_rank, skill(id).get("effects", {}).get("ko_rank", null))
+
+
 ## immune_lower 효과가 있는 기술을 쓰는 중이면, 아랫급의 공격에 무적
 static func immune_lower(owner_rank: String, att_rank: String) -> bool:
 	return rank_gap(owner_rank, att_rank) > 0

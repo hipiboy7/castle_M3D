@@ -10,6 +10,7 @@ config/description="castle M 3D 초안 — 엔진 이전(보류 결정 #9) 판�
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
+config/quit_on_go_back=false
 
 [audio]
 

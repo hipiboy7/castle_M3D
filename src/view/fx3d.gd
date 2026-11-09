@@ -287,6 +287,13 @@ func swing(f, yaw: float, left_hand: bool) -> void:
 			slam(at + fwd * (reach + 0.15))
 		"punch":
 			spike(at, yaw, 0.3, reach + radius * 0.7, 1.25, 0.09, Color(1.0, 0.95, 0.85, 0.85), 0.12)
+		"shot":
+			# 총: 총구 불꽃 + 가는 탄 궤적(사거리 끝까지)
+			var fwd2 := Vector3(-sin(yaw), 0, -cos(yaw))
+			var muzzle := at + fwd2 * 0.75 + Vector3(0, 1.35, 0)
+			flash(muzzle, Color(1.0, 0.8, 0.4), 3.0, 0.08, 3.0)
+			spark(muzzle, Color(1.0, 0.85, 0.5), 10, 3.0, 0.12)
+			spike(at, yaw, 0.8, reach, 1.35, 0.025, Color(1.0, 0.9, 0.6, 0.8), 0.08)
 	if left_hand:
 		pass
 

@@ -1,4 +1,6 @@
-"""GitHub Actions 도우미 — gh CLI 없이 REST. 토큰은 Git Credential Manager 에서 받고 화면 · 파일에 남기지 않는다.
+"""GitHub Actions 도우미 — gh CLI 없이 REST. 토큰은 환경 변수 GITHUB_TOKEN · 파일 ~/.config/castle_m3d/github_token
+(없으면 git credential fill)에서 받고
+화면 · 파일에 남기지 않는다.
 
     py -3.12 tools/ci.py runs [N]                 최근 run N개 (번호 · id · 브랜치 · 상태 · 결과)
     py -3.12 tools/ci.py status [RUN_ID]          run 의 잡 · 단계별 결과 (없으면 가장 최근 run)
@@ -31,8 +33,15 @@ _tok = None
 def token():
     global _tok
     if _tok is None:
+        _tok = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")  # 리눅스 서버(SSH 원격)는 환경 변수 또는
+        tf = os.path.expanduser("~/.config/castle_m3d/github_token")          # 이 파일(chmod 600, 한 줄)
+        if not _tok and os.path.isfile(tf):
+            with open(tf, encoding="utf-8") as f:
+                _tok = f.read().strip() or None
+    if _tok is None:
         p = subprocess.run(["git", "credential", "fill"], input="protocol=https\nhost=github.com\n\n",
-                           capture_output=True, text=True, timeout=60)
+                           capture_output=True, text=True, timeout=60,
+                           env={**os.environ, "GIT_TERMINAL_PROMPT": "0"})
         _tok = next((ln[9:] for ln in p.stdout.splitlines() if ln.startswith("password=")), None)
         if not _tok:
             sys.exit("git credential fill 에서 토큰을 못 받았다")

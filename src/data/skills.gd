@@ -5,6 +5,7 @@ extends RefCounted
 ## 여기 남는 것은 3층(이 판 소유): 기술 id → 동작 표 · 처음 게이지 · 백도찬 엇박 패턴, 그리고 3D 덧붙임 기절(moves.gd stun_3d).
 
 const Common = preload("res://src/data/common.gd")
+const Addendum = preload("res://src/data/addendum.gd")
 
 const HERO_ID := "kimshin"
 const BOSS_ID := "baekdochan"
@@ -13,16 +14,32 @@ const BOSS_ID := "baekdochan"
 const DUEL_EVENT := "duel_offbeat:baekdochan"
 
 ## 기술 id(castle_common skills.json) → 이 판 동작(moves.gd). 여기 없는 기술은 이 판에 동작이 없어 고를 수 없다
-## (김신 처음 기술 중 vanish_step 좌우로 사라지는 스텝 · inch 촌경 — 받은 데이터에는 있다)
+## (inch 촌경 — 받은 데이터에는 있다. vanish_step 좌우로 사라지는 스텝은 rc.2 폰 묶음 B 에서 동작을 얻었다)
+## (amur_dash 아무르 티그로 대시는 고르는 기술이 아니라 대시 + 공격 — moveset dash, 그래서 여기 없다)
 const MOVE_OF := {"kickarts": "s_kick", "triple": "s_triple", "offbeat": "s_offbeat", "offbeat2": "s_offbeat2",
-	"offbeat_rev": "s_offbeat_rev"}
+	"offbeat_rev": "s_offbeat_rev", "vanish_step": "s_vanish", "amur_triple": "s_amur3", "amur_weaving": "s_weave",
+	"jin_original": "s_jt_original", "jintae_vital": "s_jt_vital", "jintae_storm": "s_jt_storm", "woojin_core_counter": "s_wj_core"}
+
+## 등급 차 한 방(rc.2 폰 2026-11-07 사용자 — castle_common c3ed030 rules rank_gap.one_shot_gap · ref one_shot): 공통 규칙은
+## common.one_shot, 조작 인물 · 방의 보스를 빼는 것(oneshot_immune)은 이 판(3층)
 
 ## 처음 게이지: 초안은 4칸으로 시작해 기술을 바로 써 볼 수 있게 한다 — 본편은 1칸 (3층 · 잠정)
 const KIM_START_BARS := 4.0
+const HERO_START_BARS := 2.0      # 다른 조작 인물(서진태 · 피우진) — 묶음 B 에서 기술이 생겨 바로 써 볼 수 있게(잠정)
 
 ## 백도찬 엇박 (castle_M `castle_m/data/bosses.py` · `duels.py`, 3층 보스 패턴): 체력 90% 이하에서 처음(그때까지 체력은
 ## 80% 아래로 안 내려간다), 그 뒤 쿨다운마다. 첫 엇박에 맞은 김신은 체력 25% 아래로 안 내려간다(보여 주는 한 방)
 const BAEK_OFFBEAT := {"first_hp": 0.9, "hold_hp": 0.8, "cd": [1200, 720], "demo_floor": 0.25, "slowmo": 40}
+
+
+static func one_shot(att_rank: String, def_rank: String, immune: bool) -> bool:
+	return not immune and att_rank != "" and def_rank != "" and Common.one_shot(att_rank, def_rank)
+
+
+## 기술의 ko_rank(castle_common effects — common.skill_ko): 맞는 쪽 등급이 그 이하면 한 대에(위빙 · 서진태 오리지널)
+static func kills(mv: Dictionary, def_rank: String) -> bool:
+	var sid := str(mv.get("skill_id", ""))
+	return sid != "" and def_rank != "" and Common.skill_ko(sid, def_rank)
 
 
 ## 고를 수 있는 기술 한 칸 — 이름은 skills.json, 비용은 skill_cost(쓰는 사람 등급). cost -1 = 전부(all_min_bars 칸 이상일 때)
@@ -60,7 +77,7 @@ static func stun_frames(mv: Dictionary, att_rank: String, def_rank: String) -> i
 	if mv.get("stun_off", false):
 		return 0
 	var sid := str(mv["skill_id"])
-	if sid != "":
+	if sid != "" and not Addendum.SKILLS.has(sid):          # 3D 덧붙임 기술은 castle_common 에 없다 — stun_3d 만
 		var sec := Common.stun_sec(sid, att_rank, def_rank)
 		if sec > 0.0:
 			return roundi(sec * 60.0)

@@ -56,7 +56,10 @@ if grep -E "Program linking failed" emu/logcat.txt | head -3 | grep .; then
   exit 1
 fi
 pid=$(adb shell pidof "$PKG" | tr -d '\r')
-if grep -E "FATAL EXCEPTION|SCRIPT ERROR|USER SCRIPT ERROR" emu/logcat.txt; then
+# 우리 앱의 오류만 본다 — FATAL EXCEPTION 은 바로 다음 줄 'Process: <패키지>' 가 이 앱일 때만(에뮬레이터 안 다른 앱 — Gmail 등 —
+# 이 죽어도 실패로 보지 않는다: run #57 2026-11-08 com.google.android.gm DeadObjectException)
+if grep -A1 "FATAL EXCEPTION" emu/logcat.txt | grep -q "Process: $PKG" || grep -E "SCRIPT ERROR|USER SCRIPT ERROR" emu/logcat.txt; then
+  grep -A3 "FATAL EXCEPTION" emu/logcat.txt | grep -B1 -A2 "Process: $PKG" || true
   echo "logcat 에 오류가 있다"
   exit 1
 fi
@@ -66,3 +69,19 @@ if [ -z "$pid" ]; then
   exit 1
 fi
 echo "OK — 앱이 살아 있음 (pid $pid)"
+
+# ---- 화면 끄고 켜기 (rc.2 폰 2026-11-07: "화면 잠깐 껐다 켜면 검은 화면에서 버튼이 안 먹음") — 판정에 넣지 않고 기록만
+# 화면 끔 8초 → 켬 · 잠금 풀기 → 기다렸다 찍기. 누르지 않는다(이 에뮬레이터는 한 화면에 8 ~ 17초라 누르면 입력 5초 제한에
+# 걸려 '응답 없음'이 난다 — run #49). logcat 은 emu/logcat_resume.txt (main.gd 가 "APP hide|show …" 를 찍는다).
+# 에뮬레이터는 3D 셰이더가 깨지므로(T-4) 앱이 살아 있는지 · 글 · 로그 위주로 본다
+adb logcat -c
+adb shell input keyevent KEYCODE_SLEEP; sleep 8
+adb shell input keyevent KEYCODE_WAKEUP; sleep 2
+adb shell wm dismiss-keyguard; sleep 25
+adb exec-out screencap -p > emu/emu_5_resume.png
+adb logcat -d > emu/logcat_resume.txt
+echo "--- 화면 끄고 켜기 (기록만) ---"
+grep -E "APP (hide|show)|PAUSE |MODE |FPS_LOG|OnPause|OnResume|Not Responding" emu/logcat_resume.txt | sed -E 's/.*(APP |PAUSE |MODE |FPS_LOG|OnPause|OnResume|Application Not Responding)/\1/' | tail -14 || true
+grep -E "FATAL EXCEPTION|SCRIPT ERROR|Force quitting|EGL_BAD|eglMakeCurrent|context lost|GLES" emu/logcat_resume.txt | grep -i -E "godot|castlem3d|GLES|context" | head -10 || true
+[ -n "$(adb shell pidof "$PKG" | tr -d '\r')" ] && echo "끄고 켠 뒤 앱 살아 있음" || echo "끄고 켠 뒤 앱이 죽었다"
+exit 0

@@ -13,6 +13,8 @@ const Common = preload("res://src/data/common.gd")
 
 const PARRY_HITSTOP := 9
 const PARRY_SHAKE := 4
+# 막기로 받는 피해 배율 — 이 판 값(3층). castle_common rules.json guard.damage_k 는 0.7 이지만 쓰지 않는다:
+# 폰 리뷰로 맞춰 온 손맛(막기가 확실히 덜 아프게)을 지킨다(사용자 2026-11-09 '추천대로' — 지금 0.2 유지).
 const BLOCK_DMG_K := 0.2
 const BLOCK_POSTURE_K := 0.8
 const FINISHER_CAP_BOSS := 0.08          # 보스에게 제압 피해는 최대 체력의 8%
@@ -30,6 +32,7 @@ var slowmo := 0                          # 남은 슬로모션 로직 프레임 
 var events: Array = []                   # [종류, ...] — 그림 · 소리가 매 프레임 가져가고 비운다
 var bounds := Rect2(-6.6, -3.6, 13.2, 7.4)
 var over := ""                           # "" / win / lose
+var end_on_ko := true                    # 결투: 누가 쓰러지면 판이 끝난다. 여러 사람 판(stage.gd)은 false — 판 끝은 stage 가 정한다
 var phase := 1
 var pending: Array = []                  # 미룬 맞음 [공격자, 맞는 사람, 기술, 맞은 자리, 남은 프레임]
 var stats := {"hits": 0, "parries": 0, "boss_parries": 0, "dodges": 0, "blocks": 0, "staggers": 0,
@@ -120,6 +123,13 @@ func _in_hit(a, d) -> bool:
 	var body: float = Fighter.BODY_R
 	if str(mv["shape"]) == "spin":
 		return a.pos.distance_to(d.pos) <= radius + body
+	if str(mv["shape"]) == "shot":
+		# 총: 앞으로 뻗은 선분(사거리 reach) 위 어디든 — 몸 반지름 + 탄 굵기(radius) 안이면 맞는다
+		var to2: Vector2 = d.pos - a.pos
+		var along := to2.dot(a.facing)
+		if along < 0.0 or along > reach:
+			return false
+		return (to2 - a.facing * along).length() <= radius + body
 	var center: Vector2 = a.pos + a.facing * reach
 	if center.distance_to(d.pos) <= radius + body:
 		return true
@@ -138,10 +148,10 @@ func _faces(d, a) -> bool:
 
 func _hits() -> void:
 	for a in fighters:
-		if not a.is_active():
+		if not a.is_active() or a.inert:
 			continue
 		for d in fighters:
-			if d == a or d.team == a.team or not d.alive():
+			if d == a or d.team == a.team or not d.alive() or d.inert:
 				continue
 			if a.hit_ids.has(d.get_instance_id()):
 				continue
@@ -152,18 +162,37 @@ func _hits() -> void:
 
 
 func _resolve(a, d) -> void:
+	for p in pending:
+		if p[0] == a and p[1] == d:
+			return                                   # 미룬 사이 같은 공격자의 다음 판정은 버린다(rules/전투_쳐내기.md 1절)
 	var mv: Dictionary = _hit_move(a)
 	var at: Vector3 = _contact(a, d)
 	var push: Vector2 = a.dir_to(d)
-	if d.iframes():
+	if d.iframes() or (d.state == "attack" and d.move.get("immune_lower", false) and Common.immune_lower(d.rank, a.rank)):
 		stats["dodges"] += 1
 		events.append(["dodge", d, at])
 		d.gain("dodge")                          # 구르기로 피하면 게이지 (common gauge.gain.dodge)
 		return
+	# 카운터 자세(피우진 미친 코어 카운터): 마주 본 공격을 흘리고 그 자리에서 맞받는다(엇박 계열 · 가드 뚫기는 못 받는다)
+	if d.stance_open() and _faces(d, a) and not mv["guard_break"] and str(mv["lethal"]) == "":
+		a.landed = true
+		events.append(["counter_catch", d, at, a])
+		d.start_move(str(d.move["stance_hit"]))
+		d.facing = d.dir_to(a)
+		hitstop = maxi(hitstop, 6)
+		return
+	# 등급으로 막기를 뚫는 기술(사라지는 스텝 — 내성 중위 이하는 못 막는다)
+	if str(mv["unblock_top"]) != "" and Common.rank_at_most(d.rank, mv["unblock_top"]):
+		mv = mv.duplicate()
+		mv["parryable"] = false
+		mv["guard_break"] = true
 	# 등급 차 강함: 보통 공격의 피해 · 체간 × rank_damage_k(치는 쪽, 맞는 쪽) — 엇박 계열은 빼고(castle_M combat.py 와 같게).
 	# 이 결투(내성 상위 ↔ 톱, 1등급 차)는 1.0
 	if str(mv["lethal"]) == "":
 		var rk := Common.rank_damage_k(a.rank, d.rank)
+		var vh: Array = mv["vs_high"]
+		if not vh.is_empty() and Common.rank_index(d.rank) >= Common.rank_index(str(vh[0])):
+			rk = maxf(1.0, rk) * float(vh[1])         # 윗급 상대에게 큰 타격(아무르 티그로 3연타) — 등급 차로 깎이지 않는다
 		if rk != 1.0:
 			mv = mv.duplicate()
 			mv["damage"] = float(mv["damage"]) * rk
@@ -194,7 +223,9 @@ func _resolve(a, d) -> void:
 			_stagger(d)
 		_check_hp(d, a)
 		return
-	if parryable and not mv["guard_break"] and not d.is_boss and d.can_act() and _faces(d, a) and LATE_PARRY > 0:
+	# 늦은 쳐내기: 쳐내기가 있는 사람만 · 달리는 중이 아닐 때만(rules/전투_쳐내기.md 1절 — 69차 세부)
+	if parryable and not mv["guard_break"] and not d.is_boss and d.can_parry and d.can_act() \
+			and d.running_t < Fighter.RUN_AFTER and _faces(d, a) and LATE_PARRY > 0:
 		pending.append([a, d, mv, at, LATE_PARRY])
 		return
 	_take_hit(a, d, mv, at)
@@ -204,8 +235,8 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 	var push: Vector2 = a.dir_to(d)
 	var dmg: float = float(mv["damage"]) * a.dmg_k
 	if str(mv["name"]).ends_with("finisher") and d.state == "stagger":
-		if d.is_boss:
-			dmg = minf(dmg, d.hp_max * FINISHER_CAP_BOSS)
+		if d.finisher_cap > 0.0:
+			dmg = minf(dmg, d.hp_max * d.finisher_cap)
 		d.hp -= dmg
 		d.posture = 0.0
 		d.get_down()
@@ -227,6 +258,11 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 		shake = maxi(shake, 6)
 		events.append(["lethal", d, at, frac, lethal])
 		stats["boss_offbeats" if a.is_boss else "offbeats"] += 1
+	# 한 방: 기술의 ko_rank(그 등급 이하) · 등급 차 one_shot_gap 이상 — 조작 인물 · 방의 보스는 빼고(보스전은 보통 피해로 —
+	# 위빙 · 오리지널이 보스를 두 번에 눕혀 2장 신태진전이 17초에 끝났다, 봇 판 2026-11-08)
+	if lethal == "" and not d.oneshot_immune and (Skills.kills(mv, d.rank) or Skills.one_shot(a.rank, d.rank, false)):
+		dmg = maxf(dmg, d.hp)
+		events.append(["oneshot", d, at])
 	d.hp -= dmg
 	d.take_posture(float(mv["posture"]))
 	d.get_hit(mv, push, a.rank)
@@ -235,7 +271,8 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 		var cost: float = a.hp_max * float(mv["self_cost"])
 		a.hp = maxf(1.0, a.hp - cost)
 		events.append(["self_cost", a, cost])
-	if int(mv.get("hit_no", 0)) >= int(mv["hits"]) and mv["knockdown"] and not d.is_boss:
+	# 넘어뜨리기: 여러 대(삼연타)는 마지막 대에, 한 대짜리(0 · 1장 태클 · 메치기)는 그 대에 — hit_no 가 없으면 마지막 대로 본다
+	if int(mv.get("hit_no", mv["hits"])) >= int(mv["hits"]) and mv["knockdown"] and not d.is_boss:
 		d.get_down()
 	stats["hits"] += 1
 	hitstop = maxi(hitstop, int(mv["hitstop"]))
@@ -259,7 +296,7 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 ## (보스는 넘어지지 않는다 — 초안 잠정)
 func _hit_move(a) -> Dictionary:
 	var mv: Dictionary = a.move
-	if str(mv["fx"]) != "triple" or int(mv["hits"]) <= 1:
+	if not str(mv["fx"]) in ["triple", "amur3"] or int(mv["hits"]) <= 1:
 		return mv
 	var s := int(mv["startup"])
 	var seg := maxi(1, int(mv["active"]) / int(mv["hits"]))
@@ -268,6 +305,9 @@ func _hit_move(a) -> Dictionary:
 	m2["hit_no"] = no
 	if no < int(mv["hits"]):
 		m2["stun_off"] = true                     # 기절은 셋째 대만
+	elif str(mv["fx"]) == "amur3":
+		m2["hitstop"] = 12                        # 아무르 티그로 3연타 셋째 '쾅' — 크게 멈추고 흔들되 날려 보내지는 않는다
+		m2["shake"] = 6
 	else:
 		m2["knockback"] = float(mv["knockback"]) * TRIPLE_LAST["knockback_k"]
 		m2["hitstop"] = TRIPLE_LAST["hitstop"]
@@ -309,8 +349,9 @@ func _stagger(f) -> void:
 func _check_hp(d, a = null) -> void:
 	if d.hp_floor > 0.0:
 		d.hp = maxf(d.hp, d.hp_max * d.hp_floor)
-	if d.is_boss and phase == 1 and d.hp <= d.hp_max * PHASE2_AT:
-		d.hp = d.hp_max * PHASE2_AT
+	if d.phase2_at > 0.0 and d.phase == 1 and d.hp <= d.hp_max * d.phase2_at:
+		d.hp = d.hp_max * d.phase2_at
+		d.phase = 2
 		phase = 2
 		hitstop = maxi(hitstop, PHASE2_FREEZE)
 		events.append(["phase2", d])
@@ -320,8 +361,11 @@ func _check_hp(d, a = null) -> void:
 		events.append(["ko", d])
 		if a != null:
 			a.gain("ko")                          # 쓰러뜨리면 게이지 (common gauge.gain.ko — 1:1 은 판이 끝나 화면엔 안 보인다)
-		over = "lose" if not d.is_boss else "win"
-		hitstop = maxi(hitstop, 30)
+		if end_on_ko:
+			over = "lose" if not d.is_boss else "win"
+			hitstop = maxi(hitstop, 30)
+		else:
+			hitstop = maxi(hitstop, 12)
 
 
 ## 맞은 자리 (3D: x, 높이, z) — 불꽃 · 번쩍임이 여기서 난다

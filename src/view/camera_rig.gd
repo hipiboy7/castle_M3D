@@ -18,8 +18,22 @@ func _ready() -> void:
 
 
 func follow(a: Vector3, b: Vector3, dt: float, shake: int) -> void:
-	var mid := a.lerp(b, 0.42)
-	var sep := a.distance_to(b)
+	_aim(a.lerp(b, 0.42), a.distance_to(b), dt, shake)
+
+
+## 여럿(11장): 조작하는 사람(lead) 둘레 7.5m 안 사람들을 한 화면에 — 그 묶음 가운데와 lead 사이를 보고, 퍼진 만큼 물러난다
+func follow_group(lead: Vector3, pts: Array, dt: float, shake: int) -> void:
+	var lo := Vector2(lead.x, lead.z)
+	var hi := lo
+	for p in pts:
+		if p.distance_to(lead) < 7.5:
+			lo = lo.min(Vector2(p.x, p.z))
+			hi = hi.max(Vector2(p.x, p.z))
+	var c := (lo + hi) * 0.5
+	_aim(Vector3(lerpf(lead.x, c.x, 0.6), 0, lerpf(lead.z, c.y, 0.6)), (hi - lo).length() * 0.85, dt, shake)
+
+
+func _aim(mid: Vector3, sep: float, dt: float, shake: int) -> void:
 	var want := clampf(0.5 + sep * 0.045, 0.56, 0.95) * zoom
 	focus = focus.lerp(mid, 1.0 - exp(-5.0 * dt))
 	dist_k = lerpf(dist_k, want, 1.0 - exp(-3.0 * dt))
