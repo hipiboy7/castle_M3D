@@ -750,6 +750,8 @@ func _hair(lk: Dictionary, hc: Vector3, hk: float, hair: Color) -> void:
 			hair = hair.lerp(lk["skin"], 0.3)
 		# 아주 짧게 깎은 머리 — 머리통에 붙은 얇은 껍질. 뒤 · 위로 물려 이마가 보이게(바가지 머리처럼 보였다 — 2026-11-06 검토)
 		_blob(hc + Vector3(0, 0.058, 0.028) * hk, Vector3(0.124, 0.088, 0.122) * hk, hair, "head")
+		# 뒤통수 ~ 목덜미(위 껍질만으론 뒤 아래 절반이 살이라 위에서 내려다보면 탈모처럼 보였다 — 2026-11-09 폰 '김대건 가운데 머리 뚫림')
+		_blob(hc + Vector3(0, -0.01, 0.04) * hk, Vector3(0.13, 0.105, 0.105) * hk, hair, "head")
 		if style == "short":                                        # 위로 세워 뒤로 넘긴 앞머리
 			_blob(hc + Vector3(0, 0.115, -0.045) * hk, Vector3(0.085, 0.04, 0.06) * hk, hair, "head")
 	elif style == "bob":

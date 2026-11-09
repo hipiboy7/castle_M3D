@@ -50,6 +50,7 @@ var buttons := [
 	{"id": "swap", "label": "교대", "r": 44.0, "off": Vector2(-450, -190)},
 	{"id": "art", "label": "그림", "r": 44.0, "off": Vector2(70, 200), "at": "tl"},
 	{"id": "bench", "label": "성능", "r": 44.0, "off": Vector2(70, 310), "at": "tl"},
+	{"id": "difficulty", "label": "보통", "sub": "난이도", "r": 44.0, "off": Vector2(70, 420), "at": "tl"},   # 글은 main.gd 가 고른 난이도로
 ]
 
 
@@ -80,7 +81,7 @@ func _active(b: Dictionary) -> bool:
 			return show_pause
 		"swap":
 			return show_swap
-		"art", "bench":
+		"art", "bench", "difficulty":
 			return show_art
 	return show_fight
 
@@ -179,4 +180,8 @@ func _draw() -> void:
 		draw_circle(p, b["r"], COL_BTN_ON if on else COL_BTN)
 		draw_arc(p, b["r"], 0, TAU, 48, Color(1, 1, 1, 0.35), 3.0)
 		var w: float = b["r"] * 2.0
+		if b.has("sub"):                                # 작은 이름(위) + 지금 값(아래) — 난이도
+			draw_string(font, p + Vector2(-b["r"], -8), b["sub"], HORIZONTAL_ALIGNMENT_CENTER, w, 15, Color(COL_LABEL, 0.7))
+			draw_string(font, p + Vector2(-b["r"], 20), b["label"], HORIZONTAL_ALIGNMENT_CENTER, w, 22, COL_LABEL)
+			continue
 		draw_string(font, p + Vector2(-b["r"], 9), b["label"], HORIZONTAL_ALIGNMENT_CENTER, w, 22 if b["r"] < 40.0 else 26, COL_LABEL)

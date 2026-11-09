@@ -1,7 +1,8 @@
 extends RefCounted
 ## 세이브 — 순수 로직(읽기 · 쓰기 파일은 main.gd 가 한다: user://save.json, 창 없는 실행은 파일을 안 쓴다).
 ## 형식(VERSION 1): {"v": 1, "cleared": {장 id: {"count": 깬 횟수, "best": 가장 짧은 판(로직 프레임)}}, "last": 마지막으로 한 장,
-##   "art": 고른 그림(puppet · a · b), "speed": 게임 속도(1 · 1.5 · 2 — 로직 프레임을 1초에 60 · 90 · 120 번, 판정은 그대로)}
+##   "art": 고른 그림(puppet · a · b), "speed": 게임 속도(1 · 1.5 · 2 — 로직 프레임을 1초에 60 · 90 · 120 번, 판정은 그대로),
+##   "difficulty": 난이도(easy · normal · hard · hell — src/data/difficulty.gd, 2026-11-09 칸을 더함 · 옛 세이브는 normal)}
 ## 형식 규칙(CLAUDE.md 2-1절 도메인 품질 '세이브는 형식 버전 · 옛 세이브 시험'):
 ##   - 칸을 더할 때는 VERSION 을 그대로 두고 _fill 에 기본값을 둔다(옛 세이브는 빠진 칸만 채워 읽는다)
 ##   - 칸 뜻을 바꿀 때만 VERSION 을 올리고 _migrate 에 옛 → 새를 적는다(시험 tests/unit/test_campaign.gd)
@@ -10,6 +11,7 @@ extends RefCounted
 ## 시간(현재 시각)은 넣지 않는다 — 같은 입력이면 같은 세이브(시험 · 리플레이).
 
 const Campaign = preload("res://src/data/campaign.gd")
+const Difficulty = preload("res://src/data/difficulty.gd")
 
 const VERSION := 1
 const ARTS := ["puppet", "a", "b"]
@@ -18,7 +20,7 @@ const SPEEDS := [1.0, 1.5, 2.0]  # 게임 속도 고르기(사용자 2026-11-06 
 
 
 static func fresh() -> Dictionary:
-	return {"v": VERSION, "cleared": {}, "last": "", "art": DEFAULT_ART, "speed": SPEEDS[0]}
+	return {"v": VERSION, "cleared": {}, "last": "", "art": DEFAULT_ART, "speed": SPEEDS[0], "difficulty": Difficulty.DEFAULT}
 
 
 ## 파일 글 → {"save": 세이브, "state": "new" | "ok" | "broken" | "newer"}
@@ -54,6 +56,7 @@ static func _fill(j: Dictionary) -> Dictionary:
 	s["art"] = art if art in ARTS else DEFAULT_ART
 	var sp := float(j.get("speed", SPEEDS[0]))
 	s["speed"] = sp if sp in SPEEDS else SPEEDS[0]
+	s["difficulty"] = Difficulty.valid(j.get("difficulty", Difficulty.DEFAULT))
 	return s
 
 

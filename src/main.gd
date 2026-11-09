@@ -22,6 +22,7 @@ extends Node3D
 const Duel = preload("res://src/combat/duel.gd")
 const Stage = preload("res://src/combat/stage.gd")
 const Replay = preload("res://src/combat/replay.gd")
+const Difficulty = preload("res://src/data/difficulty.gd")
 const Campaign = preload("res://src/data/campaign.gd")
 const Save = preload("res://src/data/save.gd")
 const Lines = preload("res://src/data/lines.gd")
@@ -67,6 +68,7 @@ const SWITCH_WAIT := 2
 const RESULT_AUTO := 600        # 이긴 결과 화면: 안 눌러도 10초 뒤 처음 화면(rc.2 폰: 2장 끝 화면이 굳은 것처럼 보였다 — 끝 방 글과 결과 글이 같아서)
 var _mouse_was := false
 var _fake_art := false
+var _fake_difficulty := false
 var headless := false
 var mode := "title"
 var kind := "duel"              # 지금 판 종류 (duel · stage — campaign.gd kind)
@@ -209,7 +211,7 @@ func _setup_input() -> void:
 		"left": [KEY_A, KEY_LEFT], "right": [KEY_D, KEY_RIGHT], "up": [KEY_W, KEY_UP], "down": [KEY_S, KEY_DOWN],
 		"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_C], "dash": [KEY_L, KEY_SHIFT],
 		"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B], "pause": [KEY_ESCAPE, KEY_P], "swap": [KEY_TAB, KEY_Q],
-		"pick_1": [KEY_1], "pick_2": [KEY_2], "art": [KEY_3], "bench": [KEY_4], "accept": [KEY_ENTER, KEY_KP_ENTER],
+		"pick_1": [KEY_1], "pick_2": [KEY_2], "art": [KEY_3], "bench": [KEY_4], "difficulty": [KEY_5], "accept": [KEY_ENTER, KEY_KP_ENTER],
 		"speed": [KEY_F], "menu": [KEY_M],
 	}
 	for act in keys:
@@ -229,12 +231,12 @@ func _new_run(ch: String, room := -1) -> void:
 	kind = Campaign.kind(ch)
 	run_room = int(args["room"]) if room < 0 else room
 	_trace("STAGE %s room=%d frame=%d" % [ch, run_room, frames])
-	var opts := {}
+	var opts := {"difficulty": str(save["difficulty"])}         # 난이도는 판 · 리플레이 기록에 같이(src/data/difficulty.gd)
 	if kind == "stage":
-		opts = {"chapter": ch, "room": run_room, "crowd": int(args["crowd"])}
+		opts.merge({"chapter": ch, "room": run_room, "crowd": int(args["crowd"])})
 		d = Stage.make(seed_now, opts)
 	else:
-		d = Duel.make(seed_now)
+		d = Duel.make(seed_now, opts)
 	rec = Replay.start(kind, seed_now, opts)
 	hud.clear_messages()
 	evfx.later_msg = []
@@ -337,7 +339,8 @@ func _enter_title() -> void:
 	_fill_menu()
 	menu.visible = true
 	_apply_speed()
-	hud.set_hint(str(t["hint"]) + " · 그림: " + ART_NAMES[str(args["art"])])
+	touch.set_label("difficulty", Difficulty.label(save["difficulty"]))
+	hud.set_hint(_title_hint())
 	_trace("MODE title frame=%d" % frames)
 	snd.song("boss")
 
@@ -444,6 +447,8 @@ func _scripted() -> void:
 			_fake_swap = true
 		"art":
 			_fake_art = true
+		"difficulty":
+			_fake_difficulty = true
 		"speed":
 			save["speed"] = Save.next_speed(float(save["speed"]))
 			_apply_speed()
@@ -464,6 +469,11 @@ func _pressed_anything() -> bool:
 		or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 
 
+func _title_hint() -> String:
+	var t = Lines.at("title")
+	return "%s · 그림: %s · %s: %s" % [t["hint"], ART_NAMES[str(args["art"])], t["difficulty"], Difficulty.label(save["difficulty"])]
+
+
 ## 처음 화면 고르기 → 장 id · "bench" · ""(아직). 장 카드 · 이어하기를 누름(터치 · 마우스), 1 · 2 키 = 할 수 있는 장 차례,
 ## Enter · 베기 · 구르기 · 쳐내기 키 = 이어하기. 빈 곳을 누르면 아무것도 안 한다(카드를 빗맞혀 시작하지 않게)
 func _title_pick() -> String:
@@ -475,7 +485,17 @@ func _title_pick() -> String:
 		save["art"] = args["art"]
 		_write_save()
 		_build_stage_view()
-		hud.set_hint(str(Lines.at("title")["hint"]) + " · 그림: " + ART_NAMES[str(args["art"])])
+		hud.set_hint(_title_hint())
+		mode_t = 0
+		return ""
+	if Input.is_action_just_pressed("difficulty") or touch.peek_edge("difficulty") or _fake_difficulty:
+		_fake_difficulty = false
+		touch.take_edges()
+		save["difficulty"] = Difficulty.next(save["difficulty"])
+		_write_save()
+		touch.set_label("difficulty", Difficulty.label(save["difficulty"]))
+		hud.set_hint(_title_hint())
+		_trace("DIFFICULTY %s" % save["difficulty"])
 		mode_t = 0
 		return ""
 	if Input.is_action_just_pressed("bench") or touch.peek_edge("bench"):
@@ -550,7 +570,7 @@ func _load_save() -> void:
 			save_path = ""                                                 # 다음 판이 쓴 세이브는 덮어쓰지 않는다
 	if str(args["art"]) == "":
 		args["art"] = str(save["art"])
-	_trace("SAVE %s art=%s cleared=%s" % [p["state"], save["art"], ",".join(save["cleared"].keys())])
+	_trace("SAVE %s art=%s difficulty=%s cleared=%s" % [p["state"], save["art"], save["difficulty"], ",".join(save["cleared"].keys())])
 
 
 ## 싸움 중 메뉴(스테이지 고르기) 열기 · 닫기 — 열린 동안 판은 멈춘다(무대 · 인형 · 연출 · 소리 PAUSABLE), 싸움 버튼은 숨긴다

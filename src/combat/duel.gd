@@ -12,12 +12,14 @@ const BossAI = preload("res://src/combat/boss_ai.gd")
 const Bot = preload("res://src/combat/bot.gd")
 const Skills = preload("res://src/data/skills.gd")
 const Common = preload("res://src/data/common.gd")
+const Difficulty = preload("res://src/data/difficulty.gd")
 
 const HERO := {"hp": 200.0, "posture": 60.0, "walk": 2.1, "run": 4.6, "stagger": 50}
 const BOSS := {"hp": 400.0, "posture": 220.0, "walk": 1.9, "run": 4.0, "stagger": 100, "poise": 12.0}
 
 
-static func make(seed_value: int) -> Dictionary:
+## opts: difficulty(난이도 — 백도찬에게만 배율, src/data/difficulty.gd · 기본 보통)
+static func make(seed_value: int, opts := {}) -> Dictionary:
 	var w = World.new()
 	var kim: Array = Common.progress(Skills.HERO_ID, Common.events_until(Common.stage_of(Skills.DUEL_EVENT)))
 	var h = Fighter.new(str(Common.character(Skills.HERO_ID)["name"]), 0)
@@ -61,7 +63,9 @@ static func make(seed_value: int) -> Dictionary:
 	r_ai.seed = seed_value
 	var r_bot := RandomNumberGenerator.new()
 	r_bot.seed = seed_value * 7919 + 1
-	return {"world": w, "hero": h, "boss": b, "ai": BossAI.new(b, h, r_ai), "bot": Bot.new(h, b, r_bot)}
+	var ai = BossAI.new(b, h, r_ai)
+	Difficulty.apply_foe(b, ai, opts.get("difficulty", Difficulty.DEFAULT))
+	return {"world": w, "hero": h, "boss": b, "ai": ai, "bot": Bot.new(h, b, r_bot)}
 
 
 ## 한 프레임. hero_intent 가 null 이면 봇이 김신을 움직인다. 역경직 중에는 AI 도 멈춘다(사람 입력만 버퍼에 남는다).

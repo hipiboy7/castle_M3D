@@ -200,6 +200,7 @@ var foe
 var rng: RandomNumberGenerator
 var prof: Dictionary
 var guard_rate := 0.3
+var cd_k := 1.0                 # 공격 사이 쉬는 시간 배율(난이도 — src/data/difficulty.gd foe_cd)
 var queue: Array = []
 var wait := 0
 var cooldown := 60
@@ -331,4 +332,4 @@ func _pick() -> void:
 	wait = 0
 	var cd: Array = prof["cd"]
 	var k: float = float(prof.get("phase2", {}).get("cd_k", 1.0)) if phase == 2 else 1.0
-	cooldown = int((int(cd[0]) + rng.randi_range(0, int(cd[1]))) * k)
+	cooldown = int((int(cd[0]) + rng.randi_range(0, int(cd[1]))) * k * cd_k)

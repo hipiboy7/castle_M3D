@@ -19,9 +19,11 @@ const Common = preload("res://src/data/common.gd")
 const Addendum = preload("res://src/data/addendum.gd")
 const Campaign = preload("res://src/data/campaign.gd")
 const Lines = preload("res://src/data/lines.gd")
+const Difficulty = preload("res://src/data/difficulty.gd")
 
 
-## opts: chapter(장 id — 기본 ch11) · room(시작 방 번호 — 시험용) · crowd(첫 방에 엑스트라를 이만큼 더 — 성능 점검 '적 30명')
+## opts: chapter(장 id — 기본 ch11) · room(시작 방 번호 — 시험용) · crowd(첫 방에 엑스트라를 이만큼 더 — 성능 점검 '적 30명') ·
+##   difficulty(난이도 — 적에게만 배율, src/data/difficulty.gd · 기본 보통)
 static func make(seed_value: int, opts := {}) -> Dictionary:
 	var w = World.new()
 	w.end_on_ko = false
@@ -29,7 +31,8 @@ static func make(seed_value: int, opts := {}) -> Dictionary:
 	var T = Campaign.table(ch)
 	var d := {"kind": "stage", "chapter": ch, "tbl": T, "world": w, "heroes": [], "ctrl": 0, "room_i": -1, "room": {}, "enemies": [], "allies": [],
 		"ais": {}, "bots": {}, "yield": {}, "seed": seed_value, "stage": "intro", "t": 0, "fight_t": 0, "cleared": 0,
-		"times": {}, "look_of": {}, "hero": null, "boss": null, "crowd": int(opts.get("crowd", 0)), "n": 0, "cast": []}
+		"times": {}, "look_of": {}, "hero": null, "boss": null, "crowd": int(opts.get("crowd", 0)), "n": 0, "cast": [],
+		"difficulty": Difficulty.valid(opts.get("difficulty", Difficulty.DEFAULT))}
 	for id in T.HEROES:
 		var h = _hero(id, T)
 		d["bots"][h] = Bot.new(h, null, _rng(seed_value * 7919 + d["heroes"].size() + 1))
@@ -115,6 +118,7 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 			f.hp_floor = float(role["hp_floor"])      # 쓰러뜨릴 수 없는 적(따돌리기 방 — 2장 남궁혁)
 		var g: float = Addendum.derive(st)["guard"]
 		d["ais"][f] = EnemyAI.new(f, str(extra.get("ai", role["ai"])), _rng(int(d["seed"]) * 131 + int(d["room_i"]) * 17 + i), g)
+		Difficulty.apply_foe(f, d["ais"][f], d.get("difficulty", Difficulty.DEFAULT))
 		d["enemies"].append(f)
 	else:
 		f.moveset = role["moveset"]

@@ -93,7 +93,7 @@ static func make(rec: Dictionary) -> Dictionary:
 	var opts: Dictionary = rec.get("opts", {})
 	if str(rec["kind"]) == "stage":
 		return Stage.make(int(rec["seed"]), opts)
-	return Duel.make(int(rec["seed"]))
+	return Duel.make(int(rec["seed"]), opts)
 
 
 static func step(d: Dictionary, it) -> void:

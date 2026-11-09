@@ -520,11 +520,14 @@ func _hair(head: Node3D, m: Material, style: String) -> void:
 			_mesh(head, spike, m, Vector3(0.06 * cos(a), 0.12, 0.06 * sin(a) + 0.01), Vector3(-22 * sin(a), 0, 22 * cos(a)))
 	elif style == "crew":
 		# 경호대 최후의 4인 중심: 희끗한 짧은 크루컷
-		_mesh(head, _sphere(0.107, 0.2), m, Vector3(0, 0.055, 0.02), Vector3.ZERO, Vector3(0.98, 0.5, 0.98))
+		# (0.5 높이는 머리통 0.116 보다 낮아 정수리가 뚫려 보였다 — 2026-11-09 폰 '김대건 가운데 머리 뚫림', 김대건 1층 머리도 crew)
+		_mesh(head, _sphere(0.108, 0.2), m, Vector3(0, 0.05, 0.02), Vector3.ZERO, Vector3(1.0, 0.74, 1.0))
+		_mesh(head, _sphere(0.1, 0.2), m, Vector3(0, -0.01, 0.05), Vector3.ZERO, Vector3(1.0, 0.95, 0.85))       # 뒤통수 ~ 목덜미
 	elif style == "buzz":
 		# 아주 짧게 깎은 머리(김대건 · 강만재): 머리통에 붙인 짧은 머리 + 이마선
 		_mesh(head, _sphere(0.108, 0.2), m, Vector3(0, 0.05, 0.02), Vector3.ZERO, Vector3(1.0, 0.7, 1.0))           # 정수리까지 덮게(0.66 아래면 살이 비친다)
 		_mesh(head, _sphere(0.094, 0.1), m, Vector3(0, 0.078, -0.03), Vector3(-6, 0, 0), Vector3(1.0, 0.48, 1.0))
+		_mesh(head, _sphere(0.1, 0.2), m, Vector3(0, -0.01, 0.05), Vector3.ZERO, Vector3(1.0, 0.95, 0.85))       # 뒤통수 ~ 목덜미
 	elif style == "bald":
 		pass                                                     # 대머리(군터 경호원) — 머리털 없음
 	elif look.get("female", false) and style in ["long", "bob", "ponytail"]:
