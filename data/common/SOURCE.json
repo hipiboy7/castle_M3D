@@ -1,6 +1,6 @@
 {
   "_about": "castle_common 복사본 — 손으로 고치지 않는다. 받기: py -3.12 D:/claude/fun/castle_common/tools/sync.py castle_M3D",
-  "castle_common": "9f37ef5ec5f49fc07ff5cb6937a0ec2f985a59bf",
+  "castle_common": "68a469a3d2abdd58b6f4dbb611bbd9231fec24e1",
   "files": {
     "characters.json": "5e973e2fa9f9dd0b3af4d09a110f3094832a3387b4ea4ab894ff0be0015d3571",
     "looks.json": "876d4158429f986615d76bc4be9fb15f805fe95a7759cfba0cf9df7d18d21e86",
@@ -272,7 +272,7 @@
     "canon/fights.json": "42be7581f8868fd86835fa075fbe33fa21d6e94df3081f37dac0049aa047a763",
     "canon/glossary.json": "3b7dc9908d7ba44681c920e15124be233d6d940a1b78b275c2f936cde45fec0e",
     "canon/locations.json": "f0165c551bbe3ca29a334624f7ec2ece76b7e4f8a8aa267a9bd4e5a508a44261",
-    "canon/techniques.json": "8c7b664f06365f5e98f4766ba5ab5e217f446f4e19a47dd30bf537093afd6629",
+    "canon/techniques.json": "82e2f03df88078a4a1422356d24e9237326d544540fe45424a891ee2522b4cb9",
     "docs/개발규격/README.md": "d75049214448d9173b3402521794bc391273db711df01b0a3ee90646fac5a4c9",
     "docs/개발규격/sdlc_넘길것.md": "ff54a7af5a33a1f72ca3843e8e41151118c33b75543dc80b67b9d2dd23be0803",
     "docs/개발규격/게임개발규격.md": "f203586deae9c5e96aaa3c4db149eef58f0a92e7f716db9a2fb34e11a57a06ad",
