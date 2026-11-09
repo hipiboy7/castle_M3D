@@ -27,6 +27,11 @@ func test_npcs_override_rank() -> void:
 	check(od.rank == "내성 하위", "3장 오도화 = (현 시점) 내성 하위 — 장 표 NPCS (%s)" % od.rank)
 	var d2 := Stage.make(1, {"chapter": "ch13", "room": 2})
 	check(d2["boss"].char_id == "woojin" and d2["boss"].team == 1 and d2["boss"].rank == "외성 상위", "13장 주먹 승부의 피우진은 적 · 외성 상위")
+	# 같은 인물이 한 장에서 아군(조작)도 되고 적도 될 때: 적 칸은 방 표 덧붙임 role 로 다른 역할(체력 · AI)을 쓴다
+	var d0 := Stage.make(1, {"chapter": "ch13", "room": 0})
+	var wj = d0["heroes"].filter(func(h): return h.char_id == "woojin")[0]
+	check(wj.hp_max < 400.0, "13장 습격의 피우진(조작 인물)은 사람 체력 — 적 역할 체력이 아니다 (%.0f)" % wj.hp_max)
+	check(d2["boss"].hp_max >= 1000.0, "13장 주먹 승부의 피우진(적)은 보스 체력 (%.0f)" % d2["boss"].hp_max)
 
 
 func test_talk_room_says_lines_then_moves_on() -> void:

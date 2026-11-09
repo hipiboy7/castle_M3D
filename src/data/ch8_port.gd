@@ -35,11 +35,11 @@ const ROLES := {
 	"street_thug": {"hp": 220.0, "posture": 45.0, "walk": 1.8, "run": 3.8, "stagger": 70, "ai": "thug", "look": "ds_raider"},
 	"gang_blade": {"hp": 260.0, "posture": 50.0, "walk": 1.9, "run": 4.0, "stagger": 70, "ai": "haseong_guard", "look": "haseong_guard"},
 	"elite_guard": {"hp": 300.0, "posture": 70.0, "walk": 1.9, "run": 4.1, "stagger": 70, "poise": 4.0, "ai": "haseong_guard", "look": "guard"},
-	"scaledanjang": {"hp": 220.0, "posture": 240.0, "walk": 2.0, "run": 4.4, "stagger": 75, "poise": 28.0, "finisher_cap": 0.08, "ai": "x_blade",
-		"look": "scaledanjang", "phase2_at": 0.5, "dmg_k": 0.6},
+	"scaledanjang": {"hp": 190.0, "posture": 240.0, "walk": 2.0, "run": 4.4, "stagger": 75, "poise": 28.0, "finisher_cap": 0.08, "ai": "x_blade",
+		"look": "scaledanjang", "phase2_at": 0.5, "dmg_k": 0.5},
 	"mark": {"hp": 300.0, "posture": 280.0, "walk": 1.9, "run": 4.1, "stagger": 80, "poise": 32.0, "finisher_cap": 0.06, "ai": "x_brawler",
 		"look": "mark", "phase2_at": 0.5, "dmg_k": 0.6},
-	"ryujihak": {"hp": 1600.0, "posture": 520.0, "walk": 2.2, "run": 4.8, "stagger": 80, "poise": 36.0, "finisher_cap": 0.04, "ai": "x_twin",
+	"ryujihak": {"hp": 2400.0, "posture": 520.0, "walk": 2.2, "run": 4.8, "stagger": 80, "poise": 36.0, "finisher_cap": 0.04, "ai": "x_twin",
 		"look": "ryujihak", "yield_at": 0.3, "dmg_k": 1.6},
 }
 

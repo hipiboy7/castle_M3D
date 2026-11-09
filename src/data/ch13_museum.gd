@@ -31,16 +31,17 @@ const ROLES := {
 		"moveset": {"combo": "k_slash1", "dash": "k_dash", "counter": "k_counter", "finisher": "k_finisher"}},
 	"kimshin_bare": {"look": "kim_bare",
 		"moveset": {"combo": "kf_jab", "dash": "kf_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
-	# 피우진: 1 에서는 조작 인물(교대), 3 에서는 적(주먹 승부 — 주먹 · 발 · 메다꽂기를 섞는 x_master)
-	"woojin": {"hp": 1500.0, "posture": 560.0, "walk": 2.1, "run": 4.6, "stagger": 50, "look": "woojin", "ai": "x_master",
-		"poise": 36.0, "finisher_cap": 0.04, "phase2_at": 0.5, "dmg_k": 1.8,
+	# 피우진: 1 에서는 조작 인물(교대 — woojin), 3 에서는 적(주먹 승부 — woojin_rival: 주먹 · 발 · 메다꽂기를 섞는 x_master, 방 표 role)
+	"woojin": {"hp": 230.0, "posture": 70.0, "walk": 2.1, "run": 4.6, "stagger": 50, "look": "woojin",
 		"moveset": {"combo": "w_jab", "dash": "w_dash", "finisher": "w_finisher"}},
+	"woojin_rival": {"hp": 1500.0, "posture": 560.0, "walk": 2.1, "run": 4.6, "stagger": 50, "look": "woojin", "ai": "x_master",
+		"poise": 36.0, "finisher_cap": 0.04, "phase2_at": 0.5, "dmg_k": 1.8},
 	"elite_guard": {"hp": 300.0, "posture": 70.0, "walk": 1.9, "run": 4.1, "stagger": 70, "poise": 4.0, "ai": "haseong_guard", "look": "guard"},
-	"dohaksu": {"hp": 900.0, "posture": 300.0, "walk": 1.9, "run": 4.1, "stagger": 75, "poise": 28.0, "finisher_cap": 0.06, "ai": "x_brawler",
-		"look": "dohaksu", "phase2_at": 0.5, "dmg_k": 1.6},
+	"dohaksu": {"hp": 1200.0, "posture": 300.0, "walk": 1.9, "run": 4.1, "stagger": 75, "poise": 28.0, "finisher_cap": 0.06, "ai": "x_brawler",
+		"look": "dohaksu", "phase2_at": 0.5, "dmg_k": 2.2},
 	"eogwangdeuk": {"hp": 600.0, "posture": 220.0, "walk": 1.9, "run": 4.1, "stagger": 75, "poise": 22.0, "ai": "x_grappler", "look": "eogwangdeuk", "dmg_k": 1.4},
-	"sainjin": {"hp": 1300.0, "posture": 420.0, "walk": 2.2, "run": 4.8, "stagger": 80, "poise": 32.0, "finisher_cap": 0.05, "ai": "x_gun",
-		"look": "sainjin", "phase2_at": 0.5, "dmg_k": 2.0},
+	"sainjin": {"hp": 1600.0, "posture": 420.0, "walk": 2.2, "run": 4.8, "stagger": 80, "poise": 32.0, "finisher_cap": 0.05, "ai": "x_gun",
+		"look": "sainjin", "phase2_at": 0.5, "dmg_k": 2.6},
 }
 
 const ROOMS := [
@@ -53,7 +54,7 @@ const ROOMS := [
 		"enemies": [["sainjin", Vector2(2.6, 0.0)]], "boss": "sainjin"},
 	{"id": "fist_duel", "theme": "red_plaza", "bounds": Rect2(-5.6, -2.4, 11.2, 4.8), "cast": ["kimshin"], "kit": {"kimshin": "kimshin_bare"},
 		"heroes": [Vector2(-3.0, 0.2)], "allies": [],
-		"enemies": [["woojin", Vector2(2.6, 0.0)]], "boss": "woojin"},
+		"enemies": [["woojin", Vector2(2.6, 0.0), {"role": "woojin_rival"}]], "boss": "woojin"},
 	{"id": "epilogue", "theme": "red_plaza", "bounds": Rect2(-5.0, -2.4, 10.0, 4.8), "cast": ["kimshin"], "talk": 0.0,
 		"heroes": [Vector2(-0.6, 0.4)], "allies": [], "enemies": []},
 	{"id": "finale", "theme": "museum_plaza", "bounds": Rect2(-5.0, -2.4, 10.0, 4.8), "cast": ["kimshin"],

@@ -38,13 +38,13 @@ const ROLES := {
 	"gang_blade": {"hp": 260.0, "posture": 50.0, "walk": 1.9, "run": 4.0, "stagger": 70, "ai": "haseong_guard", "look": "haseong_guard"},
 	"richeon": {"hp": 1500.0, "posture": 640.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 38.0, "finisher_cap": 0.04, "ai": "x_master",
 		"look": "richeon", "phase2_at": 0.5, "dmg_k": 1.2},
-	"douchen": {"hp": 170.0, "posture": 240.0, "walk": 2.0, "run": 4.4, "stagger": 75, "poise": 28.0, "finisher_cap": 0.06, "ai": "x_boxer",
-		"look": "douchen", "phase2_at": 0.5, "dmg_k": 0.6},
-	"hantaecheol": {"hp": 100.0, "posture": 120.0, "walk": 1.9, "run": 4.1, "stagger": 70, "poise": 10.0, "ai": "x_brawler", "look": "hantaecheol", "dmg_k": 0.7},
+	"douchen": {"hp": 150.0, "posture": 240.0, "walk": 2.0, "run": 4.4, "stagger": 75, "poise": 28.0, "finisher_cap": 0.06, "ai": "x_boxer",
+		"look": "douchen", "phase2_at": 0.5, "dmg_k": 0.45},
+	"hantaecheol": {"hp": 100.0, "posture": 120.0, "walk": 1.9, "run": 4.1, "stagger": 70, "poise": 10.0, "ai": "x_brawler", "look": "hantaecheol", "dmg_k": 0.5},
 	"lingling": {"hp": 700.0, "posture": 240.0, "walk": 2.2, "run": 4.8, "stagger": 75, "poise": 24.0, "finisher_cap": 0.08, "ai": "x_kicker",
 		"look": "lingling", "dmg_k": 1.0},
-	"yuwoosung": {"hp": 220.0, "posture": 300.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 32.0, "finisher_cap": 0.04, "ai": "x_swordmaster",
-		"look": "yuwoosung", "phase2_at": 0.5, "dmg_k": 0.6},
+	"yuwoosung": {"hp": 180.0, "posture": 300.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 32.0, "finisher_cap": 0.04, "ai": "x_swordmaster",
+		"look": "yuwoosung", "phase2_at": 0.5, "dmg_k": 0.45},
 }
 
 const ROOMS := [

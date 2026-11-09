@@ -84,7 +84,7 @@ static func _hero(id: String, T):
 static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}):
 	var T = d["tbl"]
 	var c := Addendum.character(id)
-	var role: Dictionary = T.ROLES[id]
+	var role: Dictionary = T.ROLES[str(extra.get("role", id))]   # 방 표 덧붙임 role: 같은 인물이 그 장에서 조작 인물도 될 때 적 역할(13장 피우진)
 	var over: Dictionary = npc_over(T, id)
 	var f = Fighter.new(str(over.get("name", c["name"])), team)
 	f.char_id = id
@@ -98,7 +98,7 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 		f.hp_max *= 1.25
 		f.hp = f.hp_max
 		d["look_of"][f] = "g4_leader"                 # 그림: 희끗한 크루컷의 중심 인물(058/039-045)
-	# 방 표의 덧붙임(엑스트라 한 사람씩 다르게): look 외형 · ai 적 프로필 · name 화면 이름 · hp_k 체력 배율
+	# 방 표의 덧붙임(엑스트라 한 사람씩 다르게): role 역할 · look 외형 · ai 적 프로필 · name 화면 이름 · hp_k 체력 배율
 	if extra.has("look"):
 		d["look_of"][f] = str(extra["look"])
 	if extra.has("name"):
