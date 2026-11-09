@@ -5,6 +5,7 @@
 **이 폴더에서 Claude Code 를 따로 열어 개발한다** — 3D 일은 이 폴더 세션에서, 2D 본편 일은 castle_M 폴더 세션에서(2026-10-26 사용자).
 이 문서만으로 일할 수 있게 썼다. 여기 없는 규칙은 개발 규격(받은 사본 `data/common/docs/개발규격/` — `캐슬_게임공통.md` · `게임개발규격.md`)의 해당 절을 찾아 읽는다(전체를 읽지 않는다). 우선순위: 사용자 답(기획서 00 결정 10 포함) → 이 문서 → 기획서(castle_common `docs/기획서/03`) → 규격.
 
+> 정정 이력: 2026-11-09 (2) — 개발 끝 묶음(사용자 "1~3번 추천대로 … 개발 끝묶음도 진행해"): 0절 무엇(배포 설정 · 다음) · 1절 fighter_body · 그림 B 다시 구움 · 방별 봇 판.
 > 정정 이력: 2026-11-09 — 1절 난이도 표 difficulty.gd · 장 곡(campaign song) · 실행 인자 launch.gd · 인형 바탕 puppet_pose.gd(사용자 "추천대로 진행해").
 > 정정 이력: 2026-11-08 (2) — 3 ~ 13장(사용자 "3장부터 13장까지 중단없이 모두 다 진행"): 0절 무엇(모든 장), 1절 장 표 ch3 ~ ch13 · 무대 표 world3d · 1층 대체 · 대화 방 · 적 원형 x_ · 명부 그림 STAGED.
 > 정정 이력: 2026-11-08 — 1절 그림 B(도트)는 굳혀 둔다 · 다시 굽지 않음(사용자 "그림은 다시 (b)로 … 다 개발이 끝나면 그 이후에 추가하던지").
@@ -25,7 +26,7 @@
 > 정정 이력: 2026-10-26 — 첫 작성. 사용자: "권장안대로 진행해. 별도 브랜치를 따거나 별도 프로젝트 디렉토리로 만드는게 좋을까?" → 별도 디렉토리 · 별도 저장소(이유는 `docs/P1_설계서_3D초안.md` 1절).
 
 ## 0. 요약 (작업 전 필수 확인)
-- **무엇**: **castle M 본편**(#9 결정 2026-11-06 — 3D 본편화 · 그림 A(GLB 툰 모델), castle_M pygame 은 Phase 3 전에 멈춤). 기획서 02 캠페인(장 0 ~ 13)을 이 판으로 — S5. 지금 할 수 있는 장: **0 ~ 13장 전부**(2026-11-08 — 3 ~ 13장 첫 판: 5 · 7장은 대화만, 6장은 앞(배 위 — ch6a) + 결투(ch6) 둘). 다음: 폰 리뷰로 장마다 다듬기 · 그림 B 다시 굽기(개발 끝) · `OPEN_ALL` false(배포). 멀티(S6)는 기기 2대가 생기면 · 첫 모드 11장 협동
+- **무엇**: **castle M 본편**(#9 결정 2026-11-06 — 3D 본편화 · 그림 A(GLB 툰 모델), castle_M pygame 은 Phase 3 전에 멈춤). 기획서 02 캠페인(장 0 ~ 13)을 이 판으로 — S5. 지금 할 수 있는 장: **0 ~ 13장 전부**(2026-11-08 — 3 ~ 13장 첫 판: 5 · 7장은 대화만, 6장은 앞(배 위 — ch6a) + 결투(ch6) 둘). 2026-11-09 개발 끝 묶음: 장 다듬기(방별 봇 판) · `OPEN_ALL` false(배포 — 장이 차례대로 열린다) · 그림 B 다시 굽기 · fighter 나누기 · main 병합. 다음: 폰 리뷰로 장마다 다듬기. 멀티(S6)는 기기 2대가 생기면 · 첫 모드 11장 협동
 - **왜**: castle_M 2D 관절 인형이 "팔다리 움직이는 게 종잇장 같다"(2026-10-26 사용자) → 시험판(S1 ~ S4)으로 폰에서 보고 3D 로 정했다(`docs/S4_보고서_9엔진이전.md`)
 - **엔진**: Godot 4.7.2-stable, Compatibility 렌더러(폰 · 에뮬레이터 · CI 가상 화면 공통). 버전은 `scripts/get_godot.py` 와 `.github/workflows/android.yml` 두 곳에 같게
 - **Android 전용**(기획서 00 결정 10 · 2026-11-04 사용자): PC판 · iOS 는 만들지 않는다. 조작 · 화면 · 성능은 폰 기준으로 만들고 판단한다. 키보드 입력(`src/main.gd`)은 개발 편의로만 둔다
@@ -47,7 +48,7 @@
 대화는 세션이 끝나면 사라진다. 이어받는 데 필요한 사실은 전부 저장소(이 문서 · 문서 · history · 커밋)에 둔다.
 
 ## 1. 구조
-- `src/combat/` 순수 로직(fighter · world · boss_ai · bot · duel(6장) · stage(장 표의 방 · 여럿 · 교대 — 방마다 조작 인물 cast · kit · 따돌리기 escape) · enemy_ai(적 프로필) · replay(입력 기록 · 상태 해시 — 판 끝마다 `user://replay_last.json`, `--replay 경로` 로 재생)) — 노드 없음, 60프레임 고정, 같은 시드면 같은 결과. 시험 `tests/unit/`(A) · `tests/integration/`(B) · 공통 `tests/helpers.gd`
+- `src/combat/` 순수 로직(fighter(입력 · 상태 기계 — 바탕 fighter_body 상수 · 상태 값 · 맞기 · 게이지) · world · boss_ai · bot · duel(6장) · stage(장 표의 방 · 여럿 · 교대 — 방마다 조작 인물 cast · kit · 따돌리기 escape) · enemy_ai(적 프로필) · replay(입력 기록 · 상태 해시 — 판 끝마다 `user://replay_last.json`, `--replay 경로` 로 재생)) — 노드 없음, 60프레임 고정, 같은 시드면 같은 결과. 시험 `tests/unit/`(A) · `tests/integration/`(B) · 공통 `tests/helpers.gd`
 - `src/data/campaign.gd` **장 목록**(본편 장 차례 · 종류 duel | stage | soon · 진행 사건 · 장 표 — 장을 더하면 여기 한 줄 + 장 표 + `lines.json` chapters + `tests/unit/test_campaign.gd` PLAYABLE) · `save.gd` 세이브(형식 버전 · 옛 · 깨진 · 새 형식 규칙은 파일 머리, `user://save.json`) · `difficulty.gd` 난이도 표(쉬움 · 보통 · 어려움 · 헬 — 적에게만 배율, 보통 = 1, 판 opts · 리플레이 · 세이브). 장 곡은 장 목록 song(마지막 보스 방 boss_song)
 - `src/data/common.gd` 공통 데이터 읽기 + 규칙 함수(castle_common `ref/rules.py` 와 같은 이름 · 인자, 시험 `tests/unit/test_common_cases.gd`), `skills.gd` 이 판의 기술 값(id → 동작 · 3층) · `moves.gd` 동작 표(3층) · `addendum.gd` **3D 덧붙임 1층**(castle_common 에 아직 없는 인물 · 기술 — 사용자 답 2026-11-06, 요청 16 ~ 19행) · 장 표(방 · 역할 · 시점 · 원작 근거 CANON · 3층 — `stage.gd` 가 장 id 로 읽는다): `prologue.gd` 0장 · `hoeam.gd` 1장 · `haseong.gd` 2장 · `hotel.gd` 11장 · `ch3_busan.gd` ~ `ch13_museum.gd` 3 ~ 13장(+ `ch6a_ship.gd` 6장 앞 — 칸 NPCS 그 장 시점 등급 · 방 talk 대화 방) · `lines.gd` 대사(`data/story/lines.json`)
 - `data/common/` 받은 사본(sync 가 쓴다 — json 5개는 APK 에 들어가고 `cases/` · `docs/` 는 안 들어간다)
@@ -58,7 +59,7 @@
 - 캐릭터를 GLB 로 바꿀 때: `update_from(f, dt, frozen)` 를 가진 그림 클래스를 새로 만들어 `src/main.gd` 에서 바꿔 끼운다(판정은 그대로)
 - `assets/` 자산 — 출처 목록 `assets/ASSETS.md`(새 파일은 여기 한 줄, verify 가 본다)
 - `scripts/` 검증 · Godot 받기 · 에뮬레이터 점검(CI 경로 필터에 들어 있다), `tools/` 개발 도우미(경로 필터 밖 — 바꿔도 CI 가 안 돈다)
-- 그림 A · B(S3): `tools/make_models.gd`(헤드리스 — GLB `assets/models/<id>_a.glb`) · `tools/make_sprites.gd`(가상 화면 `tools/xvfb_run.sh` — 도트 시트 `assets/sprites/<id>_b.png/json`). 외형을 고치면 `make_models.gd` 만 다시 돌리고 `--import` — **그림 B(도트)는 굳혀 둔다**(다시 굽지 않음 · A 와 모습이 어긋나도 둔다, 개발이 끝난 뒤 다시 다룬다 — 사용자 2026-11-08 "너무 시간이 오래 걸리네", 한 번에 117장 약 20분). 게임은 `--art puppet|a|b` · 처음 화면 '그림' 버튼. 수치 조정은 `tests/sim_stage.gd`(11장 봇 6판) · `tests/sim.gd`(6장)
+- 그림 A · B(S3): `tools/make_models.gd`(헤드리스 — GLB `assets/models/<id>_a.glb`) · `tools/make_sprites.gd`(가상 화면 `tools/xvfb_run.sh` — 도트 시트 `assets/sprites/<id>_b.png/json`). 외형을 고치면 `make_models.gd` 만 다시 돌리고 `--import` — **그림 B(도트)는 평소에 다시 굽지 않는다**(A 와 모습이 어긋나도 둔다 — 사용자 2026-11-08 "너무 시간이 오래 걸리네", 한 번에 117장 약 20 ~ 40분). 묶어서 한 번에 굽는다(마지막 2026-11-09 개발 끝 묶음). 게임은 `--art puppet|a|b` · 처음 화면 '그림' 버튼. 수치 조정은 `tests/sim_rooms.gd`(방별 봇 판 — `-- ch10 seeds=1,2,3,4,5,6,7,8`) · `tests/sim_stage.gd`(장 하나 이어서) · `tests/sim.gd`(6장). 장 다듬기 기준(2026-11-09): 방마다 봇 8판 보통 난이도에서 보스 방 5/8 이상
 
 ## 2. 검증
 - 전체 검증: `python3.11 scripts/verify.py` (약 20초 — 공통 데이터(도장 · castle_common 비교) · 자산 출처 · 가져오기 · 테스트(공통 cases 1,464줄 포함) · 자동 결투 3판. 출력에 ERROR · WARNING · Leaked 가 있으면 실패). 커밋 전에 반드시. 마일스톤 끝 · 태그 전에는 `--strict`(castle_common 이 앞서 있으면 실패)
@@ -68,7 +69,7 @@
 
 ## 2-1. 설계 · 시험 원칙 (agentic-sdlc `docs/howtoCLAUDEMD.md` 골격 2 · 3 · 5 · 13절 · `docs/howtoGAME.md` 4절 — `7110098` 에서 옮겨 적음)
 - **SOLID**
-  - SRP: 로직(`src/combat`) · 데이터(`src/data`) · 그림(`src/view`) · 화면 표시(`src/ui`) · 흐름(`src/main.gd`)을 나눈다. `main.gd` 는 S2 에서 소리(`sound.gd`) · 연출(`event_fx.gd`) · 외형(`looks.gd`) · 대사(`lines.json`)를 뺐다. `fighter.gd` · `puppet3d.gd` 는 아직 크다
+  - SRP: 로직(`src/combat`) · 데이터(`src/data`) · 그림(`src/view`) · 화면 표시(`src/ui`) · 흐름(`src/main.gd`)을 나눈다. `main.gd` 는 S2 에서 소리(`sound.gd`) · 연출(`event_fx.gd`) · 외형(`looks.gd`) · 대사(`lines.json`)를 뺐다. `fighter.gd` 는 2026-11-09 상태 기계 · 바탕(`fighter_body.gd`)으로 나눴다. `puppet3d.gd` 는 아직 크다
   - OCP: 2층 값은 castle_common JSON(`common.gd`), 3층 조정 값은 표(`moves.gd` `M` · `main.gd` `LOOKS` · `skills.gd` `BAEK_OFFBEAT`)로 늘린다 — 규칙 코드를 고치지 않고
   - LSP: 그림 클래스는 `update_from(f, dt, frozen)`(+ `remove_glasses`)만 갖추면 바꿔 끼울 수 있어야 한다(관절 인형 → GLB · 도트 빌보드)
   - ISP: 로직은 그림을 모른다 — 그림 · 소리는 `World.events` 신호와 상태만 읽는다
@@ -77,7 +78,7 @@
 
   | 등급 | 이 판 | 규칙 | 커버리지 |
   |---|---|---|---|
-  | A 핵심 순수 로직 | `src/data/common.gd` · `skills.gd` · `moves.gd`, `src/combat/world.gd` · `fighter.gd`(판정 · 피해 · 기절 · 게이지 · 등급) | **테스트 먼저(Red → Green → Refactor)**. 상류 골든(castle_common cases)은 반드시 시험에 | ≥ 90% |
+  | A 핵심 순수 로직 | `src/data/common.gd` · `skills.gd` · `moves.gd`, `src/combat/world.gd` · `fighter.gd` · `fighter_body.gd`(판정 · 피해 · 기절 · 게이지 · 등급) | **테스트 먼저(Red → Green → Refactor)**. 상류 골든(castle_common cases)은 반드시 시험에 | ≥ 90% |
   | B 오케스트레이션 | `src/combat/duel.gd` · `boss_ai.gd` · `bot.gd`, `main.gd` 흐름(결투 → 2차 → 결과) | 구현 뒤 통합 시험 — headless N 프레임(`--autoplay` · `tests/sim.gd`), 같은 시드 같은 결과 | ≥ 70% |
   | C 콘텐츠 | `src/view/*` · `src/ui/*` · `assets/` · 연출 · 대사 | 검사 스크립트(자산 출처) + CI 스크린샷을 직접 본다 | 측정 제외 |
 

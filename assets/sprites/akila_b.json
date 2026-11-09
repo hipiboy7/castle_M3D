@@ -39,6 +39,6 @@
   ],
   "look_y": 1.05,
   "made_by": "tools/make_sprites.gd",
-  "source": "res://assets/roster/models/akila_a.glb",
+  "source": "res://assets/models/akila_a.glb",
   "world_h": 3.995
 }

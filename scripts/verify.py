@@ -49,7 +49,7 @@ COMMON_SRC = os.environ.get("CASTLE_COMMON") or os.path.join(os.path.dirname(ROO
 ASSETS = os.path.join(ROOT, "assets")
 # CLAUDE.md 2-1절 TDD 등급 — 함수 단위 커버리지를 재는 파일 (main.gd 흐름은 노드가 있어 자동 결투 단계가 본다)
 COV_FILES = {
-    "A": ["src/data/common.gd", "src/data/skills.gd", "src/data/moves.gd", "src/data/addendum.gd", "src/data/lines.gd", "src/combat/world.gd", "src/combat/fighter.gd", "src/combat/replay.gd",
+    "A": ["src/data/common.gd", "src/data/skills.gd", "src/data/moves.gd", "src/data/addendum.gd", "src/data/lines.gd", "src/combat/world.gd", "src/combat/fighter.gd", "src/combat/fighter_body.gd", "src/combat/replay.gd",
           "src/data/campaign.gd", "src/data/save.gd"],
     "B": ["src/combat/duel.gd", "src/combat/boss_ai.gd", "src/combat/bot.gd", "src/combat/stage.gd", "src/combat/enemy_ai.gd"],
 }
@@ -245,6 +245,17 @@ MENU_WANT = ["STAGE ch0 room=0", "MODE title", "STAGE ch0 room=0", "MODE fight",
 FLOW_WANT = ["MODE title", "MODE demo", "MODE title", "MODE fight", "PAUSE on", "PAUSE off", "PAUSE on", "PAUSE off", "MODE title"]
 
 
+def open_all_save():
+    """모든 장을 깬 세이브(.tools/save_open.json) — 배포판(campaign.gd OPEN_ALL false)은 차례대로 열리므로, 싸움 중 메뉴로
+    먼 장(11장)에 가는 흐름 시험은 이 세이브로 돈다. 장 id 는 campaign.gd CHAPTERS 에서 읽는다(준비 중 soon 빼고)"""
+    with open(os.path.join(ROOT, "src", "data", "campaign.gd"), encoding="utf-8") as f:
+        ids = re.findall(r'\{"id": "(\w+)", "no": \d+, "kind": "(?:duel|stage)"', f.read())
+    path = os.path.join(ROOT, ".tools", "save_open.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"v": 1, "cleared": {i: {"count": 1, "best": 1} for i in ids}, "last": ""}, f)
+    return path
+
+
 def step_flow(g):
     base = [g, "--headless", "--fixed-fps", "60", "--path", "."]
     got = {}
@@ -260,7 +271,7 @@ def step_flow(g):
     ok &= grab("2초 멈춤", ["--autoplay", "--seconds", "42", "--seed", "1", "--trace", "--events", "600:pause,720:resume"])
     ok &= grab("속도 ×1.5", ["--autoplay", "--seconds", "40", "--seed", "1", "--events", "1:speed"])
     ok &= grab("뒤로 · 내려감", ["--seconds", "16", "--trace", "--events", FLOW_EVENTS])
-    ok &= grab("메뉴 · 스테이지", ["--seconds", "12", "--trace", "--events", MENU_EVENTS])
+    ok &= grab("메뉴 · 스테이지", ["--seconds", "12", "--trace", "--save", open_all_save(), "--events", MENU_EVENTS])
     if not ok:
         return False
     a, b = got["멈춤 없음"][0], got["2초 멈춤"][0]

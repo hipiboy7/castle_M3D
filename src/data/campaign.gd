@@ -26,8 +26,9 @@ const Ch12 = preload("res://src/data/ch12_church.gd")
 const Ch13 = preload("res://src/data/ch13_museum.gd")
 const Lines = preload("res://src/data/lines.gd")
 
-## 시험판: 만든 장은 차례와 상관없이 모두 열어 둔다(폰 확인에서 아무 장이나 바로 — 본편 배포 때 false 로)
-const OPEN_ALL := true
+## 장 열기: false = 본편 배포(2026-11-09 사용자 '개발 끝 묶음') — 첫 장만 열리고 장을 깨면 다음 장(save.gd unlocked_by_order).
+## true = 시험판(만든 장을 차례와 상관없이 모두 — 폰에서 아무 장이나 바로 볼 때). 실행 인자 --mode · 리플레이는 이와 상관없이 그 장으로 간다
+const OPEN_ALL := false
 
 const CHAPTERS := [
 	{"id": "ch0", "no": 0, "kind": "stage", "event": "", "table": "prologue", "view": "town", "song": "street"},
