@@ -11,7 +11,10 @@ func test_fallback_name_rank_from_common_layer2() -> void:
 	check(str(v["name"]) == "바실리" and str(v["rank"]) == "전국구", "바실리 — looks.json 이름 · 강함표 전국구 (%s %s)" % [v.get("name"), v.get("rank")])
 	var g := Addendum.character("gustav")
 	check(str(g["rank"]) == "내성 상위", "구스타프 — 내성 상위 (%s)" % g.get("rank"))
-	check(int(g["stats"]["기술"]) == 40 + 3 * Common.ranks().find("내성 상위"), "기술 능력치는 등급으로 (%s)" % g["stats"])
+	# castle_common 67f709d(요청 27 — 3 ~ 13장 이름 있는 적 32)부터 구스타프는 공통 1층 능력치 — 대체(canon_fallback)는 공통에 없을 때만
+	check(g["stats"] == Common.character("gustav").get("stats"), "공통 1층에 들어온 인물은 공통 능력치 (%s)" % g["stats"])
+	var gf := Addendum.canon_fallback("gustav")
+	check(int(gf["stats"]["기술"]) == 40 + 3 * Common.ranks().find(str(gf["rank"])), "대체의 기술 능력치는 등급으로 (%s)" % gf["stats"])
 	check(Addendum.character("nobody_xyz").is_empty(), "모르는 id 는 빈 표")
 
 

@@ -46,6 +46,36 @@
         },
         {
           "field": "learn",
+          "value": "amur_dash",
+          "part": "castle1",
+          "ep": 1,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
+        },
+        {
+          "field": "learn",
+          "value": "amur_triple",
+          "part": "castle1",
+          "ep": 1,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
+        },
+        {
+          "field": "learn",
+          "value": "amur_weaving",
+          "part": "castle1",
+          "ep": 1,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
+        },
+        {
+          "field": "learn",
           "value": "jesus_zone",
           "part": "castle1",
           "ep": 1,
@@ -348,6 +378,26 @@
           "refs": [],
           "conf": "user",
           "src": "data/ranks.json 강함표 '(초반) 서진태'(사용자 확정)"
+        },
+        {
+          "field": "learn",
+          "value": "jintae_storm",
+          "part": "castle1",
+          "ep": 3,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
+        },
+        {
+          "field": "learn",
+          "value": "jintae_vital",
+          "part": "castle1",
+          "ep": 3,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
         },
         {
           "field": "faction",
@@ -748,6 +798,16 @@
           "refs": [],
           "conf": "user",
           "src": "data/ranks.json 강함표 '(남궁혁 전) 피우진'(사용자 확정)"
+        },
+        {
+          "field": "learn",
+          "value": "woojin_core_counter",
+          "part": "castle1",
+          "ep": 3,
+          "event": null,
+          "refs": [],
+          "conf": "ai",
+          "src": "canon/techniques users — 익힌 화 기록 없음 · 첫 등장부터 아는 것으로 봄"
         },
         {
           "field": "faction",
@@ -9370,6 +9430,16 @@
           "note": "홍콩 화진 쪽 유우성을 보좌하며 한국행을 만류"
         },
         {
+          "field": "rank",
+          "value": "외성 하위",
+          "part": "castle1",
+          "ep": 117,
+          "event": null,
+          "refs": [],
+          "conf": "user",
+          "src": "data/ranks.json 강함표 '도우첸'(사용자 확정)"
+        },
+        {
           "field": "alive",
           "value": false,
           "part": "castle2",
@@ -10863,6 +10933,16 @@
           "note": "DS 무리 속에서 김대건을 따라다님"
         },
         {
+          "field": "rank",
+          "value": "그 아래급",
+          "part": "castle1",
+          "ep": 14,
+          "event": null,
+          "refs": [],
+          "conf": "user",
+          "src": "data/ranks.json 강함표 '장호'(사용자 확정)"
+        },
+        {
           "field": "faction",
           "value": "bujinpa",
           "part": "castle1",
@@ -11101,6 +11181,16 @@
           "conf": "user",
           "src": "소속 flag 확인(2026-11-06 68차 · 서브에이전트 · 판독 글만 — synth/flag_verdict_A·B.json · 사용자 확인 전 · docs/답변필요.md) · 답53(사용자 2026-11-06 '추천대로 다 진행해' — docs/인터뷰/2026-11-06_자산화_답변53.md)",
           "note": "자막 인신매매 갱단 두목"
+        },
+        {
+          "field": "rank",
+          "value": "전국구",
+          "part": "castle1",
+          "ep": 75,
+          "event": null,
+          "refs": [],
+          "conf": "user",
+          "src": "data/ranks.json 강함표 '드미트리'(사용자 확정)"
         },
         {
           "field": "alive",
@@ -15186,6 +15276,16 @@
           "conf": "ai",
           "src": "화별 판독(state · traits · relations) · 사용자 메모로 소속 이력을 뽑음 — work/pilot/status_canon.py(2026-11-05 65차 · 서브에이전트 3 · 원본 다시 읽지 않음)",
           "note": "호텔 캐슬 암살조 오른손의 일원"
+        },
+        {
+          "field": "rank",
+          "value": "내성 하위",
+          "part": "castle2",
+          "ep": 111,
+          "event": null,
+          "refs": [],
+          "conf": "user",
+          "src": "data/ranks.json 강함표 '검지'(사용자 확정)"
         }
       ],
       "src": "2부 판독 new_entities(work/pilot/NNN.json) · 2부 canon 승격(work/pilot/canon_p2.py — 2026-11-03) · 검수 OK(사용자 2026-11-04 답37 — docs/인터뷰/2026-11-04_자산화_답변37.md)",
