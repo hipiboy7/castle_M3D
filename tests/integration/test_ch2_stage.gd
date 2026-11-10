@@ -128,7 +128,8 @@ func test_ch2_jintae_blade_and_iseul_both_sides() -> void:
 	var d := Stage.make(2, {"chapter": "ch2"})
 	var ise = d["enemies"][0]
 	check(ise.char_id == "iseul" and d["ais"].has(ise) and d["ais"][ise].prof == EnemyAI.PROFILES["iseul"], "공사장: 이슬은 적(프로필 iseul)")
-	var full: float = float(Haseong.ROLES["iseul"]["hp"]) * float(Addendum.derive(Addendum.stats_at("iseul", Haseong.PERIOD))["hp"])
+	var full: float = float(Haseong.ROLES["iseul"]["hp"]) * float(Addendum.derive(Addendum.stats_at("iseul", Haseong.PERIOD))["hp"]) \
+		* preload("res://src/data/rank_power.gd").hp_k(ise.rank)                 # 등급 능력 체력
 	check(absf(ise.hp_max - full * 0.5) < 0.5, "공사장은 한 합 — 체력 반 (%.0f / %.0f)" % [ise.hp_max, full])
 	Stage._enter(d, _room_of("lobby"))
 	var jin = d["hero"]

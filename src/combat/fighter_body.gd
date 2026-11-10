@@ -7,6 +7,7 @@ extends RefCounted
 
 const Moves = preload("res://src/data/moves.gd")
 const Common = preload("res://src/data/common.gd")
+const RankPower = preload("res://src/data/rank_power.gd")   # 등급 능력(3D 덧붙임 — 빠르기 · 체력 · 회피 · 방어)
 
 const ROLL_T := 20
 const ROLL_IFRAMES := Vector2i(2, 14)
@@ -100,6 +101,11 @@ var finisher_cap := 0.0          # 제압 피해 상한(최대 체력 비율, 0 
 var phase := 1
 var phase2_at := 0.0             # 체력이 이 비율이 되면 2차(0 = 2차 없음)
 var inert := false               # 싸움에서 빠졌다(신겐이 길을 내줌) — 치지도 맞지도 않는다
+var rank_power := true           # 등급 능력을 쓴다(false = 동작 · 체력 · 회피 · 방어를 등급과 상관없이 — 쳐내기 · 판정 시험)
+var no_evade := false            # 등급 회피를 안 한다(맞기만 하는 적 — 11장 천일도)
+var base_hp := -1.0              # 등급 능력을 곱하기 앞 최대 체력 · 걷기 · 달리기(apply_rank_power 가 처음 부를 때 잡는다)
+var base_walk := 0.0
+var base_run := 0.0
 var oneshot_immune := false      # 한 방(등급 차 common.one_shot · 기술 ko_rank)을 안 받는다 — 조작 인물 · 방의 보스(판이 정한다)
 
 
@@ -116,6 +122,20 @@ func _init(nm := "", tm := 0) -> void:
 	team = tm
 
 
+## 등급 능력을 체력 · 걷기 · 달리기에 건다(등급이 바뀌면 다시 불러도 된다 — 남은 체력 비율은 그대로)
+func apply_rank_power() -> void:
+	if base_hp < 0.0:
+		base_hp = hp_max
+		base_walk = walk_speed
+		base_run = run_speed
+	var frac := hp / hp_max if hp_max > 0.0 else 1.0
+	var tp := RankPower.tempo(rank) if rank_power else 1.0
+	hp_max = base_hp * (RankPower.hp_k(rank) if rank_power else 1.0)
+	hp = hp_max * frac
+	walk_speed = base_walk * tp
+	run_speed = base_run * tp
+
+
 func can_act() -> bool:
 	return state == "idle" or state == "move"
 
@@ -130,7 +150,7 @@ func set_state(s: String) -> void:
 
 
 func start_move(nm: String) -> void:
-	move = Moves.get_move(nm)
+	move = RankPower.scaled(Moves.get_move(nm), rank) if rank_power else Moves.get_move(nm)    # 윗급일수록 같은 동작이 빠르다(등급 능력 tempo)
 	attack_id += 1
 	hit_ids.clear()
 	landed = false

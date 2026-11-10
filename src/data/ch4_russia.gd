@@ -61,8 +61,8 @@ const ROLES := {
 	"deumiteuri": {"hp": 220.0, "posture": 200.0, "walk": 2.0, "run": 4.4, "stagger": 75, "poise": 26.0, "finisher_cap": 0.08, "ai": "x_blade",
 		"look": "deumiteuri", "phase2_at": 0.5, "dmg_k": 0.7},
 	# 구스타프: 결착 없음(074 — 이스크라 새 대가리들이 끼어들어 물러난다) — yield_at 에서 물러선다
-	"gustav": {"hp": 580.0, "posture": 520.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 36.0, "finisher_cap": 0.04, "ai": "x_master",
-		"look": "gustav", "phase2_at": 0.6, "yield_at": 0.3, "dmg_k": 1.05},
+	"gustav": {"hp": 480.0, "posture": 520.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 36.0, "finisher_cap": 0.04, "ai": "x_master",
+		"look": "gustav", "phase2_at": 0.6, "yield_at": 0.3, "dmg_k": 0.85},
 	"barista": {"hp": 140.0, "posture": 180.0, "walk": 2.1, "run": 4.6, "stagger": 75, "poise": 28.0, "finisher_cap": 0.06, "ai": "x_blade",
 		"look": "barista", "phase2_at": 0.5, "dmg_k": 0.35},
 }

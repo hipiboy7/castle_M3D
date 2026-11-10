@@ -24,6 +24,9 @@ func _close(dist := 0.8) -> Dictionary:
 	d["hero"].facing = Vector2(1, 0)
 	d["boss"].pos = Vector2(dist, 0)
 	d["boss"].facing = Vector2(-1, 0)
+	for f in [d["hero"], d["boss"]]:
+		f.rank_power = false                 # 판정 · 쳐내기 시험은 등급 능력 없이(프레임 · 피해를 그대로 — 등급 능력은 test_rank_power)
+		f.apply_rank_power()
 	return d
 
 

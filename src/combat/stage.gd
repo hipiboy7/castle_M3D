@@ -170,6 +170,7 @@ static func _set_rank(d: Dictionary, f, rank: String) -> void:
 	f.gauge = minf(f.gauge, f.gauge_max)
 	if d.has("skills_all"):
 		d["skills_all"].erase(f)                         # 맨손 방 거르기(_bare_skills)가 새 묶음에서 다시
+	f.apply_rank_power()                                 # 등급 능력(체력 · 빠르기 — rank_power.gd)
 
 
 ## 아군 · 적 — 1층은 addendum(castle_common 이 먼저), 3층은 장 표 ROLES
@@ -203,6 +204,8 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 		d["tag_of"][f] = str(extra["tag"])
 	if team == 1 and extra.get("passive", false):
 		d["passive"][f] = true                         # 맞기만 하는 적(11장 천일도) — 치지도 막지도 않는다
+		f.no_evade = true
+	f.apply_rank_power()                               # 등급 능력(체력 · 빠르기 — rank_power.gd)
 	var i: int = d["enemies"].size() + d["allies"].size() + 1
 	if team == 1:
 		f.is_boss = true                              # 적 쪽: 공격 준비 동안 상대 쪽으로 몸을 오래 튼다 · 늦은 쳐내기 없음

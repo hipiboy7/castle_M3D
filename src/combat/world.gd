@@ -10,6 +10,10 @@ const Fighter = preload("res://src/combat/fighter.gd")
 const Moves = preload("res://src/data/moves.gd")
 const Skills = preload("res://src/data/skills.gd")
 const Common = preload("res://src/data/common.gd")
+const RankPower = preload("res://src/data/rank_power.gd")   # 등급 능력(3D 덧붙임 — 회피 · 방어)
+## 등급 회피를 할 수 있는 상태(맞는 중 · 빈틈 · 넘어짐 · 기절이면 못 피한다)
+const EVADE_STATES := ["idle", "move", "attack", "parry_end"]
+const EVADE_SLIP := 3.2                  # 피할 때 옆으로 비키는 빠르기(m/초)
 
 const PARRY_HITSTOP := 9
 const PARRY_SHAKE := 4
@@ -35,6 +39,7 @@ var bounds := Rect2(-6.6, -3.6, 13.2, 7.4)
 var over := ""                           # "" / win / lose
 var end_on_ko := true                    # 결투: 누가 쓰러지면 판이 끝난다. 여러 사람 판(stage.gd)은 false — 판 끝은 stage 가 정한다
 var phase := 1
+var evade_seed := 0x2545F491            # 등급 회피 굴림(xorshift32 — 같은 판이면 같은 결과)
 var pending: Array = []                  # 미룬 맞음 [공격자, 맞는 사람, 기술, 맞은 자리, 남은 프레임]
 var stats := {"hits": 0, "parries": 0, "boss_parries": 0, "dodges": 0, "blocks": 0, "staggers": 0,
 	"offbeats": 0, "boss_offbeats": 0}       # offbeats: 엇박 계열이 맞은 수 (김신 · 백도찬)
@@ -174,6 +179,13 @@ func _resolve(a, d) -> void:
 		events.append(["dodge", d, at])
 		d.gain("dodge")                          # 구르기로 피하면 게이지 (common gauge.gain.dodge)
 		return
+	# 등급 회피: 한참 아랫급의 보통 공격은 저절로 비켜 피한다(rank_power evade_p — 재앙 ← 외성 미만 거의 다)
+	if str(mv["lethal"]) == "" and d.rank_power and not d.no_evade and d.state in EVADE_STATES and _evade_roll() < RankPower.evade_p(d.rank, a.rank):
+		stats["dodges"] += 1
+		events.append(["dodge", d, at])
+		var side := Vector2(-push.y, push.x) * (1.0 if (evade_seed & 1) == 0 else -1.0)
+		d.vel = side * EVADE_SLIP
+		return
 	# 카운터 자세(피우진 미친 코어 카운터): 마주 본 공격을 흘리고 그 자리에서 맞받는다(엇박 계열 · 가드 뚫기는 못 받는다)
 	if d.stance_open() and _faces(d, a) and not mv["guard_break"] and str(mv["lethal"]) == "":
 		a.landed = true
@@ -190,7 +202,7 @@ func _resolve(a, d) -> void:
 	# 등급 차 강함: 보통 공격의 피해 · 체간 × rank_damage_k(치는 쪽, 맞는 쪽) — 엇박 계열은 빼고(castle_M combat.py 와 같게).
 	# 이 결투(내성 상위 ↔ 톱, 1등급 차)는 1.0
 	if str(mv["lethal"]) == "":
-		var rk := Common.rank_damage_k(a.rank, d.rank)
+		var rk := Common.rank_damage_k(a.rank, d.rank) * (RankPower.defense_k(d.rank, a.rank) if d.rank_power else 1.0)   # + 등급 방어(3D 덧붙임)
 		var vh: Array = mv["vs_high"]
 		if not vh.is_empty() and Common.rank_index(d.rank) >= Common.rank_index(str(vh[0])):
 			rk = maxf(1.0, rk) * float(vh[1])         # 윗급 상대에게 큰 타격(아무르 티그로 3연타) — 등급 차로 깎이지 않는다
@@ -292,6 +304,15 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 		if d.state == "stun":
 			events.append(["stun", d, at, stun])
 	_check_hp(d, a)
+
+
+func _evade_roll() -> float:
+	var x := evade_seed
+	x ^= (x << 13) & 0xFFFFFFFF
+	x ^= x >> 17
+	x ^= (x << 5) & 0xFFFFFFFF
+	evade_seed = x & 0xFFFFFFFF
+	return float(evade_seed % 10000) / 10000.0
 
 
 ## 이번 한 대의 기술 값 — 리천식 삼연타는 맞은 순서(1 ~ hits)를 "hit_no" 로 달고, 셋째 대는 넉백 · 멈춤 · 흔들림을 크게

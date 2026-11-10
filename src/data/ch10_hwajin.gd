@@ -61,11 +61,11 @@ const ROLES := {
 		"moveset": {"combo": "py_slash1", "dash": "py_dash", "finisher": "py_finisher"}},
 	"lingling": {"hp": 520.0, "posture": 300.0, "walk": 2.2, "run": 4.8, "stagger": 75, "poise": 20.0, "finisher_cap": 0.1, "ai": "x_kicker",
 		"look": "lingling", "phase2_at": 0.5, "dmg_k": 0.8},
-	"yuwoosung": {"hp": 180.0, "posture": 300.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 32.0, "finisher_cap": 0.04, "ai": "x_swordmaster",
-		"look": "yuwoosung", "phase2_at": 0.5, "dmg_k": 0.45},
+	"yuwoosung": {"hp": 140.0, "posture": 300.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 32.0, "finisher_cap": 0.04, "ai": "x_swordmaster",
+		"look": "yuwoosung", "phase2_at": 0.5, "dmg_k": 0.38},
 	# 구스타프(이스크라 — 방패 · 총 · 타격): 거리를 두면 쏘는 x_gun, 방패는 단단함(poise)으로
-	"gustav": {"hp": 300.0, "posture": 400.0, "walk": 2.0, "run": 4.4, "stagger": 80, "poise": 40.0, "finisher_cap": 0.04, "ai": "x_gun",
-		"look": "gustav", "phase2_at": 0.5, "dmg_k": 0.45},
+	"gustav": {"hp": 230.0, "posture": 400.0, "walk": 2.0, "run": 4.4, "stagger": 80, "poise": 40.0, "finisher_cap": 0.04, "ai": "x_gun",
+		"look": "gustav", "phase2_at": 0.5, "dmg_k": 0.4},
 }
 
 const ROOMS := [

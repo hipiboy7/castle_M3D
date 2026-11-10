@@ -56,6 +56,8 @@ static func make(seed_value: int, opts := {}) -> Dictionary:
 	b.rank = str(Common.character(Skills.BOSS_ID)["rank"])          # 보스는 게이지 없이 패턴으로 기술을 쓴다(gauge_max 0)
 	b.pos = Vector2(2.2, -0.5)
 	b.facing = Vector2(-1, 0)
+	h.apply_rank_power()                                            # 등급 능력(체력 · 빠르기 — rank_power.gd)
+	b.apply_rank_power()
 	h.set_target(b)
 	b.set_target(h)
 	w.add(h)

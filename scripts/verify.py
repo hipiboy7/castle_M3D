@@ -52,7 +52,7 @@ ASSETS = os.path.join(ROOT, "assets")
 # CLAUDE.md 2-1절 TDD 등급 — 함수 단위 커버리지를 재는 파일 (main.gd 흐름은 노드가 있어 자동 결투 단계가 본다)
 COV_FILES = {
     "A": ["src/data/common.gd", "src/data/skills.gd", "src/data/moves.gd", "src/data/addendum.gd", "src/data/lines.gd", "src/combat/world.gd", "src/combat/fighter.gd", "src/combat/fighter_body.gd", "src/combat/replay.gd",
-          "src/data/campaign.gd", "src/data/save.gd", "src/data/skill_kit.gd"],
+          "src/data/campaign.gd", "src/data/save.gd", "src/data/skill_kit.gd", "src/data/rank_power.gd"],
     "B": ["src/combat/duel.gd", "src/combat/boss_ai.gd", "src/combat/bot.gd", "src/combat/stage.gd", "src/combat/enemy_ai.gd"],
 }
 REPLAY_FILE = ".tools/replay_stage2.json"

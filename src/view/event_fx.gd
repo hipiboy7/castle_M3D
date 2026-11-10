@@ -138,6 +138,7 @@ func apply(d: Dictionary) -> void:
 				snd.play("fall", -4.0, 1.2)
 			"dodge":
 				snd.play("miss", -6.0)
+				fx.pop(Vector3(e[1].pos.x, 2.3, e[1].pos.y), "회피", Color(0.8, 0.95, 0.85), 40, 0.5)   # 등급 회피 · 구르기(rank_power — 아랫급 공격을 비켜 낸다)
 			"feint":
 				snd.play("swing", -12.0, 0.7)
 				if pup.has(e[1]):

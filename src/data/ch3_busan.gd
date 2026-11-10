@@ -35,7 +35,9 @@ const CANON := {
 	"busan_end": {"fight": "", "place": "busan"},
 }
 
-const HEROES := ["kimshin", "jintae", "woojin", "iseul", "pyoyoung"]
+const HEROES := ["kimshin", "jintae", "woojin", "iseul", "pyoyoung", "guilhwa"]
+## 조작 인물 등급(진행이 없는 인물 — 구일화는 감방에서 이슬에게 진 뒤 샤워장에서 교대 조작, 사용자 2026-11-10 "3. 넣어")
+const HERO_RANKS := {"guilhwa": "전국구"}
 const LINES := "ch3"
 const CROWD_ID := "street_thug"
 
@@ -84,8 +86,8 @@ const ROOMS := [
 	{"id": "cheongju_cell", "theme": "prison_cell", "bounds": Rect2(-5.6, -2.4, 11.2, 4.8), "cast": ["iseul"],
 		"heroes": [Vector2(-3.0, 0.2)], "allies": [],
 		"enemies": [["guilhwa", Vector2(2.2, 0.0)]], "boss": "guilhwa"},
-	{"id": "cheongju_shower", "theme": "prison_cell", "bounds": Rect2(-6.0, -2.4, 12.0, 4.8), "cast": ["iseul"],
-		"heroes": [Vector2(-4.0, 0.2)], "allies": [["guilhwa", Vector2(-1.6, -0.8)]],
+	{"id": "cheongju_shower", "theme": "prison_cell", "bounds": Rect2(-6.0, -2.4, 12.0, 4.8), "cast": ["iseul", "guilhwa"],
+		"heroes": [Vector2(-4.0, 0.2), Vector2(-1.6, -0.8)], "allies": [],
 		"enemies": [["street_thug", Vector2(0.6, -1.4), {"name": "습격 무리"}], ["gang_blade", Vector2(1.2, 1.4), {"name": "칫솔 칼잡이"}],
 			["street_thug", Vector2(2.4, -0.2), {"name": "습격 무리"}], ["gang_blade", Vector2(3.4, 1.2), {"name": "칫솔 칼잡이"}],
 			["gang_brute", Vector2(4.2, -1.0), {"name": "턱수염 재소자"}]]},

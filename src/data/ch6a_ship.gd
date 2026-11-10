@@ -55,8 +55,8 @@ const ROLES := {
 	"komodo": {"hp": 200.0, "posture": 220.0, "walk": 2.1, "run": 4.6, "stagger": 75, "poise": 28.0, "finisher_cap": 0.06, "ai": "x_blade",
 		"look": "komodo", "phase2_at": 0.5, "dmg_k": 0.6},
 	# 남궁혁: 2장 따돌리기 방과 같은 너클(namgung 프로필 — 너클 카운터 기절). 여기서는 쓰러뜨린다(피우진 승 — p1:111)
-	"namgunghyuk": {"hp": 230.0, "posture": 200.0, "walk": 2.0, "run": 4.4, "stagger": 80, "poise": 30.0, "finisher_cap": 0.06, "ai": "namgung",
-		"look": "namgunghyuk", "dmg_k": 0.4},
+	"namgunghyuk": {"hp": 110.0, "posture": 200.0, "walk": 2.0, "run": 4.4, "stagger": 80, "poise": 30.0, "finisher_cap": 0.06, "ai": "namgung",
+		"look": "namgunghyuk", "dmg_k": 0.24},
 }
 
 const ROOMS := [
