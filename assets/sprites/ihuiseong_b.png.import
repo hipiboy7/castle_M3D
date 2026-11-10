@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://chtv2155712xg"
-path="res://.godot/imported/risa_b.png-73553c891bb192539db26af98b90ccbe.ctex"
+uid="uid://bt8vgqw8f8i6a"
+path="res://.godot/imported/ihuiseong_b.png-66269c2e96c32a65a06898608c126ee5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/roster/sprites/risa_b.png"
-dest_files=["res://.godot/imported/risa_b.png-73553c891bb192539db26af98b90ccbe.ctex"]
+source_file="res://assets/sprites/ihuiseong_b.png"
+dest_files=["res://.godot/imported/ihuiseong_b.png-66269c2e96c32a65a06898608c126ee5.ctex"]
 
 [params]
 

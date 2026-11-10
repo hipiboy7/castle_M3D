@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dbo3hsps1vep4"
-path="res://.godot/imported/krot_a.glb-9f5f287b8bdee80e168ee17bd54c8665.scn"
+uid="uid://2iqtssbo2giw"
+path="res://.godot/imported/jackson_a.glb-e0862d91255b9082705ed7369900aa6f.scn"
 
 [deps]
 
-source_file="res://assets/roster/models/krot_a.glb"
-dest_files=["res://.godot/imported/krot_a.glb-9f5f287b8bdee80e168ee17bd54c8665.scn"]
+source_file="res://assets/models/jackson_a.glb"
+dest_files=["res://.godot/imported/jackson_a.glb-e0862d91255b9082705ed7369900aa6f.scn"]
 
 [params]
 

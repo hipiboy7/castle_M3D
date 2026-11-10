@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c3ig0fm1q5fj7"
-path="res://.godot/imported/ihuiseong_a.glb-fcd1639d482f97c6f1c2d6d241fa77c7.scn"
+uid="uid://xtvsjt6dblpf"
+path="res://.godot/imported/yeominsu_a.glb-1155ccec5edf71796e2a6d74cb10d1ab.scn"
 
 [deps]
 
-source_file="res://assets/roster/models/ihuiseong_a.glb"
-dest_files=["res://.godot/imported/ihuiseong_a.glb-fcd1639d482f97c6f1c2d6d241fa77c7.scn"]
+source_file="res://assets/models/yeominsu_a.glb"
+dest_files=["res://.godot/imported/yeominsu_a.glb-1155ccec5edf71796e2a6d74cb10d1ab.scn"]
 
 [params]
 

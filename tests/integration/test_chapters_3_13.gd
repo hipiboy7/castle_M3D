@@ -51,8 +51,34 @@ func test_talk_room_says_lines_then_moves_on() -> void:
 	check(d["room_i"] == 1, "대화 방은 저절로 다음 방으로 (%d 프레임)" % n)
 	check(lines >= say.size() - 1, "say 줄을 차례로(늦춤) 보인다 — %d줄" % lines)
 	check(n >= int(Stage.SAY_SECS * say.size() * 60.0), "줄 수 × SAY_SECS 동안 머문다 (%d)" % n)
-	var r := Stage.simulate(1, 60 * 120, {"chapter": "ch7"})
-	check(r["over"] == "win", "7장(대화만)은 끝까지 간다 %s" % r["over"])
+	var r := Stage.simulate(1, 60 * 300, {"chapter": "ch7"})
+	check(r["over"] == "win", "7장(관전 · 대화)은 끝까지 간다 — 관전 방은 봇이 이긴다 %s" % r["over"])
+	var T7 = Campaign.table("ch7")
+	check(T7.ROOMS.filter(func(rm): return rm.get("auto", false)).size() >= 4, "7장은 관전 방(auto)이 넷 이상 — 컴퓨터끼리 싸우는 장면")
+
+
+## 8장 등급(사용자 2026-11-10): 피우진 이스크라 평 킬러급 · 교류회 김신 톱 대 류지학 내성 중위. 9장 CLUB BUDAPEST: 바이슨 피 반 → 그롤라 등장 · 싸움 멈춤
+func test_ch8_ranks_and_ch9_club_script() -> void:
+	var d := Stage.make(1, {"chapter": "ch8", "room": 0})
+	check(d["hero"].char_id == "woojin" and d["hero"].rank == "이스크라 평 킬러급", "8장 피우진 = 이스크라 평 킬러급 (%s)" % d["hero"].rank)
+	var d2 := Stage.make(1, {"chapter": "ch8", "room": 3})
+	check(d2["hero"].rank == "톱" and d2["boss"].char_id == "ryujihak" and d2["boss"].rank == "내성 중위",
+		"8장 교류회 김신 톱 대 류지학 내성 중위 (%s / %s)" % [d2["hero"].rank, d2["boss"].rank])
+	var d3 := Stage.make(1, {"chapter": "ch9", "room": 1})
+	while d3["stage"] != "fight":
+		Stage.step(d3)
+	var bison = d3["enemies"].filter(func(e): return e.char_id == "bison")[0]
+	bison.hp = bison.hp_max * 0.5
+	for i in 3:
+		Stage.step(d3)
+	check(d3["enemies"].any(func(e): return e.char_id == "grolla"), "바이슨 피 반 → 그롤라가 나타난다")
+	check(d3["enemies"].all(func(e): return e.inert or not e.alive()), "싸움이 멈춘다(calm)")
+	var n := 0
+	while d3["room_i"] == 1 and n < 60 * 60:
+		Stage.step(d3)
+		d3["world"].events.clear()
+		n += 1
+	check(d3["room_i"] == 2 and d3["allies"].is_empty(), "대사가 끝나면 장례식 방으로 (%d 프레임)" % n)
 
 
 func test_escape_rooms_and_determinism() -> void:

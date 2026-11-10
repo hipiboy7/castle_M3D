@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://xtvsjt6dblpf"
-path="res://.godot/imported/yeominsu_a.glb-1065763ead7f3209d6b56dacef40dd27.scn"
+uid="uid://efks56hb3osc"
+path="res://.godot/imported/risa_a.glb-b19a2cd75c4b5a11de80439441571c75.scn"
 
 [deps]
 
-source_file="res://assets/roster/models/yeominsu_a.glb"
-dest_files=["res://.godot/imported/yeominsu_a.glb-1065763ead7f3209d6b56dacef40dd27.scn"]
+source_file="res://assets/models/risa_a.glb"
+dest_files=["res://.godot/imported/risa_a.glb-b19a2cd75c4b5a11de80439441571c75.scn"]
 
 [params]
 
