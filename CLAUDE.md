@@ -5,6 +5,7 @@
 **이 폴더에서 Claude Code 를 따로 열어 개발한다** — 3D 일은 이 폴더 세션에서, 2D 본편 일은 castle_M 폴더 세션에서(2026-10-26 사용자).
 이 문서만으로 일할 수 있게 썼다. 여기 없는 규칙은 개발 규격(받은 사본 `data/common/docs/개발규격/` — `캐슬_게임공통.md` · `게임개발규격.md`)의 해당 절을 찾아 읽는다(전체를 읽지 않는다). 우선순위: 사용자 답(기획서 00 결정 10 포함) → 이 문서 → 기획서(castle_common `docs/기획서/03`) → 규격.
 
+> 정정 이력: 2026-11-10 — 0절 IP · 3절 저장소 공개 범위: 작업 완료까지 public, 끝나면 private(사용자 "Actions 분 수 · artifact 한도 때문에 public 전환이 필요해").
 > 정정 이력: 2026-11-09 (2) — 개발 끝 묶음(사용자 "1~3번 추천대로 … 개발 끝묶음도 진행해"): 0절 무엇(배포 설정 · 다음) · 1절 fighter_body · 그림 B 다시 구움 · 방별 봇 판.
 > 정정 이력: 2026-11-09 — 1절 난이도 표 difficulty.gd · 장 곡(campaign song) · 실행 인자 launch.gd · 인형 바탕 puppet_pose.gd(사용자 "추천대로 진행해").
 > 정정 이력: 2026-11-08 (2) — 3 ~ 13장(사용자 "3장부터 13장까지 중단없이 모두 다 진행"): 0절 무엇(모든 장), 1절 장 표 ch3 ~ ch13 · 무대 표 world3d · 1층 대체 · 대화 방 · 적 원형 x_ · 명부 그림 STAGED.
@@ -36,7 +37,7 @@
 - **3층은 이 판 소유**: 기술 프레임 · 거리 · 피해 · 예고(`src/data/moves.gd`), 체력 · 체간 · 속도(`src/combat/duel.gd`), 보스 패턴(`src/combat/boss_ai.gd` · `skills.gd` `BAEK_OFFBEAT`), 외형 · 연출 · 소리. 처음 값의 출처는 castle_M(`castle_m/action/moves.py` · `docs/P2_설계서_M1전투핵심.md` 8절 · `castle_m/data/looks.py` · `assets/`)이고 그 뒤 폰 리뷰로 이 판이 바꿔 왔다. 스토리는 castle_M `docs/story/`. 3D 에서 먼저 시험한 규칙(엇박 계열 기절 등)은 **3D 덧붙임**(`docs/S1_테스트결과서_공통받기.md` 3절) — 공통으로 올릴지는 사용자
 - **패키지** `com.hipiboy7.castlem3d`(castle_M 앱과 따로 설치된다), 서명 `android/debug.keystore`(castle_M 과 같은 고정 디버그 키, 의도적으로 커밋 · 유지 — 확정 규격 7절이 허용, 사용자 2026-11-04). 키는 바꾸지 않는다 — 릴리스(태그)에 붙이는 APK 도 이 키로 서명한다(덮어 설치 · 세이브 유지)
 - **개발 환경**(2026-11-06 리눅스로 옮김): RHEL 9.6 x86_64 · root 없음. Python `python3.11`(기본 `python3` 는 3.9 — 쓰지 않는다. Windows 였던 때의 `py -3.12` 는 이것으로 읽는다). Godot 는 `.tools/`(커밋 안 함, `python3.11 scripts/get_godot.py` 가 리눅스 판을 받음). castle_common 은 `../projects/castle_common` 에 있고 `../castle_common` 은 그것을 가리키는 심볼릭 링크. 가상 화면 스크린샷 `tools/xvfb_shot.sh 폴더 [프레임] [초] [시드]`(Xvfb · Mesa 는 RPM 을 `~/.local-opt/xvfb/` 에 풀어 씀 — 트러블슈팅 T-8). push 는 SSH 원격(`git@github.com`). `tools/ci.py` 는 환경 변수 `GITHUB_TOKEN` 이 있어야 CI 를 본다(없으면 CI 조회 없이 진행). Blender 없음(필요하면 사용자 폴더에 받아 씀). 사용량 도구 없음 → 보고에 "측정 없음"
-- **IP**: 비공식 · 비영리 · 비공개(저장소 비공개 유지, 공개 배포 없음). 원작 그림을 클라우드 AI(ArtCraft 등)에 올리는 것은 외부 전송이라 사용자가 정한다
+- **IP**: 비공식 · 비영리. 저장소는 **작업이 끝날 때까지 public, 끝나면 private 으로 되돌린다**(2026-11-10 사용자 — Actions 분 수 · 아티팩트 한도. 공개 동안 fork · clone 은 되돌릴 수 없다). 공개 배포(스토어 등)는 없다. 원작 그림을 클라우드 AI(ArtCraft 등)에 올리는 것은 외부 전송이라 사용자가 정한다
 
 ## 0-1. 세션을 시작하면 읽는 순서
 1. 사용량 보고 — `~/claude/usage/usage_cost.py` 가 있으면 출력 두 줄, 없으면 "측정 없음" (4절)
@@ -89,9 +90,9 @@
 - **도메인 품질**(골격 13절): 판정 결정성(60Hz 고정 · 시드 하나) · 받은 공통 데이터는 손대지 않음(도장 — verify) · 자산 출처(`assets/ASSETS.md` — verify) · 원작 신뢰도(canon `conf: ai` 는 연출에만, 근거 주석에 표시) · 성능 예산(`docs/성능.md` — 실기 FPS, 다음 단계) · 세이브는 아직 없음(생기면 형식 버전 · 옛 세이브 시험)
 
 ## 3. Git · 외부 서비스
-- 저장소 `hipiboy7/castle_M3D`(비공개, 2026-10-26 REST 로 만듦 — 사용자 확인 "둘 다 push 하고 Actions 돌려줘"). `main` 에 직접 작업하지 않는다(`impl-*` 브랜치, 병합 `--no-ff`, 브랜치 보존). 지금 브랜치 `impl-draft1`
+- 저장소 `hipiboy7/castle_M3D`(2026-11-10 부터 작업 완료까지 public — 0절 IP, 2026-10-26 비공개로 REST 로 만듦 — 사용자 확인 "둘 다 push 하고 Actions 돌려줘"). `main` 에 직접 작업하지 않는다(`impl-*` 브랜치, 병합 `--no-ff`, 브랜치 보존). 지금 브랜치 `impl-draft1`
 - commit · push 전에 `git fetch`(여러 서버 · PC 에서 일한다 — 규격 2-14)
-- **사람 확인이 필요한 일**: push(올라갈 커밋을 보여 주고), 태그 push, 저장소 공개 범위(비공개 유지), 릴리스, 이력 재작성 · 강제 push · 삭제, 비용이 드는 외부 호출. 커밋 금지: `.env` · 토큰 · 키(고정 디버그 키 `android/debug.keystore` 는 예외). `git add -A` 대신 경로를 적는다
+- **사람 확인이 필요한 일**: push(올라갈 커밋을 보여 주고), 태그 push, 저장소 공개 범위(작업 완료까지 public → 끝나면 private, 바꾸는 것은 사용자), 릴리스, 이력 재작성 · 강제 push · 삭제, 비용이 드는 외부 호출. 커밋 금지: `.env` · 토큰 · 키(고정 디버그 키 `android/debug.keystore` 는 예외). `git add -A` 대신 경로를 적는다
 - Actions: `main` · `impl-*` push(경로 필터 — `src/` · `data/` · `assets/` · `tests/` · `scripts/` · 설정)에는 **build 만**(검증 · APK · APK 안 json 검사 · 폰 스크린샷, 캐시가 있으면 약 2 ~ 3분). **에뮬레이터 점검은 수동 실행(`tools/ci.py dispatch --emulator`)과 태그 push 때만**(약 5 ~ 8분 더 — 규격 1 · 9절, 사용자 2026-11-04). 태그 push 는 build → emulator → **release**(APK 를 GitHub Releases 에 Latest 로, 본문 `docs/폰확인.md`, 디버그 키 서명). `versionCode` = run 번호 · `versionName` = 태그(가지 빌드는 `0.2.0-dev.<run>`). 무료 분량(계정 전체 월 2,000분)을 castle_M 과 같이 쓴다. 아티팩트는 1일(빌드 검사용 — 남길 스크린샷은 바로 `docs/screenshots/` 로)
 - GitHub API 는 `gh` 없이 토큰(환경 변수 `GITHUB_TOKEN`, 없으면 git credential)으로 REST — **`python3.11 tools/ci.py`** (runs · status · watch · fetch · log · dispatch · cancel, 사용법은 파일 머리). 토큰을 파일 · 로그 · 커밋에 남기지 않는다. CI 를 기다릴 때는 `watch` 를 백그라운드로 돌리고 끝나면 이어서 본다
 
