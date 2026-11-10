@@ -35,6 +35,7 @@ extends RefCounted
 ##            "survive"          방 survive 초를 버팀
 ##     do(한 줄에 여럿):
 ##            "spawn": [[id, Vector2, {덧붙임}], ..]       적 등장(장 표 ROLES 에 그 id 가 있어야)
+##            "moveset": {id: {combo · dash · counter · finisher}}   그 사람의 기본 공격 묶음을 바꾼다(10장 아킬라 총격전)
 ##            "spawn_allies": [[id, Vector2, {덧붙임}], ..] 아군 등장(봇 — ROLES 에 moveset). 자리가 bounds 밖이면 가장자리에
 ##                                        선다(가장자리에 세우면 걸어 들어오는 것처럼)
 ##            "boss": id                  화면 위 큰 막대를 이 사람으로(등급 차 한 방도 안 받는다)
@@ -839,6 +840,9 @@ static func _do(d: Dictionary, t: Dictionary) -> void:
 	if t.get("calm", false):
 		for f in d["enemies"] + d["allies"]:
 			_calm(f)
+	for id in t.get("moveset", {}):
+		for f in _who(d, str(id)):
+			f.moveset = t["moveset"][id]
 	if t.has("learn"):
 		_learn(d, str(t["learn"]))
 	if t.has("cast"):

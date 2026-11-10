@@ -136,6 +136,9 @@ func apply(d: Dictionary) -> void:
 				hud.message("제압", "", 1.0)
 			"stagger":
 				snd.play("fall", -4.0, 1.2)
+			"crit":
+				snd.play("hit_heavy", -2.0, 0.85)
+				fx.pop(Vector3(e[1].pos.x, 2.55, e[1].pos.y), "부동심", Color(1.0, 0.78, 0.3), 52, 0.7)   # 크리티컬(rank_power crit_p — 2배)
 			"dodge":
 				snd.play("miss", -6.0)
 				fx.pop(Vector3(e[1].pos.x, 2.3, e[1].pos.y), "회피", Color(0.8, 0.95, 0.85), 40, 0.5)   # 등급 회피 · 구르기(rank_power — 아랫급 공격을 비켜 낸다)

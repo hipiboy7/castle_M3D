@@ -99,6 +99,9 @@ const ROLES := {
 	# 리천(톱): 쓰러뜨릴 수 없다 — 버티기 · 퇴각 방
 	"richeon": {"hp": 3000.0, "posture": 900.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 40.0, "finisher_cap": 0.02, "ai": "x_master",
 		"look": "richeon", "hp_floor": 0.6, "dmg_k": 0.15},
+	# 카지노 3(라텔 · 표영 3분 버티기) 리천 — 등급 공격 · 부동심(톱)을 받아 더 세져서 이 방만 낮춤(봇 판 3/8 → 2026-11-10)
+	"richeon_hold": {"hp": 3000.0, "posture": 900.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 40.0, "finisher_cap": 0.02, "ai": "x_master",
+		"look": "richeon", "hp_floor": 0.6, "dmg_k": 0.11},
 	"lingling": {"hp": 900.0, "posture": 300.0, "walk": 2.2, "run": 4.8, "stagger": 75, "poise": 20.0, "finisher_cap": 0.08, "ai": "x_kicker",
 		"look": "lingling", "hp_floor": 0.3, "dmg_k": 0.5},
 	"eunbo": {"hp": 240.0, "posture": 120.0, "walk": 1.8, "run": 3.9, "stagger": 75, "poise": 14.0, "ai": "x_grappler", "look": "eunbo", "dmg_k": 0.5},
@@ -152,7 +155,7 @@ const ROOMS := [
 			{"when": "time:113", "spawn_allies": [["keurisa", Vector2(-7.0, -1.6)]], "calm": true, "say": "smoke"}]},
 	{"id": "casino_3", "theme": "casino_deck", "bounds": Rect2(-7.0, -2.4, 14.0, 4.8), "cast": ["ratel", "pyoyoung"], "survive": 180.0,
 		"heroes": [Vector2(-4.4, -0.8), Vector2(-4.4, 1.0)], "allies": [],
-		"enemies": [["richeon", Vector2(2.6, 0.0)]], "boss": "richeon",
+		"enemies": [["richeon", Vector2(2.6, 0.0), {"role": "richeon_hold"}]], "boss": "richeon",
 		"triggers": [{"when": "time:50", "say": "mid"}, {"when": "time:120", "say": "late"}]},
 	{"id": "casino_4", "theme": "casino_deck", "bounds": Rect2(-7.0, -2.4, 14.0, 4.8), "cast": ["krot", "shire"], "survive": 180.0,
 		"heroes": [Vector2(-4.4, -0.8), Vector2(-4.4, 1.0)], "allies": [],

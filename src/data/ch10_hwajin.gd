@@ -63,6 +63,8 @@ const ROLES := {
 		"look": "lingling", "phase2_at": 0.5, "dmg_k": 0.8},
 	"yuwoosung": {"hp": 140.0, "posture": 300.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 32.0, "finisher_cap": 0.04, "ai": "x_swordmaster",
 		"look": "yuwoosung", "phase2_at": 0.5, "dmg_k": 0.38},
+	# 뜨거운 피 조직원(이스크라 — 산 기슭 총격전, 구스타프 반피 뒤 셋): 거리를 두고 쏜다
+	"hotblood_gunner": {"hp": 90.0, "posture": 40.0, "walk": 1.9, "run": 4.1, "stagger": 70, "poise": 2.0, "ai": "x_gun", "look": "gunter_uzi", "dmg_k": 0.45},
 	# 구스타프(이스크라 — 방패 · 총 · 타격): 거리를 두면 쏘는 x_gun, 방패는 단단함(poise)으로
 	"gustav": {"hp": 230.0, "posture": 400.0, "walk": 2.0, "run": 4.4, "stagger": 80, "poise": 40.0, "finisher_cap": 0.04, "ai": "x_gun",
 		"look": "gustav", "phase2_at": 0.5, "dmg_k": 0.4},
@@ -83,7 +85,12 @@ const ROOMS := [
 		"triggers": [{"when": "down:yuwoosung", "learn": "beat:yuwoosung"}]},
 	{"id": "mountain_road", "theme": "mountain_road", "bounds": Rect2(-7.0, -2.4, 14.0, 4.8), "cast": ["akila"],
 		"heroes": [Vector2(-4.2, 0.2)], "allies": [],
-		"enemies": [["gustav", Vector2(2.8, 0.0)]], "boss": "gustav"},
+		"enemies": [["gustav", Vector2(2.8, 0.0)]], "boss": "gustav",
+		# 사용자 2026-11-10: 구스타프 피가 50% 떨어지면 뒤에 새 뜨거운 피 조직원 셋 → 총격전(아킬라 기본 공격이 리볼버로)
+		"triggers": [{"when": "hp:gustav:0.5", "say": "hotblood", "moveset": {"akila": {"combo": "akg_1", "dash": "akg_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
+			"spawn": [["pro_fighter", Vector2(6.4, -1.8), {"role": "hotblood_gunner", "name": "뜨거운 피"}],
+				["pro_fighter", Vector2(6.6, 0.0), {"role": "hotblood_gunner", "name": "뜨거운 피"}],
+				["pro_fighter", Vector2(6.4, 1.8), {"role": "hotblood_gunner", "name": "뜨거운 피"}]]}]},
 	{"id": "hwajin_hall", "theme": "hwajin_hall", "bounds": Rect2(-7.0, -2.6, 14.0, 5.2), "cast": ["kimshin", "woojin"],
 		"heroes": [Vector2(-5.0, -0.6), Vector2(-5.2, 0.8)],
 		"allies": [["pyoyoung", Vector2(-4.2, 1.8)], ["street_thug", Vector2(-5.8, -1.8), {"role": "baekui_man", "name": "백의 조직원", "look": "ds_suit"}],

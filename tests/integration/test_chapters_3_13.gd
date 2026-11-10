@@ -143,3 +143,25 @@ func test_bare_room_drops_weapon_skills() -> void:
 		check(not Tech.WEAPON.has(str(e["move"])), "주먹 승부에 무기 기술 없음 %s" % e["name"])
 	var d2 := Stage.make(1, {"chapter": "ch12", "room": 0})
 	check(d2["heroes"][0].skills.any(func(e): return Tech.WEAPON.has(str(e["move"]))), "칼 든 12장 김신은 칼 기술을 쓴다")
+
+
+## 10장 산 기슭(사용자 2026-11-10): 구스타프 피가 50% 아래면 뒤에 뜨거운 피 셋 → 총격전(아킬라 기본 공격이 리볼버)
+func test_ch10_mountain_road_gunfight() -> void:
+	var T = Campaign.table("ch10")
+	var ri := -1
+	for i in T.ROOMS.size():
+		if T.ROOMS[i]["id"] == "mountain_road":
+			ri = i
+	var d := Stage.make(3, {"chapter": "ch10", "room": ri})
+	var gus = d["enemies"].filter(func(e): return e.char_id == "gustav")[0]
+	var aki = d["heroes"].filter(func(h): return h.char_id == "akila")[0]
+	for n in 240:
+		Stage.step(d, {})
+	check(d["enemies"].size() == 1, "처음엔 구스타프 혼자")
+	gus.hp = gus.hp_max * 0.45
+	for n in 10:
+		Stage.step(d, {})
+	var hot: Array = d["enemies"].filter(func(e): return e.name == "뜨거운 피")
+	check(hot.size() == 3, "뜨거운 피 셋이 나온다 — %d" % hot.size())
+	check(hot.all(func(e): return e.pos.x > gus.pos.x), "구스타프 뒤쪽에서")
+	check(str(aki.moveset.get("combo", "")) == "akg_1" and Moves.get_move("akg_1")["shape"] == "shot", "아킬라 기본 공격이 리볼버")

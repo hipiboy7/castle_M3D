@@ -201,6 +201,17 @@ const M := {
 	"t_shot": {"label": "근거리 사격", "startup": 28, "active": 2, "recovery": 18, "damage": 12, "reach": 155, "radius": 4,
 		"parryable": false, "knockback": 2.0, "hitstop": 6, "posture": 12, "telegraph": "unblock", "shape": "shot",
 		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 3, "skill": true, "skill_id": "g4_shot", "hand": "L"},
+	# 아킬라 총격 묶음(10장 산 기슭 — 구스타프 반피 뒤 뜨거운 피 셋이 나오면 총격전, 사용자 2026-11-10): 리볼버 속사 → 왼손 한 발 · 구르며 쏘기.
+	# 적의 t_shot 보다 빠르고 약하다(조작 인물 연타 — 겨눔 예고 없음)
+	"akg_1": {"label": "리볼버 속사", "startup": 9, "active": 2, "recovery": 12, "damage": 7, "reach": 155, "radius": 4,
+		"parryable": false, "knockback": 1.6, "hitstop": 5, "posture": 8, "shape": "shot", "sfx": "shot", "hit_sfx": "hit_heavy",
+		"shake": 2, "hand": "R", "next": "akg_2"},
+	"akg_2": {"label": "왼손 한 발", "startup": 8, "active": 2, "recovery": 16, "damage": 8, "reach": 155, "radius": 4,
+		"parryable": false, "knockback": 2.2, "hitstop": 6, "posture": 10, "shape": "draw_shot", "sfx": "shot", "hit_sfx": "hit_heavy",
+		"shake": 3, "hand": "L"},
+	"akg_dash": {"label": "구르며 쏘기", "startup": 10, "active": 2, "recovery": 14, "damage": 8, "reach": 155, "radius": 4,
+		"parryable": false, "knockback": 2.0, "hitstop": 6, "posture": 10, "shape": "draw_shot", "sfx": "shot", "hit_sfx": "hit_heavy",
+		"shake": 3, "hand": "R", "iframes": true},
 	# 하야부사 — 긴칼(카타나). 신겐보다 짧고 느리다(하향)
 	"hy_slash1": {"label": "긴칼 베기", "startup": 13, "active": 3, "recovery": 11, "damage": 10, "reach": 20, "radius": 11,
 		"arc": 80, "lunge": 6, "posture": 12, "telegraph": "parry", "shape": "slash", "sfx": "knife"},

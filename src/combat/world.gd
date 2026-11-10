@@ -42,7 +42,7 @@ var phase := 1
 var evade_seed := 0x2545F491            # 등급 회피 굴림(xorshift32 — 같은 판이면 같은 결과)
 var pending: Array = []                  # 미룬 맞음 [공격자, 맞는 사람, 기술, 맞은 자리, 남은 프레임]
 var stats := {"hits": 0, "parries": 0, "boss_parries": 0, "dodges": 0, "blocks": 0, "staggers": 0,
-	"offbeats": 0, "boss_offbeats": 0}       # offbeats: 엇박 계열이 맞은 수 (김신 · 백도찬)
+	"offbeats": 0, "boss_offbeats": 0, "crits": 0}       # crits: 부동심(크리티컬) 수 · offbeats: 엇박 계열이 맞은 수 (김신 · 백도찬)
 
 
 func add(f) -> void:
@@ -203,6 +203,8 @@ func _resolve(a, d) -> void:
 	# 이 결투(내성 상위 ↔ 톱, 1등급 차)는 1.0
 	if str(mv["lethal"]) == "":
 		var rk := Common.rank_damage_k(a.rank, d.rank) * (RankPower.defense_k(d.rank, a.rank) if d.rank_power else 1.0)   # + 등급 방어(3D 덧붙임)
+		if a.rank_power:
+			rk *= RankPower.atk_k(a.rank)                # + 등급 공격(3D 덧붙임)
 		var vh: Array = mv["vs_high"]
 		if not vh.is_empty() and Common.rank_index(d.rank) >= Common.rank_index(str(vh[0])):
 			rk = maxf(1.0, rk) * float(vh[1])         # 윗급 상대에게 큰 타격(아무르 티그로 3연타) — 등급 차로 깎이지 않는다
@@ -271,6 +273,11 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 		shake = maxi(shake, 6)
 		events.append(["lethal", d, at, frac, lethal])
 		stats["boss_offbeats" if a.is_boss else "offbeats"] += 1
+	# 부동심(크리티컬): 보통 공격이 2배로(rank_power crit_p — 재앙 · 아킬라가 가장 잦다)
+	if lethal == "" and a.rank_power and _evade_roll() < RankPower.crit_p(a.rank, a.char_id):
+		dmg *= RankPower.CRIT_K
+		events.append(["crit", d, at, a])
+		stats["crits"] += 1
 	# 한 방: 기술의 ko_rank(그 등급 이하) · 등급 차 one_shot_gap 이상 — 조작 인물 · 방의 보스는 빼고(보스전은 보통 피해로 —
 	# 위빙 · 오리지널이 보스를 두 번에 눕혀 2장 신태진전이 17초에 끝났다, 봇 판 2026-11-08)
 	if lethal == "" and not d.oneshot_immune and (Skills.kills(mv, d.rank) or Skills.one_shot(a.rank, d.rank, false)):

@@ -1,5 +1,6 @@
 extends RefCounted
-## 등급 능력 — **3D 덧붙임**(사용자 2026-11-10 "레벨이 높을수록 당연히 동작은 더 빠르고 공격력은 더 높고, 체력은 더 많고,
+## 등급 능력 — **3D 덧붙임**(수치 2026-11-10 사용자 둘째 답: 재앙 빠르기 1.3 · 체력 1.5 · 공격 더 많이 · 방어 바닥 50% · 회피 위 45% ·
+## 재앙 ← 외성 미만 그대로 · 부동심(크리티컬 — 공격력 2배, 재앙 · 아킬라가 가장 높다))(사용자 2026-11-10 "레벨이 높을수록 당연히 동작은 더 빠르고 공격력은 더 높고, 체력은 더 많고,
 ## 회피율도 높아야 하며, 방어력도 더 높아야함. 재앙급은 거의 외성 미만급에는 타격을 받지 않고, 타격을 맞아도 데미지가
 ## 방어력이 높아서 덜 들어가야함"). 공통 후보 — docs/castle_common_요청.md 34행.
 ## castle_common rank_gap(공격 배율 rank_damage_k · 움찔 안 함 shrugs_off · 한 방 one_shot)은 그대로 두고 그 위에 더한다:
@@ -7,6 +8,9 @@ extends RefCounted
 ##   체력 hp_k — 장 표 hp × hp_k (등급 하나마다)
 ##   방어 defense_k — 아랫급의 보통 공격 피해 · 체간 × (DEF_FROM 등급 차부터 줄어든다, 바닥 DEF_MIN)
 ##   회피 evade_p — 아랫급의 보통 공격을 저절로 피할 확률(EVADE_FROM 등급 차부터, 위 EVADE_MAX)
+##   공격 atk_k — 보통 공격 피해 · 체간 × (등급 하나마다, common 등급 차 배율과 따로)
+##   부동심 crit_p — 보통 공격이 CRIT_K 배로 들어갈 확률(등급 번호마다 CRIT_STEP, 재앙 · CRIT_MAX_CHARS(아킬라 — 원작 '부동(不動)의 마음'
+##     061 · p1_071 · p1_095) 은 CRIT_MAX). 화면에 '부동심'
 ##   재앙 ← 외성 미만: 회피 CALAMITY_EVADE · 방어 × CALAMITY_DEF 더
 ## 엇박 계열(lethal)은 등급과 상관없는 박자 기술이라 피하기 · 방어를 받지 않는다(윗급을 잡는 수단 — 기획서 02). 순수 함수.
 
@@ -15,10 +19,16 @@ const Common = preload("res://src/data/common.gd")
 const MID := "외성 하위"
 const TEMPO_STEP := 0.015
 const HP_STEP := 0.05
-const TOP_OVERRIDE := {"재앙": {"tempo": 1.15, "hp": 1.4}}
+const ATK_STEP := 0.02
+const TOP_OVERRIDE := {"재앙": {"tempo": 1.3, "hp": 1.5, "atk": 1.4}}
 const DEF_FROM := 2
 const DEF_STEP := 0.06
-const DEF_MIN := 0.35
+const DEF_MIN := 0.5
+const CRIT_BASE := 0.03
+const CRIT_STEP := 0.01
+const CRIT_MAX := 0.25
+const CRIT_MAX_CHARS := ["akila"]
+const CRIT_K := 2.0
 const EVADE_FROM := 2
 const EVADE_STEP := 0.05
 const EVADE_MAX := 0.45
@@ -53,6 +63,19 @@ static func hp_k(rank: String) -> float:
 	if TOP_OVERRIDE.has(rank):
 		return float(TOP_OVERRIDE[rank]["hp"])
 	return 1.0 + HP_STEP * _steps(rank)
+
+
+static func atk_k(rank: String) -> float:
+	if TOP_OVERRIDE.has(rank):
+		return float(TOP_OVERRIDE[rank]["atk"])
+	return 1.0 + ATK_STEP * _steps(rank)
+
+
+## 부동심(크리티컬) 확률 — 등급 번호(건달급 0)마다 CRIT_STEP, 재앙 · 아킬라는 CRIT_MAX
+static func crit_p(rank: String, char_id := "") -> float:
+	if rank == CALAMITY or CRIT_MAX_CHARS.has(char_id):
+		return CRIT_MAX
+	return minf(CRIT_MAX, CRIT_BASE + CRIT_STEP * maxi(0, _i(rank)))
 
 
 static func _gap(def_rank: String, att_rank: String) -> int:

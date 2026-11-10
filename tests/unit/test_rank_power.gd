@@ -82,3 +82,51 @@ func test_tempo_shortens_frames() -> void:
 	g.rank = "건달급"
 	g.start_move("x_hook")
 	check(Moves.total(g.move) > Moves.total(base), "건달급은 길다")
+
+
+func test_attack_and_crit_by_rank() -> void:
+	var ladder: Array = Common.ranks()
+	for i in range(1, ladder.size()):
+		check(RP.atk_k(ladder[i]) > RP.atk_k(ladder[i - 1]), "공격 %s > %s" % [ladder[i], ladder[i - 1]])
+		check(RP.crit_p(ladder[i]) >= RP.crit_p(ladder[i - 1]), "부동심 %s ≥ %s" % [ladder[i], ladder[i - 1]])
+	check(is_equal_approx(RP.tempo("재앙"), 1.3) and is_equal_approx(RP.hp_k("재앙"), 1.5), "재앙 빠르기 1.3 · 체력 1.5")
+	check(RP.atk_k("재앙") > RP.atk_k("톱") + 0.1, "재앙 공격이 더 많이")
+	check(RP.defense_k("톱", "건달급") >= 0.5 - 0.001, "방어 바닥 50%")
+	check(RP.evade_p("톱", "건달급") <= 0.45 + 0.001, "회피 위 45%")
+	check(RP.crit_p("재앙") == RP.CRIT_MAX and RP.crit_p("내성 상위", "akila") == RP.CRIT_MAX, "부동심은 재앙 · 아킬라가 가장 높다")
+	check(RP.crit_p("톱") < RP.CRIT_MAX, "톱은 재앙보다 낮다")
+
+
+func test_world_crit_doubles() -> void:
+	# 아킬라(부동심 최고)가 같은 등급을 스무 번 치면 몇 번은 2배('crit' 신호) — 피해는 보통의 2배
+	var w = World.new()
+	var a = Fighter.new("아킬라", 0)
+	a.char_id = "akila"
+	a.rank = "내성 상위"
+	var d = Fighter.new("상대", 1)
+	d.rank = "내성 상위"
+	d.can_parry = false
+	a.pos = Vector2.ZERO
+	d.pos = Vector2(0.8, 0)
+	d.facing = Vector2(1, 0)
+	w.fighters = [a, d]
+	var crits := 0
+	var normal := -1.0
+	var big := -1.0
+	for i in 20:
+		d.hp_max = 1000.0
+		d.hp = 1000.0
+		d.set_state("idle")
+		d.posture = 0.0
+		a.start_move("x_hook")
+		w.events.clear()
+		w.pending.clear()
+		w._resolve(a, d)
+		var lost: float = 1000.0 - d.hp
+		if w.events.any(func(ev): return ev[0] == "crit"):
+			crits += 1
+			big = lost
+		elif lost > 0.0:
+			normal = lost
+	check(crits >= 1 and crits <= 12, "20번 중 부동심 %d" % crits)
+	check(normal > 0.0 and absf(big - normal * 2.0) < 0.01, "부동심은 2배 (%.1f · %.1f)" % [normal, big])
