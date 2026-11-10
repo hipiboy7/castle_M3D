@@ -8,7 +8,7 @@ extends Node3D
 ##
 ## 실행 인자(-- 뒤에): --autoplay 봇이 김신(끝나면 다음 시드로 다시) · --mode 장 id(ch0 · ch1 · ch6 · ch11 — 옛 이름 duel · stage 도 됨, 기본 ch6)
 ##   --seconds N N초(게임 시간) 뒤 결과를 찍고 끝 · --seed S · --shots 폴더:프레임,프레임 그 프레임 화면을 PNG 로
-##   --touch PC 에서도 터치 버튼 · --room N stage 를 N번 방부터 · --crowd N 28층에 경호원 N명 더(성능 점검)
+##   --touch PC 에서도 터치 버튼 · --room N stage 를 N번 방부터 · --crowd N 11장 첫 방에 경호원 N명 더(성능 점검)
 ##   --art puppet|a|b 그림(김신 · 신겐만 — a = GLB 툰 모델(기본 · #9 결정) · b = 도트 빌보드). 처음 화면 '그림' 버튼 · 3 키로도 바꾼다
 ##   --save 경로 세이브 파일(창 없는 실행에서 세이브를 시험할 때 — 없으면 창 없는 실행은 세이브를 안 쓴다)
 ##   --safe L,T,R,B 안전 영역 여백(기준 화면 단위 — 노치 · 제스처 바 흉내) · --trace 흐름 줄(MODE · PAUSE)을 창 없이도 찍는다
@@ -729,12 +729,12 @@ func _physics_process(_dt: float) -> void:
 		"title":
 			var pick := _title_pick()
 			if pick == "bench":
-				# 성능 점검(#9 기준 '적 30명'): 28층에 경호원 30명을 더 세우고 봇 데모 — 오른쪽 위 FPS 를 본다
+				# 성능 점검(#9 기준 '적 30명'): 11장 첫 방(지하주차장)에 경호원 30명을 더 세우고 봇 데모 — 오른쪽 위 FPS 를 본다
 				args["crowd"] = 30
 				_new_run("ch11")
 				args["crowd"] = 0
 				_start("demo")
-				hud.message("성능 점검", "28층 · 적 %d명 — 오른쪽 위 FPS" % d["enemies"].size(), 4.0)
+				hud.message("성능 점검", "지하주차장 · 적 %d명 — 오른쪽 위 FPS" % d["enemies"].size(), 4.0)
 			elif pick != "":
 				_new_run(pick)
 				_start("fight")

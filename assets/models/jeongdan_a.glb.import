@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://wb0d68mjo3gw"
-path="res://.godot/imported/choedalcheon_a.glb-6a4792cf4ec9b1f6cc21643339a6cbd5.scn"
+uid="uid://bkdsg8o4e021b"
+path="res://.godot/imported/jeongdan_a.glb-59e919b88514e3d49beffbaf15160578.scn"
 
 [deps]
 
-source_file="res://assets/roster/models/choedalcheon_a.glb"
-dest_files=["res://.godot/imported/choedalcheon_a.glb-6a4792cf4ec9b1f6cc21643339a6cbd5.scn"]
+source_file="res://assets/models/jeongdan_a.glb"
+dest_files=["res://.godot/imported/jeongdan_a.glb-59e919b88514e3d49beffbaf15160578.scn"]
 
 [params]
 

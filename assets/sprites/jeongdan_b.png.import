@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cl7jjq1hb0f20"
-path="res://.godot/imported/choedalcheon_b.png-59f6976135cfbc739012c0a5a5dbb50f.ctex"
+uid="uid://gro2tyqu336u"
+path="res://.godot/imported/jeongdan_b.png-3a5dd50a1f1c8b5fb7a7375719ae1999.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/roster/sprites/choedalcheon_b.png"
-dest_files=["res://.godot/imported/choedalcheon_b.png-59f6976135cfbc739012c0a5a5dbb50f.ctex"]
+source_file="res://assets/sprites/jeongdan_b.png"
+dest_files=["res://.godot/imported/jeongdan_b.png-3a5dd50a1f1c8b5fb7a7375719ae1999.ctex"]
 
 [params]
 

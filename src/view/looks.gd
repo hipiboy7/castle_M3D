@@ -254,7 +254,8 @@ const ROSTER_DIR := "res://assets/roster"
 const STAGED := ["vasily", "pyoyoung", "namilho", "bulgom", "moseunggyu", "odohwa", "masa", "shire", "ttolbae", "deumiteuri",
 	"gustav", "barista", "jangho", "komodo", "keurisa", "medvedi", "ratel", "immuyeol", "choeminuk", "scaledanjang", "mark", "ryujihak",
 	"andycheong", "eunbo", "bison", "pantera", "akila", "richeon", "douchen", "hantaecheol", "yuwoosung", "lingling", "majunyeong",
-	"grolla", "eomji", "geomji", "choehyeokjin", "mahakyoung", "dohaksu", "eogwangdeuk", "sainjin", "jeongseono", "hide", "seungyeong"]
+	"grolla", "eomji", "geomji", "choehyeokjin", "mahakyoung", "dohaksu", "eogwangdeuk", "sainjin", "jeongseono", "hide", "seungyeong",
+	"jeongdan", "choedalcheon", "jeonghwa", "cheonildo"]
 
 
 ## 그림 A · B 자리(장 이름 ART + 명부). 없으면 빈 표

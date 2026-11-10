@@ -16,7 +16,7 @@ func test_stage_deterministic() -> void:
 
 
 func test_ranks_and_parry_at_ch11() -> void:
-	var d := Stage.make(1)
+	var d := Stage.make(1, {"room": 1})                   # 28층 중앙홀 — 김신 · 피우진(첫 방 지하주차장은 류지학)
 	var kim = d["heroes"][0]
 	var woo = d["heroes"][1]
 	check(kim.rank == "재앙" and woo.rank == "외성 하위", "11장 앞 진행 — 김신 재앙(리천 이김) · 피우진 외성 하위(도우첸 이김) %s %s" % [kim.rank, woo.rank])
@@ -28,13 +28,19 @@ func test_ranks_and_parry_at_ch11() -> void:
 	for e in d["enemies"]:
 		if not d["ais"][e].skills.is_empty():
 			named += 1
-	check(named == 0, "35층 홀 경호원(엑스트라)은 기술 묶음이 없다")
-	check(d["allies"].size() == 1 and d["allies"][0].char_id == "guilhwa" and d["allies"][0].rank == "전국구", "35층 홀 아군 구일화(화진 전 전국구)")
-	check(d["enemies"].size() == 5, "35층 홀 경호원 다섯")
+	check(named == 0, "28층 중앙홀 경호원(엑스트라)은 기술 묶음이 없다")
+	var ally_ids: Array = d["allies"].map(func(a): return a.char_id)
+	check(ally_ids == ["guilhwa", "hantaecheol", "eogwangdeuk", "dohaksu", "choehyeokjin"] and d["allies"][0].rank == "전국구",
+		"28층 아군 구일화(화진 전 전국구) · 한태철 · 어광득 · 도학수 · 최혁진 %s" % [ally_ids])
+	check(d["enemies"].size() == 8, "28층 경호대 첫 무리 여덟(20명을 세 무리로)")
+	var p := Stage.make(1)
+	check(p["room"]["id"] == "parking" and p["hero"].char_id == "ryujihak" and p["hero"].rank == "내성 중위" and not Stage.can_swap(p),
+		"첫 방 지하주차장: 류지학 혼자 조작(내성 중위 — 방 표 ranks)")
+	check(p["allies"].any(func(a): return a.char_id == "hide") and p["room"]["protect"] == ["ryujihak", "hide"], "지하주차장: 히데 아군 · 둘을 지킨다")
 
 
 func test_swap_and_auto_swap_on_down() -> void:
-	var d := Stage.make(1)
+	var d := Stage.make(1, {"room": 1})
 	Stage.step(d, {"swap": true})
 	check(d["ctrl"] == 1 and d["hero"] == d["heroes"][1], "교대 — 피우진")
 	var seen := false
@@ -52,7 +58,7 @@ func test_swap_and_auto_swap_on_down() -> void:
 
 
 func test_attackers_capped() -> void:
-	var d := Stage.make(2, {"room": 2})                   # 71층 회장실 앞 홀 — 최후의 4인
+	var d := Stage.make(2, {"room": 3})                   # 71층 — 최후의 4인
 	var worst := 0
 	for i in 1500:
 		Stage.step(d)
@@ -68,29 +74,37 @@ func test_attackers_capped() -> void:
 
 
 func test_shingen_yields_then_room_clears() -> void:
-	var d := Stage.make(1, {"room": 3})
+	var d := Stage.make(1, {"room": 4})
 	var sg = d["enemies"][0]
 	check(sg.char_id == "shingen" and sg.rank == "내성 상위", "회장실 앞 신겐")
-	sg.hp = sg.hp_max * 0.3
+	sg.hp = sg.hp_max * 0.6
 	var yielded := false
 	for i in Hotel.INTRO_T + 4:
 		Stage.step(d)
 		for e in d["world"].events:
 			yielded = yielded or e[0] == "yield"
 		d["world"].events.clear()
-	check(yielded and sg.inert and sg.alive(), "체력 30%% 에서 길을 내준다 (inert %s)" % sg.inert)
+	check(yielded and sg.inert and sg.alive(), "체력 2/3 밑에서 길을 내준다 (inert %s)" % sg.inert)
 	check(d["stage"] == "clear", "신겐이 비키면 방을 넘는다 (%s)" % d["stage"])
 	for i in Hotel.CLEAR_T + 2:
 		Stage.step(d)
 		d["world"].events.clear()
-	check(str(d["room"]["id"]) == "office", "빈 회장실로")
-	for i in Hotel.INTRO_T + Hotel.END_T + 4:
+	check(str(d["room"]["id"]) == "office", "회장실로 — 천일도")
+	var cd = d["enemies"][0]
+	check(cd.char_id == "cheonildo" and d["passive"].has(cd), "천일도는 맞기만 한다(passive)")
+	for i in Hotel.INTRO_T + 2:
 		Stage.step(d)
 		d["world"].events.clear()
-	check(d["world"].over == "win", "빈 회장실 — 끝 (%s)" % d["world"].over)
+	cd.die()
+	var faded := false
+	for i in Hotel.CLEAR_T + Hotel.INTRO_T + Hotel.END_T + 8:
+		Stage.step(d)
+		faded = faded or d["world"].events.any(func(e): return e[0] == "fade")
+		d["world"].events.clear()
+	check(faded and d["world"].over == "win", "천일도 뒤 끝 방 — 만인지상(fade) · 끝 (%s)" % d["world"].over)
 
 
 func test_bots_clear_first_rooms() -> void:
-	var r := Stage.simulate(1, 60 * 240)
-	check(int(r["cleared"]) >= 2, "봇이 35층 홀 · 비상구 계단을 넘는다 %s" % r)
-	check(r["times"].has("hall35") and int(r["times"]["hall35"]) < 60 * 60, "35층 홀은 1분 안 %s" % r["times"])
+	var r := Stage.simulate(1, 60 * 240, {"room": 1})
+	check(int(r["cleared"]) >= 2, "봇이 28층 중앙홀 · 69층 계단을 넘는다 %s" % r)
+	check(r["times"].has("hall28") and int(r["times"]["hall28"]) < 60 * 60, "28층 중앙홀은 1분 안 %s" % r["times"])
