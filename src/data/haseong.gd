@@ -4,13 +4,16 @@ extends RefCounted
 ## 조작: 김신 / 서진태 — 방마다 한 사람(방 표 cast — 교대 없음). 원작이 로비(서진태 · 이슬 · 청년회)와 위층(김신)을 번갈아 보여 준다.
 ## 흐름(castle_common canon fights — 화/컷):
 ##   1 공사장 밤(fight:iseul p1:022/055-066) — 남구청년회 이슬과 한 합. 끝 = 김신의 한 방 → 청년회 19명 합류
-##   2 하성 본사 1층 로비(fight:haseong_lobby p1:024-028) — 서진태 조작 · 이슬 · 청년회가 아군, 하성 조직원 무리
+##   2 하성 본사 1층 로비(fight:haseong_lobby p1:024-028) — 서진태 조작 · 이슬 · 인수(이슬의 오른팔 — 028 쓰러진 동생들을 맡음) · 청년회가 아군,
+##     하성 조직원 무리. 원작 actors 의 황보민철은 4 방에서
 ##   3 대표실 앞 복도(fight:gyeonghotim p1:025-026 · 029) — 김신이 특별 경호팀을 칼로 제압(불살) · 오지인
 ##   4 우측 빌딩 로비 · 중앙계단(fight:jintae_hwangbomincheol p1:026-027) — 서진태 대 황보민철(단검 둘)
 ##   5 대표실 · 불 꺼짐(fight:kimjaehoon_daepyosil p1:029) — 김재훈 · 강창석. 끝 = 깨진 창밖으로 걷어차기(093-095)
 ##   6 위층 복도(fight:kimshin_namgunghyuk p1:029-030) — 남궁혁. 정면 승부 없이 따돌리고 빠져나간다(030/013-024) → 따돌리기 방(escape)
 ##   7 부진폐차장 밤(fight:kimshin_sintaejin p1:031-033) — 2장 끝 보스 신태진(쌍칼)
 ##   8 끝
+## 편(castle_common canon 2026-11-10 다시 봄): 김신 · 서진태 · 이슬(남구청년회 — 1 방 한 합 뒤 합류) 대 하성(김재훈 · 오지인 · 황보민철 ·
+## 강창석 — characters faction haseong 022-024) · 남궁혁(선진 — 백도찬의 오른팔) · 신태진(하성의 칼 — 김재훈 지시로 김신을 쫓음).
 ## 원작과 다른 점: 강창석은 원작에서 중간에 달아난다 — 방의 적으로 둔다. 피우진 · 김대건의 남궁혁전(fight:namgunghyuk)과
 ## 신태진 고속도로 추격(fight:sintaejin_gosokdoro) · 피우진 대련(fight:woojin_daeryeon)은 대사로만.
 ## 3층 값은 이 판 소유 — 봇 판 · 판 길이로 맞춘다(tests/sim_stage.gd ch2). 능력치 배율은 addendum.derive.
@@ -31,6 +34,11 @@ const CANON := {
 }
 
 const HEROES := ["kimshin", "jintae"]   # 방마다 cast 로 한 사람만 나온다
+
+## 그 장 시점의 등급(1층 대체가 강함표의 묶음 이름 '그 아래급'을 줄 때 — 등급 사다리 값으로)
+const NPCS := {
+	"insu": {"rank": "조장급"},            # 강함표 '그 아래급'(강창석 · 인수 · 장호) — 경호대급 밑
+}
 const LINES := "ch2"
 const CROWD_ID := "haseong_suit"
 
@@ -50,6 +58,8 @@ const ROLES := {
 	"iseul": {"hp": 900.0, "posture": 260.0, "walk": 1.8, "run": 3.9, "stagger": 75, "poise": 30.0, "finisher_cap": 0.12, "ai": "iseul",
 		"look": "iseul", "moveset": {"combo": "ia_hook", "dash": "ia_dash", "finisher": "ia_finisher"}},
 	# 아군(봇)
+	"insu": {"hp": 240.0, "posture": 50.0, "walk": 1.9, "run": 4.0, "stagger": 70, "look": "insu",
+		"moveset": {"combo": "ny_jab", "dash": "ny_dash", "finisher": "ny_finisher"}},
 	"namgu_youth": {"hp": 220.0, "posture": 45.0, "walk": 1.9, "run": 4.0, "stagger": 70, "look": "namgu_youth",
 		"moveset": {"combo": "ny_jab", "dash": "ny_dash", "finisher": "ny_finisher"}},
 	# 적
@@ -79,7 +89,7 @@ const ROOMS := [
 		"heroes": [Vector2(-3.0, 0.2)], "allies": [],
 		"enemies": [["iseul", Vector2(2.0, 0.0), {"hp_k": 0.5}]], "boss": "iseul"},
 	{"id": "lobby", "theme": "haseong_lobby", "bounds": Rect2(-7.2, -3.2, 14.4, 6.4), "cast": ["jintae"],
-		"heroes": [Vector2(-5.0, 0.2)], "allies": [["iseul", Vector2(-4.4, -1.4)], ["namgu_youth", Vector2(-5.4, 1.6)], ["namgu_youth", Vector2(-4.0, 2.0)]],
+		"heroes": [Vector2(-5.0, 0.2)], "allies": [["iseul", Vector2(-4.4, -1.4)], ["insu", Vector2(-5.6, -0.6)], ["namgu_youth", Vector2(-5.4, 1.6)], ["namgu_youth", Vector2(-4.0, 2.0)]],
 		"enemies": [["haseong_suit", Vector2(0.6, -2.0)], ["haseong_suit", Vector2(1.4, 1.6)], ["haseong_suit", Vector2(2.6, -0.4)],
 			["haseong_suit", Vector2(3.6, 2.2)], ["haseong_suit", Vector2(4.6, -1.8)], ["haseong_suit", Vector2(5.2, 0.6)]]},
 	{"id": "guard_corridor", "theme": "haseong_corridor", "bounds": Rect2(-7.0, -2.0, 14.0, 4.0), "cast": ["kimshin"],

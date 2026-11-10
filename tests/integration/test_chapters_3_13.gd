@@ -22,7 +22,7 @@ func test_every_room_builds_and_runs() -> void:
 
 
 func test_npcs_override_rank() -> void:
-	var d := Stage.make(1, {"chapter": "ch3", "room": 6})
+	var d := Stage.make(1, {"chapter": "ch3", "room": 7})
 	var od = d["enemies"].filter(func(e): return e.char_id == "odohwa")[0]
 	check(od.rank == "내성 하위", "3장 오도화 = (현 시점) 내성 하위 — 장 표 NPCS (%s)" % od.rank)
 	var d2 := Stage.make(1, {"chapter": "ch13", "room": 2})
@@ -54,7 +54,7 @@ func test_talk_room_says_lines_then_moves_on() -> void:
 
 
 func test_escape_rooms_and_determinism() -> void:
-	for pair in [["ch3", 6], ["ch9", 3]]:
+	for pair in [["ch3", 7], ["ch9", 3]]:
 		var d := Stage.make(2, {"chapter": pair[0], "room": pair[1]})
 		check(d["room"].has("escape") and d["boss"].hp_floor > 0.0, "%s 따돌리기 방 — 보스는 쓰러뜨릴 수 없다" % pair[0])
 	var a := Stage.simulate(3, 60 * 40, {"chapter": "ch8"})
