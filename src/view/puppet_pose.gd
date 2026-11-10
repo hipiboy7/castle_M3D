@@ -114,7 +114,7 @@ func _ground() -> void:
 	for side in ["r", "l"]:
 		lo = minf(lo, to_local(J["ft_" + side].global_position).y)
 	var k: float = J["body"].scale.y
-	J["hips"].position.y += (ANKLE_H * k - lo) / k
+	J["hips"].position.y += (ANKLE_H * k - lo) / k + maxf(0.0, float(cur.get("root_y", 0.0)))   # 뛰기(날아차기 · 날아 무릎): 발이 이만큼 뜬다
 
 
 ## 발밑 고리 — 여럿이 섞이는 11장에서 누가 누구인지(조작 · 짝 · 아군). null 이면 없앤다
@@ -265,8 +265,8 @@ func shape_key(mv: Dictionary) -> String:
 	var shape := str(mv["shape"])
 	if shape == "slash_back":
 		return "slash_back_L" if str(mv["hand"]) == "L" and weapon_l != null else "slash_back_R"
-	if (shape == "punch" or shape == "shot") and str(mv["hand"]) == "L" and str(mv["fx"]) != "triple":
-		return shape + "_L"                            # 왼손 주먹(스트레이트 · 팔꿈치) · 왼손 총
+	if P.MIRROR.has(shape) and str(mv["hand"]) == "L" and str(mv["fx"]) != "triple":
+		return shape + "_L"                            # 왼손 주먹(스트레이트 · 팔꿈치) · 왼손 총 · 왼발 차기 ..
 	return shape
 
 
@@ -319,6 +319,10 @@ func _attack_pose(f) -> Dictionary:
 		p3 = _lerp_pose(fo, guard_pose, _ease_in_out(float(rt - hold) / maxf(1.0, rc - hold)))
 	if shape == "spin":
 		p3["spin"] = 1080.0
+	elif P.SPIN_THROUGH.has(shape.trim_suffix("_L")) and rt > hold:
+		# 뒤돌려차기: 풀려 거꾸로 돌지 않고 같은 쪽으로 마저 돌아 한 바퀴(상태가 바뀌면 update_from 이 각도를 감는다)
+		var s0 := float(fo["spin"])
+		p3["spin"] = lerpf(s0, signf(s0) * 360.0, _ease_in_out(float(rt - hold) / maxf(1.0, rc - hold)))
 	return p3
 
 
@@ -393,7 +397,7 @@ func _down_pose(f, gets_up: bool) -> Dictionary:
 	return lying
 
 
-## 좌우 뒤집기: 팔다리 r · l 을 맞바꾸고(팔다리 각도는 _limb 가 쪽마다 뒤집는다) 몸통 · 머리의 좌우 돌림(y · z)을 뒤집는다
+## 좌우 뒤집기: 팔다리 r · l 을 맞바꾸고(팔다리 각도는 _limb 가 쪽마다 뒤집는다) 몸통 · 머리의 좌우 돌림(y · z) · 몸 돌기(spin)를 뒤집는다
 func _mirror(p: Dictionary) -> Dictionary:
 	var q := {}
 	for k in p:
@@ -405,6 +409,8 @@ func _mirror(p: Dictionary) -> Dictionary:
 			nk = k.substr(0, k.length() - 2) + "_r"
 		elif v is Vector3:
 			v = Vector3(v.x, -v.y, -v.z)
+		elif k == "spin":
+			v = -float(v)                           # 몸 돌기도 반대쪽으로(왼발 돌려차기 · 뒤돌려차기)
 		q[nk] = v
 	return q
 

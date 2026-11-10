@@ -98,10 +98,27 @@ const NEAR := {
 	"thrust": ["thrust_low", "punch"], "thrust_low": ["thrust", "punch"], "offbeat": ["thrust", "punch"],
 	"offbeat_rev": ["offbeat", "thrust"], "cross": ["slash", "punch"], "spin": ["sidekick", "slash"],
 	"sidekick": ["axe", "spin", "punch"], "axe": ["sidekick", "punch"],
+	# 2026-11-10 새 모양(시트는 다시 구울 때 생긴다 — 그 전에는 가까운 갈래: 주먹 · 발 · 칼 · 총)
+	"jab": ["punch"], "straight": ["punch"], "hook": ["punch"], "uppercut": ["punch"], "body_blow": ["punch"],
+	"elbow": ["punch"], "palm": ["punch"], "backfist": ["punch"], "guard_counter": ["punch"], "hammer_fist": ["punch"],
+	"headbutt": ["punch"], "grab": ["punch"], "choke": ["punch"], "throw_slam": ["cross", "punch"],
+	"two_hand_slam": ["cross", "punch"], "shoulder_ram": ["punch"], "tackle": ["thrust_low", "punch"], "toss": ["punch"],
+	"knee": ["sidekick", "punch"], "flying_knee": ["sidekick", "punch"], "front_kick": ["sidekick", "punch"],
+	"round_kick": ["sidekick", "spin", "punch"], "low_kick": ["sidekick", "punch"], "spin_back_kick": ["sidekick", "spin"],
+	"axe_kick": ["axe", "sidekick"], "flying_kick": ["sidekick", "punch"], "sweep": ["spin", "sidekick"],
+	"stomp": ["axe", "sidekick"], "overhead_chop": ["cross", "slash"], "rising_slash": ["slash_back_R", "slash"],
+	"reverse_stab": ["thrust", "slash"], "draw_shot": ["shot", "punch"], "duck": [], "weave": [], "sidestep": [],
 }
 
 
 func attack_frame(key: String, part: String) -> String:
+	if frames.has(key + ":" + part):
+		return key + ":" + part
+	var base := key.trim_suffix("_L")                    # 새 모양의 왼쪽 판은 시트에 없으면 오른쪽 · 가까운 갈래로
+	if base != key and not NEAR.has(key):
+		key = base
+	if NEAR.has(key) and (NEAR[key] as Array).is_empty() and not frames.has(key + ":" + part):
+		return "idle"                                   # 피하기(숙이기 · 흔들기 · 비켜서기)는 칼을 휘두르는 칸 대신 서 있는 칸
 	for k in [key] + NEAR.get(key, []) + ["slash", "punch"]:
 		if frames.has(str(k) + ":" + part):
 			return str(k) + ":" + part

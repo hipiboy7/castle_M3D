@@ -294,8 +294,75 @@ func swing(f, yaw: float, left_hand: bool) -> void:
 			flash(muzzle, Color(1.0, 0.8, 0.4), 3.0, 0.08, 3.0)
 			spark(muzzle, Color(1.0, 0.85, 0.5), 10, 3.0, 0.12)
 			spike(at, yaw, 0.8, reach, 1.35, 0.025, Color(1.0, 0.9, 0.6, 0.8), 0.08)
-	if left_hand:
-		pass
+		_:
+			_swing_more(mv, at, yaw, reach, radius, arc_deg, -1.0 if left_hand else 1.0)
+
+
+## 맨손 · 발 · 잡기 · 무기 모양(src/view/poses.gd 2026-11-10 — 이름 끝 _L 은 없다, 왼쪽은 sg = -1 로 궤적을 뒤집는다).
+## 모르는 모양은 효과음(sfx)으로 갈래를 고른다 — 칼(knife · slash) 베기 띠 · 발(kick) 굵은 쐐기 · 그 밖(주먹) 짧은 쐐기
+func _swing_more(mv: Dictionary, at: Vector3, yaw: float, reach: float, radius: float, arc_deg: float, sg: float) -> void:
+	var skin := Color(1.0, 0.95, 0.85, 0.85)
+	var steel := Color(0.85, 0.92, 1.0, 0.9)
+	var fwd := Vector3(-sin(yaw), 0, -cos(yaw))
+	match str(mv["shape"]):
+		"jab", "straight", "palm", "guard_counter":
+			spike(at, yaw, 0.3, reach + radius * 0.7, 1.28, 0.08, skin, 0.12)
+		"body_blow":
+			spike(at, yaw, 0.3, reach + radius * 0.6, 1.0, 0.09, skin, 0.12)
+		"hook", "elbow", "backfist":
+			var a := minf(arc_deg, 110.0) * 0.5
+			var a0 := -a * sg if str(mv["shape"]) != "backfist" else a * sg   # 백피스트는 바깥으로 — 훅 · 팔꿈치와 반대
+			arc(at, yaw, a0, -a0, reach * 0.35, reach + radius * 0.5, 1.25, skin, 0.14)
+		"uppercut":
+			arc_v(at, yaw, -40.0, 70.0, 0.25, 0.6, 1.0, skin, 0.16)
+		"hammer_fist", "two_hand_slam":
+			arc_v(at, yaw, 110.0, -20.0, 0.3, 0.75, 1.1, skin, 0.18)
+		"headbutt", "shoulder_ram", "tackle", "grab", "choke":
+			ring(at + fwd * (reach * 0.8) + Vector3(0, 1.1 if str(mv["shape"]) != "tackle" else 0.8, 0), yaw, 0.25, 0.08,
+				Color(1.0, 0.95, 0.85, 0.7), 0.16, 0.4, 1.4, true)
+		"knee", "flying_knee":
+			spike(at, yaw, 0.3, reach + radius * 0.6, 1.05 if str(mv["shape"]) == "knee" else 1.3, 0.12, skin, 0.14)
+		"front_kick", "spin_back_kick", "flying_kick":
+			var h: float = {"front_kick": 1.0, "spin_back_kick": 1.05, "flying_kick": 1.4}[str(mv["shape"])]
+			spike(at, yaw, 0.3, reach + radius + 0.2, h, 0.13, Color(1.0, 0.95, 0.85, 0.9), 0.18)
+		"round_kick", "low_kick":
+			var hk := 1.1 if str(mv["shape"]) == "round_kick" else 0.55
+			var a2 := minf(arc_deg, 140.0) * 0.6
+			arc(at, yaw, -a2 * sg, a2 * sg, reach * 0.4, reach + radius * 0.6, hk, Color(1.0, 0.95, 0.85, 0.9), 0.18)
+		"sweep":
+			arc(at, yaw, -150.0 * sg, 60.0 * sg, radius * 0.3, reach + radius * 0.6, 0.12, Color(1.0, 0.9, 0.75, 0.8), 0.24)
+			spark(at + fwd * reach + Vector3(0, 0.05, 0), Color(0.75, 0.68, 0.58), 14, 3.0, 0.3)
+		"axe_kick":
+			arc_v(at, yaw, 115.0, -20.0, 0.6, 1.1, 0.9, Color(1.0, 0.95, 0.85, 0.95), 0.22)
+		"stomp":
+			ring(at + fwd * (reach * 0.8) + Vector3(0, 0.04, 0), 0.0, 0.4, 0.12, Color(1.0, 0.9, 0.7, 0.8), 0.3, 0.3, 1.8)
+			spark(at + fwd * (reach * 0.8) + Vector3(0, 0.05, 0), Color(0.75, 0.68, 0.58), 16, 3.0, 0.3)
+		"throw_slam":
+			slam(at + fwd * (reach * 0.8))
+		"overhead_chop":
+			arc_v(at, yaw, 120.0, -25.0, 0.4, reach + radius * 0.5, 1.0, steel, 0.2)
+		"rising_slash":
+			arc_v(at, yaw, -30.0, 120.0, 0.4, reach + radius * 0.5, 1.0, steel, 0.2)
+		"reverse_stab":
+			arc_v(at, yaw, 80.0, 0.0, 0.3, reach + radius * 0.4, 1.1, steel, 0.16)
+			spike(at, yaw, 0.35, reach + radius, 1.05, 0.06, steel, 0.12)
+		"draw_shot":
+			var muzzle := at + fwd * 0.75 + Vector3(0, 1.35, 0)
+			flash(muzzle, Color(1.0, 0.8, 0.4), 3.0, 0.08, 3.0)
+			spark(muzzle, Color(1.0, 0.85, 0.5), 10, 3.0, 0.12)
+			spike(at, yaw, 0.8, reach, 1.35, 0.025, Color(1.0, 0.9, 0.6, 0.8), 0.08)
+		"toss":
+			spike(at, yaw, 0.6, reach + radius, 1.5, 0.04, Color(1.0, 0.95, 0.8, 0.7), 0.16)
+		"duck", "weave", "sidestep":
+			pass                                                     # 피하기 — 궤적 없음
+		_:
+			var sfx := str(mv["sfx"])
+			if sfx == "knife" or sfx == "slash":
+				arc(at, yaw, -arc_deg * 0.6 * sg, arc_deg * 0.6 * sg, reach * 0.4, reach + radius * 0.6, 1.2, steel)
+			elif sfx == "kick":
+				spike(at, yaw, 0.3, reach + radius + 0.2, 1.0, 0.13, Color(1.0, 0.95, 0.85, 0.9), 0.18)
+			else:
+				spike(at, yaw, 0.3, reach + radius * 0.7, 1.25, 0.09, skin, 0.12)
 
 
 ## 엇박 멈칫: 앞으로 찌르는 척한 잔상(흐린 쐐기)만 남긴다
