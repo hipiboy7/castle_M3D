@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://byvfjtbxhseyb"
-path="res://.godot/imported/cheonildo_b.png-b7b257878a6f17620885d4ebbe27c2ef.ctex"
+uid="uid://gro2tyqu336u"
+path="res://.godot/imported/jeongdan_b.png-3a5dd50a1f1c8b5fb7a7375719ae1999.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/roster/sprites/cheonildo_b.png"
-dest_files=["res://.godot/imported/cheonildo_b.png-b7b257878a6f17620885d4ebbe27c2ef.ctex"]
+source_file="res://assets/sprites/jeongdan_b.png"
+dest_files=["res://.godot/imported/jeongdan_b.png-3a5dd50a1f1c8b5fb7a7375719ae1999.ctex"]
 
 [params]
 

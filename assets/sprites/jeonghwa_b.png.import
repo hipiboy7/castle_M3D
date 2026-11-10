@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bn422t7flyia0"
-path="res://.godot/imported/jeonghwa_b.png-24f6175b5198a0ebe3b71d2d152d059e.ctex"
+uid="uid://0snrqxg5nabd"
+path="res://.godot/imported/jeonghwa_b.png-f6ab3a9588dfa71ad6eb890e02d1381e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/roster/sprites/jeonghwa_b.png"
-dest_files=["res://.godot/imported/jeonghwa_b.png-24f6175b5198a0ebe3b71d2d152d059e.ctex"]
+source_file="res://assets/sprites/jeonghwa_b.png"
+dest_files=["res://.godot/imported/jeonghwa_b.png-f6ab3a9588dfa71ad6eb890e02d1381e.ctex"]
 
 [params]
 

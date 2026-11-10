@@ -16,7 +16,7 @@
                테스트를 다시 돌린다(이 저장소 소스는 그대로). A ≥ 90% · B ≥ 70%(CLAUDE.md 2-1절) — 모자라면 실패
   3. 자동 결투  godot --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 --seed S  (시드 1 · 2 · 3,
                게임 전체 — 무대 · 인형 · 연출 · 화면 표시까지 돌려 멈춤 · 스크립트 오류가 없는지)
-  3. 11장 자동 판  같은 명령에 --mode stage (시드 1 · 2, 150초 — 호텔 캐슬 5방 · 여럿 · 교대 · 방 넘김 · 무대 다시 만들기)
+  3. 11장 자동 판  같은 명령에 --mode stage (시드 1 · 2, 150초 — 첫 방 지하주차장: 버티기 · 무리 triggers · 아군 11 · 지키기)
   3. 0 · 1장 자동 판  --mode ch0 (120초 — 프롤로그를 봇이 한 번은 깬다) · --mode ch1 (360초 — 회암시 5방 · 1인 판 · 아군 서진태 · 김대건 합류)
                · --mode ch2 (300초 — 하성 본사 8방 · 방마다 조작 인물 김신 / 서진태 · 따돌리기 방 둘)
   3. 리플레이    11장 seed 2 판의 입력 기록(--save-replay .tools/replay_stage2.json)을 다른 프로세스에서 --replay 로 다시 돌려
@@ -251,8 +251,8 @@ def step_coverage(g):
 
 
 FLOW_EVENTS = "400:back,500:press,700:hide,760:show,800:press,900:back,960:back"
-MENU_EVENTS = "30:press,120:menu,150:menupick_ch11,180:menupick_room3,400:menu,430:menupick_resume"
-MENU_WANT = ["STAGE ch0 room=0", "MODE title", "STAGE ch0 room=0", "MODE fight", "MENU on", "MENU off", "STAGE ch11 room=3",
+MENU_EVENTS = "30:press,120:menu,150:menupick_ch11,180:menupick_room4,400:menu,430:menupick_resume"   # 11장 다섯째 방 = 71층 회장실 앞(hotel.gd ROOMS)
+MENU_WANT = ["STAGE ch0 room=0", "MODE title", "STAGE ch0 room=0", "MODE fight", "MENU on", "MENU off", "STAGE ch11 room=4",
              "MODE fight", "MENU on", "MENU off"]
 CHAIN_EVENTS = "1:autowin," + ",".join(f"{i * 150}:press" for i in range(1, 360))   # 900초(2026-11-10 — 7 · 9장 관전 · 대화 방이 늘어 600초를 넘었다)
 MID_EVENTS = "30:press,120:menu,150:menupick_room2,200:autowin,1000:press,1300:press"
@@ -417,7 +417,7 @@ def main():
     for art in ("a", "b"):
         results.append(run(f"그림 {art.upper()} (11장 회장실 앞 · 20초)",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
-                            "--room", "3", "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))
+                            "--room", "4", "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))
     for art in ("a", "b"):
         results.append(run(f"그림 {art.upper()} (1장 회암시 거리 · 강만재 → 윤덕수 · 20초)",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "ch1",
@@ -426,7 +426,7 @@ def main():
         results.append(run(f"그림 {art.upper()} ({name} · 20초)",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "ch2",
                             "--room", room, "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))
-    results.append(run("성능 판 (28층 · 경호원 35명 · 20초)",
+    results.append(run("성능 판 (11장 지하주차장 · 경호원 36명 + 이름 있는 적 · 아군 11명 · 20초)",
                        [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
                         "--crowd", "30", "--seconds", "20"], lambda out: (("RESULT" in out), "")))
     results.append(step_flow(g))

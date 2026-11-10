@@ -57,7 +57,7 @@ func test_cast_per_room() -> void:
 
 
 func test_ch11_still_swaps() -> void:
-	var d := Stage.make(1, {"chapter": "ch11"})
+	var d := Stage.make(1, {"chapter": "ch11", "room": 1})   # 28층 중앙홀(첫 방 지하주차장은 류지학 혼자)
 	check(d["cast"] == [0, 1] and Stage.can_swap(d) and Stage.partner(d) == d["heroes"][1], "11장: 둘이 판에 · 교대 · 짝")
 	check(Stage.swap(d) and d["hero"] == d["heroes"][1] and Stage.partner(d) == d["heroes"][0], "11장: 교대하면 짝이 바뀐다")
 

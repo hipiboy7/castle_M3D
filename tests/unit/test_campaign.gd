@@ -222,9 +222,9 @@ func test_save_speed() -> void:
 ## 스테이지 고르기(사용자 2026-11-06 "메뉴 · 선택 같은 거 … 스테이지 넘어갈 수 있게") — 장 안의 방 목록
 func test_stages_of_chapter() -> void:
 	var st := Campaign.stages("ch11")
-	check(st.size() == _menu_rooms(Hotel), "11장 스테이지 = 끝 방을 뺀 방 %s" % [st])
-	check(int(st[0]["room"]) == 0 and str(st[0]["title"]) == "35층 중앙 엘리베이터 홀", "첫 스테이지 이름은 방 들어서는 글 %s" % st[0])
-	check(int(st[3]["room"]) == 3 and str(st[3]["title"]).contains("회장실"), "넷째 = 회장실 앞 %s" % st[3])
+	check(st.size() == _menu_rooms(Hotel), "11장 스테이지 = 끝 방을 뺀 여섯 %s" % [st])
+	check(int(st[0]["room"]) == 0 and str(st[0]["title"]) == "호텔 캐슬 지하주차장", "첫 스테이지 이름은 방 들어서는 글 %s" % st[0])
+	check(int(st[4]["room"]) == 4 and str(st[4]["title"]).contains("회장실"), "다섯째 = 회장실 앞 %s" % st[4])
 	var d6 := Campaign.stages("ch6")
 	check(d6.size() == 1 and int(d6[0]["room"]) == 0 and str(d6[0]["title"]) != "", "결투 장은 스테이지 하나 %s" % [d6])
 	check(Campaign.stages("nope").is_empty(), "없는 장은 스테이지 없음")

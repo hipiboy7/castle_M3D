@@ -595,6 +595,9 @@ static func _bot_intent(d: Dictionary, me, fighting: bool) -> Dictionary:
 			return {}
 		var gap: float = me.dist_to(lead)
 		return {"move": me.dir_to(lead) * 0.7 if gap > 1.6 else Vector2.ZERO, "face": me.facing}
+	if d["passive"].has(tg):                         # 맞기만 하는 적(11장 천일도) — 거리 재며 맴돌지 않고 다가가 친다(bot.gd 는 1.5m 밖에서 맴돈다)
+		var to: Vector2 = me.dir_to(tg)
+		return {"move": to if me.dist_to(tg) > 1.0 else Vector2.ZERO, "face": to, "attack": me.dist_to(tg) <= 1.2 and me.can_act()}
 	var b = d["bots"][me]
 	b.foe = tg
 	b.foes = _foes_of(d, me)
