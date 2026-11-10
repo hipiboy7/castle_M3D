@@ -139,6 +139,6 @@ func test_manjae_high_guard() -> void:
 func test_bosses_last() -> void:
 	var r := Stage.simulate(1, 60 * 25 + Hoeam.INTRO_T, {"chapter": "ch1", "room": 2})
 	check(int(r["cleared"]) == 0 and r["over"] == "", "김대건은 25초 안에 안 쓰러진다 %s" % r)
-	check(float(r["heroes_hp"][0]) < 200.0, "김대건이 김신을 맞힌다 (hp %s)" % r["heroes_hp"])
+	check(float(r["heroes_hp"][0]) < 200.0, "김대건이 김신을 맞힌다 (hp %s)" % [r["heroes_hp"]])
 	var r2 := Stage.simulate(1, 60 * 30 + Hoeam.INTRO_T, {"chapter": "ch1", "room": 4})
 	check(int(r2["cleared"]) == 0, "윤덕수는 30초 안에 안 쓰러진다 %s" % r2)

@@ -22,7 +22,7 @@ func test_every_room_builds_and_runs() -> void:
 
 
 func test_npcs_override_rank() -> void:
-	var d := Stage.make(1, {"chapter": "ch3", "room": 6})
+	var d := Stage.make(1, {"chapter": "ch3", "room": 7})
 	var od = d["enemies"].filter(func(e): return e.char_id == "odohwa")[0]
 	check(od.rank == "내성 하위", "3장 오도화 = (현 시점) 내성 하위 — 장 표 NPCS (%s)" % od.rank)
 	var d2 := Stage.make(1, {"chapter": "ch13", "room": 2})

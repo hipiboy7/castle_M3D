@@ -8,12 +8,16 @@ extends RefCounted
 ##   2 부진폐차장 밤(fight:pyechajang p1:008-010) — DS 습격조(방망이 · 쇠파이프 · 복면)와 약에 취한 김성준(칼). 끝 = 칼 쥔 손목 꺾기
 ##   3 부진폐차장 노을(fight:kimdaegeon_pyechajang p1:014-016) — 김대건 일대일(부하를 물림). 하이킥 · 뒷발 돌려차기 · 베어허그 태클,
 ##     한 번 쓰러진 뒤 '피떡이 돼야 시동'(015/042-048)으로 2차. 끝 = 마지막 돌진에 맞춘 한 방(016/009-011)
-##   4 회암시 거리 낮(fight:jintae_ds · fight:yundeoksu p1:018-019) — DS 정장 무리 난전 · 강만재(흉터 거구)
+##   4 회암시 거리 낮(fight:jintae_ds p1:019-020) — 서진태(조작 · 칼) 혼자 DS 정장 무리를 돌파 · 김혁주를 눕히고 강만재(붕대 거구 '부장님')를
+##     휘두름 밑으로 파고들어 벤다(019/031-036). 같은 때 김신은 윤덕수와(다음 방) — 원작이 둘을 번갈아 보여 준다
 ##   5 회암시 거리 중앙선(fight:yundeoksu p1:019-020) — 윤덕수. 큰 훅 · 얼굴 잡아 메치기 · 스트레이트, 옆구리를 맞은 뒤 2차.
 ##     끝 = 넘어뜨려 아스팔트에 처박기(020/024-030) → '알아서 찌그러져라'(020/045-046)
 ##   6 거리(끝) — DS 가 무너졌다(beat:yundeoksu)
-## 원작과 다른 점(게임으로 옮기며): 김성준 · 강만재는 원작에서 김신과 맞붙지 않거나(강만재 — 서진태 · 윤덕수와) 잠깐(김성준)이지만 방의
-## 강적으로 둔다. 서진태는 1 · 4 방의 아군(봇). 강창석 · 김혁주의 거리 싸움(피우진 · 김대건 몫)은 대사로만.
+## 편(castle_common canon 2026-11-10 다시 봄): 김신 · 서진태(이스크라 출신 — 김신의 오른팔) 대 DS씨큐리티(윤덕수 · 김혁주 · 강만재 · 김성준).
+## 김대건은 1 ~ 3 방까지 DS(이사) — 3 방에서 진 뒤 부진파로 넘어와(characters 김대건 faction bujinpa 018) 4 · 5 방 무렵엔 김신 편.
+## 조작: 방마다 한 사람(방 표 cast) — 4 방만 서진태(원작 fight:jintae_ds 의 주인공), 나머지는 김신.
+## 원작과 다른 점(게임으로 옮기며): 김성준은 원작에서 김신과 잠깐이지만 방의 강적으로 둔다. 서진태는 1 방의 아군(봇).
+## 강창석 · 김대건(fight:gangchangseok_kimdaegeon2) · 피우진 대 DS 무리(fight:woojin_ds)의 거리 싸움은 대사로만.
 ## 3층 값은 이 판 소유 — 봇 판 · 판 길이로 맞춘다(tests/sim_stage.gd). 능력치 배율은 addendum.derive.
 
 const EVENT := "beat:yundeoksu"      # 시점: 윤덕수를 이기기 전(김신 내성 중위 · 처음 기술)
@@ -30,7 +34,7 @@ const CANON := {
 	"street_end": {"fight": "", "place": "hoeamsi"},
 }
 
-const HEROES := ["kimshin"]          # 김신 혼자 — 교대 없음(서진태는 아군 봇)
+const HEROES := ["kimshin", "jintae"]   # 방마다 cast 로 한 사람(교대 없음) — 서진태는 4 방 조작 · 1 방 아군 봇
 const LINES := "ch1"
 const CROWD_ID := "ds_member"
 
@@ -40,6 +44,8 @@ const ROLES := {
 		"moveset": {"combo": "kf_jab", "dash": "kf_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
 	"jintae": {"hp": 180.0, "posture": 60.0, "walk": 2.2, "run": 4.8, "stagger": 50, "look": "jintae",
 		"moveset": {"combo": "j_jab", "dash": "j_dash", "finisher": "j_finisher"}},
+	# 4 방 서진태(조작 — 칼로 정장 무리를 벤다 019/003-041): 2장 서진태와 같은 칼 동작(방 표 kit)
+	"jintae_blade": {"look": "jintae", "moveset": {"combo": "jk_slash1", "dash": "jk_dash", "finisher": "jk_finisher"}},
 	"ds_member": {"hp": 240.0, "posture": 45.0, "walk": 1.8, "run": 3.8, "stagger": 70, "poise": 0.0, "ai": "thug",
 		"look": "ds_suit"},
 	"ds_raider": {"hp": 160.0, "posture": 45.0, "walk": 1.8, "run": 3.9, "stagger": 70, "poise": 0.0, "ai": "thug_pipe",
@@ -58,27 +64,27 @@ const ROLES := {
 
 ## 방 — 칸 뜻은 hotel.gd ROOMS. enemies 셋째 칸(덧붙임): look · ai · name · hp_k (stage.gd _npc)
 const ROOMS := [
-	{"id": "site_alley", "theme": "site_alley", "bounds": Rect2(-6.6, -2.2, 13.2, 4.4),
+	{"id": "site_alley", "theme": "site_alley", "bounds": Rect2(-6.6, -2.2, 13.2, 4.4), "cast": ["kimshin"],
 		"heroes": [Vector2(-4.6, 0.3)], "allies": [["jintae", Vector2(-3.6, -1.0)]],
 		"enemies": [["ds_member", Vector2(1.4, -1.2)], ["ds_member", Vector2(2.2, 1.2)], ["ds_member", Vector2(3.4, -0.2)],
 			["ds_member", Vector2(4.6, 1.4)], ["kimhyeokju", Vector2(4.6, -1.0)]], "boss": "kimhyeokju"},
-	{"id": "junkyard", "theme": "junkyard_night", "bounds": Rect2(-6.8, -3.0, 13.6, 6.0),
+	{"id": "junkyard", "theme": "junkyard_night", "bounds": Rect2(-6.8, -3.0, 13.6, 6.0), "cast": ["kimshin"],
 		"heroes": [Vector2(-4.8, 0.3)], "allies": [],
 		"enemies": [["ds_raider", Vector2(1.2, -1.8)], ["ds_raider", Vector2(1.8, 1.6)], ["ds_raider", Vector2(3.0, -0.4)],
 			["ds_raider", Vector2(4.4, 2.0)], ["ds_raider", Vector2(4.6, -2.0)], ["kimseongjun", Vector2(4.2, 0.4)]],
 		"boss": "kimseongjun"},
-	{"id": "junkyard_dusk", "theme": "junkyard_dusk", "bounds": Rect2(-6.0, -2.6, 12.0, 5.2),
+	{"id": "junkyard_dusk", "theme": "junkyard_dusk", "bounds": Rect2(-6.0, -2.6, 12.0, 5.2), "cast": ["kimshin"],
 		"heroes": [Vector2(-3.6, 0.2)], "allies": [],
 		"enemies": [["kimdaegeon", Vector2(2.4, 0.0)]], "boss": "kimdaegeon"},
-	{"id": "street", "theme": "hoeam_street", "bounds": Rect2(-7.0, -3.0, 14.0, 6.0),
-		"heroes": [Vector2(-5.0, 0.3)], "allies": [["jintae", Vector2(-4.2, -1.2)]],
+	{"id": "street", "theme": "hoeam_street", "bounds": Rect2(-7.0, -3.0, 14.0, 6.0), "cast": ["jintae"], "kit": {"jintae": "jintae_blade"},
+		"heroes": [Vector2(-5.0, 0.3)], "allies": [],
 		"enemies": [["ds_member", Vector2(0.8, -1.8)], ["ds_member", Vector2(1.6, 1.4)], ["ds_member", Vector2(2.8, -0.2)],
-			["ds_member", Vector2(3.6, 2.0)], ["ds_member", Vector2(4.6, -1.6)], ["gangmanjae", Vector2(4.4, 0.6)]],
+			["ds_member", Vector2(3.6, 2.0)], ["kimhyeokju", Vector2(4.6, -1.6), {"hp_k": 0.4}], ["gangmanjae", Vector2(4.4, 0.6)]],
 		"boss": "gangmanjae"},
-	{"id": "street_center", "theme": "hoeam_street", "bounds": Rect2(-6.0, -2.8, 12.0, 5.6),
+	{"id": "street_center", "theme": "hoeam_street", "bounds": Rect2(-6.0, -2.8, 12.0, 5.6), "cast": ["kimshin"],
 		"heroes": [Vector2(-2.4, 1.4)], "allies": [],                   # 중앙선(z = 0)을 사이에 두고 마주 선다(p1:020/000-005)
 		"enemies": [["yundeoksu", Vector2(1.8, -1.4)]], "boss": "yundeoksu"},
-	{"id": "street_end", "theme": "hoeam_street", "bounds": Rect2(-5.0, -2.4, 10.0, 4.8),
+	{"id": "street_end", "theme": "hoeam_street", "bounds": Rect2(-5.0, -2.4, 10.0, 4.8), "cast": ["kimshin"],
 		"heroes": [Vector2(-1.6, 0.4)], "allies": [], "enemies": [], "boss": "", "end": true},
 ]
 
