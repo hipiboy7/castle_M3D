@@ -10,6 +10,7 @@ extends SceneTree
 ## SD 느낌: 머리를 크게(1.55배) · 몸통 · 팔다리를 둥글고 굵게 · 손발을 크게. 색은 정점 색(툰 재질은 게임에서 입힌다).
 
 const Looks = preload("res://src/view/looks.gd")
+const Imported = preload("res://tools/import_model.gd")    # 외부 모델로 옮긴 외형(SRC — 김신 2026-11-10 시험)은 여기서 만들지 않는다
 
 var st: SurfaceTool
 var bones := {}                  # 이름 → 번호
@@ -38,6 +39,9 @@ func _initialize() -> void:
 		if done.has(path) or (not only.is_empty() and not only.has(id)):
 			continue
 		done[path] = true
+		if Imported.SRC.has(id):
+			print("MODEL %s skip — tools/import_model.gd" % path)
+			continue
 		var t0 := Time.get_ticks_msec()
 		var err := _make(Looks.look(id), path)      # 원작 대조 겉모습(looks_common)을 덮은 표
 		print("MODEL %s %s %dms %d tris" % [path, "ok" if err == OK else "error %d" % err, Time.get_ticks_msec() - t0, tris])
