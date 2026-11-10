@@ -54,9 +54,15 @@ func test_talk_room_says_lines_then_moves_on() -> void:
 
 
 func test_escape_rooms_and_determinism() -> void:
-	for pair in [["ch3", 6], ["ch9", 3]]:
-		var d := Stage.make(2, {"chapter": pair[0], "room": pair[1]})
-		check(d["room"].has("escape") and d["boss"].hp_floor > 0.0, "%s 따돌리기 방 — 보스는 쓰러뜨릴 수 없다" % pair[0])
+	for ch in ["ch3", "ch9"]:
+		var rooms: Array = Campaign.table(ch).ROOMS
+		var ri := -1
+		for i in rooms.size():
+			if rooms[i].has("escape"):
+				ri = i
+		check(ri >= 0, "%s 에 따돌리기 방이 있다" % ch)
+		var d := Stage.make(2, {"chapter": ch, "room": maxi(ri, 0)})
+		check(d["room"].has("escape") and d["boss"].hp_floor > 0.0, "%s 따돌리기 방 — 보스는 쓰러뜨릴 수 없다" % ch)
 	var a := Stage.simulate(3, 60 * 40, {"chapter": "ch8"})
 	var b := Stage.simulate(3, 60 * 40, {"chapter": "ch8"})
 	check(a == b, "같은 시드 같은 결과(8장 40초)")

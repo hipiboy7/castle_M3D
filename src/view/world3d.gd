@@ -71,6 +71,12 @@ const SETS := {
 	"rooftop_dusk": {"env": [Color(0.5, 0.36, 0.3), 0.7, Color(0.55, 0.3, 0.22)], "sun": [Color(1.0, 0.6, 0.35), 1.0, Vector3(-15, 60, 0)],
 		"floor": [Color(0.4, 0.38, 0.36), 0.8, true], "city": true, "rail": true,
 		"props": [["tank", -5.0, -0.6], ["vent", 4.6, -0.3]]},
+	# 놀이공원 분수대 광장(p1:087/005-008 — 대관람차 · 성 모양 탑 · 범퍼카 · 분수 · 'CAFFEE' 간판, 낮) — 하성 김태훈과의 회담
+	"park_plaza": {"env": [Color(0.5, 0.5, 0.5), 0.8, Color(0.62, 0.72, 0.85)], "sun": [Color(1.0, 0.96, 0.88), 1.1, Vector3(-55, 30, 0)],
+		"ground": [Color(0.52, 0.48, 0.44), Color(0.62, 0.58, 0.52), 0.7],
+		"props": [["building", -4.4, -2.8, {"col": Color(0.85, 0.55, 0.6)}], ["building", 3.8, -3.0, {"col": Color(0.55, 0.7, 0.9)}],
+			["stall", -1.6, -0.9, {"col": Color(0.95, 0.4, 0.3)}], ["neon", 2.2, -0.9, {"text": "CAFFEE", "col": Color(1.0, 0.85, 0.3)}],
+			["round_table", -4.2, 3.4], ["round_table", 4.2, 3.4], ["lamp", 0.0, -0.4, {"col": Color(1.0, 0.9, 0.7)}], ["plant", 5.6, -0.4]]},
 	# ---- 6장 인천항 — 백도찬의 배(p1:089-111)
 	"ship_deck": {"env": [Color(0.2, 0.24, 0.32), 0.6, Color(0.02, 0.03, 0.06)], "sun": [Color(0.6, 0.7, 1.0), 0.55, Vector3(-50, -30, 0)],
 		"floor": [Color(0.32, 0.3, 0.28), 0.7, true], "water": true, "rail": true, "fog": [Color(0.12, 0.15, 0.22), 0.02],
