@@ -149,7 +149,7 @@ static func _hero(d: Dictionary, id: String):
 
 
 static func _has_progress(id: String) -> bool:
-	# castle_common 에 없는 조작 인물(7장 관전 방 임무열 · 히데, 9장 여민수 · 크로트)은 진행 없이 1층 대체 등급 — 묻기 전에 걸러 오류 글을 안 낸다
+	# castle_common 에 없는 조작 인물(7장 관전 방 임무열 · 히데, 9장 여민수 · 크로트, 12장 현석 · 쿄지)은 진행 없이 1층 대체 등급 — 묻기 전에 걸러 오류 글을 안 낸다
 	if not Addendum._has_common(id):
 		return false
 	return Common.character(id).has("rank") and Common.character(id).get("rank") != null
