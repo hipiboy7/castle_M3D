@@ -39,9 +39,9 @@ const ROLES := {
 	"guilhwa": {"hp": 260.0, "posture": 90.0, "walk": 2.0, "run": 4.4, "stagger": 55, "look": "guilhwa",
 		"moveset": {"combo": "gu_jab", "dash": "gu_dash", "finisher": "gu_finisher"}},
 	"dohaksu": {"hp": 240.0, "posture": 80.0, "walk": 2.0, "run": 4.3, "stagger": 55, "look": "dohaksu",
-		"moveset": {"combo": "gu_jab", "dash": "gu_dash", "finisher": "gu_finisher"}},
+		"moveset": {"combo": "dhg_1", "dash": "dhg_dash", "finisher": "gu_finisher"}},
 	"eogwangdeuk": {"hp": 240.0, "posture": 80.0, "walk": 2.0, "run": 4.3, "stagger": 55, "look": "eogwangdeuk",
-		"moveset": {"combo": "gu_jab", "dash": "gu_dash", "finisher": "gu_finisher"}},
+		"moveset": {"combo": "egg_1", "dash": "egg_dash", "finisher": "gu_finisher"}},
 	"street_thug": {"hp": 220.0, "posture": 45.0, "walk": 1.8, "run": 3.8, "stagger": 70, "ai": "thug", "look": "ds_raider"},
 }
 

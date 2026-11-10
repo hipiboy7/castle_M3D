@@ -44,7 +44,7 @@ const ROLES := {
 		"moveset": {"combo": "jk_slash1", "dash": "jk_dash", "finisher": "jk_finisher"}},
 	# 아킬라(이스크라 — 총 · 타격기): 맨주먹 묶음 + 원작 기술(총격 — skill_kit 이 등급 수만큼)
 	"akila": {"hp": 230.0, "posture": 80.0, "walk": 2.1, "run": 4.6, "stagger": 50, "look": "akila",
-		"moveset": {"combo": "kf_jab", "dash": "kf_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
+		"moveset": {"combo": "akk_1", "dash": "akk_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
 	"street_thug": {"hp": 120.0, "posture": 40.0, "walk": 1.8, "run": 3.8, "stagger": 70, "ai": "thug", "look": "ds_raider"},
 	"gang_blade": {"hp": 150.0, "posture": 45.0, "walk": 1.9, "run": 4.0, "stagger": 70, "ai": "haseong_guard", "look": "haseong_guard"},
 	# 백의 조직원(아군 봇 — 방 표 덧붙임 role, 1층은 엑스트라 street_thug)
@@ -56,7 +56,7 @@ const ROLES := {
 		"look": "douchen", "phase2_at": 0.5, "dmg_k": 0.6},
 	# 아군: 한태철(성남제일파 — 백의 원군, 골프채) · 표영(백의 부산지부장, 카람빗)
 	"hantaecheol": {"hp": 200.0, "posture": 70.0, "walk": 1.9, "run": 4.1, "stagger": 55, "look": "hantaecheol",
-		"moveset": {"combo": "ny_jab", "dash": "ny_dash", "finisher": "ny_finisher"}},
+		"moveset": {"combo": "ht_1", "dash": "ht_dash", "finisher": "ny_finisher"}},
 	"pyoyoung": {"hp": 210.0, "posture": 60.0, "walk": 2.3, "run": 5.0, "stagger": 55, "look": "pyoyoung",
 		"moveset": {"combo": "py_slash1", "dash": "py_dash", "finisher": "py_finisher"}},
 	"lingling": {"hp": 520.0, "posture": 300.0, "walk": 2.2, "run": 4.8, "stagger": 75, "poise": 20.0, "finisher_cap": 0.1, "ai": "x_kicker",

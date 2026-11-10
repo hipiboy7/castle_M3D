@@ -195,9 +195,57 @@ const PROFILES := {
 		"phase2": {"dmg_k": 1.2, "cd_k": 0.65, "guard_add": 0.1}},
 }
 
+## 인물별 기본기(2026-11-10 폰 리뷰 '캐릭들 공격 모션이 다 비슷하던데'): 같은 원형(x_)을 쓰는 이름 있는 적마다 원형 동작을 그 사람 동작으로
+## 바꿔 끼운다(char_id → {원형 동작: 변형}). 변형은 moves.gd M 의 base 칸 — 프레임 · 피해 · 예고는 원형 그대로라 패턴 · 무게 · 박자(손맛 ·
+## 균형)는 그대로이고, 자세 모양 · 이름만 원작 싸움 갈래 · 무기(docs/기술목록.md)대로 달라진다. 패턴 · 맞받기 · 기술 묶음의 원형 동작 모두에
+## (_mv). 원형을 둘 쓰는 사람(피우진 x_kicker · x_master, 사인진 x_boxer · x_blade, 구스타프 x_master · x_gun)은 한 줄에 둘 다
+const STYLE := {
+	"moseunggyu": {"x_jab": "mo_jab", "x_body": "mo_body", "x_rush": "mo_rush"},
+	"ttolbae": {"x_jab": "tb_jab", "x_straight": "tb_straight", "x_hook": "tb_hook", "x_body": "tb_body", "x_rush": "tb_rush"},
+	"mark": {"x_jab": "mk_jab", "x_hook": "mk_hook", "x_rush": "mk_rush"},
+	"jucheonmyeong": {"x_straight": "jc_straight", "x_body": "jc_body", "x_rush": "jc_rush"},
+	"choedalcheon": {"x_jab": "cde_jab", "x_straight": "cde_straight", "x_hook": "cde_hook", "x_body": "cde_body", "x_rush": "cde_rush"},
+	"iwashiro": {"x_hook": "iw_hook", "x_body": "iw_body", "x_rush": "iw_rush"},
+	"cheonildo": {"x_jab": "ci_jab", "x_hook": "ci_hook", "x_rush": "ci_rush"},
+	"guilhwa": {"x_jab": "gh_jab", "x_hook": "gh_hook", "x_body": "gh_body"},
+	"sainjin": {"x_hook": "sn_hook", "x_body": "sn_body", "x_cut": "sn_cut", "x_cut2": "sn_cut2", "x_stab": "sn_stab", "x_lunge": "sn_lunge"},
+	"douchen": {"x_jab": "dc_jab", "x_straight": "dc_straight", "x_body": "dc_body"},
+	"keurisa": {"x_frontkick": "ku_front", "x_spinkick": "ku_spin", "x_jab": "ku_jab"},
+	"lingling": {"x_roundkick": "ll_round", "x_jab": "ll_jab", "x_flykick": "ll_fly"},
+	"pantera": {"x_jab": "pt_jab", "x_roundkick": "pt_round", "x_flykick": "pt_fly"},
+	"woojin": {"x_frontkick": "wj_front", "x_roundkick": "wj_round", "x_spinkick": "wj_spin", "x_flykick": "wj_fly", "x_body": "wj_body", "x_rush": "wj_rush"},
+	"vasily": {"x_hammer": "vs_hammer", "x_shoulder": "vs_shoulder", "x_hook": "vs_hook"},
+	"bulgom": {"x_hammer": "bg_hammer", "x_shoulder": "bg_shoulder", "x_grab": "bg_grab"},
+	"bison": {"x_hammer": "bs_hammer", "x_hook": "bs_hook", "x_shoulder": "bs_shoulder"},
+	"eunbo": {"x_hammer": "eb_hammer", "x_shoulder": "eb_shoulder", "x_grab": "eb_grab"},
+	"majunyeong": {"x_hammer": "mze_hammer", "x_grab": "mze_grab", "x_hook": "mze_hook"},
+	"namilho": {"x_cut": "nh_cut", "x_cut2": "nh_cut2", "x_stab": "nh_stab"},
+	"masa": {"x_cut": "ms_cut", "x_cut2": "ms_cut2", "x_stab": "ms_stab"},
+	"deumiteuri": {"x_cut": "dm_cut", "x_cut2": "dm_cut2"},
+	"barista": {"x_cut2": "br_cut2", "x_stab": "br_stab", "x_lunge": "br_lunge"},
+	"komodo": {"x_cut": "km_cut", "x_cut2": "km_cut2", "x_lunge": "km_lunge"},
+	"immuyeol": {"x_cut": "iy_cut", "x_cut2": "iy_cut2", "x_stab": "iy_stab", "x_lunge": "iy_lunge"},
+	"scaledanjang": {"x_stab": "sd_stab", "x_lunge": "sd_lunge"},
+	"toishi": {"x_cut": "ts_cut", "x_cut2": "ts_cut2"},
+	"ryujihak": {"x_twin": "rjx_twin", "x_cut": "rjx_cut", "x_lunge": "rjx_lunge"},
+	"andycheong": {"x_twin": "ac_twin", "x_cut": "ac_cut", "x_lunge": "ac_lunge"},
+	"odohwa": {"x_frontkick": "od_front", "x_swing": "od_swing"},
+	"pyoyoung": {"x_kara": "pye_kara", "x_frontkick": "pye_front", "x_lunge": "pye_lunge"},
+	"gustav": {"x_jab": "gv_jab", "x_hook": "gv_hook", "x_roundkick": "gv_round", "x_spinkick": "gv_spin", "x_rush": "gv_rush", "x_stab": "gv_stab"},
+	"grolla": {"x_hook": "gr_hook", "x_spinkick": "gr_spin", "x_body": "gr_body", "x_rush": "gr_rush"},
+	"richeon": {"x_hook": "rc_hook", "x_roundkick": "rc_round", "x_grab": "rc_grab", "x_rush": "rc_rush"},
+	"choeminuk": {"x_jab": "cm_jab", "x_hook": "cm_hook", "x_roundkick": "cm_round", "x_grab": "cm_grab", "x_spinkick": "cm_spin", "x_rush": "cm_rush"},
+	"yuwoosung": {"x_cut2": "yw_cut2", "x_cross": "yw_cross", "x_twin": "yw_twin", "x_lunge": "yw_lunge", "x_overhead": "yw_overhead"},
+	"akila": {"x_jab": "ake_jab", "x_straight": "ake_straight", "x_hook": "ake_hook", "x_stab": "ake_stab", "x_rush": "ake_rush"},
+	"jeongdan": {"x_jab": "jd_jab", "x_hook": "jd_hook", "x_body": "jd_body"},
+	"jeonghwa": {"x_straight": "jw_straight", "x_grab": "jw_grab", "x_body": "jw_body", "x_rush": "jw_rush"},
+	"mahakyoung": {"x_jab": "mh_jab", "x_straight": "mh_straight", "x_hook": "mh_hook", "x_stab": "mh_stab", "x_body": "mh_body", "x_rush": "mh_rush"},
+}
+
 ## 이름 있는 적의 기술 묶음(src/data/skill_kit.gd — 등급 수만큼): 패턴을 고를 때 이 확률로 기술 하나를 차례대로 낸다(이름이 머리 위에 뜬다).
-## 2차는 더 자주. 동작은 기술 묶음이 고른 동작 그대로(피해 · 예고는 동작 표 — 3층)
-const SKILL_P := [0.2, 0.3]
+## 2차는 더 자주. 동작은 기술 묶음이 고른 동작 그대로(피해 · 예고는 동작 표 — 3층). 2026-11-10 0.2 · 0.3 → 0.26 · 0.36(폰 리뷰 — 기술이 드물어
+## 다 같은 기본기만 보였다. 패턴 고르기 넷 중 하나 꼴 — 쉬는 틈 cd 는 그대로라 몰아치지는 않는다)
+const SKILL_P := [0.26, 0.36]
 
 var me
 var foe
@@ -218,6 +266,7 @@ var strafe_t := 0
 var phase := 1
 var counter_rate := 0.0          # 맞받아 치는 확률(프로필 counter — 0 · 1장 김대건)
 var kite := false                # 총잡이(프로필 kite): 주먹 차례가 와도 다가가지 않고 거리를 둔다 — 붙으면 그때 친다
+var style: Dictionary = {}       # 인물별 기본기(STYLE — 원형 동작 → 그 사람 동작)
 
 
 ## 이 원형이 패턴 · 총 · 맞받기에 쓰는 동작 이름(차례 고정 — 기술 묶음이 이 안에서 고른다, skill_kit npc_kit allowed)
@@ -244,6 +293,7 @@ func _init(enemy, profile_id: String, r: RandomNumberGenerator, guard := 0.3) ->
 	cooldown = 40 + rng.randi_range(0, 60)                  # 여럿이 같은 박자로 시작하지 않게
 	ranged_cd = 90 + rng.randi_range(0, 120)
 	kite = bool(prof.get("kite", false))
+	style = STYLE.get(str(me.char_id), {})
 	if kite:
 		ranged_cd = int(ranged_cd / 3.0)                   # 총잡이는 첫 발이 빠르다(들어서자 겨눈다 — 002/013-015)
 
@@ -284,7 +334,7 @@ func decide(target, may_attack: bool) -> Dictionary:
 		# 막지 않으면 맞받아 친다(크로스 카운터 — 프로필 counter 가 있는 사람만, 판이 준 차례 안에서)
 		if counter_rate > 0.0 and may_attack and d < float(prof["engage"]) and rng.randf() < counter_rate:
 			queue.clear()
-			it["use"] = str(prof["counter"][0])
+			it["use"] = _mv(str(prof["counter"][0]))
 			return it
 	# 2. 패턴 이어 가기
 	if not queue.is_empty():
@@ -293,7 +343,7 @@ func decide(target, may_attack: bool) -> Dictionary:
 			it["move"] = it["face"] * 0.35 if d > float(prof["near"]) + 0.2 else Vector2.ZERO
 			return it
 		var step: Array = queue.pop_front()
-		it["use"] = step[0]
+		it["use"] = _mv(str(step[0]))
 		wait = int(step[1])
 		if step.size() > 2:
 			it["use_name"] = step[2]                    # 기술 묶음 — 머리 위 이름(fighter 가 skill 신호로)
@@ -325,6 +375,11 @@ func decide(target, may_attack: bool) -> Dictionary:
 	else:
 		it["move"] = Vector2(-to.y, to.x) * strafe * 0.4
 	return it
+
+
+## 원형 동작 → 이 사람의 동작(STYLE 에 없으면 그대로 — 엑스트라 · 제 프로필이 있는 0 ~ 2장 인물)
+func _mv(name: String) -> String:
+	return str(style.get(name, name))
 
 
 func _enter_phase2() -> void:

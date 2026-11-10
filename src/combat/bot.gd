@@ -18,6 +18,10 @@ var poke_t := 0
 var skill_cd := 120
 var foes: Array = []
 var generic_skills := false
+var skill_turn := 0              # 아군(generic_skills): 되는 기술을 차례로 돌려 쓴다(늘 첫 기술만 쓰지 않게)
+
+const ALLY_NEUTRAL_WAIT := 150    # 아군은 상대가 빈틈이 없어도 기술을 마지막으로 쓴 뒤 이만큼(쉬는 틈 240 + 이것) 지나면 쓴다 — 2026-11-10 폰 리뷰
+                                  # '기본기만 보인다'(전에는 빈틈 · 움찔에만 써서 드물었다). 6.5초에 한 번 꼴 — 몰아치지 않게
 
 
 func _init(hero, boss, r: RandomNumberGenerator) -> void:
@@ -133,8 +137,10 @@ func _pick_skill(d: float) -> int:
 		var i: int = me.skill_index(id)
 		if i >= 0 and me.can_pay(me.skills[i]):
 			return i
-	if generic_skills and not order.is_empty():
-		for i in me.skills.size():
+	if generic_skills and (not order.is_empty() or skill_cd <= -ALLY_NEUTRAL_WAIT):
+		for k in me.skills.size():
+			var i: int = (skill_turn + k) % me.skills.size()
 			if me.can_pay(me.skills[i]):
+				skill_turn = i + 1
 				return i
 	return -1
