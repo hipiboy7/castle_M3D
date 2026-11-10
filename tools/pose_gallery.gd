@@ -1,6 +1,6 @@
 extends SceneTree
-## 자세 모양 모아 보기(개발용) — src/view/poses.gd SHAPES 의 모양마다 W(준비 끝) · S(타격) 를 옆에서, S 를 3/4 앞 · 게임 카메라(위 55도)에서
-## 찍어 한 장(쪽마다 8 모양)에 모은다. 팔다리가 몸을 뚫거나 꺾이지 않는지 눈으로 보는 데 쓴다.
+## 자세 모양 모아 보기(개발용) — src/view/poses.gd SHAPES 의 모양마다 A(예비 동작) · W(준비 끝) · S(타격) · O(지나침) 를 옆에서, S 를
+## 게임 카메라(위 55도)에서 찍어 한 장(쪽마다 8 모양)에 모은다. 팔다리가 몸을 뚫거나 꺾이지 않는지 눈으로 보는 데 쓴다.
 ## 창이 있어야 그린다:  tools/xvfb_run.sh <godot> --path . -s res://tools/pose_gallery.gd -- 출력폴더 외형이름 [모양 ..]
 ## 외형이름 끝이 _a 면 그림 A(GLB — src/view/puppet_glb.gd). 모양을 안 주면 SHAPES 전부(+ 쪽 붙은 _L 은 이름으로 주면 찍는다).
 ## 출력: <출력폴더>/<외형이름>_<쪽번호>.png — 저장소 밖에 둔다.
@@ -12,7 +12,8 @@ const P = preload("res://src/view/poses.gd")
 
 const CW := 260
 const CH := 320
-const PER_ROW := 2          # 한 줄에 모양 둘(칸 셋씩)
+const PER_ROW := 2          # 한 줄에 모양 둘(칸 다섯씩)
+const CELLS := 5
 const ROWS := 4
 
 
@@ -68,7 +69,7 @@ func _run() -> void:
 	var page := 0
 	var i := 0
 	while i < shapes.size():
-		var img := Image.create(CW * 4 * PER_ROW, CH * ROWS, false, Image.FORMAT_RGBA8)
+		var img := Image.create(CW * CELLS * PER_ROW, CH * ROWS, false, Image.FORMAT_RGBA8)
 		img.fill(Color(0.1, 0.1, 0.1))
 		for j in per:
 			if i + j >= shapes.size():
@@ -78,9 +79,10 @@ func _run() -> void:
 				print("NO SHAPE %s" % sh)
 				continue
 			var keys: Array = p.shape_keys[sh]
-			var cells := [[keys[0], Vector3(1, 0.12, 0), sh + " W"], [keys[1], Vector3(1, 0.12, 0), "S"],
-				[keys[1], Vector3(0.5, 0.12, -0.87), "S 3/4"], [keys[1], Vector3(0.55, 0.82, 0.15), "S 위"]]
-			for c in 4:
+			var side := Vector3(1, 0.12, 0)
+			var cells := [[keys[3] if keys.size() > 3 else keys[0], side, sh + " A"], [keys[0], side, "W"], [keys[1], side, "S"],
+				[keys[4] if keys.size() > 4 else keys[1], side, "O"], [keys[1], Vector3(0.55, 0.82, 0.15), "S 위"]]
+			for c in CELLS:
 				var pose: Dictionary = cells[c][0]
 				p.cur = pose.duplicate()
 				p._apply(p.cur)
@@ -92,7 +94,7 @@ func _run() -> void:
 					await process_frame
 				var shot := vp.get_texture().get_image()
 				shot.convert(Image.FORMAT_RGBA8)
-				var col := (j % PER_ROW) * 4 + c
+				var col := (j % PER_ROW) * CELLS + c
 				img.blit_rect(shot, Rect2i(0, 0, CW, CH), Vector2i(col * CW, (j / PER_ROW) * CH))
 		img.save_png(out.path_join("%s_%d.png" % [name, page]))
 		print("PAGE %s_%d" % [name, page])

@@ -5,7 +5,8 @@ extends RefCounted
 ## 팔 · 다리(sh_ · th_): Vector3(앞으로 듦, 가로 휘두름(+ 몸 앞쪽으로), 옆으로 벌림(+ 바깥)) — 왼쪽도 같은 뜻(인형이 뒤집는다)
 ## 팔꿈치(el_) · 무릎(kn_) · 발목(ft_): 굽힘 각도 하나, 손목(wr_): Vector3(굽힘, 비틀기, 꺾기)
 ## root_y · root_fwd: 골반 높이(+ 면 발이 그만큼 땅에서 뜬다 — 날아차기) · 앞 보정(m), spin: 몸 전체 돌기(+ 왼쪽으로), roll: 앞구르기, fall: 뒤로 넘어짐
-## 공격 동작은 모양(Move.shape)마다 W(준비 끝) · S(타격) · F(회수) 세 자세 — 그 사이는 인형이 부드럽게 잇는다.
+## 공격 동작은 모양(Move.shape)마다 W(준비 끝) · S(타격) · F(회수) 세 자세 — 인형이 A(예비 동작) · O(지나침)를 더해
+## 가드 → A → W → S → O → F → 가드 다섯 자세로 부드럽게 잇는다(아래 AMP_TORSO 묶음 — src/view/puppet3d.gd _shape_set).
 
 const NEUTRAL := {
 	"pelvis": Vector3.ZERO, "spine": Vector3.ZERO, "chest": Vector3.ZERO, "head": Vector3.ZERO,
@@ -40,6 +41,18 @@ const GUARD_LONG := {
 	"sh_r": Vector3(40, 30, 12), "el_r": 50.0, "wr_r": Vector3(-30, 0, 0), "sh_l": Vector3(36, 30, 14), "el_l": 96.0,
 	"th_r": Vector3(24, -4, 6), "kn_r": 28.0, "ft_r": -6.0, "th_l": Vector3(-18, 4, 10), "kn_l": 24.0, "ft_l": 12.0,
 }
+
+## 공격 자세를 크고 길게 읽히게(2026-11-10 폰 리뷰 "공격 모션이 다 비슷하다") — 인형(src/view/puppet3d.gd _shape_set)이 모양마다
+## W · S · F 에 더해 A(예비 동작: 준비 앞에 타격 반대쪽으로 더 감고 가라앉음) · O(지나침: 타격 뒤 같은 쪽으로 더) 를 만든다.
+## AMP_TORSO: 가드에서 벗어난 몸통 각도 배율 · AMP_STEP: 내딛기(root_fwd) 배율 · ANTICIPATE · OVERSHOOT: W↔S 차이의 몇 배를 더 감고 · 지나가나 ·
+## KEY_MAX: 그 더함의 한도(도) · SINK: 예비 동작에서 두 무릎을 더 굽히는 각도. 모양 표에 "A" · "O" 가 있으면 그 위에 덮는다
+const AMP_TORSO := 1.3
+const AMP_STEP := 1.3
+const ANTICIPATE := 0.35
+const OVERSHOOT := 0.25
+const KEY_MAX := 24.0
+const SINK := 12.0
+const TORSO_KEYS := ["pelvis", "spine", "chest", "head"]
 
 const LUNGE_LEGS := {"th_r": Vector3(40, -4, 6), "kn_r": 48.0, "ft_r": -10.0, "th_l": Vector3(-28, 4, 9), "kn_l": 14.0,
 	"ft_l": 16.0}

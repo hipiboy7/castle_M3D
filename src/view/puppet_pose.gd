@@ -29,6 +29,9 @@ const FOREARM := 0.26
 const ROLL_PIVOT := 0.45
 const GRIP_FWD := Vector3(0, -0.82, -0.57)    # 바로 쥔 칼날 방향 (손 좌표: 아래팔 연장선에서 엄지 쪽으로)
 const GRIP_REV := Vector3(0, 0.55, 0.83)      # 거꾸로 쥔 칼날 (새끼손가락 쪽 → 아래팔을 따라 뒤로)
+const ANTIC_MIN := 8              # 준비가 이 프레임 이상인 동작만 예비 동작(A)을 보인다 — 조작 인물의 빠른 연타(4 ~ 7)는 바로 W 로(손맛)
+const ANTIC_AT := 0.4             # 준비의 앞 이만큼 가드 → A, 나머지 A → W
+const OVER_AT := 0.4              # 회수 앞부분(hold)의 이만큼 S → O(지나침), 나머지 O → F
 
 var look: Dictionary
 var J := {}
@@ -277,6 +280,8 @@ func _attack_pose(f) -> Dictionary:
 	var w: Dictionary = keys[0]
 	var s: Dictionary = keys[1]
 	var fo: Dictionary = keys[2]
+	var an: Dictionary = keys[3] if keys.size() > 3 else w      # 예비 동작(A) · 지나침(O) — puppet3d _shape_set
+	var ov: Dictionary = keys[4] if keys.size() > 4 else s
 	var su := int(mv["startup"])
 	var ac := int(mv["active"])
 	var rc := int(mv["recovery"])
@@ -290,6 +295,10 @@ func _attack_pose(f) -> Dictionary:
 		if shape == "sidekick":
 			return _sidekick_windup(f, u, w)
 		var p := _lerp_pose(guard_pose, w, 1.0 - (1.0 - u) * (1.0 - u))   # 준비 자세가 일찍 보이게(처음이 빠르다)
+		if su >= ANTIC_MIN:
+			# 예비 동작: 앞 ANTIC_AT 동안 가드 → A(더 감고 가라앉음), 나머지는 A → W(감긴 채 타격 자세 쪽으로 몸을 연다)
+			p = _lerp_pose(guard_pose, an, _ease_out(u / ANTIC_AT)) if u < ANTIC_AT \
+				else _lerp_pose(an, w, _ease_in_out((u - ANTIC_AT) / (1.0 - ANTIC_AT)))
 		for fr in mv["feints"]:
 			if t >= int(fr) and t < int(fr) + 4:
 				p = _lerp_pose(w, s, 0.7)       # 멈칫: 치는 척만 하고 몸은 다시 준비로
@@ -312,9 +321,12 @@ func _attack_pose(f) -> Dictionary:
 			return wp
 		rt -= f.whiff_t
 	var hold := maxi(2, int(rc * 0.45))
+	var over := maxi(1, int(hold * OVER_AT))
 	var p3: Dictionary
-	if rt <= hold:
-		p3 = _lerp_pose(s, fo, _ease_out(float(rt) / hold))
+	if rt <= over:
+		p3 = _lerp_pose(s, ov, _ease_out(float(rt) / over))           # 지나침(O): 타격 쪽으로 조금 더 — 힘이 실린 끝
+	elif rt <= hold:
+		p3 = _lerp_pose(ov, fo, _ease_in_out(float(rt - over) / maxf(1.0, hold - over)))
 	else:
 		p3 = _lerp_pose(fo, guard_pose, _ease_in_out(float(rt - hold) / maxf(1.0, rc - hold)))
 	if shape == "spin":
@@ -355,6 +367,8 @@ func _triple_pose(mv: Dictionary, ta: int) -> Dictionary:
 	var seq: Array = mv.get("seq", [])
 	if not seq.is_empty():                             # 대마다 모양(묶음 B — 서진태 오리지널 베기 · 되베기 · 찌르기 등)
 		var nm := str(seq[mini(k, seq.size() - 1)])
+		if nm == "slash_back":                         # 쪽 없는 되베기 — 왼손 칼이 있으면 왼손(shape_key 와 같은 뜻)
+			nm = "slash_back_L" if weapon_l != null else "slash_back_R"
 		if nm == "slash_back_L" and weapon_l == null:
 			nm = "slash_back_R"
 		keys = shape_keys.get(nm, keys)
