@@ -27,7 +27,7 @@ func test_kit_size_and_moves() -> void:
 	var low := Kit.npc_kit("scaledanjang", "준10강", "x_brawler", [])
 	check(low.size() == 3, "스케일단장(준10강) 3개 — %d" % low.size())
 	for e in g + r + w + low:
-		check(Moves.M.has(str(e["move"])) and str(e["name"]) != "", "동작 표에 있는 동작 · 이름 %s" % e)
+		check(Moves.has(str(e["move"])) and str(e["name"]) != "", "동작 표에 있는 동작 · 이름 %s" % e)
 	var names := {}
 	for e in r:
 		names[e["name"]] = true
@@ -53,11 +53,44 @@ func test_known_first_and_no_progression_skip() -> void:
 	check(cap.size() == 4 and cap[0]["id"] == "kickarts", "아는 기술이 많아도 등급 수까지(외성 4)")
 
 
-func test_npc_moves_stay_in_profile() -> void:
-	# 적의 기술 동작은 그 적이 원래 쓰는 동작 안에서 — 이름만 원작 기술(손맛은 원래 패턴과 같게)
+func test_named_moves_follow_canon() -> void:
+	# 사용자 2026-11-10 "숙이고 카운터해도 그냥 주먹만 내지르고 — 이름 별로 각각 행동을 다 구체화": 기술은 이름대로의 전용 동작
+	var Tech = preload("res://src/data/tech_moves.gd")
+	var cp := Moves.get_move(Tech.BY_SKILL["kimshin_counter_punch"])
+	check(int(cp["stance"]) > 0 and str(cp["shape"]) == "duck", "숙여 흘리고 카운터 주먹 = 숙인 카운터 자세 %s" % cp["shape"])
+	check(str(Moves.get_move(str(cp["stance_hit"]))["shape"]) == "uppercut", "맞받기는 올려치기")
+	check(str(Moves.get_move("s_gu_headbutt")["shape"]) == "headbutt", "구일화 들이받기 = 박치기 자세(OVERRIDE)")
 	var allowed: Array = preload("res://src/combat/enemy_ai.gd").moves_of("x_master")
-	check(allowed.has("x_grab") and allowed.has("x_straight") and not allowed.has("t_shot"), "x_master 동작 %s" % [allowed])
 	var g := Kit.npc_kit("gustav", "내성 상위", "x_master", [], allowed)
 	check(g.size() == 5, "구스타프 5개")
+	var shapes := {}
 	for e in g:
-		check(allowed.has(str(e["move"])), "구스타프 기술 동작이 원형 안에 %s" % e)
+		check(Moves.has(str(e["move"])), "동작 표에 %s" % e)
+		if e["src"] == "canon":
+			check(str(e["move"]) == str(Tech.BY_SKILL.get(e["id"], e["move"])), "원작 기술은 전용 동작 %s" % e)
+			shapes[str(Moves.get_move(str(e["move"]))["shape"])] = true
+	check(shapes.size() >= 2, "같은 사람 기술끼리 모양이 다르다 %s" % [shapes.keys()])
+	# 1층 기술도 전용 동작으로(예전엔 원형 패턴 밖이면 주먹으로 바꿨다 — 이슬 메다꽂기가 주먹이던 것)
+	var known := [{"id": "iseul_double_slam", "name": "양팔 머리 낚아채 메다꽂기", "move": "is_punch", "cost": 1.0}]
+	var k := Kit.npc_kit("iseul", "외성 하위", "x_brawler", known, ["is_punch"])
+	check(k[0]["move"] == "s_is_slam", "이슬 메다꽂기는 메다꽂기 동작 %s" % k[0])
+
+
+func test_tech_moves_valid() -> void:
+	var Tech = preload("res://src/data/tech_moves.gd")
+	for id in Tech.M:
+		var m := Moves.get_move(id)
+		check(int(m["startup"]) > 0 and int(m["active"]) > 0 and str(m["label"]) != "", "%s 프레임 · 이름" % id)
+		check(preload("res://tests/unit/test_p1_moves.gd").shape_ok(str(m["shape"])), "%s 자세 %s 는 있는 모양" % [id, m["shape"]])
+		for sh in m["seq"]:
+			check(preload("res://tests/unit/test_p1_moves.gd").shape_ok(str(sh)), "%s 대마다 모양 %s" % [id, sh])
+		check(int(m["hits"]) <= int(m["active"]) and str(m["telegraph"]) in ["", "parry", "unblock"], "%s 여러 대 · 예고" % id)
+		for fr in m["feints"]:
+			check(int(fr) > 0 and int(fr) < int(m["startup"]), "%s 멈칫은 준비 안에" % id)
+		check(int(m["hits"]) == 1 or (m["seq"] as Array).is_empty() or (m["seq"] as Array).size() == int(m["hits"]), "%s seq = hits" % id)
+		if int(m["stance"]) > 0:
+			check(int(m["stance"]) < int(m["startup"]) and Moves.has(str(m["stance_hit"])), "%s 카운터 자세 · 맞받기" % id)
+	for id in Tech.OVERRIDE:
+		check(Moves.M.has(id), "덧씌우는 동작 %s 이 moves.gd 에" % id)
+	for sid in Tech.BY_SKILL:
+		check(Moves.has(str(Tech.BY_SKILL[sid])), "기술 %s → 동작 %s" % [sid, Tech.BY_SKILL[sid]])

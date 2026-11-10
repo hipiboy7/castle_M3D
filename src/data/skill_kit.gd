@@ -1,6 +1,8 @@
 extends RefCounted
 ## 인물 기술 묶음 — 사용자 2026-11-10 "castle_common 에 있는 캐릭터별 기술을 캐릭터에 적용: 재앙 모든 기술 · 톱 7 · 내성 5 · 외성 4 ·
 ## 외성 미만 3". 기술 수는 그 장 시점 등급(조작 인물은 진행, 적은 장 표 NPCS · 1층)으로 정한다(castle_common 요청 30행 — 공통 규칙 후보).
+## 동작: 기술 id 가 tech_moves.gd BY_SKILL 에 있으면 그 전용 동작(원작 묘사대로 — 숙여 흘리고 카운터는 숙임 · 맞받기 어퍼).
+##   없을 때만 갈래(kind) 원형 동작(KIND_MOVES — allowed 안에서).
 ## 원천 차례: ① 아는 기술(known — 이 판 동작이 있는 1층 기술: 조작 인물은 castle_common 진행, 아군 · 적은 characters.json skills)
 ##   ② 원작 기술 표(data/story/techniques.json — tools/bake_techniques.py 가 castle_common canon 에서 구움. conf ai 는 이름 띄우기에만).
 ##      castle_common skills.json 에 있는 기술은 ②로 넣지 않는다(진행 · 습득 규칙이 정한다 — 얻기 전의 엇박을 미리 쓰지 않게)
@@ -9,6 +11,7 @@ extends RefCounted
 
 const Common = preload("res://src/data/common.gd")
 const Moves = preload("res://src/data/moves.gd")
+const Tech = preload("res://src/data/tech_moves.gd")   # 기술 id → 전용 동작(사용자 2026-11-10 "이름 별로 각각 행동을 다 구체화")
 
 const ALL := -1
 const PATH := "res://data/story/techniques.json"
@@ -98,9 +101,9 @@ static func _kit(id: String, rank: String, known: Array, ai: String, hero: bool,
 	for e in known:
 		if n != ALL and out.size() >= n:
 			return out
-		if not allowed.is_empty() and not allowed.has(str(e["move"])):
-			e = e.duplicate()                            # 원형 패턴에 없는 1층 기술 동작(11장용 구일화 박치기 등)은 이름만 두고 원형 동작으로
-			e["move"] = _moves_for("strike", allowed)[0]
+		if Tech.BY_SKILL.has(str(e.get("id", ""))) and str(e["move"]) != Tech.BY_SKILL[str(e["id"])]:
+			e = e.duplicate()                            # 전용 동작(원작 묘사대로)
+			e["move"] = Tech.BY_SKILL[str(e["id"])]
 		out.append(e)
 		names[str(e["name"])] = true
 	var used := {}                                   # 갈래마다 몇 번째 동작까지 썼나
@@ -110,11 +113,14 @@ static func _kit(id: String, rank: String, known: Array, ai: String, hero: bool,
 		var sid := str(t["id"])
 		if _is_common_skill(sid) or names.has(str(t["name"])):
 			continue
-		var kind := str(t["kind"])
-		var mvs: Array = _moves_for(kind, allowed)
-		var k := int(used.get(kind, 0))
-		used[kind] = k + 1
-		out.append({"id": sid, "name": str(t["name"]), "move": str(mvs[k % mvs.size()]), "cost": CANON_COST, "src": "canon"})
+		var mv := str(Tech.BY_SKILL.get(sid, ""))
+		if mv == "":                                     # 전용 동작이 아직 없는 기술(새로 받은 원작 표) — 갈래 원형 동작
+			var kind := str(t["kind"])
+			var mvs: Array = _moves_for(kind, allowed)
+			var k := int(used.get(kind, 0))
+			used[kind] = k + 1
+			mv = str(mvs[k % mvs.size()])
+		out.append({"id": sid, "name": str(t["name"]), "move": mv, "cost": CANON_COST, "src": "canon"})
 		names[str(t["name"])] = true
 	if hero or n == ALL:
 		return out

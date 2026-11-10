@@ -94,7 +94,7 @@ func test_p1_move_frames() -> void:
 		for fr in mv["feints"]:
 			check(int(fr) > 0 and int(fr) < int(mv["startup"]), "%s 멈칫(%d)은 준비 안에" % [k, fr])
 		check(str(mv["telegraph"]) in ["", "parry", "unblock"], "%s 예고 종류" % k)
-		check(str(mv["shape"]) in ["slash", "slash_back", "thrust", "thrust_low", "sidekick", "axe", "punch", "shot", "spin"], "%s 자세 %s 는 있는 모양" % [k, mv["shape"]])
+		check(shape_ok(str(mv["shape"])), "%s 자세 %s 는 있는 모양" % [k, mv["shape"]])
 	for k in ids:
 		var mv := Moves.get_move(k)
 		check(str(mv["telegraph"]) != "", "적 동작 %s 는 예고가 있다(흰 ! · 빨간 !)" % k)
@@ -196,3 +196,9 @@ func test_p1_big_moves_stop_kim() -> void:
 		var want: String = case[2]
 		var ok: bool = (h.state in ["idle", "move"]) if want == "idle" else h.state == want
 		check(hit and ok, "%s(%s) 맞은 김신 %s — 기대 %s" % [case[0], case[1], h.state, want])
+
+
+## 자세 모양이 그림 표(poses.gd SHAPES)에 있나 — slash_back 은 _L · _R 두 판
+static func shape_ok(shape: String) -> bool:
+	var P = preload("res://src/view/poses.gd")
+	return P.SHAPES.has(shape) or P.SHAPES.has(shape + "_L")

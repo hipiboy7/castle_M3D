@@ -7,6 +7,7 @@ extends RefCounted
 
 const Common = preload("res://src/data/common.gd")
 const Addendum = preload("res://src/data/addendum.gd")     # castle_common 에 없는 기술(3D 덧붙임)도 같은 길로
+const Tech = preload("res://src/data/tech_moves.gd")       # 원작 기술 전용 동작(tk_) · 이미 있던 동작에 덧씌우는 칸(OVERRIDE)
 
 const PX := 0.045                 # castle_M 1px → m (키 46px ≈ 1.8m 에서 몸 너비가 맞게 조금 크게)
 
@@ -648,12 +649,18 @@ const M := {
 static var _cache := {}
 
 
+## 동작 표에 있나 — moves.gd M 또는 원작 기술 전용 동작(tech_moves.gd)
+static func has(name: String) -> bool:
+	return M.has(name) or Tech.M.has(name)
+
+
 ## 이름 → 기술 (기본값을 채우고 거리를 미터로 바꾸고 2층 효과를 공통 데이터에서 채운 사본, 한 번 만들어 둔다)
 static func get_move(name: String) -> Dictionary:
 	if _cache.has(name):
 		return _cache[name]
 	var d: Dictionary = DEFAULTS.duplicate(true)
-	d.merge(M[name], true)
+	d.merge(M[name] if M.has(name) else Tech.M[name], true)
+	d.merge(Tech.OVERRIDE.get(name, {}), true)
 	d["name"] = name
 	var fx: Dictionary = Addendum.skill(d["skill_id"]).get("effects", {}) if d["skill_id"] != "" else {}
 	d["lethal"] = str(fx.get("lethal", ""))

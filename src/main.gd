@@ -233,7 +233,7 @@ func _attack_label(h) -> String:
 	if combo == "":
 		return "베기"
 	var shape := str(Moves.get_move(combo)["shape"])
-	return "베기" if shape.begins_with("slash") or shape.begins_with("thrust") else "치기"
+	return "베기" if shape.begins_with("slash") or shape.begins_with("thrust") or shape in ["overhead_chop", "reverse_stab", "rising_slash"] else "치기"
 
 
 ## 따돌리기 방(2장 남궁혁): 남은 초를 아래 알림 줄에 — 방을 넘으면 지운다

@@ -19,6 +19,7 @@ const BLOCK_DMG_K := 0.2
 const BLOCK_POSTURE_K := 0.8
 const FINISHER_CAP_BOSS := 0.08          # 보스에게 제압 피해는 최대 체력의 8%
 const PHASE2_AT := 0.55                  # 1차 체력 바닥 — 여기서 2차로
+const SHOT_SHAPES := ["shot", "draw_shot", "toss"]   # 앞으로 뻗은 선 판정(총 · 품에서 뽑아 쏘기 · 던지기)
 const PHASE2_FREEZE := 50                # 2차로 넘어가는 동안 멈춤(컷인)
 const LATE_PARRY := 6                    # 늦은 쳐내기: 서 있던 김신이 맞으면 맞음을 이만큼 미루고, 그 사이 누르면 쳐내기
                                          # (휘두름이 보이는 순간이 판정 순간이라 보고 누르면 늦다 — castle_common rules/전투_쳐내기.md 1절)
@@ -123,7 +124,7 @@ func _in_hit(a, d) -> bool:
 	var body: float = Fighter.BODY_R
 	if str(mv["shape"]) == "spin":
 		return a.pos.distance_to(d.pos) <= radius + body
-	if str(mv["shape"]) == "shot":
+	if str(mv["shape"]) in SHOT_SHAPES:
 		# 총: 앞으로 뻗은 선분(사거리 reach) 위 어디든 — 몸 반지름 + 탄 굵기(radius) 안이면 맞는다
 		var to2: Vector2 = d.pos - a.pos
 		var along := to2.dot(a.facing)
