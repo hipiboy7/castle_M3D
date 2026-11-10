@@ -159,6 +159,10 @@ func test_offbeat2_spends_all_and_self_cost() -> void:
 	check(_events(d, "brake").size() == 1, "엇박처럼 나가다 브레이크 한 번 (%d)" % _events(d, "brake").size())
 	check(is_equal_approx(b.hp, b.hp_max * (1.0 - 0.6)), "6칸 = 최대 체력 60%% (boss hp %s)" % b.hp)
 	check(is_equal_approx(h.hp, h.hp_max * 0.8), "맞히면 내 체력 1/5 를 잃는다 (hero hp %s)" % h.hp)
+	# 한 번 쓰면 한 번 — 같은 찌르기에 둘째 사람이 맞아도 더 잃지 않는다(무리에 쓰면 4명 = 80% 가 한 번에 빠지던 것, 2026-11-10)
+	b.hp = b.hp_max
+	d["world"]._take_hit(h, b, h.move, Vector3.ZERO)
+	check(is_equal_approx(h.hp, h.hp_max * 0.8), "같은 기술의 둘째 맞힘은 손해 없음 (hero hp %s)" % h.hp)
 
 
 func test_offbeat_hit_stuns() -> void:

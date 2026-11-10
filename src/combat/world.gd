@@ -267,8 +267,9 @@ func _take_hit(a, d, mv: Dictionary, at: Vector3) -> void:
 	d.hp -= dmg
 	d.take_posture(float(mv["posture"]))
 	d.get_hit(mv, push, a.rank)
-	if float(mv["self_cost"]) > 0.0:
-		# 엇엇박: 맞히면 쓴 사람도 체력 1/5 를 잃는다 (쓰러지지는 않는다)
+	if float(mv["self_cost"]) > 0.0 and a.self_cost_at != a.attack_id:
+		# 엇엇박: 맞히면 쓴 사람도 체력 1/5 를 잃는다 (쓰러지지는 않는다) — 한 번 쓰면 한 번(무리 여럿을 맞혀도 — 12장 봇 판 2026-11-10)
+		a.self_cost_at = a.attack_id
 		var cost: float = a.hp_max * float(mv["self_cost"])
 		a.hp = maxf(1.0, a.hp - cost)
 		events.append(["self_cost", a, cost])

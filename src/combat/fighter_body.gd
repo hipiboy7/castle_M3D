@@ -45,6 +45,7 @@ var clock := 0
 var move: Dictionary = {}
 var attack_id := 0               # 기술을 낼 때마다 1씩 — AI 가 같은 공격에 두 번 반응하지 않게
 var hit_ids := {}
+var self_cost_at := -1          # 엇엇박 쓴 사람 손해를 낸 attack_id(한 번 쓰면 한 번)
 var landed := false              # 이번 기술이 누군가에게 닿았는지 (맞힘 · 막힘 · 쳐내짐) — 헛치면 move.whiff 만큼 더 멈춘다
 var whiff_t := 0                 # 헛쳐서 회수에 더해진 프레임
 var moveset := {}

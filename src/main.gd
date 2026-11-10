@@ -64,6 +64,8 @@ var _fake_press := false
 var _fake_swap := false
 var _esc_hint := false
 var _faded := false                     # 방 끝 연출(stage fade)로 화면을 어둡게 했다
+var _gone_t := {}                          # 쓰러진 적 → 쓰러져 있던 초(GONE_SECS 뒤 인형을 숨긴다)
+const GONE_SECS := 4.0
 var _logic_ticks := 0                      # 로직(Stage · Duel.step)이 돈 수 — 멈춤 지킴이(_watch_stall)
 var _stall_seen := 0
 var _stall_t := 0.0
@@ -184,6 +186,7 @@ func _new_run(ch: String, room := -1) -> void:
 
 ## 무대 + 인형을 지금 판(방)에 맞게 다시 만든다 — 11장은 방을 넘을 때마다(신호 "room")
 func _build_stage_view() -> void:
+	_gone_t.clear()
 	for f in pup:
 		pup[f].queue_free()
 	pup.clear()
@@ -911,6 +914,14 @@ func _process(dt: float) -> void:
 	evfx.tick_later(dt)
 	var frozen: bool = d["world"].hitstop > 0 and (mode == "fight" or mode == "demo")
 	for f in pup:
+		if not f.alive() and kind == "stage" and f != d["boss"] and d["enemies"].has(f):
+			_gone_t[f] = float(_gone_t.get(f, 0.0)) + dt    # 쓰러진 적은 몇 초 뒤 치운다(12장 개전 경호대 100 · 13장 공터 50 — 폰 성능)
+			if _gone_t[f] > GONE_SECS:
+				pup[f].visible = false
+				continue
+		elif _gone_t.has(f):
+			_gone_t.erase(f)                            # 다시 일어남(합류 recruit) — 다시 보인다
+			pup[f].visible = true
 		pup[f].update_from(f, dt, frozen)
 	touch.set_label("attack", _attack_label(d["hero"]))
 	var hp: Vector3 = pup[d["hero"]].position
