@@ -15,6 +15,7 @@ const World = preload("res://src/combat/world.gd")
 const EnemyAI = preload("res://src/combat/enemy_ai.gd")
 const Bot = preload("res://src/combat/bot.gd")
 const Skills = preload("res://src/data/skills.gd")
+const Kit = preload("res://src/data/skill_kit.gd")
 const Common = preload("res://src/data/common.gd")
 const Addendum = preload("res://src/data/addendum.gd")
 const Campaign = preload("res://src/data/campaign.gd")
@@ -72,7 +73,11 @@ static func _hero(id: String, T):
 	_base(f, T.ROLES[id], st)
 	f.moveset = T.ROLES[id]["moveset"]
 	f.can_parry = bool(c.get("can_parry", false))
-	f.skills = Skills.entries(pr[1], f.rank)      # castle_common 진행 기술(동작이 있는 것 — 묶음 B 기술은 c3ed030 부터 공통)
+	var known := Skills.entries(pr[1], f.rank)          # castle_common 진행 기술(동작이 있는 것)
+	for e in _known(c):                                  # + 1층 기술 중 3D 덧붙임 동작이 있는 것(이슬 · 표영처럼 진행이 없는 조작 인물)
+		if not known.any(func(k): return k["id"] == e["id"]):
+			known.append(e)
+	f.skills = Kit.hero_kit(id, f.rank, known)           # + 원작 기술 — 등급 수까지(skill_kit)
 	f.oneshot_immune = true
 	f.gauge_max = Common.bars_for(f.rank) * Common.bar_points()
 	f.gauge_rate = Common.gauge_rate(f.rank, st.get("기술"))
@@ -117,18 +122,15 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 		elif role.has("hp_floor"):
 			f.hp_floor = float(role["hp_floor"])      # 쓰러뜨릴 수 없는 적(따돌리기 방 — 2장 남궁혁)
 		var g: float = Addendum.derive(st)["guard"]
-		d["ais"][f] = EnemyAI.new(f, str(extra.get("ai", role["ai"])), _rng(int(d["seed"]) * 131 + int(d["room_i"]) * 17 + i), g)
+		var ai := str(extra.get("ai", role["ai"]))
+		d["ais"][f] = EnemyAI.new(f, ai, _rng(int(d["seed"]) * 131 + int(d["room_i"]) * 17 + i), g)
+		if not _extra(c):
+			d["ais"][f].skills = Kit.npc_kit(id, f.rank, ai, _known(c), EnemyAI.moves_of(ai))   # 이름 있는 적: 등급 수만큼 기술(가끔 이름을 띄우며 쓴다 — enemy_ai SKILL_P)
 		Difficulty.apply_foe(f, d["ais"][f], d.get("difficulty", Difficulty.DEFAULT))
 		d["enemies"].append(f)
 	else:
 		f.moveset = role["moveset"]
-		var sk: Array = []
-		for sid in c.get("skills", []):
-			var s := Addendum.skill(sid)
-			var mv_name := str(Skills.MOVE_OF.get(sid, s.get("move", "")))   # 공통 기술(묶음 B 조작 인물 기술 — 1장 아군 서진태)은 MOVE_OF
-			if mv_name != "":
-				sk.append({"id": sid, "name": str(s["name"]), "move": mv_name, "cost": 1.0})
-		f.skills = sk
+		f.skills = Kit.npc_kit(id, f.rank, str(role.get("ai", "")), _known(c)) if not _extra(c) else _known(c)
 		f.gauge_max = Common.bars_for(f.rank) * Common.bar_points()
 		f.gauge_rate = Common.gauge_rate(f.rank, st.get("기술"))
 		var b = Bot.new(f, null, _rng(int(d["seed"]) * 977 + i))
@@ -137,6 +139,22 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 		d["allies"].append(f)
 	d["world"].add(f)
 	return f
+
+
+## 1층 기술 중 이 판 동작이 있는 것 — 공통 기술(묶음 B 조작 인물 기술 — 1장 아군 서진태)은 MOVE_OF, 3D 덧붙임은 addendum move
+static func _known(c: Dictionary) -> Array:
+	var sk: Array = []
+	for sid in c.get("skills", []):
+		var s := Addendum.skill(sid)
+		var mv_name := str(Skills.MOVE_OF.get(sid, s.get("move", "")))
+		if mv_name != "":
+			sk.append({"id": sid, "name": str(s["name"]), "move": mv_name, "cost": 1.0})
+	return sk
+
+
+## 이름 없는 무리(3D 덧붙임 엑스트라 — 경호원 · 조직원)는 기술 묶음이 없다
+static func _extra(c: Dictionary) -> bool:
+	return str(c.get("src", "")).contains("엑스트라")
 
 
 ## 장 표 NPCS(3 ~ 13장 — 그 장 시점의 등급 · 능력치 · 화면 이름, 3D 덧붙임)가 1층을 덮는다. 칸이 없는 장 표는 빈 표

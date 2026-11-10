@@ -116,8 +116,8 @@ func _tick_free() -> void:
 	var use: String = intent.get("use", "")
 	if use != "":
 		start_move(use)
-		if move["skill"]:
-			events.append(["skill", self, {"id": use, "name": move["label"]}])     # 보스 기술 (게이지 없이 패턴으로)
+		if move["skill"] or intent.has("use_name"):        # 보스 기술 (게이지 없이 패턴으로) · 적 기술 묶음(use_name — enemy_ai)
+			events.append(["skill", self, {"id": use, "name": str(intent.get("use_name", move["label"]))}])
 		return
 	if buf_attack > 0:
 		var nm := _pick_attack()

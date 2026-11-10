@@ -52,7 +52,7 @@ ASSETS = os.path.join(ROOT, "assets")
 # CLAUDE.md 2-1절 TDD 등급 — 함수 단위 커버리지를 재는 파일 (main.gd 흐름은 노드가 있어 자동 결투 단계가 본다)
 COV_FILES = {
     "A": ["src/data/common.gd", "src/data/skills.gd", "src/data/moves.gd", "src/data/addendum.gd", "src/data/lines.gd", "src/combat/world.gd", "src/combat/fighter.gd", "src/combat/fighter_body.gd", "src/combat/replay.gd",
-          "src/data/campaign.gd", "src/data/save.gd"],
+          "src/data/campaign.gd", "src/data/save.gd", "src/data/skill_kit.gd"],
     "B": ["src/combat/duel.gd", "src/combat/boss_ai.gd", "src/combat/bot.gd", "src/combat/stage.gd", "src/combat/enemy_ai.gd"],
 }
 REPLAY_FILE = ".tools/replay_stage2.json"
@@ -148,6 +148,16 @@ def step_looks():
                        capture_output=True, text=True, timeout=60)
     ok = p.returncode == 0
     print(f"[{'ok' if ok else 'FAIL'}] 외형 생성물 ({time.time() - t0:.1f}s) — {(p.stdout + p.stderr).strip()}")
+    return ok
+
+
+def step_techniques():
+    """원작 기술 표(data/story/techniques.json — 인물 기술 묶음 src/data/skill_kit.gd 가 읽는다)가 받은 canon 과 맞는지"""
+    t0 = time.time()
+    p = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "bake_techniques.py"), "--check"], cwd=ROOT,
+                       capture_output=True, text=True, timeout=60)
+    ok = p.returncode == 0
+    print(f"[{'ok' if ok else 'FAIL'}] 원작 기술 표 ({time.time() - t0:.1f}s) — {(p.stdout + p.stderr).strip()}")
     return ok
 
 
@@ -353,7 +363,7 @@ def main():
     strict = "--strict" in sys.argv[1:]
     g = godot()
     t0 = time.time()
-    results = [step_common(strict), step_assets(), step_looks()]
+    results = [step_common(strict), step_assets(), step_looks(), step_techniques()]
     if not os.path.isdir(os.path.join(ROOT, ".godot", "imported")):
         # 새로 받은 저장소(CI): 첫 가져오기는 프로젝트 글꼴을 가져오기 전에 읽으려 해 ERROR 를 낸다(run #1) — 한 번 돌리고 다시 본다
         p = subprocess.run([g, "--headless", "--path", ".", "--import"], cwd=ROOT, capture_output=True, timeout=600, stdin=subprocess.DEVNULL)

@@ -55,7 +55,7 @@ const ROLES := {
 	"deumiteuri": {"hp": 220.0, "posture": 200.0, "walk": 2.0, "run": 4.4, "stagger": 75, "poise": 26.0, "finisher_cap": 0.08, "ai": "x_blade",
 		"look": "deumiteuri", "phase2_at": 0.5, "dmg_k": 0.7},
 	"gustav": {"hp": 580.0, "posture": 520.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 36.0, "finisher_cap": 0.04, "ai": "x_master",
-		"look": "gustav", "phase2_at": 0.5, "dmg_k": 1.2},
+		"look": "gustav", "phase2_at": 0.5, "dmg_k": 1.05},
 	"barista": {"hp": 140.0, "posture": 180.0, "walk": 2.1, "run": 4.6, "stagger": 75, "poise": 28.0, "finisher_cap": 0.06, "ai": "x_blade",
 		"look": "barista", "phase2_at": 0.5, "dmg_k": 0.35},
 	"jangho": {"hp": 160.0, "posture": 90.0, "walk": 2.0, "run": 4.3, "stagger": 70, "poise": 10.0, "ai": "x_blade", "look": "jangho", "dmg_k": 0.6},

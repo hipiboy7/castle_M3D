@@ -195,8 +195,14 @@ const PROFILES := {
 		"phase2": {"dmg_k": 1.2, "cd_k": 0.65, "guard_add": 0.1}},
 }
 
+## 이름 있는 적의 기술 묶음(src/data/skill_kit.gd — 등급 수만큼): 패턴을 고를 때 이 확률로 기술 하나를 차례대로 낸다(이름이 머리 위에 뜬다).
+## 2차는 더 자주. 동작은 기술 묶음이 고른 동작 그대로(피해 · 예고는 동작 표 — 3층)
+const SKILL_P := [0.2, 0.3]
+
 var me
 var foe
+var skills: Array = []          # [{id, name, move}] — stage._npc 가 채운다(엑스트라는 빈 묶음)
+var skill_i := 0
 var rng: RandomNumberGenerator
 var prof: Dictionary
 var guard_rate := 0.3
@@ -212,6 +218,20 @@ var strafe_t := 0
 var phase := 1
 var counter_rate := 0.0          # 맞받아 치는 확률(프로필 counter — 0 · 1장 김대건)
 var kite := false                # 총잡이(프로필 kite): 주먹 차례가 와도 다가가지 않고 거리를 둔다 — 붙으면 그때 친다
+
+
+## 이 원형이 패턴 · 총 · 맞받기에 쓰는 동작 이름(차례 고정 — 기술 묶음이 이 안에서 고른다, skill_kit npc_kit allowed)
+static func moves_of(profile_id: String) -> Array:
+	var p: Dictionary = PROFILES.get(profile_id, PROFILES["guard"])
+	var out: Array = []
+	for name in p["patterns"]:
+		for step in p["patterns"][name]:
+			if not out.has(step[0]):
+				out.append(step[0])
+	for k in ["ranged", "counter"]:
+		if p.has(k) and not out.has(p[k][0]):
+			out.append(p[k][0])
+	return out
 
 
 func _init(enemy, profile_id: String, r: RandomNumberGenerator, guard := 0.3) -> void:
@@ -275,6 +295,8 @@ func decide(target, may_attack: bool) -> Dictionary:
 		var step: Array = queue.pop_front()
 		it["use"] = step[0]
 		wait = int(step[1])
+		if step.size() > 2:
+			it["use_name"] = step[2]                    # 기술 묶음 — 머리 위 이름(fighter 가 skill 신호로)
 		return it
 	# 3. 총: 떨어져 있으면 겨눠 쏜다(빨간 ! — 보고 구른다)
 	if prof.has("ranged") and may_attack and ranged_cd == 0 and not foe.state in HELPLESS:
@@ -316,6 +338,13 @@ func _enter_phase2() -> void:
 
 
 func _pick() -> void:
+	if not skills.is_empty() and rng.randf() < float(SKILL_P[mini(phase, SKILL_P.size()) - 1]):
+		var sk: Dictionary = skills[skill_i % skills.size()]          # 차례대로 — 한 사람의 기술을 고루 보인다
+		skill_i += 1
+		queue = [[str(sk["move"]), 0, str(sk["name"])]]
+		wait = 0
+		_set_cooldown()
+		return
 	var tables: Array = prof["weights"]
 	var table: Array = tables[mini(phase, tables.size()) - 1]
 	var total := 0
@@ -330,6 +359,10 @@ func _pick() -> void:
 			break
 	queue = prof["patterns"][name].duplicate(true)
 	wait = 0
+	_set_cooldown()
+
+
+func _set_cooldown() -> void:
 	var cd: Array = prof["cd"]
 	var k: float = float(prof.get("phase2", {}).get("cd_k", 1.0)) if phase == 2 else 1.0
 	cooldown = int((int(cd[0]) + rng.randi_range(0, int(cd[1]))) * k * cd_k)

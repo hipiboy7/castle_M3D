@@ -11,6 +11,7 @@ const World = preload("res://src/combat/world.gd")
 const BossAI = preload("res://src/combat/boss_ai.gd")
 const Bot = preload("res://src/combat/bot.gd")
 const Skills = preload("res://src/data/skills.gd")
+const Kit = preload("res://src/data/skill_kit.gd")
 const Common = preload("res://src/data/common.gd")
 const Difficulty = preload("res://src/data/difficulty.gd")
 
@@ -32,7 +33,7 @@ static func make(seed_value: int, opts := {}) -> Dictionary:
 	h.stagger_len = HERO["stagger"]
 	h.moveset = {"combo": "k_slash1", "dash": "k_dash", "counter": "k_counter", "finisher": "k_finisher"}
 	h.rank = kim[0]
-	h.skills = Skills.entries(kim[1], h.rank)
+	h.skills = Kit.hero_kit(Skills.HERO_ID, h.rank, Skills.entries(kim[1], h.rank))   # 진행 기술 + 원작 기술 — 등급 수까지(skill_kit)
 	h.oneshot_immune = true
 	h.gauge_max = Common.bars_for(h.rank) * Common.bar_points()
 	h.gauge_rate = Common.gauge_rate(h.rank, Common.tech_of(Skills.HERO_ID))
@@ -95,7 +96,7 @@ static func _boss_offbeat(d: Dictionary) -> void:
 	d["learned"] = true
 	w.slowmo = maxi(w.slowmo, int(Skills.BAEK_OFFBEAT["slowmo"]))
 	var got := Skills.entries(Skills.learned_at(h.char_id, Skills.DUEL_EVENT), h.rank)
-	h.skills = got + h.skills
+	h.skills = Kit.hero_kit(h.char_id, h.rank, got + h.skills.filter(func(e): return str(e.get("src", "")) != "canon"))   # 얻은 기술이 앞 · 등급 수까지
 	h.skill_idx = maxi(0, h.skill_index("offbeat"))        # 방금 본 엇박을 골라 둔다
 	var names: Array = []
 	for sk in got:

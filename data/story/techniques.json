@@ -1,0 +1,2637 @@
+{
+ "_about": "tools/bake_techniques.py 가 castle_common canon/techniques.json 에서 구운 것 — 손으로 고치지 않는다. 인물 id → [기술 id · 이름 · 갈래(kind) · conf · count] (차례: conf user → guess → ai, count 많은 순)",
+ "chars": {
+  "akila": [
+   {
+    "id": "jesus_zone",
+    "name": "예수존 총격술",
+    "kind": "gun",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "akila_precise_shot",
+    "name": "정밀 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "akila_dual_pistol",
+    "name": "구르기 · 도약 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "akila_knife",
+    "name": "칼 찌르기 · 내리찍기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "akila_gun_butt",
+    "name": "총 개머리 · 총구 타격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "akila_revolver_aim",
+    "name": "리볼버 겨눔 위협",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "akila_shotgun_fire",
+    "name": "펌프 산탄총 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "akila_dirty_close",
+    "name": "박치기 · 물어뜯기",
+    "kind": "head",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "akila_warning_shot",
+    "name": "경고 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "akila_close_gun",
+    "name": "밀착 권총 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "andycheong": [
+   {
+    "id": "andy_hook_bind",
+    "name": "갈고리 걸어 묶기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "andy_hook_stance",
+    "name": "쌍 갈고리 자세",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "andy_hook_slash",
+    "name": "뛰어넘으며 베기·셔츠 가르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "baekdochan": [
+   {
+    "id": "offbeat",
+    "name": "엇박 찌르기",
+    "kind": "blade",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "baek_sidekick",
+    "name": "백도찬식 옆차기",
+    "kind": "kick",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "baek_vital",
+    "name": "백도찬식 찌르기",
+    "kind": "blade",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "baek_wide",
+    "name": "살아있는 건 전부 죽여라",
+    "kind": "strike",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "baek_slash",
+    "name": "단도 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "baek_throw",
+    "name": "붙잡아 메치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "baek_clinch",
+    "name": "클린치 타격 · 목 잡기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "baek_hand_deflect",
+    "name": "칼날을 손으로 쳐서 흘리기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "baek_highkick",
+    "name": "칼 쥔 높은 발차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "baek_bait",
+    "name": "빈틈 미끼 후 찌르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "baek_gun",
+    "name": "근접 총격 · 맞총",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "baek_afterimage",
+    "name": "잔상 회피 · 막기",
+    "kind": "evade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "barista": [
+   {
+    "id": "barista_curved_blade",
+    "name": "바리스타 곡도 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 8
+   },
+   {
+    "id": "barista_strike",
+    "name": "바리스타 맨손 타격",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "barista_gun_handling",
+    "name": "바리스타 총 붙잡기·맨손 칼날 잡기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "barista_blade_swap",
+    "name": "바리스타 칼 바꿔 쥐기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "barista_rifle",
+    "name": "바리스타 소총 연사",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "blackmamba": [
+   {
+    "id": "bm_pistol_exec",
+    "name": "근접 권총 처형·기습 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "bm_karambit",
+    "name": "카람빗 베기·찌르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "bm_dagger",
+    "name": "단검 찌르기·내리꽂기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "bm_bait",
+    "name": "미끼 던지기·받아치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "bm_grab_slam",
+    "name": "붙잡아 메치기·박치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "bm_kick_punch",
+    "name": "발차기·주먹 연타",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "bm_weapon_snatch",
+    "name": "무기 탈취·탄창 교환",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "bm_dual_pistol",
+    "name": "쌍권총 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "bm_human_shield",
+    "name": "인간·시신 방패 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "bm_pin",
+    "name": "권총 손잡이 찍기·발 밟기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "choedalcheon": [
+   {
+    "id": "chd_grab_slam",
+    "name": "잡아 내리꽂기 · 얼굴 움켜쥐기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "chd_shield",
+    "name": "방패 휘두르기 · 돌진",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "chd_catch_counter",
+    "name": "받아 쥐고 카운터",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "chd_heavy_swing",
+    "name": "무거운 물건 내려치기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "choeminuk": [
+   {
+    "id": "choe_fist",
+    "name": "최민욱 주먹 강타",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 8
+   },
+   {
+    "id": "choe_wrist_grab",
+    "name": "최민욱 손목·주먹 붙잡기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "choe_head_smash",
+    "name": "최민욱 머리 처박기·메치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "choe_dagger",
+    "name": "최민욱 단검 쓰기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "choe_improv",
+    "name": "최민욱 즉석 무기 내려치기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "choe_kick",
+    "name": "최민욱 발차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "condor": [
+   {
+    "id": "condor_dual_gun",
+    "name": "쌍소음권총 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 4
+   }
+  ],
+  "deumiteuri": [
+   {
+    "id": "deumiteuri_scalpel",
+    "name": "드미트리 메스",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "douchen": [
+   {
+    "id": "douchen_heavy_punch",
+    "name": "도우첸 맷집 한 방",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "douchen_grip",
+    "name": "악력 움켜쥐기 · 맞잡기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "douchen_slam",
+    "name": "얼굴 움켜잡아 내리꽂기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "eunbo": [
+   {
+    "id": "eunbo_throw",
+    "name": "은보 끌어안아 메치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "gangchangseok": [
+   {
+    "id": "gcs_slash",
+    "name": "칼 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   }
+  ],
+  "gangmanjae": [
+   {
+    "id": "gmj_punch",
+    "name": "큰 휘두르기·보디블로",
+    "kind": "evade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "gangminseong": [
+   {
+    "id": "gang_dagger",
+    "name": "단검 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "gang_kick",
+    "name": "발바닥 찍기 · 젖혀 올려차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "gang_gun",
+    "name": "강민성 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "grolla": [
+   {
+    "id": "grolla_low_shoot",
+    "name": "엄폐 · 구르기 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 9
+   },
+   {
+    "id": "grolla_throw_slam",
+    "name": "잡아 메다꽂기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "grolla_blade",
+    "name": "칼 베기 · 내리꽂기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "grolla_kick",
+    "name": "발차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "grolla_low_kick",
+    "name": "낮은 자세 차올리기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "grolla_choke",
+    "name": "목 조르기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "grolla_head_shot",
+    "name": "근접 머리 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "guilhwa": [
+   {
+    "id": "guilhwa_punch",
+    "name": "구일화 큰 주먹",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "guilhwa_kick",
+    "name": "구두 발차기 · 날아차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "guilhwa_headbutt",
+    "name": "들이받기",
+    "kind": "head",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "guilhwa_forearm",
+    "name": "팔뚝 연타",
+    "kind": "flurry",
+    "conf": "ai",
+    "count": 0
+   }
+  ],
+  "gustav": [
+   {
+    "id": "gus_hammer_fist",
+    "name": "구스타프 내리꽂는 주먹",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 15
+   },
+   {
+    "id": "gus_blade",
+    "name": "구스타프 칼 싸움",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "gus_gun",
+    "name": "구스타프 총격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "gus_tackle_headbutt",
+    "name": "구스타프 몸통박치기·박치기",
+    "kind": "head",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "gus_slam",
+    "name": "구스타프 메치기·내던지기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "gus_door_shield",
+    "name": "구스타프 문짝 방패",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "gus_choke",
+    "name": "구스타프 조르기·움켜쥐기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "gyeonghodaechoehuui4in": [
+   {
+    "id": "g4_heelkick",
+    "name": "내려찍기 하이킥",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "g4_chop",
+    "name": "칼 내리찍기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "g4_shot",
+    "name": "근거리 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 0
+   }
+  ],
+  "hantaecheol": [
+   {
+    "id": "han_golf_swing",
+    "name": "골프채 후려치기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "hayabusa": [
+   {
+    "id": "hayabusa_arc",
+    "name": "하야부사식 큰 호 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "hayabusa_low",
+    "name": "낮은 다리 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 0
+   }
+  ],
+  "hide": [
+   {
+    "id": "hide_katana_slash",
+    "name": "히데 카타나 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 9
+   },
+   {
+    "id": "hide_blade_pistol",
+    "name": "히데 카타나·권총 겸용",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "hide_throw",
+    "name": "히데 메치기·벽 처박기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "hide_pistol",
+    "name": "히데 권총 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "hide_iai",
+    "name": "히데 낮은 자세 발도 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "hide_gas_blast",
+    "name": "히데 가스 폭발",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "hwangbomincheol": [
+   {
+    "id": "hwangbo_dual_blade",
+    "name": "쌍단도 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "hwangbo_face_counter",
+    "name": "얼굴 스치기 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "hwangbo_bait",
+    "name": "왼다리 미끼 찌르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 0
+   }
+  ],
+  "hyeonseok": [
+   {
+    "id": "hyeonseok_blade",
+    "name": "현석 단검 · 몸 부딪기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "insu": [
+   {
+    "id": "insu_punch",
+    "name": "맞받아치는 주먹·일격",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "ipildo": [
+   {
+    "id": "ip_dagger",
+    "name": "단검 내리꽂기·베기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "ip_kick",
+    "name": "뛰어드는 무릎·회전 발차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "ip_rhythm",
+    "name": "리듬 스텝 주먹",
+    "kind": "evade",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "ip_misc",
+    "name": "넘어지며 사격·칼 던지기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "iseul": [
+   {
+    "id": "iseul_grab_down",
+    "name": "머리 · 턱 잡아 누르기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "iseul_catch_slam",
+    "name": "잡아 메치기 · 어깨 들이받기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "iseul_big_punch",
+    "name": "이슬 큰 주먹",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "iseul_flying_kick",
+    "name": "날아 · 뛰어 차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "iseul_knee",
+    "name": "머리 눌러 무릎 올려치기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "iseul_kimdaegun_punch",
+    "name": "'김대건' 펀치",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 1
+   },
+   {
+    "id": "iseul_throw",
+    "name": "붙잡아 후려 날리기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "iseul_double_slam",
+    "name": "양팔 머리 낚아채 메다꽂기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 0
+   }
+  ],
+  "jackson": [
+   {
+    "id": "jackson_gun",
+    "name": "잭슨 권총 · 소총 연사",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "jangho": [
+   {
+    "id": "jangho_slam_choke",
+    "name": "헬멧 메다꽂기 · 목 조르기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "jangho_air_strike",
+    "name": "날아 무릎 · 날아차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "jangho_counter_punch",
+    "name": "숙여 피하고 주먹 · 칼잡이 붙들기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "jeongdan": [
+   {
+    "id": "jd_shoot",
+    "name": "정단 권총 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "jd_guard",
+    "name": "몸으로 받아내기·팔 교차",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "jeongseono": [
+   {
+    "id": "jso_tackle",
+    "name": "덮쳐 내리치기·눕히기",
+    "kind": "head",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "jintae": [
+   {
+    "id": "jin_original",
+    "name": "서진태 오리지널",
+    "kind": "strike",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "roulette",
+    "name": "러시안 룰렛",
+    "kind": "flurry",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "jintae_vital",
+    "name": "근거리 급소 베기",
+    "kind": "blade",
+    "conf": "guess",
+    "count": 0
+   },
+   {
+    "id": "jintae_storm",
+    "name": "서진태 난무",
+    "kind": "flurry",
+    "conf": "guess",
+    "count": 0
+   },
+   {
+    "id": "jintae_dual_dagger",
+    "name": "서진태 쌍단검 돌진 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 22
+   },
+   {
+    "id": "jintae_low_slash",
+    "name": "서진태 낮게 파고들어 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 13
+   },
+   {
+    "id": "jintae_throw_grapple",
+    "name": "서진태 잡아 메치기·조르기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 11
+   },
+   {
+    "id": "jintae_kick",
+    "name": "서진태 공중·돌려 발차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 8
+   },
+   {
+    "id": "jintae_gun",
+    "name": "서진태 권총·칼 겸용 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "jintae_disarm",
+    "name": "서진태 총·칼 쳐내기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "jintae_knife_throw",
+    "name": "서진태 칼 던지기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "jintae_threat",
+    "name": "서진태 칼 위협",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "jintae_air_slash",
+    "name": "서진태 공중제비·회전 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "jintae_stab",
+    "name": "서진태 찌르기·역수 내리꽂기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "jintae_drive",
+    "name": "서진태 차량 운전·들이받기",
+    "kind": "head",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "jintae_hostage_shield",
+    "name": "서진태 인간 방패",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "jintae_feint",
+    "name": "서진태 칼 페인트·기습",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "joseokjung": [
+   {
+    "id": "joseokjung_power_punch",
+    "name": "몸통 · 돌진 전력타",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "juro": [
+   {
+    "id": "juro_gunblade",
+    "name": "권총 · 단검 겹쳐 쥐기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "juro_shield",
+    "name": "방패 뛰어넘기 · 짓누르기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "keurisa": [
+   {
+    "id": "keurisa_kick",
+    "name": "로우킥·미들킥·하이킥",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "keurisa_punch",
+    "name": "아웃파이팅 · 근접 연타",
+    "kind": "flurry",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "keurisa_gun_dive",
+    "name": "공중 회전·돌진 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "keurisa_tackle",
+    "name": "몸통 들이받기",
+    "kind": "head",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "keurisa_defense",
+    "name": "크로스 가드·공중 착지",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "keurisa_salsu",
+    "name": "살수(크리사)",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 0
+   }
+  ],
+  "kimdaegeon": [
+   {
+    "id": "kimdaegeon_slam",
+    "name": "메치기 · 내리꽂기 · 조르기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 8
+   },
+   {
+    "id": "kimdaegeon_big_punch",
+    "name": "큰 직선 주먹 · 몸 던진 일격",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 8
+   },
+   {
+    "id": "kimdaegeon_jacket_wrap",
+    "name": "윗옷 감은 팔 방어 · 타격",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "kimdaegeon_wrist_grab",
+    "name": "칼 든 손목 잡고 얼굴 치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "kimdaegeon_high_kick",
+    "name": "디딤발 하이킥 · 돌려차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "kimdaegeon_slip_in",
+    "name": "흘리고 파고들기",
+    "kind": "evade",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "kimdaegeon_headbutt",
+    "name": "박치기",
+    "kind": "head",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "kimseongjun": [
+   {
+    "id": "kimseongjun_knife",
+    "name": "김성준 칼 휘두르기·베어 올리기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "kimshin": [
+   {
+    "id": "offbeat2",
+    "name": "엇엇박 찌르기",
+    "kind": "blade",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "offbeat",
+    "name": "엇박 찌르기",
+    "kind": "blade",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "offbeat_rev",
+    "name": "반대발 엇박 찌르기",
+    "kind": "blade",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "kickarts",
+    "name": "각법",
+    "kind": "kick",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "vanish_step",
+    "name": "좌우로 사라지는 스텝",
+    "kind": "evade",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "triple",
+    "name": "리천식 삼연타",
+    "kind": "flurry",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "jesus_zone",
+    "name": "예수존 총격술",
+    "kind": "gun",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "inch",
+    "name": "촌경",
+    "kind": "strike",
+    "conf": "guess",
+    "count": 0
+   },
+   {
+    "id": "amur_triple",
+    "name": "아무르 티그로 3연타",
+    "kind": "flurry",
+    "conf": "guess",
+    "count": 0
+   },
+   {
+    "id": "amur_dash",
+    "name": "아무르 티그로 대시",
+    "kind": "strike",
+    "conf": "guess",
+    "count": 0
+   },
+   {
+    "id": "amur_weaving",
+    "name": "아무르 티그로 위빙",
+    "kind": "evade",
+    "conf": "guess",
+    "count": 0
+   },
+   {
+    "id": "kimshin_counter_punch",
+    "name": "숙여 흘리고 카운터 주먹",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 38
+   },
+   {
+    "id": "kimshin_knife_stab",
+    "name": "단검 찌르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 25
+   },
+   {
+    "id": "kimshin_wrist_grab",
+    "name": "손목 · 팔 잡아 제압",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 16
+   },
+   {
+    "id": "kimshin_running_shot",
+    "name": "달리며 · 도약하며 쏘기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 15
+   },
+   {
+    "id": "kimshin_clinch_shot",
+    "name": "맞잡고 밀착 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 15
+   },
+   {
+    "id": "kimshin_knife_slash",
+    "name": "칼 베기(휩쓸기)",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 13
+   },
+   {
+    "id": "kimshin_throw",
+    "name": "메치기 · 넘기기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 12
+   },
+   {
+    "id": "kimshin_low_dash",
+    "name": "낮은 자세 질주 돌파",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 12
+   },
+   {
+    "id": "kimshin_blade_defense",
+    "name": "칼 막기 · 받아내기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 12
+   },
+   {
+    "id": "kimshin_kick",
+    "name": "발차기(앞차기 · 하이킥 · 올려차기)",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 11
+   },
+   {
+    "id": "kimshin_improvised",
+    "name": "주변 물건 · 장도리로 때리기",
+    "kind": "flurry",
+    "conf": "ai",
+    "count": 11
+   },
+   {
+    "id": "kimshin_body_charge",
+    "name": "몸통 · 머리 들이받기",
+    "kind": "head",
+    "conf": "ai",
+    "count": 10
+   },
+   {
+    "id": "kimshin_dual_knife",
+    "name": "양손 칼(두 칼) 운용",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 10
+   },
+   {
+    "id": "kimshin_leaping_blade",
+    "name": "도약 · 낙하 칼 공격",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 10
+   },
+   {
+    "id": "kimshin_bluff_feint",
+    "name": "허세 · 미끼 · 위압",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 9
+   },
+   {
+    "id": "kimshin_dark_ambush",
+    "name": "어둠 속 매복 기습",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 8
+   },
+   {
+    "id": "kimshin_reverse_grip",
+    "name": "역수 칼 내려찍기 · 올려 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "kimshin_flying_kick",
+    "name": "날아차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "kimshin_karambit",
+    "name": "카람빗 사용",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "hyeonseok_blade",
+    "name": "현석 단검 · 몸 부딪기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "kimshin_pistol_butt",
+    "name": "권총 손잡이 내려찍기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "kimshin_elbow_knee",
+    "name": "팔꿈치 · 무릎 연타",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "kimshin_choke",
+    "name": "목 조르기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "kimtaehoon": [
+   {
+    "id": "kimtaehoon_descent",
+    "name": "곤돌라 · 난간 하강",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "komodo": [
+   {
+    "id": "komodo_ring_spin",
+    "name": "고리 칼 돌리기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "lingling": [
+   {
+    "id": "lingling_chain_cleaver",
+    "name": "사슬 식칼",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "lingling_cleaver_overhead",
+    "name": "식칼 치켜들어 내려베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "mahakyoung": [
+   {
+    "id": "mahak_close_fire",
+    "name": "근접 소음기 권총 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 9
+   },
+   {
+    "id": "mahak_glove_punch",
+    "name": "검은 장갑 주먹 강타",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "mahak_grip_slam",
+    "name": "잡아 내리꽂기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "mahak_shield_rush",
+    "name": "방패 돌진·압박",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "mahak_boot_kick",
+    "name": "군화 걷어차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "mahak_dive_shoot",
+    "name": "몸 날려 사격(차량·벽)",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "mahak_throw",
+    "name": "거꾸로 들어 메치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "mahak_wrist_twist",
+    "name": "손목 잡아 꺾기·제압",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "mahak_gun_melee",
+    "name": "권총 근접 타격·막기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "mahak_stomp",
+    "name": "군화 짓밟기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "mahak_dagger_stab",
+    "name": "톱니 단검 찌르기·베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "mahak_bait",
+    "name": "유인·허수 읽기",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "mahak_leap_chop",
+    "name": "도약 내리찍기(칼)",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "mahak_knee",
+    "name": "무릎 차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "mahak_shield_fire",
+    "name": "방패 뒤 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "mahak_cleaver",
+    "name": "중식도 베기·쳐내기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "mahak_bangeom",
+    "name": "방검방탄",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "mahak_elbow",
+    "name": "팔꿈치 안면 타격",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "majunyeong": [
+   {
+    "id": "mj_vehicle_smash",
+    "name": "차체·문짝 때리기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "mj_dagger_stab",
+    "name": "단검 내리찍기·돌진",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "mj_close_fire",
+    "name": "근접 소음기 연사",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "mj_shield_rush",
+    "name": "방패 들이받기·돌진",
+    "kind": "head",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "mj_shield_guard",
+    "name": "방패 세워 막기·홀드",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "mj_throw",
+    "name": "거꾸로 메치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "mj_grip_grab",
+    "name": "총·몸통 붙잡기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "mj_deflect",
+    "name": "받아 흘리기(형의 방식)",
+    "kind": "evade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "mark": [
+   {
+    "id": "mark_knuckle",
+    "name": "혁대 · 손띠 감은 큰 주먹",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "mark_body_charge",
+    "name": "몸통 들이받기 · 끌어안고 돌진",
+    "kind": "head",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "medvedi": [
+   {
+    "id": "md_stud_strike",
+    "name": "징 장갑 일격·박치기",
+    "kind": "head",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "md_pistol",
+    "name": "권총 사격·견제",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "md_throw",
+    "name": "붙잡아 메쳐 꽂기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "md_counter_deflect",
+    "name": "흘리고 받아치기·그립 풀기",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "md_cloth",
+    "name": "천 휘두르기·감기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "monkey": [
+   {
+    "id": "monkey_machete",
+    "name": "몽키 마체테 기습",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "namgunghyuk": [
+   {
+    "id": "namgung_knuckle_combo",
+    "name": "금 너클 연타 · 내리찍기",
+    "kind": "flurry",
+    "conf": "ai",
+    "count": 8
+   },
+   {
+    "id": "namgung_kick",
+    "name": "남궁혁 발차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "namgung_throw",
+    "name": "잡아 던지기 · 메치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "namgung_grab_strike",
+    "name": "붙잡고 치기 · 발목 잡기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "namgung_knee_elbow",
+    "name": "잡고 무릎 · 팔꿈치",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "namgung_knuckle_trade",
+    "name": "너클 맞교환 · 정면 주먹",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "namgung_disarm",
+    "name": "총 쥔 손 붙잡아 꺾기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "namgung_knuckle_counter",
+    "name": "너클 낀 주먹 카운터",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "namgung_knuckle_hook",
+    "name": "너클 훅",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 0
+   }
+  ],
+  "namilho": [
+   {
+    "id": "namilho_thin_blade",
+    "name": "남일호 가는 칼 찌르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "namilho_guard",
+    "name": "남일호 피하기·몸으로 막기",
+    "kind": "evade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "namilho_strike_throw",
+    "name": "남일호 타격·메치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "odohwa": [
+   {
+    "id": "odohwa_axe_chop",
+    "name": "손도끼 내려찍기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "odohwa_blade",
+    "name": "일본도 · 칼 베기와 찌르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "odohwa_axe_flow",
+    "name": "도끼 바꿔 쥐기 · 받아 쥐기 연계",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "odohwa_trick",
+    "name": "기만 · 임기응변",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "odohwa_gun",
+    "name": "권총 사격 · 쌍수",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "ojiin": [
+   {
+    "id": "ojiin_katana_upslash",
+    "name": "오지인 카타나 올려 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "ojiin_dagger",
+    "name": "오지인 단검 찌르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "ojiin_katana_cut",
+    "name": "오지인 발도·내려 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "ojiin_skirt_dagger",
+    "name": "치마 뒤 단검",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 0
+   }
+  ],
+  "pantera": [
+   {
+    "id": "pantera_dagger",
+    "name": "단검 돌진 · 내리꽂기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "pantera_pistol",
+    "name": "소음기 권총 · 칼 양손 전진",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "peurikit": [
+   {
+    "id": "peurikit_snap_shot",
+    "name": "프리깃 선제·정밀 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "peurikit_twin_pistol",
+    "name": "프리깃 쌍권총 연사",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "pyoyoung": [
+   {
+    "id": "pyoyoung_karambit_dive",
+    "name": "카람빗 낮은 파고들기 연속 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 12
+   },
+   {
+    "id": "pyoyoung_jump_kick",
+    "name": "뛰어 날아차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "pyoyoung_karambit_leap",
+    "name": "카람빗 도약 내려 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "pyoyoung_karambit_throat",
+    "name": "카람빗 목 겨누기 · 긋기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "pyoyoung_prop_trick",
+    "name": "물건 · 옷 이용 기만 · 투척",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "pyoyoung_spin_combo",
+    "name": "허실 회전 · 높은 발차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "pyoyoung_stomp",
+    "name": "구두 짓밟기 · 내리찍기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "pyoyoung_jump_knee",
+    "name": "뛰어 무릎 찍기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "pyoyoung_trapped_kick",
+    "name": "잡힌 발 · 몸을 지지대로 삼은 공중 차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "pyoyoung_grab_strike",
+    "name": "붙잡고 무릎 · 멱살 치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "pyoyoung_karambit_wrist",
+    "name": "카람빗 걸어 막기 · 손목 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "pyoyoung_ground_kick",
+    "name": "누운 채 차올리기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "pyoyoung_karambit_stance",
+    "name": "카람빗 늘어뜨려 스쳐 지나가기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "ratel": [
+   {
+    "id": "ratel_binding",
+    "name": "라텔 조르기·사슬 구속",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "ratel_twin_knife",
+    "name": "라텔 쌍칼 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "ratel_karambit",
+    "name": "라텔 카람빗 공격",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "ratel_tackle",
+    "name": "라텔 태클",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "richeon": [
+   {
+    "id": "triple",
+    "name": "리천식 삼연타",
+    "kind": "flurry",
+    "conf": "user",
+    "count": 0
+   },
+   {
+    "id": "richeon_clinch",
+    "name": "리천 근접 제압 · 관절 · 메치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 15
+   },
+   {
+    "id": "richeon_gun",
+    "name": "리천 사격 · 클린치 총격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "richeon_dagger",
+    "name": "리천 단검 파고들기 · 내려찍기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "richeon_choke_clinch",
+    "name": "리천 줄 조르기 · 멱살 무릎",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "risa": [
+   {
+    "id": "risa_serrated_dagger",
+    "name": "톱날 단검 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "ryujihak": [
+   {
+    "id": "ryujihak_air_cross_slash",
+    "name": "도약 교차 내려 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 11
+   },
+   {
+    "id": "ryujihak_curved_arc",
+    "name": "휜 칼 큰 호 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 9
+   },
+   {
+    "id": "ryujihak_shield_breach",
+    "name": "방패 사이 파고들기 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "ryujihak_low_pass_slash",
+    "name": "저자세 스치며 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "ryujihak_gun_disarm",
+    "name": "총 쥔 손 제압 · 권총 걸어 떨어뜨리기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "ryujihak_close_rip",
+    "name": "양손 칼 근접 찢기 · 찌르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "ryujihak_gun_blade",
+    "name": "권총 · 휜 칼 동시 운용",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "ryujihak_dagger_stance",
+    "name": "역수 단도 자세 · 뽑기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "ryujihak_counter_punch",
+    "name": "보이지 않는 카운터 · 숙여 올려치기",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "ryujihak_counter_cut",
+    "name": "카운터 감수 목 · 관절 베기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "ryujihak_kick",
+    "name": "칼 든 채 발차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "ryujihak_corpse_shield",
+    "name": "시체 · 인간 방패 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "ryujihak_lean_evade",
+    "name": "상체 젖혀 · 숙여 피하며 차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "ryujihak_dagger_throw",
+    "name": "단검 투척 · 동시 꽂기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "ryujihak_close_stab",
+    "name": "근접 붙잡아 찌르기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "sainjin": [
+   {
+    "id": "sainjin_vehicle",
+    "name": "사인진 차량 공격",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "scaledanjang": [
+   {
+    "id": "scaledanjang_pistol",
+    "name": "권총 뽑아 겨누기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "scaledanjang_execution",
+    "name": "약 짓이기기 · 처형 연타",
+    "kind": "flurry",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "scaledanjang_machete",
+    "name": "마체테 · 칼 횡베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "shamo": [
+   {
+    "id": "shamo_restrain",
+    "name": "샤모 제압 · 단검",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "shingen": [
+   {
+    "id": "shingen_counter",
+    "name": "받아치기 반격",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "shingen_grip_crush",
+    "name": "손바닥 얼굴 움켜쥐기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "shingen_two_weapon",
+    "name": "쌍무기 협공",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "shingen_combo",
+    "name": "타격·베기 연계",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "shingen_hammer",
+    "name": "장도리",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "shingen_lapel",
+    "name": "멱살·넥타이 낚아채기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "shingen_dagger",
+    "name": "단도·칼 찌르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "shingen_throw",
+    "name": "붙잡아 메치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "shingen_gun_bait",
+    "name": "권총·인간 방패·미끼",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "shingen_leap_chop",
+    "name": "도약 내려치기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "shingen_blade_grab",
+    "name": "칼날 맨손 잡기·칼 탈취",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "shingen_katana_draw",
+    "name": "카타나 뽑기·시험 휘두름",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "shingen_joint",
+    "name": "손목·팔 꺾기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "shingen_stomp",
+    "name": "목·얼굴 밟기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "shingen_daegeuk",
+    "name": "대극 큰 호 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "shingen_dive",
+    "name": "낮은 파고들기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "shingen_frontkick",
+    "name": "앞차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "shingen_leap",
+    "name": "날아차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 0
+   }
+  ],
+  "shire": [
+   {
+    "id": "shire_chain",
+    "name": "쇠사슬 추 휘두르기 · 던지기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "shire_tent_assault",
+    "name": "텐트 습격 · 제압 사살",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "sintaejin": [
+   {
+    "id": "sintaejin_blade_cut",
+    "name": "칼 베기 · 찌르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "sintaejin_low_dive",
+    "name": "낮은 자세 돌진 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "sintaejin_trick",
+    "name": "임기응변 속임수",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "sintaejin_bind_blade",
+    "name": "칼 동여매기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "sintaejin_sweep",
+    "name": "장도 수평 베기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "sintaejin_second_blade",
+    "name": "숨긴 두 번째 칼",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 0
+   },
+   {
+    "id": "sintaejin_pistol",
+    "name": "코앞 권총",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 0
+   }
+  ],
+  "toishi": [
+   {
+    "id": "toishi_blade",
+    "name": "토이시 칼 대기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 3
+   }
+  ],
+  "tonyjin": [
+   {
+    "id": "tonyjin_karambit",
+    "name": "토니진 카람빗",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "ttolbae": [
+   {
+    "id": "ttolbae_club_swing",
+    "name": "큐 · 쇠파이프 내려치기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "ttolbae_pool_ball",
+    "name": "당구공 던지기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "ttolbae_kick",
+    "name": "파고드는 · 돌려 발차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "vasily": [
+   {
+    "id": "vasily_sambo",
+    "name": "삼보 그라운드 기술",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "vasily_swing",
+    "name": "큰 주먹 휘두르기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "woojin": [
+   {
+    "id": "woojin_core_counter",
+    "name": "미친 코어 카운터",
+    "kind": "counter",
+    "conf": "guess",
+    "count": 0
+   },
+   {
+    "id": "woojin_suplex",
+    "name": "들어 메다꽂기 · 던지기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 17
+   },
+   {
+    "id": "woojin_kick",
+    "name": "피우진 발차기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 12
+   },
+   {
+    "id": "woojin_overhead",
+    "name": "내리꽂는 주먹",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 10
+   },
+   {
+    "id": "woojin_flying_kick",
+    "name": "도약 날아차기 · 덮치기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 9
+   },
+   {
+    "id": "woojin_grab",
+    "name": "붙잡아 끌어내려 치기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 9
+   },
+   {
+    "id": "woojin_counter",
+    "name": "엇갈려 맞받는 카운터",
+    "kind": "counter",
+    "conf": "ai",
+    "count": 8
+   },
+   {
+    "id": "woojin_knee",
+    "name": "무릎 · 니킥",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 8
+   },
+   {
+    "id": "woojin_headbutt",
+    "name": "박치기 · 머리 처박기",
+    "kind": "head",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "woojin_blade_grab",
+    "name": "칼날 맨손 움켜쥐기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "woojin_gun",
+    "name": "피우진 권총 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 6
+   },
+   {
+    "id": "woojin_hatchet",
+    "name": "도끼 · 손도끼 휘두르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "woojin_hammer",
+    "name": "장도리 · 망치 내려치기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "woojin_uppercut",
+    "name": "올려치기 · 어퍼컷",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "woojin_wrist_lock",
+    "name": "손목 잡아 꺾기 · 무장해제",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "woojin_stomp",
+    "name": "밑창 차기 · 짓밟기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "woojin_chair",
+    "name": "의자 내려치기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "woojin_shield",
+    "name": "방패 돌파 · 방패 넘기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "woojin_wrench",
+    "name": "몽키스패너 휘두르기",
+    "kind": "kick",
+    "conf": "ai",
+    "count": 4
+   },
+   {
+    "id": "woojin_guard",
+    "name": "가드 · 막기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "woojin_takedown",
+    "name": "테이크다운",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "woojin_human_shield",
+    "name": "인간 방패",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "woojin_bat",
+    "name": "방망이 올려치기 · 잡기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "woojin_choke",
+    "name": "목 조르기",
+    "kind": "grab",
+    "conf": "ai",
+    "count": 2
+   },
+   {
+    "id": "woojin_cloth",
+    "name": "천 휘감기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "yamamotokyoji": [
+   {
+    "id": "kyoji_pan",
+    "name": "쿄지 프라이팬",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "yeominsu": [
+   {
+    "id": "yeo_deflect",
+    "name": "막기 · 쳐내기 · 발 잡기",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "yeo_punch",
+    "name": "큰 주먹 · 몸통 연타",
+    "kind": "flurry",
+    "conf": "ai",
+    "count": 3
+   },
+   {
+    "id": "yeo_bat",
+    "name": "방망이 내려치기 · 올려치기",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   }
+  ],
+  "yuwoosung": [
+   {
+    "id": "yuwoosung_dagger_stab",
+    "name": "칼 연속 · 근접 찌르기",
+    "kind": "blade",
+    "conf": "ai",
+    "count": 10
+   },
+   {
+    "id": "yuwoosung_gun_shot",
+    "name": "한 손 권총 사격",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 7
+   },
+   {
+    "id": "yuwoosung_prop_strike",
+    "name": "물건 이용 타격",
+    "kind": "strike",
+    "conf": "ai",
+    "count": 5
+   },
+   {
+    "id": "yuwoosung_shield_hostage",
+    "name": "시체 · 인질 방패",
+    "kind": "gun",
+    "conf": "ai",
+    "count": 2
+   }
+  ]
+ }
+}

@@ -54,7 +54,7 @@ const ROLES := {
 	"gang_blade": {"hp": 260.0, "posture": 50.0, "walk": 1.9, "run": 4.0, "stagger": 70, "ai": "haseong_guard", "look": "haseong_guard"},
 	"gang_brute": {"hp": 340.0, "posture": 70.0, "walk": 1.7, "run": 3.6, "stagger": 75, "ai": "thug_brute", "look": "gunter_brute"},
 	"guilhwa": {"hp": 300.0, "posture": 180.0, "walk": 2.0, "run": 4.3, "stagger": 75, "poise": 28.0, "finisher_cap": 0.1, "ai": "x_boxer",
-		"look": "guilhwa", "phase2_at": 0.5, "dmg_k": 1.0},
+		"look": "guilhwa", "phase2_at": 0.5, "dmg_k": 0.85},
 	"vasily": {"hp": 430.0, "posture": 260.0, "walk": 1.9, "run": 4.1, "stagger": 80, "poise": 32.0, "finisher_cap": 0.06, "ai": "x_grappler",
 		"look": "vasily", "phase2_at": 0.5, "dmg_k": 1.0},
 	"namilho": {"hp": 1100.0, "posture": 300.0, "walk": 2.1, "run": 4.6, "stagger": 75, "poise": 28.0, "finisher_cap": 0.08, "ai": "x_blade",

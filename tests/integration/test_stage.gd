@@ -21,8 +21,14 @@ func test_ranks_and_parry_at_ch11() -> void:
 	var woo = d["heroes"][1]
 	check(kim.rank == "재앙" and woo.rank == "외성 하위", "11장 앞 진행 — 김신 재앙(리천 이김) · 피우진 외성 하위(도우첸 이김) %s %s" % [kim.rank, woo.rank])
 	check(kim.can_parry and not woo.can_parry, "칼날 쳐내기는 김신만(이 판의 사람 중)")
-	check(kim.skill_index("offbeat") >= 0 and woo.skills.size() == 1 and woo.skill_index("woojin_core_counter") == 0,
-		"김신은 엇박 계열을 안다 · 피우진은 3D 덧붙임 미친 코어 카운터만(1층 skills [] — 묶음 B)")
+	check(kim.skill_index("offbeat") >= 0 and woo.skills.size() == 4 and woo.skill_index("woojin_core_counter") == 0,
+		"김신은 엇박 계열을 안다 · 피우진(외성 하위)은 기술 4개 — 미친 코어 카운터가 먼저(skill_kit 2026-11-10) %d" % woo.skills.size())
+	check(kim.skills.size() > 7, "김신(재앙)은 모든 기술 %d" % kim.skills.size())
+	var named := 0
+	for e in d["enemies"]:
+		if not d["ais"][e].skills.is_empty():
+			named += 1
+	check(named == 0, "28층 경호원(엑스트라)은 기술 묶음이 없다")
 	check(d["allies"].size() == 1 and d["allies"][0].char_id == "guilhwa" and d["allies"][0].rank == "전국구", "28층 아군 구일화(화진 전 전국구)")
 	check(d["enemies"].size() == 5, "28층 경호원 다섯")
 
