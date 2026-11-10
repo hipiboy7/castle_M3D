@@ -1,5 +1,5 @@
 {
-  "_about": "0층 정사 — 2부 싸움(fight) 색인. 원본 work/pilot/synth/fights.json(종합 패스) · 화별 phase refs(work/pilot/NNN.json fights[].phases — 화마다 처음~끝). actors = canon 인물 · factions = canon 조직 · others = 이름 없는 군중(글). place_text = canon 장소로 아직 못 묶은 판독 글. events = 이 싸움을 가리키는 canon/events id(이름표 사건). 만든 법: work/pilot/canon_p2.py(멱등, 2026-11-03). 1부 fight(part castle1 · refs p1:)는 work/pilot_p1/canon_p1.py(멱등, 2026-11-06) — 판독 id 그대로(2부와 겹치면 p1_). 액션 칸(phase_list · mobs · moves)은 work/pilot/fight_fields.py(멱등, 2026-11-06) — 판독 국면 · who '?:' · 화 moves 를 refs 겹침으로 묶음.",
+  "_about": "0층 정사 — 2부 싸움(fight) 색인. 원본 work/pilot/synth/fights.json(종합 패스) · 화별 phase refs(work/pilot/NNN.json fights[].phases — 화마다 처음~끝). actors = canon 인물 · factions = canon 조직 · others = 이름 없는 군중(글). place_text = canon 장소로 아직 못 묶은 판독 글. events = 이 싸움을 가리키는 canon/events id(이름표 사건). 만든 법: work/pilot/canon_p2.py(멱등, 2026-11-03). 1부 fight(part castle1 · refs p1:)는 work/pilot_p1/canon_p1.py(멱등, 2026-11-06) — 판독 id 그대로(2부와 겹치면 p1_). 액션 칸(phase_list · mobs · moves)은 work/pilot/fight_fields.py(멱등, 2026-11-06) — 판독 국면 · who '?:' · 화 moves 를 refs 겹침으로 묶음. 편(sides · sides_unclear · sides_conf · sides_why)은 work/pilot/fight_sides.py(2026-11-10 — conf ai).",
   "fights": [
     {
       "id": "fight:prologue_kimshin_woojin",
@@ -46,7 +46,11 @@
       "mobs": [],
       "moves": [
         {"ep": 1, "i": 0, "name": "맞주먹(서술 이름)", "user": "?:피투성이 흰 셔츠 남자 · ?:검은 정장 남자", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["woojin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "프롤로그에서 두 사람이 서로 주먹을 뻗는 1대1 대치"
     },
     {
       "id": "fight:woojin_bandits",
@@ -126,7 +130,11 @@
         {"ep": 2, "i": 2, "name": "기둥 넘어 돌진 연타", "user": "woojin", "technique": null},
         {"ep": 2, "i": 3, "name": "인간 방패 전진", "user": "woojin", "technique": null},
         {"ep": 2, "i": 4, "name": "정면 밑창 발차기", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:posro_execution",
@@ -160,7 +168,11 @@
         }
       ],
       "mobs": [{"label": "포로(자칭 홀딩스 사람)", "kind": "single", "faction": null, "count_text": null}],
-      "moves": [{"ep": 2, "i": 7, "name": "뒤통수 연타 처형", "user": "scaledanjang", "technique": null}]
+      "moves": [{"ep": 2, "i": 7, "name": "뒤통수 연타 처형", "user": "scaledanjang", "technique": null}],
+      "sides": [["scaledanjang"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:majunyeong_gyodogwan",
@@ -240,7 +252,11 @@
       "moves": [
         {"ep": 2, "i": 8, "name": "구속복 하이킥", "user": "majunyeong", "technique": null},
         {"ep": 2, "i": 9, "name": "구속복 하이킥(위협)", "user": "majunyeong", "technique": "kickarts"}
-      ]
+      ],
+      "sides": [["majunyeong"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:woojin_scaledanjang",
@@ -355,7 +371,11 @@
         {"ep": 4, "i": 2, "name": "잡아 던지기 · 팔꿈치 처박기", "user": "woojin", "technique": null},
         {"ep": 4, "i": 3, "name": "점프 킥", "user": "scaledanjang", "technique": null},
         {"ep": 4, "i": 4, "name": "권총 겨누기", "user": "scaledanjang", "technique": null}
-      ]
+      ],
+      "sides": [["scaledanjang"], ["woojin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "단장이 총을 뽑으며 시작, 피우진과 1대1 난투(결착 없음)"
     },
     {
       "id": "fight:scale_market",
@@ -414,7 +434,11 @@
       "moves": [
         {"ep": 4, "i": 5, "name": "상자 처박기", "user": "yeominsu", "technique": null},
         {"ep": 4, "i": 6, "name": "상자 던지기 → 강타", "user": "choehyeokjin", "technique": null}
-      ]
+      ],
+      "sides": [["choehyeokjin", "yeominsu"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "백의 쪽 최혁진·여민수가 스케일 쪽 복면 킬러(무명)에게 맞섬"
     },
     {
       "id": "raid:scale_hideout",
@@ -500,7 +524,11 @@
       "moves": [
         {"ep": 4, "i": 9, "name": "어퍼컷", "user": "?:거구 습격자", "technique": null},
         {"ep": 4, "i": 10, "name": "팔 꺾기", "user": "?:거구 습격자", "technique": null}
-      ]
+      ],
+      "sides": [],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 없음(기계)"
     },
     {
       "id": "kill:scaledanjang_mercenary",
@@ -542,7 +570,11 @@
         }
       ],
       "mobs": [{"label": "용병(대머리 붉은 셔츠)", "kind": "single", "faction": null, "count_text": null}],
-      "moves": [{"ep": 4, "i": 11, "name": "마체테 가로 베기", "user": "scaledanjang", "technique": null}]
+      "moves": [{"ep": 4, "i": 11, "name": "마체테 가로 베기", "user": "scaledanjang", "technique": null}],
+      "sides": [["scaledanjang"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:scale_sea",
@@ -693,7 +725,11 @@
         {"ep": 5, "i": 10, "name": "낙하 착지", "user": "mahakyoung", "technique": null},
         {"ep": 5, "i": 11, "name": "머리채 잡아 메치기", "user": "mahakyoung", "technique": null},
         {"ep": 5, "i": 12, "name": "가면 깨기 주먹", "user": "mahakyoung", "technique": null}
-      ]
+      ],
+      "sides": [["mahakyoung"], ["scaledanjang"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:choedalcheon_gwanjung",
@@ -727,7 +763,11 @@
         }
       ],
       "mobs": [{"label": "최달천에게 맞은 관중(누군지 불명)", "kind": "group", "faction": null, "count_text": null}],
-      "moves": []
+      "moves": [],
+      "sides": [["choedalcheon"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:choedalcheon_sainjin",
@@ -777,7 +817,11 @@
         }
       ],
       "mobs": [],
-      "moves": [{"ep": 6, "i": 0, "name": "소매 걷고 돌진", "user": "choedalcheon", "technique": null}]
+      "moves": [{"ep": 6, "i": 0, "name": "소매 걷고 돌진", "user": "choedalcheon", "technique": null}],
+      "sides": [["choedalcheon"], ["sainjin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "최달천 대 사인진 대치, 교전 전에 최민욱이 나타나 무산"
     },
     {
       "id": "fight:gustav_joseokjung",
@@ -908,7 +952,11 @@
         {"ep": 8, "i": 5, "name": "내리꽂는 주먹", "user": "gustav", "technique": null},
         {"ep": 8, "i": 6, "name": "내리꽂는 주먹(결착)", "user": "gustav", "technique": null},
         {"ep": 8, "i": 7, "name": "한 팔 내던지기", "user": "gustav", "technique": null}
-      ]
+      ],
+      "sides": [["gustav"], ["joseokjung", "shamo"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "샤모와 조석중은 위층 쪽에서 구스타프에게 차례로 덤벼 패함"
     },
     {
       "id": "fight:gustav_jeongdan",
@@ -986,7 +1034,11 @@
         {"ep": 8, "i": 8, "name": "돌아서며 치는 주먹", "user": "gustav", "technique": null},
         {"ep": 8, "i": 9, "name": "팔 교차 막기", "user": "jeongdan", "technique": null},
         {"ep": 8, "i": 10, "name": "안경 벗기", "user": "jeongdan", "technique": null}
-      ]
+      ],
+      "sides": [["gustav"], ["jeongdan"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "구스타프가 정단에게 주먹, 한 합 뒤 최민욱이 제지"
     },
     {
       "id": "fight:mark",
@@ -1157,7 +1209,11 @@
         {"ep": 10, "i": 3, "name": "앉은 상대 얼굴 차기", "user": "woojin", "technique": null},
         {"ep": 10, "i": 4, "name": "머리 위 교차 막기", "user": "woojin", "technique": null},
         {"ep": 10, "i": 5, "name": "흐름을 가른 발차기", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin"], ["mark"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:ipildo_grolla",
@@ -1291,7 +1347,11 @@
         {"ep": 11, "i": 4, "name": "회전 큰 원 발차기(연속 2회)", "user": "ipildo", "technique": null},
         {"ep": 11, "i": 5, "name": "손 빼 붙잡기 → 후두부 잡고 머리부터 메치기", "user": "grolla", "technique": null},
         {"ep": 11, "i": 6, "name": "포식자 자세(살기 위압)", "user": "grolla", "technique": null}
-      ]
+      ],
+      "sides": [["grolla"], ["ipildo"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:kimshin_ryujihak",
@@ -1528,7 +1588,11 @@
         {"ep": 13, "i": 8, "name": "칼날 맞물림 → 근접 타격", "user": "ryujihak", "technique": null},
         {"ep": 13, "i": 9, "name": "휜 칼 든 높은 발차기", "user": "ryujihak", "technique": null},
         {"ep": 13, "i": 10, "name": "오른발 앞차기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["ryujihak"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "대결장에서 김신과 류지학이 1대1 칼싸움"
     },
     {
       "id": "fight:baekui_elevator",
@@ -1565,7 +1629,11 @@
         {"label": "묶은 금발 사내(베이지 재킷)", "kind": "single", "faction": null, "count_text": null},
         {"label": "백의 조직원(짧은 흑발 · 주먹)", "kind": "group", "faction": "baekui", "count_text": null}
       ],
-      "moves": [{"ep": 15, "i": 1, "name": "선타 후 목 움켜쥐기", "user": "?:묶은 금발 사내(베이지 재킷)", "technique": null}]
+      "moves": [{"ep": 15, "i": 1, "name": "선타 후 목 움켜쥐기", "user": "?:묶은 금발 사내(베이지 재킷)", "technique": null}],
+      "sides": [],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 없음(기계)"
     },
     {
       "id": "fight:hwajin_baekui_office",
@@ -1640,7 +1708,11 @@
         {"ep": 16, "i": 0, "name": "팔 휘둘러 쳐내기", "user": "?:보라 선글라스 사내", "technique": null},
         {"ep": 16, "i": 1, "name": "어깨 움켜쥐기(악력 제압)", "user": "?:대머리 사내(화진)", "technique": null},
         {"ep": 16, "i": 2, "name": "초승달 쌍날 무기 낚아채기(서술 이름)", "user": "?:꽁지머리 베이지 코트 사내(화진)", "technique": null}
-      ]
+      ],
+      "sides": [],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 없음(기계)"
     },
     {
       "id": "fight:hwajin_baekui_corridor",
@@ -1714,7 +1786,11 @@
         {"ep": 16, "i": 1, "name": "어깨 움켜쥐기(악력 제압)", "user": "?:대머리 사내(화진)", "technique": null},
         {"ep": 16, "i": 2, "name": "초승달 쌍날 무기 낚아채기(서술 이름)", "user": "?:꽁지머리 베이지 코트 사내(화진)", "technique": null},
         {"ep": 16, "i": 3, "name": "돌진 주먹(서술 이름)", "user": "ttolbae", "technique": null}
-      ]
+      ],
+      "sides": [["ttolbae"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:shingen_kurodaguards",
@@ -1770,7 +1846,11 @@
       "moves": [
         {"ep": 17, "i": 0, "name": "턱 쥐어 부수기", "user": "shingen", "technique": null},
         {"ep": 17, "i": 1, "name": "얼굴 움켜쥐어 으스러뜨리기", "user": "shingen", "technique": null}
-      ]
+      ],
+      "sides": [["shingen"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:shingen_kurodajeotaek",
@@ -1912,7 +1992,11 @@
         {"ep": 17, "i": 9, "name": "장도리 투척(무장 해제)", "user": "shingen", "technique": null},
         {"ep": 17, "i": 10, "name": "팔 꺾기", "user": "shingen", "technique": null},
         {"ep": 17, "i": 11, "name": "만년필 처형", "user": "shingen", "technique": null}
-      ]
+      ],
+      "sides": [["shingen"], ["kuroda"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "신겐이 구로다 저택을 습격해 구로다를 처형"
     },
     {
       "id": "fight:shingen_hideoffice",
@@ -1949,7 +2033,11 @@
         {"label": "대머리 염소수염 사내", "kind": "single", "faction": null, "count_text": null},
         {"label": "쓰러진 조직원들", "kind": "group", "faction": null, "count_text": null}
       ],
-      "moves": [{"ep": 17, "i": 13, "name": "목 밟아 누르기", "user": "shingen", "technique": null}]
+      "moves": [{"ep": 17, "i": 13, "name": "목 밟아 누르기", "user": "shingen", "technique": null}],
+      "sides": [["shingen", "hayabusa"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "신겐이 하야부사와 함께 히데 사무실 조직원(무명)을 제압"
     },
     {
       "id": "fight:jintae_clubbudapest",
@@ -2094,7 +2182,11 @@
         {"ep": 20, "i": 5, "name": "주먹 흘리기 + 권총 쳐내기(무장해제)", "user": "jintae", "technique": null},
         {"ep": 20, "i": 6, "name": "손짓 도발 · 칼 자세", "user": "jintae", "technique": null},
         {"ep": 22, "i": 3, "name": "리볼버 들이대기(근접 위협)", "user": "akila", "technique": null}
-      ]
+      ],
+      "sides": [["jintae"], ["pantera", "bison", "grolla"]],
+      "sides_unclear": ["akila"],
+      "sides_conf": "ai",
+      "sides_why": "서진태가 판테라·바이슨·그롤라 쪽과 대치, 아킬라는 룰을 내세워 중재(불개입 선언, 리볼버로 거구에게 경고)"
     },
     {
       "id": "fight:medvedi_hunter",
@@ -2351,7 +2443,11 @@
         {"ep": 21, "i": 15, "name": "주먹 연타", "user": "grolla", "technique": null},
         {"ep": 22, "i": 0, "name": "최후 돌진(낮은 도약 돌진 + 오른 주먹)", "user": "medvedi", "technique": null},
         {"ep": 22, "i": 1, "name": "안면 쥐고 바닥에 꽂기", "user": "grolla", "technique": null}
-      ]
+      ],
+      "sides": [["grolla"], ["medvedi"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:akila_jintae",
@@ -2385,7 +2481,11 @@
         }
       ],
       "mobs": [],
-      "moves": [{"ep": 22, "i": 4, "name": "턱 주먹", "user": "akila", "technique": null}]
+      "moves": [{"ep": 22, "i": 4, "name": "턱 주먹", "user": "akila", "technique": null}],
+      "sides": [["akila"], ["jintae"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:akila_doorguard",
@@ -2419,7 +2519,11 @@
         }
       ],
       "mobs": [{"label": "복면 문지기", "kind": "single", "faction": null, "count_text": null}],
-      "moves": [{"ep": 22, "i": 5, "name": "전완 후려치기", "user": "akila", "technique": null}]
+      "moves": [{"ep": 22, "i": 5, "name": "전완 후려치기", "user": "akila", "technique": null}],
+      "sides": [["akila"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:akila_mafia",
@@ -2474,7 +2578,11 @@
           "technique": null,
           "technique_guess": {"id": "jesus_zone", "conf": "high", "why": "세 사람 권총 한 발씩"}
         }
-      ]
+      ],
+      "sides": [["akila"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:pyoyoung_hangure",
@@ -2519,7 +2627,11 @@
         {"label": "쓰러진 정장 남자", "kind": "single", "faction": null, "count_text": null},
         {"label": "한구레", "kind": "single", "faction": null, "count_text": null}
       ],
-      "moves": [{"ep": 24, "i": 0, "name": "덮쳐 내리치기", "user": "jeongseono", "technique": null}]
+      "moves": [{"ep": 24, "i": 0, "name": "덮쳐 내리치기", "user": "jeongseono", "technique": null}],
+      "sides": [["pyoyoung", "jeongseono"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "표영과 정선오가 같은 편으로 정장 남자·한구레(무명)와 싸워 이김"
     },
     {
       "id": "fight:yuwoosung_wangswiipeon",
@@ -2553,7 +2665,11 @@
         }
       ],
       "mobs": [{"label": "왕쉬이펀", "kind": "single", "faction": null, "count_text": null}],
-      "moves": []
+      "moves": [],
+      "sides": [["yuwoosung"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:pyoyoung_casinoring",
@@ -2648,7 +2764,11 @@
         {"ep": 25, "i": 6, "name": "얼굴 · 명치 연타", "user": "pyoyoung", "technique": null},
         {"ep": 25, "i": 7, "name": "팔 잡아 내던지기", "user": "?:붉은 민소매 용문신 거한", "technique": null},
         {"ep": 25, "i": 8, "name": "착지 반동 파고들기 마무리", "user": "pyoyoung", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:jintae_sacheonwang",
@@ -3493,7 +3613,11 @@
         {"ep": 31, "i": 10, "name": "발목 높이 크게 긋기", "user": "jintae", "technique": null},
         {"ep": 31, "i": 11, "name": "X자 교차 막기", "user": "jintae", "technique": null},
         {"ep": 31, "i": 12, "name": "뒤로 쏘며 달리기", "user": "ratel", "technique": null}
-      ]
+      ],
+      "sides": [["jintae", "pyoyoung", "keurisa", "ratel"], ["andycheong", "eunbo", "richeon", "yuwoosung"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "서진태 일행(표영·크리사·라텔)이 사천왕(앤디·은보·리천·유우성)과 교전. 왕하오밍은 actors 에 없어 제외"
     },
     {
       "id": "fight:pyoyoung_sacheonwang",
@@ -3582,7 +3706,11 @@
         {"ep": 27, "i": 11, "name": "단검 투척", "user": "jintae", "technique": null},
         {"ep": 27, "i": 12, "name": "손목 쳐들기 + 베기", "user": "jintae", "technique": null},
         {"ep": 27, "i": 13, "name": "뛰어 발차기", "user": "pyoyoung", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung", "jintae"], []],
+      "sides_unclear": ["kkuldanji"],
+      "sides_conf": "ai",
+      "sides_why": "서진태·표영 협공으로 사천왕 바가지머리(무명) 제압. 꿀단지는 표영을 밀쳐 두고 혼자 도주(배신성 이탈)"
     },
     {
       "id": "fight:pyoyoung_jokki",
@@ -4004,7 +4132,11 @@
         {"ep": 31, "i": 0, "name": "칼 쥔 손 붙잡아 빼앗기", "user": "richeon", "technique": null},
         {"ep": 31, "i": 1, "name": "하이킥", "user": "keurisa", "technique": null},
         {"ep": 31, "i": 2, "name": "근접 사격(머리 옆)", "user": "keurisa", "technique": null}
-      ]
+      ],
+      "sides": [["richeon"], ["pyoyoung", "keurisa", "ratel", "krot", "jintae"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "조끼 남자(리천)가 표영·라텔·크리사를 차례로 제압(조끼 남자 승으로 보임), 크로트는 지붕에서 견제, 서진태는 끝에 대치"
     },
     {
       "id": "fight:krot_shire",
@@ -4186,7 +4318,11 @@
         {"ep": 30, "i": 3, "name": "쇠사슬 휘두르기", "user": "shire", "technique": null},
         {"ep": 30, "i": 4, "name": "쇠사슬 식칼", "user": "?:회색 올백 머리 · 식칼 든 사람", "technique": null},
         {"ep": 31, "i": 13, "name": "사슬 식칼 박기 · 회수", "user": "?:회색 올백 머리 · 식칼 든 사람", "technique": null}
-      ]
+      ],
+      "sides": [["krot", "shire"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "크로트·샤이어가 회색 올백 식칼 남자·흰 셔츠 무리(무명)와 교전, 열세"
     },
     {
       "id": "fight:jintae_jokki",
@@ -4300,7 +4436,11 @@
         {"ep": 32, "i": 1, "name": "가슴 치기", "user": "richeon", "technique": null},
         {"ep": 32, "i": 4, "name": "무릎차기 · 내리찍기", "user": "jintae", "technique": null},
         {"ep": 32, "i": 5, "name": "공중 상대 지나치며 베기", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["jintae", "ratel"], ["richeon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "서진태가 조끼 남자(리천)와 싸우고, 라텔은 서진태를 뒤에서 끌어안아 빼냄(같은 편)"
     },
     {
       "id": "fight:sikkal_talchul",
@@ -4457,7 +4597,11 @@
         {"ep": 32, "i": 12, "name": "사슬 식칼 베기", "user": "?:식칼 사슬 남자", "technique": null},
         {"ep": 32, "i": 13, "name": "식칼 내려찍기", "user": "?:식칼 사슬 남자", "technique": null},
         {"ep": 32, "i": 14, "name": "머리채 끌기 · 목 긋기", "user": "yuwoosung", "technique": null}
-      ]
+      ],
+      "sides": [["yuwoosung", "andycheong", "richeon", "wanghaoming"], ["keurisa", "ratel"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "유우성 일행이 라텔 일행을 몰아 크리사를 인질 삼아 처형(승자 유우성)"
     },
     {
       "id": "fight:keurisa_cage",
@@ -4520,7 +4664,11 @@
         {"ep": 32, "i": 6, "name": "뛰어올라 덮치기", "user": "keurisa", "technique": null},
         {"ep": 32, "i": 7, "name": "올려 치기(맞받기)", "user": "?:검은 티 동양인 청년", "technique": null},
         {"ep": 32, "i": 8, "name": "높이 차기", "user": "keurisa", "technique": null}
-      ]
+      ],
+      "sides": [["keurisa"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:sainjin_hwangbo",
@@ -4570,7 +4718,11 @@
         }
       ],
       "mobs": [],
-      "moves": [{"ep": 33, "i": 2, "name": "넥타이 잡아 조르기 + 칼 겨누기", "user": "sainjin", "technique": null}]
+      "moves": [{"ep": 33, "i": 2, "name": "넥타이 잡아 조르기 + 칼 겨누기", "user": "sainjin", "technique": null}],
+      "sides": [["sainjin"], ["hwangbomincheol"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:dunti_spar",
@@ -4620,7 +4772,11 @@
         }
       ],
       "mobs": [{"label": "흰 셔츠 장갑 남자('둔티')", "kind": "single", "faction": null, "count_text": null}],
-      "moves": [{"ep": 33, "i": 3, "name": "칼 내리찍기 / 공중 메치기", "user": "majunyeong", "technique": null}]
+      "moves": [{"ep": 33, "i": 3, "name": "칼 내리찍기 / 공중 메치기", "user": "majunyeong", "technique": null}],
+      "sides": [["majunyeong"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:shingen_lobby",
@@ -4705,7 +4861,11 @@
         {"ep": 34, "i": 0, "name": "넥타이 쥐어 당기기(도발)", "user": "shingen", "technique": null},
         {"ep": 34, "i": 1, "name": "거꾸로 꺾어 넘기기 · 머리 끼우기", "user": "mahakyoung", "technique": null},
         {"ep": 34, "i": 2, "name": "손 쳐내기", "user": "mahakyoung", "technique": null}
-      ]
+      ],
+      "sides": [["mahakyoung"], ["shingen"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "마학영이 신겐 수행원을 제압하고 칼을 압수, 신겐 본인과는 맞붙지 않음"
     },
     {
       "id": "fight:douchen_apateu",
@@ -4993,7 +5153,11 @@
         {"ep": 37, "i": 7, "name": "날아들어 걷어차기", "user": "woojin", "technique": null},
         {"ep": 37, "i": 9, "name": "골프채 머리 스윙('나이스 샷')", "user": "hantaecheol", "technique": null},
         {"ep": 37, "i": 10, "name": "맨손으로 칼날 쥐기", "user": "?:곱슬 흑발 · 턱수염 검은 정장 남자(칼날을 쥠)", "technique": null}
-      ]
+      ],
+      "sides": [["woojin", "choehyeokjin", "ipildo", "dohaksu", "hantaecheol", "eogwangdeuk"], ["douchen"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "피우진 일행이 도우첸 쪽 아파트를 습격, 도우첸 쪽 전의 상실. 어광득은 같은 일행으로 봄(직접 서술 없음)"
     },
     {
       "id": "fight:yuwoosung_andycheong",
@@ -5074,7 +5238,11 @@
         {"ep": 36, "i": 3, "name": "권총 뽑아 겨누기", "user": "andycheong", "technique": null},
         {"ep": 36, "i": 4, "name": "끈 달린 표창(술 장식 승표) 던지기", "user": "lingling", "technique": null},
         {"ep": 36, "i": 5, "name": "붙들고 등 찌르기", "user": "?:대머리 · 남색 정장 남자", "technique": null}
-      ]
+      ],
+      "sides": [["yuwoosung", "lingling", "eunbo"], ["andycheong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "유우성 쪽(링링·은보 포함)이 앤디청을 제압해 죽임"
     },
     {
       "id": "fight:kimshin_richeon",
@@ -5383,7 +5551,11 @@
         {"ep": 41, "i": 13, "name": "태클 들어 넘기기", "user": "kimshin", "technique": null},
         {"ep": 41, "i": 14, "name": "주먹 → 멱살 · 무릎 차기", "user": "richeon", "technique": null},
         {"ep": 41, "i": 15, "name": "주운 권총 접사", "user": "richeon", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["richeon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신과 리천의 총격·칼 근접전, 리천 사망"
     },
     {
       "id": "fight:kimshin_jangap",
@@ -5411,7 +5583,11 @@
       "note": "→ fight:kimshin_richeon 에 합침 — 036 가죽 재킷 · 장갑 거구 = 리천(답20 2026-10-29)",
       "phase_list": [],
       "mobs": [{"label": "가죽 재킷 · 검은 장갑 거구", "kind": "single", "faction": null, "count_text": null}],
-      "moves": []
+      "moves": [],
+      "sides": [["kimshin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:hwajinhotel",
@@ -5982,7 +6158,11 @@
         {"ep": 51, "i": 2, "name": "각목 안면 타격", "user": "?:검은 정장 무리", "technique": null},
         {"ep": 51, "i": 3, "name": "사슬 클리버 도약 내려베기", "user": "lingling", "technique": null},
         {"ep": 51, "i": 4, "name": "권총 견제 → 목 베기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "woojin", "jintae", "ratel", "pyoyoung", "jeongseono"], ["yuwoosung", "lingling"]],
+      "sides_unclear": ["neopchi", "seungyeong"],
+      "sides_conf": "ai",
+      "sides_why": "김신 쪽이 화진 호텔에서 유우성·링링 쪽과 교전, 링링 사망. 넙치·정승영은 부산세력 소속으로 보이나 편 서술 없음"
     },
     {
       "id": "fight:pyoyoung_hongkong",
@@ -6172,7 +6352,11 @@
         {"ep": 46, "i": 0, "name": "재킷 눈가림", "user": "pyoyoung", "technique": null},
         {"ep": 46, "i": 1, "name": "잡고 무릎 올려 찍기", "user": "pyoyoung", "technique": null},
         {"ep": 46, "i": 2, "name": "거꾸로 뒤집혀 목 긋기", "user": "pyoyoung", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung", "jeongseono"], ["eunbo"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "표영·정선오 대 사천왕 거구 은보(칼잡이들 무명 동행), 표영 쪽 승"
     },
     {
       "id": "fight:saehuimang_boyugwon",
@@ -6211,7 +6395,11 @@
         {"label": "갈색 머리 젊은 남자", "kind": "single", "faction": null, "count_text": null},
         {"label": "흰 머리 노인(전화)", "kind": "single", "faction": null, "count_text": null}
       ],
-      "moves": []
+      "moves": [],
+      "sides": [["namyong", "wonyong"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "청년회 쪽 남용·원용이 상대 무리(무명)와 말로 대치"
     },
     {
       "id": "fight:insu_daemeori",
@@ -6355,7 +6543,11 @@
         {"ep": 38, "i": 5, "name": "사각 변칙 발차기 잡기", "user": "yeominsu", "technique": null},
         {"ep": 38, "i": 6, "name": "큰 훅 연타", "user": "?:대머리 흉터 정장 남자", "technique": null},
         {"ep": 57, "i": 4, "name": "몸통 박치기", "user": "namyong", "technique": null}
-      ]
+      ],
+      "sides": [["yeominsu", "insu", "iseul", "namyong", "wonyong"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "청년곱창 쪽(여민수·인수·이슬·남용·원용)이 대머리·화진 부하·화교 칼잡이(무명)를 제압"
     },
     {
       "id": "fight:ttolbae_gangchangseok",
@@ -6485,7 +6677,11 @@
         {"ep": 57, "i": 1, "name": "발 밟아 묶고 차 넘기기", "user": "ttolbae", "technique": null},
         {"ep": 57, "i": 2, "name": "단도 내리긋기 · 배 가르기", "user": "gangchangseok", "technique": null},
         {"ep": 57, "i": 3, "name": "판자 뒤통수 치기", "user": "wonil", "technique": null}
-      ]
+      ],
+      "sides": [["wonil", "ttolbae"], ["gangchangseok"]],
+      "sides_unclear": ["icheolmin"],
+      "sides_conf": "ai",
+      "sides_why": "똘배가 강창석과 싸우고 원일이 뒤에서 기절시킴. 이철민은 어느 편인지 서술 없음"
     },
     {
       "id": "fight:woojin_douchen",
@@ -7028,7 +7224,11 @@
         {"ep": 42, "i": 2, "name": "맷집 받기 → 한 방", "user": "douchen", "technique": null},
         {"ep": 42, "i": 3, "name": "올려치기 → 내리꽂기 연타", "user": "woojin", "technique": null},
         {"ep": 42, "i": 4, "name": "내리꽂는 주먹(마무리)", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin", "hantaecheol"], ["douchen"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "피우진·한태철(골프채) 대 도우첸, 도우첸 쓰러짐"
     },
     {
       "id": "fight:gyeonghodae_juchajang",
@@ -7651,7 +7851,11 @@
         {"ep": 48, "i": 6, "name": "오토바이 뒷자리 베기 · 사격", "user": "hide", "technique": null},
         {"ep": 48, "i": 7, "name": "방패 후려치기", "user": "choedalcheon", "technique": null},
         {"ep": 48, "i": 8, "name": "차 위 두 손 조준 사격", "user": "jeongdan", "technique": null}
-      ]
+      ],
+      "sides": [["hide", "igyeonguk", "ryujihak"], ["mahakyoung", "majunyeong", "jeongdan", "choedalcheon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "하성 탈출조(히데·이경욱·류지학, 복면)가 주차장에서 경호대(마학영·마준영·정단·최달천)와 교전, 경호대 우세. 정단·최달천은 경호대 소속으로 추정"
     },
     {
       "id": "fight:sainjin_hwangbomincheol",
@@ -7756,7 +7960,11 @@
         {"ep": 45, "i": 4, "name": "로퍼 정면 차기", "user": "sainjin", "technique": null},
         {"ep": 45, "i": 5, "name": "전기 곤봉 휘두르기", "user": "sainjin", "technique": null},
         {"ep": 45, "i": 6, "name": "구르기 회피", "user": "sainjin", "technique": null}
-      ]
+      ],
+      "sides": [["hwangbomincheol", "hyeonseok"], ["sainjin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "황보민철·현석이 사인진을 막아섬, 현석이 일부러 놓아줌"
     },
     {
       "id": "fight:jina_eastereurope",
@@ -7809,7 +8017,11 @@
       "moves": [
         {"ep": 46, "i": 6, "name": "뒤에서 목 조르며 총 든 손 누르기", "user": "shamo", "technique": null},
         {"ep": 46, "i": 7, "name": "붙잡은 채 하이킥", "user": "shamo", "technique": null}
-      ]
+      ],
+      "sides": [["shamo"], []],
+      "sides_unclear": ["peurikit"],
+      "sides_conf": "ai",
+      "sides_why": "샤모가 추적자들(무명)을 제압, 프리깃은 창 너머 구경만 해서 편 불명"
     },
     {
       "id": "fight:akila_suv",
@@ -8757,7 +8969,11 @@
         {"ep": 61, "i": 7, "name": "웃음 연사(기습 사격)", "user": "blackmamba", "technique": null},
         {"ep": 61, "i": 8, "name": "거꾸로 내리꽂기 · 팔뚝 목 조르기", "user": "gustav", "technique": null},
         {"ep": 69, "i": 0, "name": "나무에 눌러 목 조르기", "user": "gustav", "technique": null}
-      ]
+      ],
+      "sides": [["akila"], ["gustav", "blackmamba", "owl", "heron", "condor"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "아킬라 단독 대 SUV 습격조(구스타프·블랙맘바·오울·헤론·콘도르). 끝의 구스타프-블랙맘바 조르기 서술은 편 구분에 반영 안 함"
     },
     {
       "id": "fight:jintae_seojae",
@@ -9373,7 +9589,11 @@
         {"ep": 50, "i": 8, "name": "올인 돌진", "user": "yuwoosung", "technique": null},
         {"ep": 50, "i": 9, "name": "같이 가자(동반 추락)", "user": "jintae", "technique": null},
         {"ep": 50, "i": 10, "name": "뒤에서 목조르기(팔 + 끈)", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["jintae", "jangibo"], ["yuwoosung"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "서진태가 장이보를 지키며 유우성과 싸워 함께 추락, 유우성 사망"
     },
     {
       "id": "fight:yuwoosung_actionschool",
@@ -9407,7 +9627,11 @@
         }
       ],
       "mobs": [{"label": "학원 에이스", "kind": "single", "faction": null, "count_text": null}],
-      "moves": []
+      "moves": [],
+      "sides": [["yuwoosung"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:krot_blackmamba",
@@ -9480,7 +9704,11 @@
         {"label": "갈색 장발 복면 운전자", "kind": "single", "faction": null, "count_text": null},
         {"label": "분홍 스웨터 총잡이", "kind": "single", "faction": null, "count_text": null}
       ],
-      "moves": [{"ep": 53, "i": 12, "name": "승합차 정면 충돌", "user": "krot", "technique": null}]
+      "moves": [{"ep": 53, "i": 12, "name": "승합차 정면 충돌", "user": "krot", "technique": null}],
+      "sides": [["krot", "shire"], ["blackmamba"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "크로트가 차량으로 들이받으며 시작, 블랙맘바 쪽(무명 총잡이 포함)과 교전, 크로트 부상"
     },
     {
       "id": "fight:hwajinhotel_jinap",
@@ -9526,7 +9754,11 @@
         {"label": "승합차 운전자", "kind": "single", "faction": null, "count_text": null},
         {"label": "백의 잔류 조직원", "kind": "group", "faction": "baekui", "count_text": null}
       ],
-      "moves": [{"ep": 56, "i": 1, "name": "진압봉 내려치기", "user": "?:복면 조끼 경호대원", "technique": null}]
+      "moves": [{"ep": 56, "i": 1, "name": "진압봉 내려치기", "user": "?:복면 조끼 경호대원", "technique": null}],
+      "sides": [["jeongdan", "mahakyoung"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "정단·마학영이 경호대로 호텔 현장을 장악, 백의 잔류 조직원(무명)을 제압"
     },
     {
       "id": "fight:baekui_tower",
@@ -9896,7 +10128,11 @@
         {"ep": 63, "i": 1, "name": "의자 걷어차 던지기", "user": "woojin", "technique": null},
         {"ep": 63, "i": 2, "name": "방패 넘어 근접 사격", "user": "woojin", "technique": null},
         {"ep": 63, "i": 3, "name": "뒤잡아 칼 내리꽂기", "user": "ipildo", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "woojin", "guilhwa", "ipildo", "juwon"], ["gyeonghodaechoehuui4in", "ihuiseong"]],
+      "sides_unclear": ["hayabusa"],
+      "sides_conf": "ai",
+      "sides_why": "백의 일행이 빌딩 경호대(이희성 지휘, 최후의 4인)와 교전. 하야부사는 서술 없어 편 불명"
     },
     {
       "id": "fight:cheonildo_gamgeumsil",
@@ -9962,7 +10198,11 @@
       "moves": [
         {"ep": 56, "i": 4, "name": "뒷머리 잡아 탁자 찍기", "user": "?:캐슬 경호원 B(올백 · 휴대폰)", "technique": null},
         {"ep": 56, "i": 5, "name": "찌르고 내리찍기", "user": "?:부스스한 머리 젊은 남자", "technique": null}
-      ]
+      ],
+      "sides": [["cheonildo"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:kimshin_shingen",
@@ -10120,7 +10360,11 @@
         {"ep": 62, "i": 10, "name": "장검 큰 호 베기", "user": "shingen", "technique": null},
         {"ep": 62, "i": 11, "name": "단도 찌르기 · 낮은 파고들기", "user": "shingen", "technique": null},
         {"ep": 62, "i": 12, "name": "단검 막기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["shingen"], ["kimshin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "신겐이 덮쳐 김신과 칼싸움, 결착 없이 신겐이 보내 줌"
     },
     {
       "id": "fight:cheongnyeongopchang",
@@ -10294,7 +10538,11 @@
         {"ep": 62, "i": 7, "name": "한 손 메치기", "user": "grolla", "technique": null},
         {"ep": 62, "i": 8, "name": "뒤 목조르기(매복)", "user": "?:골목 복면 남자", "technique": null},
         {"ep": 62, "i": 9, "name": "단검 내리꽂기", "user": "grolla", "technique": null}
-      ]
+      ],
+      "sides": [["grolla"], ["insu", "iseul", "namyong", "wonyong", "dojiung"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "그롤라 쪽 복면 습격조가 청년곱창을 습격, 이슬·인수 등 쓰러뜨림, 도지웅은 달려와 목 졸려 쓰러짐"
     },
     {
       "id": "fight:hoeamsi",
@@ -10342,7 +10590,11 @@
       "moves": [
         {"ep": 63, "i": 5, "name": "단도 들고 뛰어들기", "user": "pyoyoung", "technique": null},
         {"ep": 63, "i": 6, "name": "마스크 습격자의 얼굴 주먹", "user": "?:복면 · 조끼 습격조", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung", "yeominsu", "wonil"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "표영·여민수·원일이 회암시 복면 습격조(무명)를 저지"
     },
     {
       "id": "fight:kimshin_cheonildo",
@@ -10387,7 +10639,11 @@
       "moves": [
         {"ep": 63, "i": 4, "name": "멱살 잡고 박치기", "user": "kimshin", "technique": null},
         {"ep": 63, "i": 7, "name": "양손 얼굴 · 목 죄기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["cheonildo"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 약속을 어긴 천일도를 일방적으로 제압하고 놓아줌"
     },
     {
       "id": "fight:seuseung_seupgyeok",
@@ -10445,7 +10701,11 @@
         {"label": "헬멧 쓴 무장 인원", "kind": "single", "faction": null, "count_text": null},
         {"label": "권총 든 붉은 머리 남자", "kind": "single", "faction": null, "count_text": null}
       ],
-      "moves": []
+      "moves": [],
+      "sides": [],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 없음(기계)"
     },
     {
       "id": "fight:bitsok_seupgyeok",
@@ -10727,7 +10987,11 @@
         {"ep": 69, "i": 2, "name": "총신 잡아 막기", "user": "?:웃는 남자", "technique": null},
         {"ep": 69, "i": 3, "name": "덮쳐 깔고 근접 사격", "user": "?:짙은 코트 남자", "technique": null},
         {"ep": 69, "i": 4, "name": "올려 쏘기", "user": "?:흰 털깃 코트 사수", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "ipildo", "pyoyoung", "yeominsu", "cheonildo"], ["choedalcheon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신 쪽이 교회를 습격, 경호대·수비 쪽(최달천 포함)과 교전. 천일도는 김신과 협의한 사이라 김신 쪽으로 봄(직접 서술 약함)"
     },
     {
       "id": "fight:dongcheonbang_nanjeon",
@@ -10901,7 +11165,11 @@
           "user": "?:흐트러진 흑발 검은 정장 남자",
           "technique": null
         }
-      ]
+      ],
+      "sides": [["cheonkun", "mojajun", "ugang"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "동천방(천쿤·모자준·우강)이 김신 쪽 무리(무명)와 난전"
     },
     {
       "id": "fight:tonyjin_ugang",
@@ -10954,7 +11222,11 @@
       "moves": [
         {"ep": 68, "i": 0, "name": "카람빗 손목 걸기 · 얼굴 긋기", "user": "tonyjin", "technique": null},
         {"ep": 68, "i": 1, "name": "앞차기(배)", "user": "tonyjin", "technique": null}
-      ]
+      ],
+      "sides": [["tonyjin"], ["ugang"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "토니진이 우강을 압도하며 대치"
     },
     {
       "id": "fight:eunsincheo_seupgyeok",
@@ -11108,7 +11380,11 @@
         {"ep": 69, "i": 11, "name": "양손 총검 대치", "user": "hyeonseok", "technique": null},
         {"ep": 80, "i": 0, "name": "소파 밑 발 사격", "user": "hyeonseok", "technique": null},
         {"ep": 80, "i": 1, "name": "코트 날리며 돌입 근접 사격", "user": "hyeonseok", "technique": null}
-      ]
+      ],
+      "sides": [["sainjin"], ["hyeonseok"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "치성대 습격대(사인진)가 현석을 급습, 현석은 총상 입고 이탈"
     },
     {
       "id": "fight:kimtaehoon_juchajang",
@@ -11166,7 +11442,11 @@
         {"ep": 69, "i": 8, "name": "차량 돌진", "user": "?:볼 반창고 운전자(TF팀)", "technique": null},
         {"ep": 69, "i": 9, "name": "올려 베기(일본도)", "user": "ojiin", "technique": null},
         {"ep": 69, "i": 10, "name": "멱살 잡고 내리찍기(단검)", "user": "?:검은 정장 경호원(김태훈 쪽)", "technique": null}
-      ]
+      ],
+      "sides": [["kimtaehoon", "ojiin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김태훈·오지인 일행이 치성대(무명)의 주차장 습격을 뚫고 탈출"
     },
     {
       "id": "fight:shamo_bokdo",
@@ -11485,7 +11765,11 @@
         {"ep": 73, "i": 0, "name": "인간 방패", "user": "blackmamba", "technique": null},
         {"ep": 78, "i": 0, "name": "낙하 찌르기", "user": "kimshin", "technique": null},
         {"ep": 78, "i": 1, "name": "방패조 전진 사격", "user": "?:방탄조끼 방패조", "technique": null}
-      ]
+      ],
+      "sides": [["blackmamba", "gustav"], ["shamo", "jackson", "shire", "peurikit", "kimshin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "습격조 쪽 블랙맘바·구스타프 대 샤모·잭슨·샤이어·프리깃(김신은 같은 쪽으로 봄). 구스타프는 서술 거의 없고 이스크라 용병대 편은 복잡해 불확실"
     },
     {
       "id": "fight:kimshin_gustav",
@@ -12125,7 +12409,11 @@
         {"ep": 74, "i": 4, "name": "반대 손 턱 밑 찔러 올리기", "user": "kimshin", "technique": null},
         {"ep": 74, "i": 5, "name": "공중 뒤집기 내리찍기", "user": "kimshin", "technique": null},
         {"ep": 74, "i": 6, "name": "창문 밀어내기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["gustav"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:adong_seupgyeok",
@@ -12534,7 +12822,14 @@
         {"ep": 76, "i": 6, "name": "바닥 올려 베기", "user": "ojiin", "technique": null},
         {"ep": 76, "i": 7, "name": "단검 찌르고 인질 잡기", "user": "pantera", "technique": null},
         {"ep": 76, "i": 8, "name": "이마 베기 · 정수리 찌르기 · 차 날리기", "user": "ryujihak", "technique": null}
-      ]
+      ],
+      "sides": [
+        ["ryujihak", "kimtaehoon", "ojiin", "hwangbomincheol"],
+        ["jeongdan", "pantera", "mark", "bison"]
+      ],
+      "sides_unclear": ["jomyeongsik"],
+      "sides_conf": "ai",
+      "sides_why": "후드 습격조(황보민철 지휘)·김태훈 일행·류지학이 경호대(정단)와 판테라·마크·바이슨 쪽을 상대. 조명식은 서술 없어 편 불명"
     },
     {
       "id": "fight:choedalcheon_ryujihak",
@@ -12579,7 +12874,11 @@
         }
       ],
       "mobs": [],
-      "moves": [{"ep": 75, "i": 5, "name": "사슬 끊기 해머 내려치기", "user": "choedalcheon", "technique": null}]
+      "moves": [{"ep": 75, "i": 5, "name": "사슬 끊기 해머 내려치기", "user": "choedalcheon", "technique": null}],
+      "sides": [["choedalcheon"], ["ryujihak"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:seukaibeuriji",
@@ -12978,7 +13277,11 @@
         {"ep": 81, "i": 2, "name": "허벅지 칼침(각성 유지)", "user": "ryujihak", "technique": null},
         {"ep": 81, "i": 3, "name": "칼 빼앗아 겨누기", "user": "ryujihak", "technique": null},
         {"ep": 81, "i": 4, "name": "끌어안고 함께 쏘게 하기", "user": "jeongdan", "technique": null}
-      ]
+      ],
+      "sides": [["ryujihak", "kimtaehoon", "ojiin", "hwangbomincheol", "kimshin"], ["jeongdan", "bison"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "스카이브리지에서 류지학·김태훈·황보민철이 경호대(정단·바이슨)와 교전, 류지학 승. 김신은 서술 없지만 김태훈 쪽으로 봄"
     },
     {
       "id": "fight:kimshin_gustav_dwi",
@@ -13012,7 +13315,11 @@
         }
       ],
       "mobs": [],
-      "moves": []
+      "moves": [],
+      "sides": [["kimshin"], ["gustav"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:majunyeong_juro",
@@ -13110,7 +13417,11 @@
         {"ep": 78, "i": 3, "name": "칼 박힌 손으로 밀어 넣는 주먹(미끼 훅)", "user": "majunyeong", "technique": null},
         {"ep": 78, "i": 4, "name": "메어치기", "user": "juro", "technique": null},
         {"ep": 78, "i": 5, "name": "뒤잡아 목 긋기", "user": "juro", "technique": null}
-      ]
+      ],
+      "sides": [["juro"], ["majunyeong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "복면 남자(주로)가 경호대·마준영과 교전하다 물러남"
     },
     {
       "id": "fight:kimshin_majunyeong",
@@ -13311,7 +13622,11 @@
         {"ep": 87, "i": 5, "name": "방패 짓밟기 돌진", "user": "majunyeong", "technique": null},
         {"ep": 87, "i": 6, "name": "근접 사격 후 유리창 돌입", "user": "kimshin", "technique": null},
         {"ep": 87, "i": 7, "name": "어둠 속 매복 처치 · 재장전", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["majunyeong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 방패 든 마준영과 경호대원들에게 맞섬"
     },
     {
       "id": "fight:hide_mahakyoung",
@@ -13717,7 +14032,14 @@
         {"ep": 87, "i": 6, "name": "근접 사격 후 유리창 돌입", "user": "kimshin", "technique": null},
         {"ep": 87, "i": 7, "name": "어둠 속 매복 처치 · 재장전", "user": "kimshin", "technique": null},
         {"ep": 88, "i": 1, "name": "짓눌러 으깨기 · 걷어차기", "user": "hide", "technique": null}
-      ]
+      ],
+      "sides": [
+        ["hide", "fujita", "watanabe", "kimshin", "ipildo", "jackson", "peurikit", "shamo"],
+        ["mahakyoung", "grolla"]
+      ],
+      "sides_unclear": ["iskradanjang", "toishi"],
+      "sides_conf": "ai",
+      "sides_why": "히데·반야마구치 연합·김신 일행이 마학영·방패 경호대·그롤라와 교전. 이스크라 용병대 단장·토이시는 서술 없어 편 불명"
     },
     {
       "id": "fight:shingen_ryujihak",
@@ -14069,7 +14391,11 @@
         {"ep": 85, "i": 3, "name": "카타나 가로 베기", "user": "shingen", "technique": null},
         {"ep": 85, "i": 4, "name": "정전 직후 낮게 파고드는 카타나 베기", "user": "shingen", "technique": null},
         {"ep": 85, "i": 5, "name": "어둠 속 양손 칼 덮치기", "user": "ryujihak", "technique": null}
-      ]
+      ],
+      "sides": [["shingen"], ["ryujihak"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "신겐이 류지학을 베어 죽임"
     },
     {
       "id": "fight:ojiin_bdong",
@@ -14175,7 +14501,11 @@
         {"ep": 82, "i": 5, "name": "붙잡힌 채 얼굴 찌르기", "user": "ojiin", "technique": null},
         {"ep": 82, "i": 6, "name": "카타나 올려 베기", "user": "ojiin", "technique": null},
         {"ep": 83, "i": 5, "name": "총구 잡아 올리기 근접 제압", "user": "hyeonseok", "technique": null}
-      ]
+      ],
+      "sides": [["ojiin", "hyeonseok"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "오지인·현석이 방탄조끼 경호대원(무명)들과 교전"
     },
     {
       "id": "fight:jeongilchueotang",
@@ -14253,7 +14583,11 @@
         {"ep": 83, "i": 1, "name": "칼 손목 낚아채기 → 주먹 → 카운터 메다꽂기", "user": "ilguk", "technique": null},
         {"ep": 83, "i": 2, "name": "돌진 베기", "user": "sintaejin", "technique": null},
         {"ep": 83, "i": 3, "name": "하이킥", "user": "?:하성 부장(올리브 재킷 올백)", "technique": null}
-      ]
+      ],
+      "sides": [["ilguk"], ["sintaejin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "일국(최민욱 쪽 습격자)이 하성 부장을 제압, 신태진은 하성 쪽에서 습격자를 벰"
     },
     {
       "id": "fight:grolla_hotelcastle",
@@ -14329,7 +14663,11 @@
         {"ep": 86, "i": 0, "name": "단검 얼굴 찍기 → 메다꽂기", "user": "ipildo", "technique": null},
         {"ep": 86, "i": 1, "name": "다리 잡아 내리꽂기 · 짓밟기", "user": "grolla", "technique": null},
         {"ep": 86, "i": 2, "name": "뒤통수 근접 사격", "user": "grolla", "technique": null}
-      ]
+      ],
+      "sides": [["ipildo", "juwon"], ["grolla"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이필도·주원(김신 쪽)이 그롤라와 교전"
     },
     {
       "id": "fight:namyong_wonil",
@@ -14374,7 +14712,11 @@
         }
       ],
       "mobs": [],
-      "moves": [{"ep": 88, "i": 0, "name": "올라타 내려치기", "user": "namyong", "technique": null}]
+      "moves": [{"ep": 88, "i": 0, "name": "올라타 내려치기", "user": "namyong", "technique": null}],
+      "sides": [["namyong"], ["wonil"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:kimshin_bondong_maebok",
@@ -14417,7 +14759,11 @@
       "moves": [
         {"ep": 88, "i": 2, "name": "목 조르기 강제 무전", "user": "kimshin", "technique": null},
         {"ep": 88, "i": 3, "name": "뒤로 쏘기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:kimshin_grolla",
@@ -14846,7 +15192,11 @@
         {"ep": 93, "i": 11, "name": "블록 내려치기", "user": "kimshin", "technique": null},
         {"ep": 93, "i": 12, "name": "반죽 통 처박기", "user": "kimshin", "technique": null},
         {"ep": 93, "i": 13, "name": "입 속 사격(처형)", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "woojin"], ["grolla"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 그롤라와 총격·칼 근접전 끝에 이김, 피우진은 같은 편으로 봄"
     },
     {
       "id": "fight:blackmamba_bokdo",
@@ -14982,7 +15332,11 @@
         {"ep": 94, "i": 7, "name": "붙잡고 내리꽂기", "user": "blackmamba", "technique": null},
         {"ep": 94, "i": 8, "name": "근접 사격 뒤 앞차기", "user": "blackmamba", "technique": null},
         {"ep": 94, "i": 9, "name": "덮쳐 눕히기(엄폐)", "user": "jeongseono", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung", "jeongseono"], ["blackmamba"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "표영·정선오가 블랙맘바(용병 동행)와 교전"
     },
     {
       "id": "fight:kimshin_majunyeong2",
@@ -15599,7 +15953,11 @@
         {"ep": 93, "i": 8, "name": "거꾸로 메치기", "user": "majunyeong", "technique": null},
         {"ep": 93, "i": 9, "name": "상대 권총 탈취 근접 사격", "user": "kimshin", "technique": null},
         {"ep": 93, "i": 10, "name": "마지막 돌진", "user": "majunyeong", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "woojin"], ["majunyeong", "grolla"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신·피우진이 마준영·그롤라(버건디 남자)와 싸워 이김"
     },
     {
       "id": "fight:risa_eungjeopsil",
@@ -15653,7 +16011,11 @@
         {"ep": 94, "i": 0, "name": "손 물어뜯기", "user": "risa", "technique": null},
         {"ep": 94, "i": 3, "name": "단검 베기", "user": "risa", "technique": null},
         {"ep": 94, "i": 4, "name": "머리채 끊고 빠지기", "user": "risa", "technique": null}
-      ]
+      ],
+      "sides": [["risa"], ["ihuiseong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:gyeonghodae_chugyeok",
@@ -15764,7 +16126,11 @@
         {"ep": 94, "i": 17, "name": "창문 기습 손도끼 내려찍기", "user": "?:붉은 재킷 금목걸이 손도끼 남자", "technique": null},
         {"ep": 95, "i": 0, "name": "돌아서며 손도끼 휘두르기", "user": "kimshin", "technique": null},
         {"ep": 95, "i": 1, "name": "식칼 손도끼 목 베기(마무리)", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "woojin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신·피우진이 경호대와 중국 쪽 추격자들(무명)에게 쫓기며 맞섬"
     },
     {
       "id": "fight:hide_mahakyoung2",
@@ -16444,7 +16810,31 @@
         {"ep": 125, "i": 1, "name": "얼굴 잡아 처박기", "user": "?:지게차 뻗친 흑발 남자", "technique": null},
         {"ep": 125, "i": 2, "name": "엎드려 쏘기", "user": "woojin", "technique": null},
         {"ep": 125, "i": 3, "name": "야구방망이 내려치기", "user": "yeominsu", "technique": null}
-      ]
+      ],
+      "sides": [
+        [
+          "hide",
+          "kimshin",
+          "ipildo",
+          "juwon",
+          "yamamotokyoji",
+          "yeominsu",
+          "pyoyoung",
+          "woojin",
+          "dohaksu",
+          "eogwangdeuk",
+          "guilhwa",
+          "hantaecheol",
+          "jeonghwa",
+          "jackson",
+          "peurikit",
+          "choedalcheon"
+        ],
+        ["mahakyoung"]
+      ],
+      "sides_unclear": ["juro", "geomji"],
+      "sides_conf": "ai",
+      "sides_why": "백의 쪽이 경호대(마학영)와 교전. 최달천은 경호대 방패조 속에서 김신 편으로 돌아섬(배신). 주로·검지는 이 싸움 서술에서 편 불명"
     },
     {
       "id": "fight:hide_shingen",
@@ -16716,7 +17106,11 @@
         {"ep": 97, "i": 4, "name": "주먹 · 칼 동시 반격", "user": "shingen", "technique": null},
         {"ep": 97, "i": 5, "name": "가스 폭발 위협", "user": "hide", "technique": null},
         {"ep": 97, "i": 6, "name": "가스 폭발(라이터 점화)", "user": "hide", "technique": null}
-      ]
+      ],
+      "sides": [["hide", "yamamotokyoji", "hyeonseok", "pyoyoung"], ["shingen", "hayabusa"]],
+      "sides_unclear": ["goro"],
+      "sides_conf": "ai",
+      "sides_why": "히데·쿄지·현석·표영 대 신겐·하야부사. 고로는 서술 없어 편 불명"
     },
     {
       "id": "fight:juro_mahakyoung",
@@ -16957,7 +17351,11 @@
         {"ep": 96, "i": 9, "name": "손목 꺾어 무장 해제", "user": "juro", "technique": null},
         {"ep": 96, "i": 11, "name": "마학영 강타", "user": "mahakyoung", "technique": null},
         {"ep": 104, "i": 5, "name": "내리꽂기", "user": "mahakyoung", "technique": null}
-      ]
+      ],
+      "sides": [["mahakyoung"], ["juro", "eomji"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "회상 교전 — 마학영이 주로를 제압, 엄지(비밀 전력)는 주로 쪽으로 봄"
     },
     {
       "id": "fight:hyeonseok_shingen",
@@ -17041,7 +17439,11 @@
         {"ep": 97, "i": 7, "name": "낮은 돌진 베기", "user": "hyeonseok", "technique": null},
         {"ep": 97, "i": 8, "name": "몸통 부딪기 → 손목 잡아 총구 비키고 옆구리 찌르기", "user": "hyeonseok", "technique": null},
         {"ep": 97, "i": 9, "name": "꽂힌 칼 뽑아내기 · 반격 찌르기", "user": "shingen", "technique": null}
-      ]
+      ],
+      "sides": [["shingen"], ["hyeonseok"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "신겐이 현석을 베어 쓰러뜨림"
     },
     {
       "id": "fight:shingen",
@@ -17499,7 +17901,11 @@
         {"ep": 100, "i": 4, "name": "기다렸다 흘리기 반격", "user": "shingen", "technique": null},
         {"ep": 100, "i": 5, "name": "두 손 몽키스패너 휘두름", "user": "woojin", "technique": null},
         {"ep": 100, "i": 6, "name": "발 붙잡아 메치기", "user": "shingen", "technique": null}
-      ]
+      ],
+      "sides": [["shingen"], ["woojin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:jeongseono_hayabusa",
@@ -17533,7 +17939,11 @@
         }
       ],
       "mobs": [],
-      "moves": []
+      "moves": [],
+      "sides": [["hayabusa"], ["jeongseono"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:pyoyoung_hayabusa",
@@ -17699,7 +18109,11 @@
         {"ep": 102, "i": 3, "name": "공중 덮치기", "user": "hayabusa", "technique": null},
         {"ep": 102, "i": 4, "name": "부하 미끼 돌진 → 두 손 수평 베기", "user": "hayabusa", "technique": null},
         {"ep": 102, "i": 5, "name": "칼 밑 파고들어 목 긋기", "user": "pyoyoung", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung"], ["hayabusa"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:seungyeong_yakuzagrunt",
@@ -17733,7 +18147,11 @@
         }
       ],
       "mobs": [{"label": "야쿠자 졸개", "kind": "group", "faction": null, "count_text": null}],
-      "moves": []
+      "moves": [],
+      "sides": [["seungyeong"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:hide_powi",
@@ -17913,7 +18331,11 @@
         {"ep": 102, "i": 1, "name": "프라이팬 후려치기", "user": "yamamotokyoji", "technique": null},
         {"ep": 103, "i": 5, "name": "뛰어올라 얼굴 차기 + 카람빗 베기", "user": "pyoyoung", "technique": null},
         {"ep": 103, "i": 6, "name": "카람빗 연속 찌르기", "user": "pyoyoung", "technique": null}
-      ]
+      ],
+      "sides": [["hide", "pyoyoung", "yamamotokyoji"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "히데·표영·쿄지가 합동으로 중국 쪽 적들(무명)을 돌파"
     },
     {
       "id": "fight:kimshin_shingen_gyohoe",
@@ -18257,7 +18679,11 @@
         {"ep": 102, "i": 11, "name": "손도끼 탈취 · 목 아래 박기", "user": "kimshin", "technique": null},
         {"ep": 102, "i": 12, "name": "칼자루 정수리 찍기", "user": "shingen", "technique": null},
         {"ep": 102, "i": 13, "name": "장도리 못뽑이 꽂기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "woojin"], ["shingen"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 신겐과 재대결해 이김, 피우진은 김신 쪽(신겐이 피우진에게 힘을 썼다고 후회)"
     },
     {
       "id": "fight:hide_shingen_cheohyeong",
@@ -18321,7 +18747,11 @@
       "moves": [
         {"ep": 103, "i": 0, "name": "손도끼 내리찍기(쓰러진 적 처형)", "user": "hide", "technique": null},
         {"ep": 103, "i": 1, "name": "얼굴 움켜쥐기 · 머리 짓밟기", "user": "hide", "technique": null}
-      ]
+      ],
+      "sides": [["hide"], ["shingen"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:sainjin_taxi",
@@ -18443,7 +18873,11 @@
         {"ep": 107, "i": 4, "name": "SUV 충돌", "user": "sainjin", "technique": null},
         {"ep": 107, "i": 5, "name": "보닛 밟기 · 뒷유리 걷어차기", "user": "sainjin", "technique": null},
         {"ep": 111, "i": 6, "name": "전기 꼬챙이 귀 심문", "user": "sainjin", "technique": null}
-      ]
+      ],
+      "sides": [["sainjin"], ["kimtaehoon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "사인진이 김태훈을 택시까지 추적, 김태훈은 도주"
     },
     {
       "id": "fight:kimshin_mahakyoung",
@@ -20400,7 +20834,26 @@
         {"ep": 124, "i": 13, "name": "얼굴 걷어차기", "user": "kimshin", "technique": null},
         {"ep": 124, "i": 14, "name": "기둥에 몰아 찌르기", "user": "kimshin", "technique": null},
         {"ep": 126, "i": 0, "name": "칼 박아 넣기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [
+        [
+          "kimshin",
+          "hide",
+          "jackson",
+          "jintae",
+          "peurikit",
+          "pyoyoung",
+          "ratel",
+          "shamo",
+          "woojin",
+          "guilhwa",
+          "choedalcheon"
+        ],
+        ["mahakyoung"]
+      ],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신 일행이 마학영·경호대와 교전, 김신 승. 최달천은 이 시기 김신 쪽으로 봄(앞 싸움에서 돌아섬)"
     },
     {
       "id": "fight:gyeonghodae_bangpaejo",
@@ -20514,7 +20967,11 @@
         {"ep": 106, "i": 2, "name": "방패 돌진 · 방패 후려치기", "user": "kimshin", "technique": null},
         {"ep": 106, "i": 3, "name": "총구 맞대기 사격", "user": "kimshin", "technique": null},
         {"ep": 106, "i": 4, "name": "부하째 관통 사격", "user": "mahakyoung", "technique": null}
-      ]
+      ],
+      "sides": [["mahakyoung"], ["kimshin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "경호대 방패조(마학영 지휘)가 암살하러 전진, 김신이 방패를 뺏어 맞섬"
     },
     {
       "id": "fight:jiha1cheung_bokdo",
@@ -20756,7 +21213,11 @@
         {"ep": 112, "i": 9, "name": "얼굴 움켜쥐고 찌르기", "user": "kimshin", "technique": null},
         {"ep": 113, "i": 12, "name": "단검 목 베기 연속", "user": "kimshin", "technique": null},
         {"ep": 113, "i": 13, "name": "칼 쥔 주먹 잡기", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "choehyeokjin", "guilhwa", "jintae"], []],
+      "sides_unclear": ["eomji", "geomji"],
+      "sides_conf": "ai",
+      "sides_why": "김신 쪽이 지하 1층 복도에서 경호대(무명)와 교전. 엄지·검지는 서열 신경전만 있어 편 불명"
     },
     {
       "id": "fight:choeminuk_samhaphoe",
@@ -20873,7 +21334,11 @@
         {"ep": 109, "i": 5, "name": "관통 주먹", "user": "choeminuk", "technique": null},
         {"ep": 109, "i": 6, "name": "벽 · 유리창 머리 찧기", "user": "choeminuk", "technique": null},
         {"ep": 109, "i": 7, "name": "총구 물리기", "user": "choeminuk", "technique": null}
-      ]
+      ],
+      "sides": [["choeminuk"], ["wanggiryong", "jeouchang"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "최민욱이 삼합회 왕 회장(저우창 포함) 매복을 뚫고 왕 회장을 죽임"
     },
     {
       "id": "fight:blackmamba_bokdo2",
@@ -21447,7 +21912,11 @@
         {"ep": 115, "i": 8, "name": "낮은 돌진 카람빗", "user": "blackmamba", "technique": null},
         {"ep": 115, "i": 9, "name": "두 발 사격", "user": "hide", "technique": null},
         {"ep": 115, "i": 14, "name": "주먹 짓이기기", "user": "?:옆머리 민 턱수염 검은 정장 남자", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung", "hide"], ["blackmamba"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "표영이 블랙맘바와 교전, 히데는 표영 쪽으로 봄(서술 약함), 블랙맘바 사망"
     },
     {
       "id": "fight:hide_iwashiro",
@@ -21539,7 +22008,11 @@
         {"ep": 115, "i": 12, "name": "권총 들이대기 · 인질 선언", "user": "toishi", "technique": null},
         {"ep": 115, "i": 13, "name": "등 뒤 대각 베기", "user": "iwashiro", "technique": null},
         {"ep": 115, "i": 14, "name": "주먹 짓이기기", "user": "?:옆머리 민 턱수염 검은 정장 남자", "technique": null}
-      ]
+      ],
+      "sides": [["hide", "yamamotokyoji", "iwashiro"], ["toishi"]],
+      "sides_unclear": ["kayanuma"],
+      "sides_conf": "ai",
+      "sides_why": "이와시로가 히데를 떠본 뒤 매복자 토이시를 베고 히데를 받아들임(전환). 카야누마는 이와시로 쪽이나 히데에 반박해 편 불명"
     },
     {
       "id": "fight:yeouidoyuse_brawl",
@@ -21604,7 +22077,11 @@
       "moves": [
         {"ep": 117, "i": 0, "name": "전기봉 감전", "user": "?:전기봉 든 흰 셔츠 남자", "technique": null},
         {"ep": 117, "i": 1, "name": "막대 내려치기", "user": "?:전기봉 든 흰 셔츠 남자", "technique": null}
-      ]
+      ],
+      "sides": [["juwangil"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:kimtaehoon_jeongibongsanae",
@@ -21654,7 +22131,11 @@
         }
       ],
       "mobs": [{"label": "전기봉 사내", "kind": "single", "faction": null, "count_text": null}],
-      "moves": [{"ep": 117, "i": 3, "name": "전기봉 지지기", "user": "?:전기봉 사내", "technique": null}]
+      "moves": [{"ep": 117, "i": 3, "name": "전기봉 지지기", "user": "?:전기봉 사내", "technique": null}],
+      "sides": [["kimtaehoon"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:kimtaehoon_police",
@@ -21696,7 +22177,11 @@
         }
       ],
       "mobs": [{"label": "형사기동대", "kind": "single", "faction": null, "count_text": null}],
-      "moves": []
+      "moves": [],
+      "sides": [["kimtaehoon"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:woojin_risa",
@@ -21773,7 +22258,11 @@
       "moves": [
         {"ep": 118, "i": 0, "name": "포옹 중 장도리 기습", "user": "woojin", "technique": null},
         {"ep": 118, "i": 16, "name": "머리 가죽 사격", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin"], ["risa"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "피우진이 리사를 무력화, 복면 사내(무명)는 리사와도 맞서는 별도 세력으로 보임"
     },
     {
       "id": "fight:woojin_gunmen",
@@ -21835,7 +22324,11 @@
         {"ep": 118, "i": 1, "name": "장도리 얼굴 가격", "user": "woojin", "technique": null},
         {"ep": 118, "i": 2, "name": "의자 내려찍기", "user": "woojin", "technique": null},
         {"ep": 118, "i": 3, "name": "장도리로 총 걸어 빼앗기 · 인간 방패 응사", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:majunyeong_sombra",
@@ -21869,7 +22362,11 @@
         }
       ],
       "mobs": [{"label": "솜브라 카르텔 조직원들", "kind": "group", "faction": "sombrakareutel", "count_text": null}],
-      "moves": []
+      "moves": [],
+      "sides": [["majunyeong"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:sombrakareutel_seupgyeok",
@@ -21938,7 +22435,11 @@
         }
       ],
       "mobs": [{"label": "복면 반군 병사들", "kind": "group", "faction": null, "count_text": null}],
-      "moves": [{"ep": 121, "i": 3, "name": "복도 돌파 사격", "user": "mahakyoung", "technique": null}]
+      "moves": [{"ep": 121, "i": 3, "name": "복도 돌파 사격", "user": "mahakyoung", "technique": null}],
+      "sides": [["choeminuk", "mahakyoung", "majunyeong"], ["juliancastillo"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "최민욱이 카스티요를 죽이고, 마학영이 마준영을 구출"
     },
     {
       "id": "fight:gyeonghodae_gongmuwon",
@@ -21999,7 +22500,11 @@
         }
       ],
       "mobs": [{"label": "검은 정장 요원(짧은 머리 · 턱수염)", "kind": "single", "faction": null, "count_text": null}],
-      "moves": [{"ep": 124, "i": 6, "name": "칼 찌르고 총 빼앗아 쏘기", "user": "mahakyoung", "technique": null}]
+      "moves": [{"ep": 124, "i": 6, "name": "칼 찌르고 총 빼앗아 쏘기", "user": "mahakyoung", "technique": null}],
+      "sides": [["mahakyoung"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:hotelcastle_baekui",
@@ -22109,7 +22614,11 @@
         {"ep": 125, "i": 6, "name": "칼날 맨손 붙잡기", "user": "woojin", "technique": null},
         {"ep": 125, "i": 7, "name": "야구방망이 올려치기", "user": "yeominsu", "technique": null},
         {"ep": 125, "i": 8, "name": "칼 던지기(로 봄)", "user": "ipildo", "technique": null}
-      ]
+      ],
+      "sides": [["woojin", "ipildo", "yeominsu"], ["juro", "geomji"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "백의(피우진·이필도·여민수) 대 호텔 캐슬 쪽(주로·검지), 주로가 중단 선언"
     },
     {
       "id": "fight:misulgwan_seupgyeok",
@@ -22201,7 +22710,11 @@
       "moves": [
         {"ep": 127, "i": 0, "name": "덤프트럭 정문 돌파", "user": "baekui", "technique": null},
         {"ep": 127, "i": 1, "name": "소매 걷고 정면 주먹", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "eogwangdeuk"], ["woojin", "dohaksu"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "백의가 미술관을 습격하다 피우진이 1대1을 제안해 중단. 도학수는 피우진 쪽('배신자' 고함), 어광득은 김신 쪽"
     },
     {
       "id": "fight:choeminuk_sachaemuri",
@@ -22257,7 +22770,11 @@
       "moves": [
         {"ep": 127, "i": 2, "name": "가래침 · 옆발 걷어차기", "user": "choeminuk", "technique": null},
         {"ep": 127, "i": 3, "name": "붕대 감은 스패너 내려치기", "user": "choeminuk", "technique": null}
-      ]
+      ],
+      "sides": [["choeminuk"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:choeminuk_bulhwi",
@@ -22404,7 +22921,11 @@
         {"ep": 127, "i": 6, "name": "낮춰 스쳐 베기", "user": "?:불휘 출신 살수(곱슬 흑발 — 쫓겨남)", "technique": null},
         {"ep": 127, "i": 7, "name": "손목 잡고 박치기", "user": "choeminuk", "technique": null},
         {"ep": 127, "i": 8, "name": "들어 메치기", "user": "choeminuk", "technique": null}
-      ]
+      ],
+      "sides": [["choeminuk"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:choeminuk_gangminseong",
@@ -22540,7 +23061,11 @@
         {"ep": 128, "i": 2, "name": "버티고 맞받아치기(10 내주고 5)", "user": "choeminuk", "technique": null},
         {"ep": 128, "i": 3, "name": "젖히며 올려 차기", "user": "gangminseong", "technique": null},
         {"ep": 130, "i": 3, "name": "칼집 단검 휘두르기", "user": "gangminseong", "technique": null}
-      ]
+      ],
+      "sides": [["choeminuk"], ["gangminseong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "최민욱과 강민성의 대련(결착 없음)"
     },
     {
       "id": "fight:choeminuk_jeongmiso",
@@ -22665,7 +23190,11 @@
         {"ep": 128, "i": 5, "name": "깁스 다리 찌르기", "user": "?:불휘 출신 살수(곱슬 흑발 — 쫓겨남)", "technique": null},
         {"ep": 128, "i": 6, "name": "머리채 잡고 얼굴 긋기", "user": "?:불휘 출신 살수(곱슬 흑발 — 쫓겨남)", "technique": null},
         {"ep": 128, "i": 7, "name": "강제 손도장", "user": "?:모자 마스크 사채 무리 부하", "technique": null}
-      ]
+      ],
+      "sides": [["gwonsuchan", "choeminuk"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "권수찬이 최민욱을 노리는 줄무늬 살수(무명)를 막아섬. 권수찬 발언에 갈등 암시 있어 약간 불확실"
     },
     {
       "id": "fight:jumeok_seungbu",
@@ -23038,7 +23567,11 @@
         {"ep": 134, "i": 4, "name": "복부 앞차기", "user": "woojin", "technique": null},
         {"ep": 134, "i": 5, "name": "쓰러뜨리는 발차기 · 짓밟기", "user": "woojin", "technique": null},
         {"ep": 134, "i": 6, "name": "방망이 내리치기(로 봄)", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["woojin"]],
+      "sides_unclear": ["dojiung"],
+      "sides_conf": "ai",
+      "sides_why": "김신 대 피우진 1대1 승부, 김신 승. 도지웅은 이전에 사망 처리된 인물이라 위치 불명"
     },
     {
       "id": "fight:jangnyesikjang_sodong",
@@ -23116,7 +23649,11 @@
       "moves": [
         {"ep": 130, "i": 0, "name": "맞으며 웃기 · 주먹 붙잡기", "user": "choeminuk", "technique": null},
         {"ep": 130, "i": 1, "name": "매달린 무리 떨쳐 내기", "user": "choeminuk", "technique": null}
-      ]
+      ],
+      "sides": [["choeminuk"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:ilguk_daeguk",
@@ -23169,7 +23706,11 @@
         {"label": "금발 크루컷 검은 재킷 남자", "kind": "single", "faction": null, "count_text": null},
         {"label": "대국 쪽 습격자들", "kind": "group", "faction": "daeguk", "count_text": null}
       ],
-      "moves": []
+      "moves": [],
+      "sides": [["ilguk", "choeminuk"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "차일국이 최민욱의 도움으로 대국 쪽 습격자(무명)를 이김"
     },
     {
       "id": "fight:choeminuk_bandopa",
@@ -23214,7 +23755,11 @@
         }
       ],
       "mobs": [{"label": "반도파 회색 셔츠 거구", "kind": "single", "faction": "bandopa", "count_text": null}],
-      "moves": [{"ep": 130, "i": 2, "name": "얼굴 처박기", "user": "choeminuk", "technique": null}]
+      "moves": [{"ep": 130, "i": 2, "name": "얼굴 처박기", "user": "choeminuk", "technique": null}],
+      "sides": [["choeminuk"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:pacheon_hotelbokdo",
@@ -23270,7 +23815,11 @@
         {"label": "불휘 출신 살수(곱슬 흑발 — 쫓겨남)", "kind": "single", "faction": "bulhwi", "count_text": null},
         {"label": "불휘 출신 부하들", "kind": "group", "faction": "bulhwi", "count_text": null}
       ],
-      "moves": [{"ep": 131, "i": 0, "name": "장갑 주먹 정면 강타", "user": "choeminuk", "technique": null}]
+      "moves": [{"ep": 131, "i": 0, "name": "장갑 주먹 정면 강타", "user": "choeminuk", "technique": null}],
+      "sides": [["choeminuk", "gwonsuchan"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "젊은 최민욱이 불휘 출신 넷(무명)을 제압, 권수찬은 곁에서 지켜봄(약간 불확실)"
     },
     {
       "id": "fight:pacheon_daeguk",
@@ -23324,7 +23873,11 @@
         {"label": "파천 조직원들", "kind": "group", "faction": "pacheon", "count_text": null},
         {"label": "대국 조직원들", "kind": "group", "faction": "daeguk", "count_text": null}
       ],
-      "moves": [{"ep": 131, "i": 1, "name": "차일국 오른 주먹", "user": "ilguk", "technique": null}]
+      "moves": [{"ep": 131, "i": 1, "name": "차일국 오른 주먹", "user": "ilguk", "technique": null}],
+      "sides": [["ilguk", "gangminseong"], ["ssanggae"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "파천 쪽(차일국·강민성)이 대국 쪽 쌍개를 상대, 차일국이 쌍개를 이김"
     },
     {
       "id": "fight:chaehong_seupgyeok",
@@ -23467,7 +24020,11 @@
         {"ep": 131, "i": 4, "name": "맞주먹", "user": "wigilseong", "technique": null},
         {"ep": 131, "i": 5, "name": "높은 발차기 → 머리 처박기", "user": "choeminuk", "technique": null},
         {"ep": 131, "i": 7, "name": "올려치기 · 몸통 잡기", "user": "choeminuk", "technique": null}
-      ]
+      ],
+      "sides": [["choeminuk", "ilguk", "gwonsuchan"], ["baekganghoe", "wigilseong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "파천(최민욱 · 차일국)이 대국 채홍 본거지를 습격했으나 백강회 · 위길성(대국 1석)과 맞붙음, 권수찬은 같은 131화 파천 쪽으로 봄(이 묶음 묘사엔 안 보임)"
     },
     {
       "id": "fight:gwonsuchan_cheonildo",
@@ -23536,7 +24093,11 @@
         {"label": "안경 쓴 천일도 측근", "kind": "single", "faction": null, "count_text": null},
         {"label": "천일도 경호원들", "kind": "group", "faction": null, "count_text": null}
       ],
-      "moves": [{"ep": 131, "i": 6, "name": "차 막기 칼 · 사격", "user": "gwonsuchan", "technique": null}]
+      "moves": [{"ep": 131, "i": 6, "name": "차 막기 칼 · 사격", "user": "gwonsuchan", "technique": null}],
+      "sides": [["cheonildo"], ["gwonsuchan"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "천일도가 경호원과 함께 도주 성공, 권수찬이 추격"
     },
     {
       "id": "fight:pacheon_eunsincheo",
@@ -23589,7 +24150,11 @@
         }
       ],
       "mobs": [{"label": "모자 쓴 배달원", "kind": "single", "faction": null, "count_text": null}],
-      "moves": [{"ep": 131, "i": 8, "name": "배달원 위장 습격", "user": "?:모자 쓴 배달원", "technique": null}]
+      "moves": [{"ep": 131, "i": 8, "name": "배달원 위장 습격", "user": "?:모자 쓴 배달원", "technique": null}],
+      "sides": [["choeminuk", "dojiung", "gangminseong", "gwonsuchan"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "파천 은신처가 정필성 쪽 미상 습격자(컷 밖 저격)에 당함, 강민성은 뒤늦게 들어서 파천 쪽"
     },
     {
       "id": "fight:cheonildo_chaseupgyeok",
@@ -23729,7 +24294,11 @@
         {"ep": 132, "i": 3, "name": "무릎 저격", "user": "gangminseong", "technique": null},
         {"ep": 132, "i": 4, "name": "차창 돌입", "user": "choeminuk", "technique": null},
         {"ep": 132, "i": 6, "name": "공중 난입", "user": "choeminuk", "technique": null}
-      ]
+      ],
+      "sides": [["choeminuk", "dojiung", "gangminseong"], ["cheonildo", "jeongpilseong", "wigilseong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "파천(마스크 강민성 · 최민욱 · 지웅)이 천일도 차를 습격, 정필성 · 위길성(흰 셔츠로 봄)은 천일도 쪽 후속 부대"
     },
     {
       "id": "fight:pacheon_cheonildo",
@@ -23817,7 +24386,11 @@
       "moves": [
         {"ep": 132, "i": 7, "name": "칼 든 팔 붙잡아 막기", "user": "choeminuk", "technique": null},
         {"ep": 132, "i": 8, "name": "파고드는 몸통 치기", "user": "choeminuk", "technique": null}
-      ]
+      ],
+      "sides": [["choeminuk", "dojiung", "gangminseong", "ilguk"], ["cheonildo"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "파천이 천일도를 사찰에서 제압, 중간에 강민성이 죽이려 하고 최민욱 · 차일국이 막은 파천 내부 다툼이 있으나 편은 파천 대 천일도로 둠"
     },
     {
       "id": "fight:pacheon_talju",
@@ -23887,7 +24460,11 @@
       "moves": [
         {"ep": 133, "i": 0, "name": "정면 오른주먹", "user": "dojiung", "technique": null},
         {"ep": 133, "i": 1, "name": "단검 베기", "user": "gangminseong", "technique": null}
-      ]
+      ],
+      "sides": [["dojiung", "gangminseong"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "파천 조직원인 지웅 · 강민성이 마작방 등 이름 없는 상대를 습격"
     },
     {
       "id": "fight:gangminseong_choeminuk",
@@ -23992,7 +24569,11 @@
         {"ep": 133, "i": 2, "name": "올려 치는 주먹", "user": "gangminseong", "technique": null},
         {"ep": 133, "i": 3, "name": "단검 경고 베기", "user": "gangminseong", "technique": null},
         {"ep": 133, "i": 9, "name": "칼 쳐내고 손목 누르기", "user": "choeminuk", "technique": null}
-      ]
+      ],
+      "sides": [["choeminuk"], ["gangminseong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:gangminseong_seupgyeok",
@@ -24042,7 +24623,11 @@
         {"label": "백발 노인", "kind": "single", "faction": null, "count_text": null},
         {"label": "갈색 재킷 청년", "kind": "single", "faction": null, "count_text": null}
       ],
-      "moves": [{"ep": 134, "i": 1, "name": "칼 베기(습격)", "user": "?:녹색 코트 칼잡이", "technique": null}]
+      "moves": [{"ep": 134, "i": 1, "name": "칼 베기(습격)", "user": "?:녹색 코트 칼잡이", "technique": null}],
+      "sides": [["baekdochan"], ["gangminseong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "최민욱 쪽 자객(녹색 코트 백도찬)이 불휘 · 강민성을 습격, 강민성 사망"
     },
     {
       "id": "fight:kimshin_sainjin",
@@ -24087,7 +24672,11 @@
         }
       ],
       "mobs": [],
-      "moves": [{"ep": 134, "i": 7, "name": "묶인 적 어깨 찌르기", "user": "kimshin", "technique": null}]
+      "moves": [{"ep": 134, "i": 7, "name": "묶인 적 어깨 찌르기", "user": "kimshin", "technique": null}],
+      "sides": [["kimshin"], ["sainjin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:tenteuchon_seupgyeok",
@@ -24176,7 +24765,11 @@
         {"ep": 135, "i": 0, "name": "텐트 습격 베기", "user": "shire", "technique": null},
         {"ep": 135, "i": 1, "name": "입 틀어막고 짓누르기", "user": "shire", "technique": null},
         {"ep": 135, "i": 2, "name": "근접 사살(제압 상태)", "user": "shire", "technique": null}
-      ]
+      ],
+      "sides": [["shire", "ttolbae"], ["kimjaehoon", "kimyongseong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "샤이어(마스크) · 똘배(크루컷)가 텐트촌 김용성 · 김재훈 부자를 습격, 김용성 사살 · 김재훈 드럼통"
     },
     {
       "id": "fight:ratel_deseukeu",
@@ -24217,7 +24810,11 @@
         {"label": "스카프 두른 노파", "kind": "single", "faction": null, "count_text": null},
         {"label": "전대 리사", "kind": "single", "faction": null, "count_text": null}
       ],
-      "moves": [{"ep": 135, "i": 3, "name": "두 발 권총 던지기(강요된 상잔)", "user": "ratel", "technique": null}]
+      "moves": [{"ep": 135, "i": 3, "name": "두 발 권총 던지기(강요된 상잔)", "user": "ratel", "technique": null}],
+      "sides": [["ratel"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:pyoyoung_gohyeonsu",
@@ -24298,7 +24895,11 @@
         {"ep": 135, "i": 4, "name": "카람빗 목 겨누기", "user": "pyoyoung", "technique": null},
         {"ep": 135, "i": 5, "name": "허리 뒤 단검 빼앗기", "user": "?:빡빡머리 정장 남자", "technique": null},
         {"ep": 135, "i": 6, "name": "카람빗 위협", "user": "pyoyoung", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung"], ["gohyeonsu", "dakseuhunteu"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "표영(과 이름 없는 빡빡머리 부하)이 히데 전령 고현수를 제압, 닥스훈트는 고현수와 같이 쓰러진 쪽으로 봄(소속 직접 언급은 없음)"
     },
     {
       "id": "fight:gunter",
@@ -24366,7 +24967,11 @@
         {"ep": 2, "i": 1, "name": "인간 방패", "user": "kimshin", "technique": null},
         {"ep": 2, "i": 2, "name": "권총 손잡이 내려찍기", "user": "kimshin", "technique": null},
         {"ep": 2, "i": 3, "name": "군터 결정타(목 쪽 손 공격)", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["gunter"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 군터 경호원들을 쓰러뜨리고 군터를 처치"
     },
     {
       "id": "fight:kimhyeokju",
@@ -24470,7 +25075,11 @@
         {"ep": 3, "i": 6, "name": "팔꿈치 · 무릎 연타", "user": "kimshin", "technique": null},
         {"ep": 3, "i": 7, "name": "잭나이프 두 자루 2연 베기", "user": "kimhyeokju", "technique": null},
         {"ep": 3, "i": 8, "name": "박자 읽고 파고드는 주먹", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "jintae"], ["kimhyeokju"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신 · 진태가 DS 김혁주와 부하들을 제압"
     },
     {
       "id": "fight:woojin",
@@ -24563,7 +25172,11 @@
         {"ep": 4, "i": 5, "name": "파고들어 머리 타격(박치기로 보임)", "user": "woojin", "technique": null},
         {"ep": 4, "i": 6, "name": "깃 잡고 다리 쓸어 메치기", "user": "kimshin", "technique": null},
         {"ep": 4, "i": 7, "name": "멈춘 주먹(추격타 보류)", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "jintae"], ["woojin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "피우진이 김신 · 진태와 맞붙고 김신 우세로 끝남"
     },
     {
       "id": "fight:chasumin_gangmanjae",
@@ -24644,7 +25257,11 @@
       "moves": [
         {"ep": 5, "i": 1, "name": "재킷 감은 주먹 · 유리 뭉치 휘두르기(서술 이름)", "user": "chasumin", "technique": null},
         {"ep": 5, "i": 2, "name": "상체 젖혀 피한 뒤 보디블로(서술 이름)", "user": "gangmanjae", "technique": null}
-      ]
+      ],
+      "sides": [["gangmanjae"], ["chasumin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "차수민이 DS 부하와 강만재에게 맞섰다가 강만재에게 쓰러짐(김신 · 진태는 끝에 등장해 중단)"
     },
     {
       "id": "fight:jintae_gangmanjae",
@@ -24720,7 +25337,11 @@
         {"ep": 6, "i": 2, "name": "오른발 하이킥", "user": "jintae", "technique": null},
         {"ep": 6, "i": 3, "name": "칼 페인트", "user": "jintae", "technique": null},
         {"ep": 6, "i": 4, "name": "큰 휘두르기 · 스트레이트", "user": "gangmanjae", "technique": null}
-      ]
+      ],
+      "sides": [["jintae", "kimshin"], ["gangmanjae"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "서진태가 흉터 거구(강만재)를 쓰러뜨리고 김신은 부하를 처리"
     },
     {
       "id": "fight:yundeoksu_gangmanjae",
@@ -24763,7 +25384,11 @@
         }
       ],
       "mobs": [],
-      "moves": [{"ep": 6, "i": 5, "name": "명패 내려치기", "user": "yundeoksu", "technique": null}]
+      "moves": [{"ep": 6, "i": 5, "name": "명패 내려치기", "user": "yundeoksu", "technique": null}],
+      "sides": [["yundeoksu"], ["gangmanjae"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:pyechajang",
@@ -24930,7 +25555,11 @@
         {"ep": 9, "i": 6, "name": "정면 카운터 → 연타 → 올려치기", "user": "kimshin", "technique": null},
         {"ep": 10, "i": 0, "name": "칼 휘두르기(정수 쥐기)", "user": "kimseongjun", "technique": null},
         {"ep": 10, "i": 1, "name": "칼 쥔 손목 움켜쥐기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["kimseongjun"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 습격조와 칼 든 김성준을 제압"
     },
     {
       "id": "fight:dongyangpa",
@@ -25022,7 +25651,11 @@
         {"ep": 11, "i": 2, "name": "얼굴 잡고 무릎 차기(서술)", "user": "kimdaegeon", "technique": null},
         {"ep": 11, "i": 3, "name": "발목 잡아 끌어내리기(서술)", "user": "woojin", "technique": null},
         {"ep": 11, "i": 4, "name": "방망이 맨손 잡기(서술)", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin", "kimdaegeon"], ["yundeoksu"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "피우진 · 김대건이 동양파를 급습, 윤덕수는 끝에 나타나 중단시킴(동양파 보스)"
     },
     {
       "id": "fight:barista_buyer",
@@ -25079,7 +25712,11 @@
       "moves": [
         {"ep": 13, "i": 1, "name": "바리스타의 올려 치기", "user": "barista", "technique": null},
         {"ep": 13, "i": 2, "name": "한 손 목 조르기", "user": "barista", "technique": null}
-      ]
+      ],
+      "sides": [["barista"], ["kimdaegeon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "바리스타가 김대건 쪽 부하를 제압, 김대건은 맞서 싸우지 않고 굴복"
     },
     {
       "id": "fight:gangchangseok_kimdaegeon",
@@ -25114,7 +25751,11 @@
         }
       ],
       "mobs": [{"label": "스리피스 정장 · 색안경 남자(회상)", "kind": "single", "faction": null, "count_text": null}],
-      "moves": [{"ep": 13, "i": 3, "name": "강창석의 칼 베기", "user": "gangchangseok", "technique": null}]
+      "moves": [{"ep": 13, "i": 3, "name": "강창석의 칼 베기", "user": "gangchangseok", "technique": null}],
+      "sides": [["gangchangseok"], ["kimdaegeon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "회상 속 강창석이 김대건을 칼로 벰"
     },
     {
       "id": "fight:kimdaegeon_pyechajang",
@@ -25345,7 +25986,11 @@
         {"ep": 16, "i": 5, "name": "크게 휘두르는 오른 주먹(얼굴)", "user": "kimshin", "technique": null},
         {"ep": 16, "i": 6, "name": "마지막 돌진 맞받아 한 방", "user": "kimshin", "technique": null},
         {"ep": 16, "i": 9, "name": "칼 인질 위협", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "jintae"], ["kimdaegeon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 김대건과 일대일로 이김, 서진태는 김신 쪽"
     },
     {
       "id": "fight:gangchangseok_golmok",
@@ -25489,7 +26134,11 @@
         {"ep": 17, "i": 1, "name": "칼 연속 찌르기", "user": "gangchangseok", "technique": null},
         {"ep": 17, "i": 2, "name": "칼날 맨손 잡기", "user": "woojin", "technique": null},
         {"ep": 17, "i": 3, "name": "칼 잡은 뒤 얼굴 타격", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["gangchangseok"], ["woojin", "kimseongjun"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "강창석(과 부하)이 먼저 덮쳤고 피우진 · 김성준이 맞섬, 강창석이 스스로 물러남"
     },
     {
       "id": "fight:yundeoksu",
@@ -25615,7 +26264,11 @@
         {"ep": 20, "i": 3, "name": "윤덕수 오른 스트레이트", "user": "yundeoksu", "technique": null},
         {"ep": 20, "i": 4, "name": "카운터 연타(턱 · 쇄골 · 늑골 · 가슴 차기)", "user": "kimshin", "technique": null},
         {"ep": 20, "i": 5, "name": "덮쳐 넘어뜨리고 얼굴 처박기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["yundeoksu"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 윤덕수를 이김"
     },
     {
       "id": "fight:kimseongjun_ds",
@@ -25661,7 +26314,11 @@
         {"label": "김성준 쪽 무리", "kind": "group", "faction": null, "count_text": null},
         {"label": "DS 정장 무리", "kind": "group", "faction": null, "count_text": null}
       ],
-      "moves": []
+      "moves": [],
+      "sides": [["kimseongjun"], ["kimhyeokju"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김성준 일행이 DS 정장 무리(김혁주로 봄)를 뒤에서 들이침"
     },
     {
       "id": "fight:gangchangseok_kimdaegeon2",
@@ -25770,7 +26427,11 @@
         {"ep": 19, "i": 4, "name": "손목 잡고 얼굴 치기", "user": "kimdaegeon", "technique": null},
         {"ep": 19, "i": 5, "name": "칼 쥔 채 하이킥", "user": "gangchangseok", "technique": null},
         {"ep": 20, "i": 6, "name": "칼 떨구고 한 방에 처박기(김대건 대 강창석 결정타)", "user": "kimdaegeon", "technique": null}
-      ]
+      ],
+      "sides": [["kimdaegeon", "woojin"], ["gangchangseok"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "피우진이 오토바이로 강창석을 들이받아 김대건과 합세, 김대건 승"
     },
     {
       "id": "fight:woojin_ds",
@@ -25847,7 +26508,11 @@
       "moves": [
         {"ep": 18, "i": 3, "name": "난전 붙잡기", "user": "woojin", "technique": null},
         {"ep": 19, "i": 2, "name": "붙잡고 박치기(로 보임)", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:jintae_ds",
@@ -25920,7 +26585,11 @@
       "moves": [
         {"ep": 19, "i": 0, "name": "낮게 파고들어 옆구리 베기", "user": "jintae", "technique": null},
         {"ep": 19, "i": 1, "name": "뛰어넘으며 베기", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["jintae"], ["gangmanjae", "kimhyeokju"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "서진태가 DS 무리와 강만재 · 김혁주를 제압"
     },
     {
       "id": "fight:namgucheongnyeonhoe_kimdaegeon",
@@ -25958,7 +26627,11 @@
         {"label": "김대건 쪽 정장 무리", "kind": "group", "faction": null, "count_text": null},
         {"label": "청년회 무리", "kind": "group", "faction": null, "count_text": null}
       ],
-      "moves": []
+      "moves": [],
+      "sides": [],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 없음(기계)"
     },
     {
       "id": "fight:iseul",
@@ -26012,7 +26685,11 @@
       "moves": [
         {"ep": 22, "i": 1, "name": "?:이슬 돌진 큰 주먹", "user": "iseul", "technique": null},
         {"ep": 22, "i": 2, "name": "?:김신 반격 한 방(생략)", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["iseul"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:haseong_lobby",
@@ -26168,7 +26845,11 @@
         {"ep": 28, "i": 2, "name": "역수 내리꽂기", "user": "jintae", "technique": null},
         {"ep": 28, "i": 3, "name": "회전 베기", "user": "jintae", "technique": null},
         {"ep": 28, "i": 4, "name": "양팔 머리 낚아채 메다꽂기", "user": "iseul", "technique": null}
-      ]
+      ],
+      "sides": [["iseul", "insu", "jintae"], ["hwangbomincheol"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이슬 · 인수(남구청년회)와 진태가 하성 로비 습격, 황보민철은 하성 쪽 부장으로 보나 이 묶음 묘사엔 안 나옴(추정)"
     },
     {
       "id": "fight:namgunghyuk",
@@ -26396,7 +27077,11 @@
         {"ep": 29, "i": 7, "name": "맞교환", "user": "namgunghyuk", "technique": null},
         {"ep": 29, "i": 8, "name": "팔 가드", "user": "woojin", "technique": null},
         {"ep": 29, "i": 9, "name": "너클 오른 훅", "user": "namgunghyuk", "technique": null}
-      ]
+      ],
+      "sides": [["namgunghyuk"], ["woojin", "kimdaegeon", "kimshin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "남궁혁이 김신 · 피우진 · 김대건 합공을 이기고 피우진을 쓰러뜨림"
     },
     {
       "id": "fight:gyeonghotim",
@@ -26528,7 +27213,11 @@
         {"ep": 26, "i": 9, "name": "엇갈려 받아치고 베기", "user": "kimshin", "technique": null},
         {"ep": 26, "i": 10, "name": "낮게 휩쓸어 베기", "user": "kimshin", "technique": null},
         {"ep": 26, "i": 11, "name": "눈길 위압", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["ojiin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 대표실 특별 경호팀을 쓸고, 비서 오지인은 칼을 내려놓고 비켜섬(경호팀 쪽으로 둠)"
     },
     {
       "id": "fight:jintae_hwangbomincheol",
@@ -26610,7 +27299,11 @@
         {"ep": 26, "i": 4, "name": "내리찍기 받아 옆구리 가르기", "user": "jintae", "technique": null},
         {"ep": 27, "i": 3, "name": "왼다리 미끼(중심 무너지는 척)", "user": "hwangbomincheol", "technique": null},
         {"ep": 27, "i": 4, "name": "노리는 척 → 옆구리 찌르기 · 위에서 내리치기", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["jintae"], ["hwangbomincheol"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:gusanghun",
@@ -26673,7 +27366,11 @@
         {"ep": 27, "i": 0, "name": "숙여 피하고 카운터 스트레이트", "user": "kimshin", "technique": null},
         {"ep": 27, "i": 1, "name": "파이프 든 상대 품으로 들어가 몸통 치기", "user": "kimshin", "technique": null},
         {"ep": 27, "i": 2, "name": "앉은 상대 얼굴 걷어차기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["gusanghun", "kimjaehoon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 구상훈 · 김재훈 · 학생들과 싸워 이김"
     },
     {
       "id": "fight:kimjaehoon",
@@ -26716,7 +27413,11 @@
         }
       ],
       "mobs": [{"label": "반 학생 무리", "kind": "group", "faction": null, "count_text": null}],
-      "moves": []
+      "moves": [],
+      "sides": [["kimshin"], ["kimjaehoon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 김재훈을 먼저 쳤고 반 학생 무리가 김신을 집단 구타(무리는 이름 없음)"
     },
     {
       "id": "fight:sintaejin_gosokdoro",
@@ -26781,7 +27482,11 @@
       "moves": [
         {"ep": 29, "i": 0, "name": "달걀 · 봉지 투척", "user": "?:오토바이 무리(헬멧 · 복면)", "technique": null},
         {"ep": 29, "i": 1, "name": "검은 차 측면 밀어붙이기", "user": "chasumin", "technique": null}
-      ]
+      ],
+      "sides": [["chasumin"], ["sintaejin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "차수민이 탄 검은 차와 오토바이 무리(김신 쪽 지연 작전)가 신태진 벤틀리를 막음"
     },
     {
       "id": "fight:kimjaehoon_daepyosil",
@@ -26861,7 +27566,11 @@
         {"ep": 29, "i": 3, "name": "장전 중 권총 빼앗기", "user": "kimshin", "technique": null},
         {"ep": 29, "i": 4, "name": "헛스윙 받아치기 · 다리 차기", "user": "kimshin", "technique": null},
         {"ep": 29, "i": 5, "name": "창 쏘아 깨기 · 걷어차 떨어뜨리기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["kimjaehoon", "gangchangseok"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 대표실에서 김재훈을 제압, 강창석은 김재훈 쪽이나 달아남"
     },
     {
       "id": "fight:kimshin_namgunghyuk",
@@ -26927,7 +27636,11 @@
         {"ep": 29, "i": 10, "name": "복도 돌진 · 낮은 맞이 자세", "user": "kimshin", "technique": null},
         {"ep": 30, "i": 0, "name": "좌우 잔상 페인트 · 낮은 돌파(서술 이름)", "user": "kimshin", "technique": null},
         {"ep": 30, "i": 1, "name": "너클 훅(원 궤적)", "user": "namgunghyuk", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["namgunghyuk"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 남궁혁과 정면 교전 없이 따돌림"
     },
     {
       "id": "fight:kimshin_sintaejin",
@@ -27078,7 +27791,11 @@
         {"ep": 32, "i": 3, "name": "메쳐 박고 얼굴 주먹", "user": "kimshin", "technique": null},
         {"ep": 32, "i": 4, "name": "쓰러진 채 올려 베기 → 굴러 빠지기", "user": "sintaejin", "technique": null},
         {"ep": 32, "i": 5, "name": "마무리 찌르기(급소 피함)", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["sintaejin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:baekdochan_deungyong",
@@ -27133,7 +27850,11 @@
           "technique": null,
           "technique_guess": {"id": "baek_sidekick", "conf": "low", "why": "높은 발차기, 옆차기 불분명"}
         }
-      ]
+      ],
+      "sides": [["baekdochan"], []],
+      "sides_unclear": ["sintaejin"],
+      "sides_conf": "ai",
+      "sides_why": "백도찬이 등용 반대자 · 정장 무리를 개인 힘으로 제압, 신태진은 쓰러진 남자(로 봄)로만 나와 어느 편인지 불명"
     },
     {
       "id": "fight:komodo_snapper_mafia",
@@ -27187,7 +27908,11 @@
         {"label": "러시아 마피아 조직원들", "kind": "group", "faction": null, "count_text": null},
         {"label": "베이지 코트 마피아 보스", "kind": "single", "faction": null, "count_text": null}
       ],
-      "moves": [{"ep": 34, "i": 0, "name": "미니건 난사", "user": "snapper", "technique": null}]
+      "moves": [{"ep": 34, "i": 0, "name": "미니건 난사", "user": "snapper", "technique": null}],
+      "sides": [["komodo", "snapper"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "코모도 · 스내퍼가 러시아 마피아를 둘이 습격"
     },
     {
       "id": "fight:baekdochan_snapper",
@@ -27225,7 +27950,11 @@
         }
       ],
       "mobs": [],
-      "moves": []
+      "moves": [],
+      "sides": [["baekdochan"], ["snapper"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:baekdochan_komodo",
@@ -27326,7 +28055,11 @@
         {"ep": 35, "i": 3, "name": "무릎 차기 · 손으로 막기", "user": "komodo", "technique": null},
         {"ep": 35, "i": 4, "name": "칼날을 손으로 쳐서 궤도 꺾기(코모도: '티그로의…')", "user": "baekdochan", "technique": null},
         {"ep": 35, "i": 5, "name": "얼굴 연타 → 하이킥 → 공중 내려찍기", "user": "baekdochan", "technique": null}
-      ]
+      ],
+      "sides": [["baekdochan"], ["komodo"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:woojin_daeryeon",
@@ -27434,7 +28167,11 @@
         {"ep": 36, "i": 2, "name": "무리한 하이킥 · 공중 회전차기", "user": "woojin", "technique": null},
         {"ep": 36, "i": 3, "name": "낮은 몸통 카운터 → 연타", "user": "kimshin", "technique": null},
         {"ep": 36, "i": 4, "name": "돌아서며 카운터", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["woojin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:iseul_guilhwa",
@@ -27485,7 +28222,11 @@
         }
       ],
       "mobs": [],
-      "moves": []
+      "moves": [],
+      "sides": [["iseul"], ["guilhwa"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "주먹 교환 없는 대치와 설득, 이슬이 구일화를 설득해 합류시킴"
     },
     {
       "id": "fight:cheongju_cell",
@@ -27531,7 +28272,11 @@
       "moves": [
         {"ep": 38, "i": 0, "name": "'왕독필 식구 1번' 이름 대며 주먹", "user": "guilhwa", "technique": null},
         {"ep": 38, "i": 1, "name": "머리 내리눌러 꿇리기", "user": "iseul", "technique": null}
-      ]
+      ],
+      "sides": [["iseul"], ["guilhwa"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:cheongju_shower",
@@ -27587,7 +28332,11 @@
         {"ep": 38, "i": 3, "name": "칼 밑으로 파고들어 쳐내고 메치기", "user": "guilhwa", "technique": null},
         {"ep": 38, "i": 4, "name": "뒤 노린 주먹 잡아채기", "user": "iseul", "technique": null},
         {"ep": 38, "i": 5, "name": "칼 맞고 되받는 주먹", "user": "guilhwa", "technique": null}
-      ]
+      ],
+      "sides": [["iseul", "guilhwa"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이슬 · 구일화가 샤워장 습격 무리를 함께 상대함"
     },
     {
       "id": "fight:woojin_vasily",
@@ -27712,7 +28461,11 @@
         {"ep": 41, "i": 3, "name": "숙여 들어가 앞차기", "user": "woojin", "technique": null},
         {"ep": 41, "i": 4, "name": "눈앞 손가락 위협 + 주먹", "user": "woojin", "technique": null},
         {"ep": 41, "i": 5, "name": "태클 막는 내리찍기 → 뛰어 넘으며 머리 내리꽂기", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin"], ["vasily"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:kimdaegeon_daeryeon",
@@ -27785,7 +28538,11 @@
       "moves": [
         {"ep": 42, "i": 0, "name": "스텝과 엇박으로 들어오는 칼날(백도찬 특기 흉내)", "user": "sintaejin", "technique": "offbeat"},
         {"ep": 42, "i": 1, "name": "눈가리개 상태 파고들기 반격", "user": "kimdaegeon", "technique": null}
-      ]
+      ],
+      "sides": [["sintaejin"], ["kimdaegeon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "신태진 대 김대건 훈련 대련"
     },
     {
       "id": "fight:orakssil",
@@ -27823,7 +28580,11 @@
         }
       ],
       "mobs": [{"label": "쓰러진 표영 패거리", "kind": "group", "faction": null, "count_text": null}],
-      "moves": []
+      "moves": [],
+      "sides": [["kimshin", "jintae"], ["seungyeong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신 · 서진태가 표영 패거리(승영 포함)를 쓰러뜨림, 컷은 결과만"
     },
     {
       "id": "fight:jintae_pyoyoung",
@@ -27953,7 +28714,11 @@
         {"ep": 43, "i": 2, "name": "서진태 반격 발차기", "user": "jintae", "technique": null},
         {"ep": 43, "i": 3, "name": "신발 날리기 기만 회전차기", "user": "pyoyoung", "technique": null},
         {"ep": 43, "i": 4, "name": "명치 치기 → 후드째 잡아 슬롯머신 처박기", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["jintae", "kimshin"], ["pyoyoung"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "표영이 김신 쪽에 덤볐고 서진태가 상대, 김신은 지켜보다 말림"
     },
     {
       "id": "fight:kimshin_pyoyoungpae",
@@ -27996,7 +28761,11 @@
         {"label": "하늘색 셔츠 갈색 머리", "kind": "single", "faction": null, "count_text": null},
         {"label": "쓰러진 표영 패거리", "kind": "group", "faction": null, "count_text": null}
       ],
-      "moves": []
+      "moves": [],
+      "sides": [["kimshin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:bulhwi",
@@ -28096,7 +28865,11 @@
         {"ep": 44, "i": 1, "name": "김신 주먹 반격(가면 깨기)", "user": "kimshin", "technique": null},
         {"ep": 44, "i": 2, "name": "버킷햇 쌍칼 베기", "user": "namilho", "technique": null},
         {"ep": 44, "i": 3, "name": "서진태 팔 잡고 무릎 · 목에 칼", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "jintae"], ["namilho"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "불휘 시험 — 서진태가 칼잡이 남일호(버킷햇)와, 김신이 가면 둘과 겨룸"
     },
     {
       "id": "fight:pyoyoung_bulgom",
@@ -28203,7 +28976,11 @@
         {"ep": 46, "i": 1, "name": "앞차기(얼굴)", "user": "bulgom", "technique": null},
         {"ep": 46, "i": 2, "name": "벽 차고 넘기 + 날아차기", "user": "pyoyoung", "technique": null},
         {"ep": 47, "i": 1, "name": "(서술) 멱살 잡고 주먹", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["seungyeong", "bulgom"], ["pyoyoung", "jintae"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "모승규 패거리(승영 · 불곰)가 표영을 잡으려다 실패, 서진태가 표영을 구출"
     },
     {
       "id": "fight:pyoseong_odohwa",
@@ -28246,7 +29023,11 @@
         }
       ],
       "mobs": [],
-      "moves": [{"ep": 47, "i": 2, "name": "(서술) 칼 든 팔 뻗어 찌르기", "user": "odohwa", "technique": null}]
+      "moves": [{"ep": 47, "i": 2, "name": "(서술) 칼 든 팔 뻗어 찌르기", "user": "odohwa", "technique": null}],
+      "sides": [["odohwa"], ["pyoseong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:jintae_gangchangseok",
@@ -28313,7 +29094,11 @@
         {"label": "콧수염 칼잡이", "kind": "single", "faction": null, "count_text": null},
         {"label": "칼잡이들", "kind": "group", "faction": null, "count_text": null}
       ],
-      "moves": [{"ep": 48, "i": 0, "name": "(서술) 목에 겨눈 칼 빼앗아 베기", "user": "jintae", "technique": null}]
+      "moves": [{"ep": 48, "i": 0, "name": "(서술) 목에 겨눈 칼 빼앗아 베기", "user": "jintae", "technique": null}],
+      "sides": [["jintae"], ["gangchangseok"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "서진태가 칼잡이 일행을 제압, 강창석은 같은 일행 쪽이나 싸우지 않고 도주"
     },
     {
       "id": "fight:gangchangseok_ambush",
@@ -28385,7 +29170,11 @@
         {"ep": 57, "i": 0, "name": "스틸레토 찌르기(멈춤)", "user": "namilho", "technique": null},
         {"ep": 57, "i": 1, "name": "얼굴 주먹", "user": "namilho", "technique": null},
         {"ep": 57, "i": 2, "name": "머리 돌려차기", "user": "namilho", "technique": null}
-      ]
+      ],
+      "sides": [["namilho"], ["gangchangseok"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:pinout_raid",
@@ -28450,7 +29239,11 @@
         {"label": "대머리 씨름꾼(빨강 · 검정 트랙 재킷)", "kind": "single", "faction": null, "count_text": null},
         {"label": "갈색 머리 씨름꾼(검은 셔츠)", "kind": "single", "faction": null, "count_text": null}
       ],
-      "moves": [{"ep": 48, "i": 2, "name": "(서술) 점프 방망이 내려치기", "user": "?:핀아웃 대원(초록 하이탑)", "technique": null}]
+      "moves": [{"ep": 48, "i": 2, "name": "(서술) 점프 방망이 내려치기", "user": "?:핀아웃 대원(초록 하이탑)", "technique": null}],
+      "sides": [["pyoyoung"], []],
+      "sides_unclear": ["seojeongchi"],
+      "sides_conf": "ai",
+      "sides_why": "표영이 핀아웃 대원(이름 없음)과 함께 모승규 부하를 급습, 서정치는 이 묶음 묘사에 안 보여 소속 불명"
     },
     {
       "id": "fight:pyoyoung_ssireumdan",
@@ -28511,7 +29304,11 @@
       "moves": [
         {"ep": 48, "i": 3, "name": "(서술) 왼발 도약 · 잡힘을 지지대로 삼은 공중 차기", "user": "pyoyoung", "technique": null},
         {"ep": 48, "i": 4, "name": "(서술) 피하지 않고 맞받아치기", "user": "pyoyoung", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:kimshin_bulgom",
@@ -28583,7 +29380,11 @@
         {"ep": 48, "i": 5, "name": "(서술) 원펀치 어퍼컷", "user": "kimshin", "technique": null},
         {"ep": 49, "i": 0, "name": "(서술) 보지 않고 칼 손목 잡기", "user": "kimshin", "technique": null},
         {"ep": 49, "i": 1, "name": "(서술) 팔다리만 골라 부수기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["bulgom"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신이 불곰과 모승규 부하들을 전멸시킴"
     },
     {
       "id": "fight:pyoyoung_moseunggyu",
@@ -28718,7 +29519,11 @@
         {"ep": 52, "i": 3, "name": "누운 채 차올리기", "user": "pyoyoung", "technique": null},
         {"ep": 52, "i": 4, "name": "물건으로 머리 깨기", "user": "pyoyoung", "technique": null},
         {"ep": 52, "i": 5, "name": "뛰어 무릎", "user": "pyoyoung", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung"], ["moseunggyu"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "표영이 모승규를 KO시킴"
     },
     {
       "id": "fight:kimshin_odohwa",
@@ -28887,7 +29692,11 @@
         {"ep": 51, "i": 3, "name": "승표 던지기", "user": "shire", "technique": null},
         {"ep": 51, "i": 4, "name": "사슬 잡아 빼앗기 · 단도 내려찍기", "user": "masa", "technique": null},
         {"ep": 51, "i": 5, "name": "칼 던지고 낙하 베기 → 공중 회전 베기", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "shire", "jintae"], ["odohwa", "masa"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신 · 샤이어(승표) · 서진태가 오도화 · 마사와 교전, 시간 벌고 철수"
     },
     {
       "id": "fight:monkey_bimilchanggo",
@@ -28941,7 +29750,11 @@
         {"label": "민머리 밀수꾼(녹색 조끼)", "kind": "single", "faction": null, "count_text": null},
         {"label": "밀수꾼 무리(소총 · 칼)", "kind": "group", "faction": null, "count_text": null}
       ],
-      "moves": [{"ep": 51, "i": 6, "name": "천장 낙하 기습", "user": "monkey", "technique": null}]
+      "moves": [{"ep": 51, "i": 6, "name": "천장 낙하 기습", "user": "monkey", "technique": null}],
+      "sides": [["barista", "monkey"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "몽키가 습격하고 바리스타가 두목을 처형, 밀수꾼 무리가 상대(이름 없음)"
     },
     {
       "id": "fight:odohwa_moseunggyu",
@@ -28976,7 +29789,11 @@
         }
       ],
       "mobs": [],
-      "moves": [{"ep": 52, "i": 6, "name": "몽둥이 내려치기", "user": "odohwa", "technique": null}]
+      "moves": [{"ep": 52, "i": 6, "name": "몽둥이 내려치기", "user": "odohwa", "technique": null}],
+      "sides": [["odohwa"], ["moseunggyu"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:pyoyoung_odohwa",
@@ -29054,7 +29871,11 @@
         {"ep": 53, "i": 1, "name": "멱살 잡고 치기(모승규 흉내)", "user": "pyoyoung", "technique": null},
         {"ep": 53, "i": 2, "name": "사선 칼 베기", "user": "?:오도화 수하(밝은 갈색 머리)", "technique": null},
         {"ep": 53, "i": 3, "name": "손도끼 내려치기 — 멈춤", "user": "odohwa", "technique": null}
-      ]
+      ],
+      "sides": [["odohwa"], ["pyoyoung"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "오도화가 수하를 시켜 표영을 시험(오도화 쪽이 먼저 공격), 표영 시험 통과"
     },
     {
       "id": "fight:ojiin_kimdaegeon",
@@ -29095,7 +29916,11 @@
       "moves": [
         {"ep": 54, "i": 0, "name": "순간 발도 수평 베기", "user": "ojiin", "technique": null},
         {"ep": 54, "i": 1, "name": "동료 피신 + 숙여 피하기", "user": "kimdaegeon", "technique": null}
-      ]
+      ],
+      "sides": [["ojiin"], ["kimdaegeon", "chasumin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "오지인이 시험 삼아 벴고 김대건이 차수민을 피신시키며 피함"
     },
     {
       "id": "fight:woojin_keurisa",
@@ -29262,7 +30087,11 @@
         {"ep": 56, "i": 5, "name": "공중에서 몸 틀어 착지", "user": "keurisa", "technique": null},
         {"ep": 56, "i": 6, "name": "크리사의 살수(목젖 노리는 손)", "user": "keurisa", "technique": null},
         {"ep": 56, "i": 8, "name": "피우진 오른 스트레이트", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["keurisa"], ["woojin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "크리사가 케이지에서 피우진을 압도, 메드베디가 중단(판정은 피우진 패배)"
     },
     {
       "id": "fight:jintae_daeryeon",
@@ -29335,7 +30164,11 @@
         },
         {"ep": 58, "i": 3, "name": "손목 쳐내기 → 돌려차기", "user": "kimshin", "technique": null},
         {"ep": 58, "i": 4, "name": "큰 가로 베기", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["jintae"], ["kimshin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "서진태가 먼저 돌진한 훈련 대련, 김신 우세"
     },
     {
       "id": "fight:jintae_daeryeon2",
@@ -29453,7 +30286,11 @@
         {"ep": 59, "i": 5, "name": "등 넘어 목 뒤 내리찍기", "user": "jintae", "technique": null},
         {"ep": 59, "i": 6, "name": "가슴 밀어내기", "user": "kimshin", "technique": null},
         {"ep": 59, "i": 7, "name": "재킷 찢기 · 손끝 돌려 역수 찌르기", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["jintae"], ["kimshin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "서진태가 쌍단검으로 덤빈 훈련 대련, 김신 일방 우세"
     },
     {
       "id": "fight:choedalcheon_warmup",
@@ -29496,7 +30333,11 @@
         }
       ],
       "mobs": [{"label": "흰 셔츠 부하들(골드)", "kind": "group", "faction": "gold", "count_text": null}],
-      "moves": [{"ep": 59, "i": 8, "name": "머리 잡아 내리꽂기", "user": "choedalcheon", "technique": null}]
+      "moves": [{"ep": 59, "i": 8, "name": "머리 잡아 내리꽂기", "user": "choedalcheon", "technique": null}],
+      "sides": [["choedalcheon"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:ryujihak_changgo",
@@ -29645,7 +30486,11 @@
         {"ep": 62, "i": 1, "name": "돌진 베기", "user": "sintaejin", "technique": null},
         {"ep": 62, "i": 2, "name": "공중 내리긋기 · 보이지 않는 한 수", "user": "ryujihak", "technique": null},
         {"ep": 62, "i": 3, "name": "칼 돌려 잡기", "user": "ryujihak", "technique": null}
-      ]
+      ],
+      "sides": [["ryujihak"], ["kimdaegeon", "sintaejin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "류지학이 김대건 · 신태진을 한 합에 쓰러뜨림"
     },
     {
       "id": "fight:sintaejin_barista",
@@ -29853,7 +30698,11 @@
         {"ep": 65, "i": 4, "name": "맨손 칼날 잡기", "user": "barista", "technique": null},
         {"ep": 65, "i": 5, "name": "무아지경 칼", "user": "sintaejin", "technique": null},
         {"ep": 65, "i": 6, "name": "확인 사살 3연발", "user": "barista", "technique": null}
-      ]
+      ],
+      "sides": [["barista", "monkey"], ["sintaejin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "바리스타 · 몽키(와 마을 사람들)가 신태진을 추격해 쓰러뜨림"
     },
     {
       "id": "fight:sintaejin_barista_russia",
@@ -29915,7 +30764,11 @@
       "moves": [
         {"ep": 64, "i": 1, "name": "팔 쳐올리기 → 뒤잡아 총구 대기", "user": "sintaejin", "technique": null},
         {"ep": 64, "i": 2, "name": "접이식 칼 펴기", "user": "barista", "technique": null}
-      ]
+      ],
+      "sides": [["barista"], ["sintaejin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "러시아 회상, 바리스타가 칼을 펴며 먼저 움직이고 서로 급소를 잡은 채 중단"
     },
     {
       "id": "fight:iseul_ttolbae",
@@ -30015,7 +30868,11 @@
         {"ep": 67, "i": 2, "name": "공중 잡아 메치기", "user": "iseul", "technique": null},
         {"ep": 67, "i": 3, "name": "팔뚝 교차 막기(큐 부러뜨림)", "user": "iseul", "technique": null},
         {"ep": 67, "i": 4, "name": "'김대건' 펀치", "user": "iseul", "technique": null}
-      ]
+      ],
+      "sides": [["iseul"], ["ttolbae"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:woojin_ballerino",
@@ -30083,7 +30940,11 @@
         {"ep": 69, "i": 2, "name": "권총으로 마체테 받아 흘리기", "user": "woojin", "technique": null},
         {"ep": 69, "i": 3, "name": "달리며 미끄러지기 양손 사격", "user": "woojin", "technique": null},
         {"ep": 69, "i": 4, "name": "멱(턱) 잡아 메다꽂기", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:woojin_josimopeu",
@@ -30198,7 +31059,11 @@
         {"ep": 71, "i": 0, "name": "주워 든 쌍권총 교차 사격", "user": "blackmamba", "technique": null},
         {"ep": 71, "i": 1, "name": "무기 탈취", "user": "blackmamba", "technique": null},
         {"ep": 71, "i": 2, "name": "샹들리에 스윙 사격", "user": "blackmamba", "technique": null}
-      ]
+      ],
+      "sides": [["blackmamba", "woojin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "피우진과 블랙맘바가 조시모프 갱단(이름 없음)을 소탕, 블랙맘바가 단독 처리"
     },
     {
       "id": "fight:p1_kimshin_gustav",
@@ -30225,12 +31090,12 @@
       },
       "finisher": null,
       "gaps": [],
-      "alias_ids": ["fight:kimshin_gustav"],
+      "alias_ids": [],
       "events": ["beat:gustav"],
       "src": "1부 판독 · 종합(work/pilot_p1 · synth/series_p1.json) · 1부 canon 승격(work/pilot_p1/canon_p1.py — 2026-11-06 · 사용자 답52)",
       "conf": "ai",
       "provisional": true,
-      "note": "1부 판독 id fight:kimshin_gustav — 2부 같은 id 와 겹쳐 p1_ 를 붙임(2026-11-06)",
+      "note": "1부 판독 id fight:kimshin_gustav — 2부 같은 id 와 겹쳐 p1_ 를 붙임(2026-11-06) · 옛 id 는 2부 대결이라 alias_ids 에 넣지 않음(castle_srpg 요청 [별칭] 2026-11-10)",
       "phase_list": [
         {
           "n": 1,
@@ -30417,7 +31282,11 @@
         {"ep": 73, "i": 3, "name": "늑골로 받기(일부러 맞기 의심)", "user": "kimshin", "technique": null},
         {"ep": 73, "i": 4, "name": "들쳐 메어 내던지기", "user": "gustav", "technique": null},
         {"ep": 74, "i": 2, "name": "칼 거두기", "user": "kimshin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin"], ["gustav"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신 대 구스타프 선착장 · 물 · 나룻배 교전"
     },
     {
       "id": "fight:kimshin_cage",
@@ -30460,7 +31329,11 @@
         }
       ],
       "mobs": [{"label": "케이지 상대(민머리 짙은 피부 근육질)", "kind": "single", "faction": null, "count_text": null}],
-      "moves": []
+      "moves": [],
+      "sides": [["kimshin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:woojin_alleksya_home",
@@ -30529,7 +31402,11 @@
         {"ep": 74, "i": 3, "name": "손목 잡아 등 뒤로 팔 꺾기", "user": "woojin", "technique": null},
         {"ep": 74, "i": 4, "name": "칼 든 상대에게 직선 주먹", "user": "woojin", "technique": null},
         {"ep": 74, "i": 5, "name": "총 든 손목 잡아 올려 빼앗기", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:woojin_deumiteuri",
@@ -30720,7 +31597,11 @@
         {"ep": 75, "i": 7, "name": "눈 가린 채 주먹 흘려 잡기 → 몸통 주먹", "user": "woojin", "technique": null},
         {"ep": 75, "i": 8, "name": "목 움켜쥐어 짓이기기", "user": "woojin", "technique": null},
         {"ep": 75, "i": 9, "name": "달아나는 상대 머리채 잡아 바닥에 얼굴 찍기 → 올라타 연타", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin"], ["deumiteuri"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "피우진이 드미트리 갱단과 드미트리를 쓰러뜨림"
     },
     {
       "id": "fight:jintae_yeominsu",
@@ -30823,7 +31704,11 @@
         {"ep": 76, "i": 5, "name": "책상 짚고 넘는 공중 차기", "user": "jintae", "technique": null},
         {"ep": 76, "i": 7, "name": "단검 엇베기", "user": "jintae", "technique": null},
         {"ep": 76, "i": 8, "name": "결정적인 한방(베임을 감수한 주먹)", "user": "yeominsu", "technique": null}
-      ]
+      ],
+      "sides": [["yeominsu"], ["jintae"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "여민수가 먼저 돌진, 서진태 우위로 중단"
     },
     {
       "id": "fight:spar_busan",
@@ -30898,7 +31783,11 @@
         {"ep": 78, "i": 1, "name": "잡힌 다리 축 회전 차기(서술 이름)", "user": "pyoyoung", "technique": null},
         {"ep": 78, "i": 2, "name": "등 짚고 날아차기(합공 · 서술 이름)", "user": "songikcheon", "technique": null},
         {"ep": 78, "i": 3, "name": "공중제비 회피 · 착지 차기(서술 이름)", "user": "pyoyoung", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung"], ["seojeongchi", "songikcheon"]],
+      "sides_unclear": ["ihwan", "jeongseono"],
+      "sides_conf": "ai",
+      "sides_why": "불휘 대련 — 표영이 서정치 · 송익천 2대1, 정선오는 별개 대련(흰 셔츠 남자에게 항복)이라 편 미정, 이환은 묘사 없음"
     },
     {
       "id": "fight:namilho_pyoyoung",
@@ -30948,7 +31837,11 @@
         {"ep": 78, "i": 3, "name": "공중제비 회피 · 착지 차기(서술 이름)", "user": "pyoyoung", "technique": null},
         {"ep": 78, "i": 4, "name": "칼 뽑기(서술 이름)", "user": "namilho", "technique": null},
         {"ep": 79, "i": 0, "name": "?:낮게 쥔 칼 받아치기(남일호)", "user": "namilho", "technique": null}
-      ]
+      ],
+      "sides": [["namilho"], ["pyoyoung"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:jangho_ambush",
@@ -31131,7 +32024,11 @@
         {"ep": 80, "i": 5, "name": "차 문 기습 베기", "user": "?:녹색 셔츠 묶은 머리 칼잡이(바리스타 쪽)", "technique": null},
         {"ep": 80, "i": 6, "name": "허벅지 찌르기 + 무릎 찍기", "user": "?:녹색 셔츠 묶은 머리 칼잡이(바리스타 쪽)", "technique": null},
         {"ep": 80, "i": 7, "name": "접이칼 목 찌르기", "user": "?:녹색 셔츠 묶은 머리 칼잡이(바리스타 쪽)", "technique": null}
-      ]
+      ],
+      "sides": [["barista"], ["jangho", "janghun"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "바리스타가 장호 · 장훈 일행을 매복 제압, 장호 중상 · 포로"
     },
     {
       "id": "fight:kimdaegeon_barista",
@@ -31707,7 +32604,11 @@
         {"ep": 84, "i": 8, "name": "곡도 되잡아 내려치기", "user": "barista", "technique": null},
         {"ep": 84, "i": 9, "name": "박치기 연타", "user": "kimdaegeon", "technique": null},
         {"ep": 84, "i": 10, "name": "칼 빼앗아 찌르기 · 목 조르기", "user": "kimdaegeon", "technique": null}
-      ]
+      ],
+      "sides": [["kimdaegeon", "jangho"], ["barista", "joshua"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김대건이 장호를 구하러 와 바리스타를 이김, 조슈아는 바리스타(준)를 말리는 쪽(바리스타 편으로 봄)"
     },
     {
       "id": "fight:barista_gangdan",
@@ -31789,7 +32690,11 @@
         {"ep": 84, "i": 4, "name": "몸으로 막기", "user": "noa", "technique": null},
         {"ep": 84, "i": 5, "name": "긴 칼 베기", "user": "?:붉은 잎무늬 셔츠 갱단 두목", "technique": null},
         {"ep": 84, "i": 6, "name": "등 뒤 베기", "user": "baekdochan", "technique": null}
-      ]
+      ],
+      "sides": [["baekdochan", "namgunghyuk", "barista", "noa"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "준(바리스타) · 노아와 재키(남궁혁로 봄), 백도찬이 갱단 두목 무리를 상대(이름 없음)"
     },
     {
       "id": "fight:joshua",
@@ -31857,7 +32762,11 @@
       ],
       "moves": [
         {"ep": 84, "i": 11, "name": "뒤에서 껴안아 제압", "user": "?:갈색 앞머리 피투성이 남자(김대건 쪽)", "technique": null}
-      ]
+      ],
+      "sides": [["joshua"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:baekdochan_kimdaegeon",
@@ -31946,7 +32855,11 @@
       "moves": [
         {"ep": 85, "i": 0, "name": "단검 돌진 찌르기(서술)", "user": "kimdaegeon", "technique": null},
         {"ep": 85, "i": 1, "name": "안면 움켜쥐어 메다꽂기(서술)", "user": "baekdochan", "technique": null}
-      ]
+      ],
+      "sides": [["baekdochan", "namgunghyuk", "komodo"], ["kimdaegeon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "백도찬 일행이 김대건을 제압하고 사망시킴"
     },
     {
       "id": "fight:baekui_sunjin",
@@ -32238,7 +33151,14 @@
         {"ep": 112, "i": 5, "name": "사다리 도약 차기", "user": "iseul", "technique": null},
         {"ep": 112, "i": 6, "name": "난간 짓찧기 → 바다로 넘기기", "user": "iseul", "technique": null},
         {"ep": 112, "i": 7, "name": "목 움켜쥐기", "user": "iseul", "technique": null}
-      ]
+      ],
+      "sides": [
+        ["iseul", "kimseongjun", "guilhwa", "eogwangdeuk", "dohaksu", "bakcheolgyu", "insu", "wonil"],
+        ["gimyeonggyun", "ogyudong"]
+      ],
+      "sides_unclear": ["icheolmin"],
+      "sides_conf": "ai",
+      "sides_why": "백의(이슬 쪽)가 선진 항구 무리(오규동 · 기명균)를 공격, 이철민은 묘사 없어 불명, 인수는 이슬 쪽으로 봄"
     },
     {
       "id": "fight:iskra_scale",
@@ -32481,7 +33401,11 @@
         {"ep": 95, "i": 2, "name": "파고드는 상대 잡아 휘둘러 메치기", "user": "baekdochan", "technique": null},
         {"ep": 95, "i": 5, "name": "권총 뽑기 · 맞총(팔 쳐내며 동시 사격)", "user": "baekdochan", "technique": null},
         {"ep": 114, "i": 1, "name": "총 든 팔 끌어안아 총구 꺾기", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["ratel", "medvedi", "keurisa", "kimshin", "jintae", "woojin"], ["baekdochan", "namgunghyuk"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이스크라(라텔 · 메드베디 · 크리사)와 김신 일행이 스케일 선박 습격, 백도찬 쪽 경비 · 복면 무리, 남궁혁은 백도찬 쪽으로 봄(묘사 없음)"
     },
     {
       "id": "fight:jintae_komodo",
@@ -32793,7 +33717,11 @@
         {"ep": 107, "i": 6, "name": "달아나는 등에 칼 던지기", "user": "jintae", "technique": null},
         {"ep": 107, "i": 7, "name": "창 깨고 탈출", "user": "komodo", "technique": null},
         {"ep": 107, "i": 8, "name": "권총 추격 사격", "user": "jintae", "technique": null}
-      ]
+      ],
+      "sides": [["jintae"], ["komodo"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "서진태가 코모도를 이겨 쫓아냄"
     },
     {
       "id": "fight:kimshin_seonsil",
@@ -32897,7 +33825,11 @@
         {"ep": 91, "i": 5, "name": "?:몸 낮춰 파고들며 올려 베기(김신)", "user": "kimshin", "technique": null},
         {"ep": 91, "i": 6, "name": "?:뛰어들며 단검 내려치기(대역)", "user": "?:백도찬을 닮은 안경 남자(선창 대역)", "technique": null},
         {"ep": 91, "i": 7, "name": "?:2인 동시 총팔 제압(피우진 · 김신)", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["kimshin", "woojin", "jintae"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "김신 · 피우진 · 진태가 선실 경비(이름 없음)를 제압하고 백도찬 대역을 만남"
     },
     {
       "id": "fight:keurisa_namgunghyuk",
@@ -33104,7 +34036,11 @@
         },
         {"ep": 97, "i": 6, "name": "마지막 수단 — 손가락 사이 가는 칼로 목 찌르기", "user": "keurisa", "technique": null},
         {"ep": 97, "i": 7, "name": "무릎 → 팔꿈치 연타(서술 이름)", "user": "namgunghyuk", "technique": null}
-      ]
+      ],
+      "sides": [["namgunghyuk"], ["keurisa", "woojin"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "남궁혁이 크리사를 사실상 이김, 피우진은 크리사에게서 이어받는 쪽(묘사 적음)"
     },
     {
       "id": "fight:medvedi_baekdochan",
@@ -33288,7 +34224,11 @@
         {"ep": 95, "i": 5, "name": "권총 뽑기 · 맞총(팔 쳐내며 동시 사격)", "user": "baekdochan", "technique": null},
         {"ep": 95, "i": 8, "name": "빈틈 미끼(허수)", "user": "baekdochan", "technique": null},
         {"ep": 95, "i": 9, "name": "근접 총격 흘리기", "user": "medvedi", "technique": null}
-      ]
+      ],
+      "sides": [["baekdochan"], ["medvedi", "ratel"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "백도찬이 메드베디를 이김, 라텔은 메드베디를 도와 백도찬을 붙듦"
     },
     {
       "id": "fight:jeongseono_masa",
@@ -33532,7 +34472,14 @@
         {"ep": 110, "i": 1, "name": "진압봉 몸통 잠그기 제압", "user": "?:방탄조끼 무리(캐슬 경호대로 봄)", "technique": null},
         {"ep": 110, "i": 2, "name": "핸드랩 주먹 맞교환", "user": "shamo", "technique": null},
         {"ep": 110, "i": 3, "name": "덮쳐 엎드리기(엄호)", "user": "peurikit", "technique": null}
-      ]
+      ],
+      "sides": [
+        ["masa"],
+        ["jeongseono", "neopchi", "shamo", "peurikit", "songikcheon", "seojeongchi", "namilho", "blackmamba"]
+      ],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "마사 · 모리 정장 무리가 정선오(불휘 · 부산) 일행을 막아 공격, 샤모 · 프리깃 · 블랙맘바는 정선오 쪽 이스크라 지원, 서정치 · 송익천 · 남일호는 합류"
     },
     {
       "id": "fight:pyoyoung_mori",
@@ -33575,7 +34522,11 @@
         }
       ],
       "mobs": [{"label": "엘리베이터 모리 정장 넷", "kind": "single", "faction": "mori", "count_text": null}],
-      "moves": [{"ep": 93, "i": 0, "name": "쌍 갈고리칼 늘어뜨리기", "user": "pyoyoung", "technique": null}]
+      "moves": [{"ep": 93, "i": 0, "name": "쌍 갈고리칼 늘어뜨리기", "user": "pyoyoung", "technique": null}],
+      "sides": [["pyoyoung"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:hide_odohwa",
@@ -34119,7 +35070,11 @@
         {"ep": 109, "i": 8, "name": "관통 사격", "user": "blackmamba", "technique": null},
         {"ep": 109, "i": 9, "name": "일본도 올려 베기", "user": "hide", "technique": null},
         {"ep": 109, "i": 10, "name": "회전 카람빗 목 베기", "user": "pyoyoung", "technique": null}
-      ]
+      ],
+      "sides": [["pyoyoung", "hide", "namilho", "blackmamba"], ["odohwa", "kimhyeongcheol"]],
+      "sides_unclear": ["oota"],
+      "sides_conf": "ai",
+      "sides_why": "히데 · 표영 · 남일호 · 블랙맘바가 오도화를 쳐 오도화 사망, 오오타는 묘사에 없어 불명"
     },
     {
       "id": "fight:haseong_goldcapital",
@@ -34273,7 +35228,11 @@
         {"ep": 93, "i": 3, "name": "방망이 돌입", "user": "?:하성 습격 무리", "technique": null},
         {"ep": 99, "i": 10, "name": "'잔금' 얼굴 움켜쥐기(서술 — 중단)", "user": "choedalcheon", "technique": null},
         {"ep": 99, "i": 11, "name": "양손 칼 베기 · 역수 찌르기(서술)", "user": "?:TF팀 칼잡이", "technique": null}
-      ]
+      ],
+      "sides": [["hwangbomincheol", "yeominsu", "ryujihak"], ["choedalcheon", "kimhwang"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "하성 쪽(황보민철 · 여민수 · 류지학 TF)이 골드캐피탈(최달천 · 김황)을 습격"
     },
     {
       "id": "fight:kimshin_baekdochan",
@@ -34770,7 +35729,11 @@
           "technique": null,
           "technique_guess": {"id": "baek_vital", "conf": "high", "why": "붕괴 상태 마지막 찌르기"}
         }
-      ]
+      ],
+      "sides": [["kimshin"], ["baekdochan"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:takebayashi_osaka",
@@ -34829,7 +35792,11 @@
       "moves": [
         {"ep": 97, "i": 1, "name": "칼 빼앗아 메치고 베기(서술 이름)", "user": "hide", "technique": null},
         {"ep": 97, "i": 2, "name": "일본도 베기(서술 이름)", "user": "odohwa", "technique": null}
-      ]
+      ],
+      "sides": [["odohwa", "immuyeol", "hide"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "타케바야시 쪽(오도화 · 임무열 · 히데)이 오사카 적 조직원(이름 없음)과 싸움"
     },
     {
       "id": "fight:woojin_namgunghyuk",
@@ -35151,7 +36118,11 @@
         {"ep": 111, "i": 7, "name": "숙여 피하고 올려치기", "user": "woojin", "technique": null},
         {"ep": 111, "i": 8, "name": "얼굴 연타", "user": "woojin", "technique": null},
         {"ep": 111, "i": 9, "name": "들어 내리꽂기", "user": "woojin", "technique": null}
-      ]
+      ],
+      "sides": [["woojin", "keurisa"], ["namgunghyuk"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "피우진이 크리사에게서 이어받아 남궁혁을 쓰러뜨림"
     },
     {
       "id": "fight:hide_mansionguard",
@@ -35186,7 +36157,11 @@
         }
       ],
       "mobs": [{"label": "니시지마 쪽 경비(검은 정장)", "kind": "single", "faction": null, "count_text": null}],
-      "moves": [{"ep": 98, "i": 0, "name": "뒤에서 입 막고 조르기(서술 이름)", "user": "hide", "technique": null}]
+      "moves": [{"ep": 98, "i": 0, "name": "뒤에서 입 막고 조르기(서술 이름)", "user": "hide", "technique": null}],
+      "sides": [["hide"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:hide_takebayashi",
@@ -35240,7 +36215,11 @@
       "moves": [
         {"ep": 98, "i": 2, "name": "일어서며 목 베기(회상)", "user": "hide", "technique": null},
         {"ep": 98, "i": 3, "name": "짧은 칼 끼어들어 막기", "user": "odohwa", "technique": null}
-      ]
+      ],
+      "sides": [["odohwa"], ["hide"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "히데가 칼을 빼들었다가 오도화에게 제압당함"
     },
     {
       "id": "fight:choedalcheon",
@@ -35421,7 +36400,11 @@
         {"ep": 99, "i": 8, "name": "주먹 받아 쥐고 카운터(서술)", "user": "choedalcheon", "technique": null},
         {"ep": 99, "i": 9, "name": "앞차기(서술)", "user": "choedalcheon", "technique": null},
         {"ep": 99, "i": 10, "name": "'잔금' 얼굴 움켜쥐기(서술 — 중단)", "user": "choedalcheon", "technique": null}
-      ]
+      ],
+      "sides": [["choedalcheon"], ["hwangbomincheol", "yeominsu", "ryujihak"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "최달천이 여민수 · 황보민철 · 백의 아우들을 모두 눕힘, 류지학은 끝에 도착한 하성 쪽"
     },
     {
       "id": "fight:ryujihak_choedalcheon",
@@ -35645,7 +36628,11 @@
         {"ep": 101, "i": 8, "name": "내려꽂는 오른 주먹 → 숙여 빠지기(서술)", "user": "choedalcheon", "technique": null},
         {"ep": 101, "i": 9, "name": "어깨로 받게 한 큰 주먹(서술)", "user": "choedalcheon", "technique": null},
         {"ep": 101, "i": 10, "name": "마디 끊기 쌍단도 연속 베기(서술 — 이름 안 나옴)", "user": "ryujihak", "technique": null}
-      ]
+      ],
+      "sides": [["ryujihak"], ["choedalcheon"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:hide_pyoyoung",
@@ -35691,7 +36678,11 @@
       "moves": [
         {"ep": 110, "i": 5, "name": "카람빗 목 걸기(표영)", "user": "pyoyoung", "technique": null},
         {"ep": 110, "i": 6, "name": "멱살 벽 처박기(히데)", "user": "hide", "technique": null}
-      ]
+      ],
+      "sides": [["hide"], ["pyoyoung"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:immuyeol_kimhwang",
@@ -35726,7 +36717,11 @@
         }
       ],
       "mobs": [],
-      "moves": []
+      "moves": [],
+      "sides": [["immuyeol"], ["kimhwang"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "임무열이 김황을 문 잠그고 멱살 잡음"
     },
     {
       "id": "fight:baekdochan_gangminseong",
@@ -35788,7 +36783,11 @@
           "user": "gangminseong",
           "technique": null
         }
-      ]
+      ],
+      "sides": [["baekdochan"], ["gangminseong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "회상, 백도찬이 강민성을 쫓다 놓침"
     },
     {
       "id": "fight:baekdochan_gangminseong_russia",
@@ -35825,7 +36824,11 @@
       "mobs": [],
       "moves": [
         {"ep": 114, "i": 2, "name": "동맥을 실낱만큼 남기는 베기(서술 이름)", "user": "baekdochan", "technique": null}
-      ]
+      ],
+      "sides": [["baekdochan"], ["gangminseong"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:hyeonseok_ryujihak",
@@ -35925,7 +36928,11 @@
         {"ep": 116, "i": 2, "name": "총 쥔 손목 잡기", "user": "ryujihak", "technique": null},
         {"ep": 116, "i": 3, "name": "쓰러진 자리에서 단검 기습", "user": "kimshin", "technique": null},
         {"ep": 116, "i": 4, "name": "단도로 권총 걸어 떨어뜨리기", "user": "ryujihak", "technique": null}
-      ]
+      ],
+      "sides": [["ryujihak", "kimshin"], ["hyeonseok"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "류지학이 처음 현석과 맞붙었다가 알아본 뒤 김신을 감싸 함께 현석을 막음"
     },
     {
       "id": "fight:immuyeol_castleguards",
@@ -35971,7 +36978,11 @@
       "moves": [
         {"ep": 117, "i": 0, "name": "경호원 넷의 덮쳐 메다꽂기", "user": "?:검은 정장 경호원 넷", "technique": null},
         {"ep": 117, "i": 1, "name": "사인진의 발도 내리꽂기", "user": "sainjin", "technique": null}
-      ]
+      ],
+      "sides": [["sainjin"], ["immuyeol"]],
+      "sides_unclear": ["ihuiseong"],
+      "sides_conf": "ai",
+      "sides_why": "캐슬 경호원 · 사인진이 임무열을 제압, 이희성은 묘사에 없어 불명"
     },
     {
       "id": "fight:immuyeol_sainjin",
@@ -36020,7 +37031,11 @@
       "moves": [
         {"ep": 117, "i": 2, "name": "차 안 총구 꺾기 · 팔 휘두르기", "user": "immuyeol", "technique": null},
         {"ep": 117, "i": 3, "name": "옆 차 창 너머 조준 사격", "user": "sainjin", "technique": null}
-      ]
+      ],
+      "sides": [["sainjin"], ["immuyeol"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "사인진이 호송 중 임무열을 처형"
     },
     {
       "id": "fight:hide_moriganbu",
@@ -36082,7 +37097,11 @@
       "moves": [
         {"ep": 121, "i": 0, "name": "낮은 자세 발도 베기(서술)", "user": "hide", "technique": null},
         {"ep": 121, "i": 1, "name": "찌르기 마무리(서술)", "user": "hide", "technique": null}
-      ]
+      ],
+      "sides": [["hide"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     },
     {
       "id": "fight:gustav_komodo",
@@ -36133,7 +37152,11 @@
         }
       ],
       "mobs": [],
-      "moves": [{"ep": 121, "i": 2, "name": "칼 손 잡아 뒤집고 내리꽂는 주먹", "user": "gustav", "technique": null}]
+      "moves": [{"ep": 121, "i": 2, "name": "칼 손 잡아 뒤집고 내리꽂는 주먹", "user": "gustav", "technique": null}],
+      "sides": [["gustav"], ["komodo"]],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "둘이 맞붙음 · 승자 쪽이 앞(기계)"
     },
     {
       "id": "fight:majunyeong_prison",
@@ -36187,7 +37210,11 @@
         {"label": "대머리 수감자(갱단 두목)", "kind": "single", "faction": null, "count_text": null},
         {"label": "수감자들", "kind": "group", "faction": null, "count_text": null}
       ],
-      "moves": [{"ep": 121, "i": 3, "name": "짓밟기 · 내리찍기", "user": "majunyeong", "technique": null}]
+      "moves": [{"ep": 121, "i": 3, "name": "짓밟기 · 내리찍기", "user": "majunyeong", "technique": null}],
+      "sides": [["majunyeong"], []],
+      "sides_unclear": [],
+      "sides_conf": "ai",
+      "sides_why": "이름 있는 참가자 하나 — 상대는 이름 없는 사람(기계)"
     }
   ]
 }

@@ -418,7 +418,7 @@
   "data": [
     {
       "kind": "규칙",
-      "subject": "fight:kimshin_gustav",
+      "subject": "fight:p1_kimshin_gustav",
       "value": "대결 장소 = 인적 드문 폐저수지 일대 · 반경 10km 외부인 접근 차단 · 총성은 부유층 취미 수렵으로 위장(블루 준비)",
       "refs": ["p1:071/066-068"]
     },
@@ -436,7 +436,7 @@
     },
     {
       "kind": "기록",
-      "subject": "fight:kimshin_gustav",
+      "subject": "fight:p1_kimshin_gustav",
       "value": "'과거에 가리지 못한 이스크라 최강의 타이틀 매치' — 둘이 예전에 결판을 내지 못했음",
       "refs": ["p1:071/111-113"]
     },

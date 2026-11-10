@@ -21,7 +21,7 @@
 | `게임개발규격.md` | 일반 게임판 — agentic-sdlc `docs/howtoGAME.md` 의 사본(읽은 버전 `09b4253` · 머리 한 줄). sdlc 와 **다른 점만**: Android APK 기본 · 빌드 · 에뮬레이터는 CI(GitHub Actions) · 플레이는 폰 · 폰에 설치할 APK 는 릴리스로 · Phase · 산출물 · 시험 · 화면 · 자산 · 빌드 · 배포 · 게임 고유 토큰 · 비용 | 모든 게임 agent | castle_common · 각 판 · **agentic-sdlc `docs/howtoGAME.md` 의 사본** — 여기서 고치지 않는다(고칠 것은 agentic-sdlc 에서 연 세션에 넘긴다) |
 | `README.md`(이 문서) | 묶음 설명 · 왜 이 폴더인가 · agentic-sdlc 반영 절차 | castle_common 세션 | castle_common · 각 판 |
 
-받는 법: `games.json` 네 판(castle_M · castle_M3D · castle · castle_tactics)의 `receives` 에 `docs/개발규격/*.md`, `follows` 에 두 문서(2026-11-04). sync 하면 받는 곳 아래 `docs/개발규격/` 에 사본이 생기고 `SOURCE.json` 도장이 '따른 판'이 된다. 읽는 순서는 `캐슬_게임공통.md` 0절. 캐슬 판에서는 기획서 00 결정 10(답39 — 모바일 Android 전용)이 이 묶음보다 앞선다.
+받는 법: `games.json` 받는 판(castle_M · castle_M3D · castle · castle_srpg · castle_strategy — 2026-11-10 · castle_tactics 는 no-sync)의 `receives` 에 `docs/개발규격/*.md`, `follows` 에 두 문서(2026-11-04). sync 하면 받는 곳 아래 `docs/개발규격/` 에 사본이 생기고 `SOURCE.json` 도장이 '따른 판'이 된다. 읽는 순서는 `캐슬_게임공통.md` 0절. 캐슬 판에서는 기획서 00 결정 10(답39 — 모바일 Android 전용)이 이 묶음보다 앞선다.
 
 ## 2. 왜 `docs/기획서/` 가 아니라 이 폴더인가
 
