@@ -68,3 +68,20 @@ func test_escape_rooms_and_determinism() -> void:
 	var a := Stage.simulate(3, 60 * 40, {"chapter": "ch8"})
 	var b := Stage.simulate(3, 60 * 40, {"chapter": "ch8"})
 	check(a == b, "같은 시드 같은 결과(8장 40초)")
+
+
+## 맨손 방에서는 무기 기술을 안 쓴다(13장 주먹 승부 — 칼 기술이 주먹 승부에 섞이지 않게), 칼 든 방에서는 쓴다
+func test_bare_room_drops_weapon_skills() -> void:
+	var Tech = preload("res://src/data/tech_moves.gd")
+	var rooms: Array = Campaign.table("ch13").ROOMS
+	var ri := -1
+	for i in rooms.size():
+		if rooms[i]["id"] == "fist_duel":
+			ri = i
+	var d := Stage.make(1, {"chapter": "ch13", "room": ri})
+	var kim = d["heroes"][0]
+	check(not kim.skills.is_empty(), "맨손 김신도 기술이 있다 %d" % kim.skills.size())
+	for e in kim.skills:
+		check(not Tech.WEAPON.has(str(e["move"])), "주먹 승부에 무기 기술 없음 %s" % e["name"])
+	var d2 := Stage.make(1, {"chapter": "ch12", "room": 0})
+	check(d2["heroes"][0].skills.any(func(e): return Tech.WEAPON.has(str(e["move"]))), "칼 든 12장 김신은 칼 기술을 쓴다")

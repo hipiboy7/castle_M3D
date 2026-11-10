@@ -44,7 +44,7 @@ const ROLES := {
 	"street_thug": {"hp": 220.0, "posture": 45.0, "walk": 1.8, "run": 3.8, "stagger": 70, "ai": "thug", "look": "ds_raider"},
 	"gang_blade": {"hp": 260.0, "posture": 50.0, "walk": 1.9, "run": 4.0, "stagger": 70, "ai": "haseong_guard", "look": "haseong_guard"},
 	"richeon": {"hp": 1300.0, "posture": 640.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 38.0, "finisher_cap": 0.04, "ai": "x_master",
-		"look": "richeon", "phase2_at": 0.5, "dmg_k": 1.0},
+		"look": "richeon", "phase2_at": 0.5, "dmg_k": 0.85},
 	"douchen": {"hp": 260.0, "posture": 240.0, "walk": 2.0, "run": 4.4, "stagger": 75, "poise": 28.0, "finisher_cap": 0.06, "ai": "x_boxer",
 		"look": "douchen", "phase2_at": 0.5, "dmg_k": 0.6},
 	# 아군: 한태철(성남제일파 — 백의 원군, 골프채) · 표영(백의 부산지부장, 카람빗) · 라텔(이스크라 킬러, 카람빗)

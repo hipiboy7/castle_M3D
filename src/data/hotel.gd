@@ -46,7 +46,7 @@ const ROLES := {
 	"gyeonghodaechoehuui4in": {"hp": 240.0, "posture": 130.0, "walk": 1.8, "run": 3.9, "stagger": 80, "poise": 6.0, "ai": "g4",
 		"look": "g4"},
 	"shingen": {"hp": 1500.0, "posture": 420.0, "walk": 1.95, "run": 4.2, "stagger": 80, "poise": 18.0, "ai": "shingen",
-		"look": "shingen", "phase2_at": 0.6, "yield_at": 0.3, "finisher_cap": 0.08, "dmg_k": 3.0},
+		"look": "shingen", "phase2_at": 0.6, "yield_at": 0.3, "finisher_cap": 0.08, "dmg_k": 2.5},
 }
 
 ## 방 — theme: 무대 그림(src/view/hotel3d.gd) · bounds: 걸을 수 있는 바닥(m) · heroes/allies/enemies: [인물 id, 자리, (외형 덧붙임)]

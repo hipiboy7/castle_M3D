@@ -16,6 +16,7 @@ const EnemyAI = preload("res://src/combat/enemy_ai.gd")
 const Bot = preload("res://src/combat/bot.gd")
 const Skills = preload("res://src/data/skills.gd")
 const Kit = preload("res://src/data/skill_kit.gd")
+const Tech = preload("res://src/data/tech_moves.gd")
 const Common = preload("res://src/data/common.gd")
 const Addendum = preload("res://src/data/addendum.gd")
 const Campaign = preload("res://src/data/campaign.gd")
@@ -142,6 +143,18 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 
 
 ## 1층 기술 중 이 판 동작이 있는 것 — 공통 기술(묶음 B 조작 인물 기술 — 1장 아군 서진태)은 MOVE_OF, 3D 덧붙임은 addendum move
+## 맨손 방(외형 *_bare — 0 · 1장 김신 · 2장 공사장 · 4장 케이지 · 13장 주먹 승부)에서는 무기 기술(tech_moves WEAPON — 칼 · 총 ·
+## 소품)을 빼고, 다른 방에서는 다시 모두 쓴다(사용자 2026-11-10 "기술에 따른 행동을 다 구체화")
+static func _bare_skills(d: Dictionary, h, bare: bool) -> void:
+	if not d.has("skills_all"):
+		d["skills_all"] = {}
+	if not d["skills_all"].has(h):
+		d["skills_all"][h] = h.skills
+	var all: Array = d["skills_all"][h]
+	h.skills = all.filter(func(e): return not Tech.WEAPON.has(str(e["move"]))) if bare else all
+	h.skill_idx = clampi(h.skill_idx, 0, maxi(0, h.skills.size() - 1))
+
+
 static func _known(c: Dictionary) -> Array:
 	var sk: Array = []
 	for sid in c.get("skills", []):
@@ -204,6 +217,7 @@ static func _enter(d: Dictionary, i: int) -> void:
 			d["look_of"][h] = str(T.ROLES[rk]["look"])
 		else:
 			d["look_of"].erase(h)
+		_bare_skills(d, h, str(T.ROLES[rk].get("look", T.ROLES[h.char_id].get("look", ""))).ends_with("_bare"))
 		w.add(h)
 	for a in room["allies"]:
 		_npc(d, a[0], 0, a[1])

@@ -45,7 +45,7 @@ const ROLES := {
 	"elite_guard": {"hp": 300.0, "posture": 70.0, "walk": 1.9, "run": 4.1, "stagger": 70, "poise": 4.0, "ai": "haseong_guard", "look": "guard"},
 	# 피우진(적 — 주먹 승부): 주먹 · 발 · 메다꽂기를 섞는 x_master(129/032-035 메침 · 134/042-046 앞차기)
 	"woojin": {"hp": 1300.0, "posture": 520.0, "walk": 2.1, "run": 4.6, "stagger": 50, "look": "woojin", "ai": "x_master",
-		"poise": 36.0, "finisher_cap": 0.04, "phase2_at": 0.5, "dmg_k": 1.6},
+		"poise": 36.0, "finisher_cap": 0.04, "phase2_at": 0.5, "dmg_k": 1.0},
 }
 
 const ROOMS := [
