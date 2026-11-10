@@ -459,6 +459,9 @@ func _dev_knockout() -> void:
 		for e in d["enemies"]:
 			if e.alive() and not e.inert:
 				e.die()
+		var gx: float = Stage._walk_goal(d)            # 걸어가야 터지는 trigger(x: — 0장 군터의 방)가 남았으면 그 자리로(사람 입력이 없어 걷지 않는다)
+		if gx > -INF and d["hero"] != null:
+			d["hero"].pos.x = maxf(d["hero"].pos.x, gx + 0.05)
 	elif d["boss"] != null and d["boss"].alive() and d["world"].over == "":
 		d["boss"].die()
 		d["world"].over = "win"

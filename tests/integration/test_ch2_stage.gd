@@ -3,6 +3,7 @@ extends "res://tests/helpers.gd"
 ## 방에 없는 사람은 판에 없다 · 교대 없음 · 그 방 사람이 쓰러지면 진다) · 방 표 kit(공사장 맨손 김신) · 따돌리기 방(남궁혁 —
 ## 버티거나 출구에 닿으면 넘는다 · 쓰러뜨릴 수 없다) · 11장은 그대로 둘이 교대. 전투 내용(S5 묶음 4): 서진태 칼 · 이슬 적/아군 ·
 ## 2장 1층 기술 · 남궁혁 너클 카운터 · 신태진 2차 · 오지인 길 내주기 · 봇이 보스 방을 넘는다.
+## 스테이지(사용자 2026-11-10): 1층 15명 세 무리 + 황보민철 · 위층 복도(피우진 · 김대건 지키며 남궁혁 지나기) · 대표실 한 방씩 · 긴 따돌리기 복도.
 
 const Stage = preload("res://src/combat/stage.gd")
 const Haseong = preload("res://src/data/haseong.gd")
@@ -208,7 +209,7 @@ func test_ch2_sintaejin_phase2() -> void:
 	check(not mv["parryable"] and str(mv["telegraph"]) == "unblock", "두 번째 칼은 못 막는다(빨간 !)")
 
 
-## 오지인은 '열에 아홉은 진다'며 칼을 내려놓는다(026/049-052) — yield_at 에서 길을 내주고, 경호팀이 다 쓰러졌으면 방을 넘는다
+## 오지인은 '열에 아홉은 진다'며 칼을 내려놓는다(026/049-052) — yield_at 에서 길을 내주고, 경호팀 10명(5 + 5)이 다 쓰러졌으면 방을 넘는다
 func test_ch2_ojiin_yields() -> void:
 	var d := Stage.make(1, {"chapter": "ch2", "room": _room_of("guard_corridor")})
 	_past_intro(d)
@@ -220,19 +221,81 @@ func test_ch2_ojiin_yields() -> void:
 			e.hp = 0.0
 			e.die()
 	check(oj != null and d["yield"].has(oj), "오지인은 길을 내주는 체력이 있다")
+	Stage.step(d, {})
+	d["world"].events.clear()
+	var guards: Array = d["enemies"].filter(func(e): return e.char_id == "haseong_guard")
+	check(guards.size() == 10 and guards.filter(func(e): return e.alive()).size() == 5, "첫 다섯이 쓰러지면 다섯이 더 — 경호팀 10인 (%d)" % guards.size())
+	for e in guards:
+		if e.alive():
+			e.hp = 0.0
+			e.die()
 	oj.hp = oj.hp_max * 0.3
 	d["world"]._check_hp(oj)
 	var yielded := false
-	for i in 3:
+	for i in 60 * 5:                                          # 둘째 무리 대사(wave2)가 지나가면 넘는다
 		Stage.step(d, {})
 		yielded = yielded or d["world"].events.any(func(e): return e[0] == "yield")
 		d["world"].events.clear()
+		if d["stage"] != "fight":
+			break
 	check(yielded and oj.alive() and oj.inert and d["stage"] == "clear", "오지인이 비켜서고 방을 넘는다 %s" % d["stage"])
 
 
-## 봇이 2장 보스 방을 넘는다 — 몇 초 만에 녹지 않는다(황보민철 · 신태진 20초 넘게). 수치 조정 회귀 막기
+## 1층: 하성 인력 15명이 세 무리(6 · 5 · 4)로 — 셋째 무리와 함께 황보민철. 서진태 쪽 아군은 이슬 · 청년회 3명 · 부진파 2명
+func test_ch2_lobby_waves() -> void:
+	var d := Stage.make(1, {"chapter": "ch2", "room": _room_of("lobby")})
+	_past_intro(d)
+	check(d["allies"].size() == 6 and d["allies"].filter(func(a): return a.name == "부진파").size() == 2, "아군 이슬 · 청년회 3 · 부진파 2")
+	var seen := {}
+	for wave in 3:
+		for e in d["enemies"]:
+			seen[e] = true
+			if e.char_id == "haseong_suit" and e.alive():
+				e.hp = 0.0
+				e.die()
+		Stage.step(d, {})
+		d["world"].events.clear()
+	for e in d["enemies"]:
+		seen[e] = true
+	var suits: int = seen.keys().filter(func(e): return e.char_id == "haseong_suit").size()
+	check(suits == 15 and d["enemies"].any(func(e): return e.char_id == "hwangbomincheol" and e.alive()), "하성 인력 15명 + 황보민철 (%d)" % suits)
+
+
+## 위층 복도(남궁혁 + 경호대 · 피우진 · 김대건 아군): 둘 중 하나가 쓰러지면 진다 · 김신이 오른쪽 끝에 닿으면 넘는다
+func test_ch2_upper_hall_protect() -> void:
+	var i := _room_of("upper_hall")
+	var d := Stage.make(1, {"chapter": "ch2", "room": i})
+	_past_intro(d)
+	var wj = null
+	for a in d["allies"]:
+		if a.char_id == "woojin":
+			wj = a
+	check(wj != null and d["allies"].any(func(a): return a.char_id == "kimdaegeon"), "피우진 · 김대건이 아군")
+	check(float(Haseong.ROOMS[i]["bounds"].size.x) >= 20.0, "긴 복도")
+	wj.hp = 0.0
+	wj.die()
+	Stage.step(d, {})
+	check(d["world"].over == "lose" and d.get("lose_line", []).size() >= 2, "피우진이 쓰러지면 진다")
+	var d2 := Stage.make(1, {"chapter": "ch2", "room": i})
+	_past_intro(d2)
+	d2["heroes"][0].pos = (Haseong.ROOMS[i]["escape"]["exit"] as Rect2).get_center()
+	Stage.step(d2, {})
+	check(d2["stage"] == "clear", "끝 계단에 닿으면 넘는다 %s" % d2["stage"])
+
+
+## 대표실: 강창석 · 김재훈 모두 김신의 한 방 — 둘 다 쓰러지면 김신의 멘트(원작 029/090 · 093-096) 뒤에 넘는다
+func test_ch2_ceo_one_hit() -> void:
+	var d := Stage.make(1, {"chapter": "ch2", "room": _room_of("ceo_office")})
+	for e in d["enemies"]:
+		check(not e.oneshot_immune, "%s 는 한 방을 받는다(방 보스 없음)" % e.name)
+	var r := Stage.simulate(1, 60 * 60, {"chapter": "ch2", "room": _room_of("ceo_office")})
+	var t := float(r["times"].get("ceo_office", -1)) / 60.0
+	check(t > 0.0 and t < 25.0, "봇이 짧게 넘는다 (%.1f초)" % t)
+
+
+## 봇이 2장 보스 방을 넘는다 — 몇 초 만에 녹지 않지만 1분 안(2장 보스는 모두 조작 인물보다 아랫급 — 사용자 2026-11-10). 수치 조정 회귀 막기
 func test_ch2_bot_beats_bosses() -> void:
-	for c in [["lobby_stairs", 2], ["junkyard_night", 2]]:
+	for c in [["lobby", 2], ["junkyard_night", 2]]:
 		var r := Stage.simulate(int(c[1]), 60 * 90 + Haseong.INTRO_T, {"chapter": "ch2", "room": _room_of(c[0])})
 		var t := float(r["times"].get(c[0], -1)) / 60.0
-		check(t > 20.0 and t < 80.0, "%s 봇이 넘는다 · 20 ~ 80초 (%.0f초) %s" % [c[0], t, r])
+		check(t > 8.0 and t < 60.0, "%s 봇이 넘는다 · 8 ~ 60초 (%.0f초) %s" % [c[0], t, r])

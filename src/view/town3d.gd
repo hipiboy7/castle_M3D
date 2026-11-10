@@ -8,6 +8,8 @@ extends "res://src/view/set3d.gd"
 ##   vlad_corridor  밤의 호텔 복도, 경호원들이 권총 · 우지 난사(p1:002/013-020) — 붉은 카펫 · 객실 문 · 벽등 · 벽의 총알 자국 · 탄피
 ##   gunter_suite   군터의 방 '최후의 만찬 그림 · 아치 창'(p1:002/021-029) — 탁자(밑에서 리볼버) · 위스키 병 · 잔('까앙' 깨지는 잔) · 시가,
 ##                  창밖은 눈 오는 밤 도시
+##   vlad_hotel     복도 → 군터의 방을 한 맵으로 잇는다(2026-11-10 사용자 "복도 방에서 군터 방으로 연결되어 이어지도록") — 왼쪽
+##                  HOTEL_CORRIDOR m 는 vlad_corridor, 열린 문틀 너머 오른쪽은 gunter_suite(빛 · 끝 벽 · 문은 한 번만). 걸을 곳은 하나
 ##   vlad_night     경찰차가 몰린 밤거리(p1:002/029-031) — 호텔 정문(간판 Владивосток гостиница — 글꼴에 키릴 문자가 없어 라틴 글자) · 눈
 ##   site_alley     회암시 공사장(굴착기 있는 골목 — fight:kimhyeokju, 밤거리를 걸어 온다 p1:003/023) — 굴착기 · 가설 울타리 · 벽돌 벽
 ##                  (칼이 '뒤쪽 벽에 꽂힘')
@@ -21,9 +23,16 @@ extends "res://src/view/set3d.gd"
 ##   상세(detail — 헤드리스는 끔)일 때만 그림자 · 내리는 눈(입자) · 땅 결 · 작은 소품(탄피 · 총알 자국 · 얼룩)
 
 ## 이 그림이 그리는 무대 이름(시험 test_campaign 이 장 표의 theme 이 여기 있는지 본다)
-const THEMES := ["vlad_corridor", "gunter_suite", "vlad_night", "site_alley", "junkyard_night", "junkyard_dusk", "hoeam_street"]
+const THEMES := ["vlad_corridor", "gunter_suite", "vlad_hotel", "vlad_night", "site_alley", "junkyard_night", "junkyard_dusk", "hoeam_street"]
 
 const FONT = preload("res://assets/fonts/Galmuri11-Bold.ttf")
+
+## vlad_hotel: 걸을 곳 왼쪽 끝에서 복도 길이(m) · 복도 끝과 군터의 방 사이 문틀 폭(m) — 장 표 prologue.gd 의 자리와 같이 잰다
+const HOTEL_CORRIDOR := 14.0
+const HOTEL_GAP := 1.2
+
+## vlad_hotel 을 그리는 중(복도 · 방이 빛 · 끝 벽 · 바닥을 겹쳐 그리지 않게)
+var _joined := false
 
 ## 경광등(vlad_night) — [빨강 재질, 파랑 재질, 빨강 점광, 파랑 점광]. 그림만(판정과 상관없음)
 var _siren: Array = []
@@ -38,6 +47,8 @@ func build(th: String, b: Rect2, detail := true) -> void:
 			_vlad_corridor(b)
 		"gunter_suite":
 			_gunter_suite(b)
+		"vlad_hotel":
+			_vlad_hotel(b)
 		"vlad_night":
 			_vlad_night(b)
 		"site_alley":
@@ -75,7 +86,11 @@ func _vlad_corridor(b: Rect2) -> void:
 	_env(Color(0.3, 0.24, 0.2), 0.6, Color(0.02, 0.015, 0.015))
 	_top(Color(1.0, 0.86, 0.68), 0.5)
 	_floor(b, Color(0.2, 0.12, 0.07), 0.4, false)
-	_back_wall(b, Color(0.13, 0.19, 0.15), 3.2)
+	if _joined:                                       # 이어 그릴 때: 뒷벽만(set3d _back_wall 의 낮은 옆벽이 문틀을 막는다)
+		var bw := _mat(Color(0.13, 0.19, 0.15), 0.8)
+		_mesh(self, _box(Vector3(b.size.x + 4.0, 3.2, 0.3)), bw, Vector3(b.get_center().x, 1.6, b.position.y - 0.8))
+	else:
+		_back_wall(b, Color(0.13, 0.19, 0.15), 3.2)
 	var g1 := Color(0.12, 0.18, 0.14)
 	var g2 := Color(0.16, 0.24, 0.18)
 	var gold := Color(0.36, 0.3, 0.17)
@@ -89,7 +104,7 @@ func _vlad_corridor(b: Rect2) -> void:
 	var brass := _shared(Color(0.62, 0.46, 0.22), 0.35, 0.0, 0.6)
 	_mesh(self, _box(Vector3(w, 0.07, 0.06)), brass, Vector3(cx, 1.02, wz + 0.03))          # 허리띠
 	_runner(Rect2(b.position.x - 0.5, b.get_center().y - 1.0, b.size.x + 0.95, 2.0))
-	for sx in [-1.0, 1.0]:                                                                 # 복도 양 끝 벽(높게 — 옆이라 가리지 않는다)
+	for sx in ([-1.0] if _joined else [-1.0, 1.0]):                                        # 복도 양 끝 벽(높게 — 옆이라 가리지 않는다)
 		var ex: float = b.position.x - 0.62 if sx < 0.0 else b.end.x + 0.62
 		var ez := (wz + b.end.y + 0.8) * 0.5
 		var ed := b.size.y + 1.6
@@ -106,7 +121,10 @@ func _vlad_corridor(b: Rect2) -> void:
 		_wall_lamp(Vector3(cx - 7.2 + i * 3.6, 1.72, wz))
 	for x in [cx - 3.6, cx + 3.6]:
 		_console(Vector3(x, 0, wz))
-	_double_door(Vector3(b.end.x + 0.45, 0, b.get_center().y))                                 # 군터의 방으로
+	if _joined:
+		_open_doorway(b.end.x + HOTEL_GAP * 0.5, b)                                            # 열린 문틀 — 군터의 방으로 걸어 들어간다
+	else:
+		_double_door(Vector3(b.end.x + 0.45, 0, b.get_center().y))                             # 군터의 방으로
 	for x in [cx - 3.6, cx, cx + 3.6]:
 		_omni(Vector3(x, 2.0, wz + 0.5), Color(1.0, 0.74, 0.46), 1.5, 5.5)
 	if not _detail:
@@ -129,6 +147,24 @@ func _vlad_corridor(b: Rect2) -> void:
 		var c := _mesh(self, _cyl(0.012, 0.012, 0.045), shell,
 			Vector3(cx + r.randf_range(0.8, 6.6), 0.02, r.randf_range(b.position.y + 0.2, b.end.y - 0.2)))
 		c.rotation_degrees = Vector3(0, r.randf() * 360.0, 90)
+
+
+## 복도 → 군터의 방 한 맵(vlad_hotel) — 걸을 곳 b 의 왼쪽 HOTEL_CORRIDOR m 는 복도, 문틀(HOTEL_GAP) 너머 나머지는 군터의 방
+func _vlad_hotel(b: Rect2) -> void:
+	_joined = true
+	var c := Rect2(b.position.x, b.position.y, HOTEL_CORRIDOR, b.size.y)
+	var sx0 := c.end.x + HOTEL_GAP
+	_vlad_corridor(c)
+	_gunter_suite(Rect2(sx0, b.position.y, b.end.x - sx0, b.size.y))
+	_joined = false
+
+
+## 열린 문틀(vlad_hotel — 복도 끝과 군터의 방 사이): 뒷벽 쪽 기둥 하나 · 바닥 문턱만(앞 기둥 · 상인방은 위에서 보는 카메라를 가린다)
+func _open_doorway(x: float, b: Rect2) -> void:
+	var wood := _shared(Color(0.25, 0.15, 0.09), 0.45)
+	var gold := _shared(Color(0.85, 0.7, 0.3), 0.3, 0.0, 0.85)
+	_mesh(self, _box(Vector3(0.3, 3.2, 0.5)), wood, Vector3(x, 1.6, b.position.y - 0.7))
+	_mesh(self, _box(Vector3(0.36, 0.02, b.size.y + 0.4)), gold, Vector3(x, 0.01, b.get_center().y))
 
 
 ## 복도 카펫 — 붉은 바탕 · 금빛 마름모가 1m 마다(그림 하나를 되풀이), 가장자리 금줄
@@ -209,9 +245,11 @@ func _gunter_suite(b: Rect2) -> void:
 	var wz := b.position.y - 1.05                    # 뒷벽 가운데(앞면 wz + 0.15) — 벽과 걸을 곳 사이에 탁자
 	var half := b.size.x * 0.5 + 1.6
 	var hh := 3.6
-	_env(Color(0.3, 0.22, 0.17), 0.6, Color(0.01, 0.012, 0.025))
-	_top(Color(1.0, 0.85, 0.66), 0.5)
-	_floor(Rect2(b.position.x, b.position.y - 0.8, b.size.x, b.size.y + 0.8), Color(0.13, 0.075, 0.045), 0.35, false)
+	var fx := 4.0 - HOTEL_GAP if _joined else 0.0      # 이어 그릴 때: 바닥이 복도 바닥 끝(복도 끝 + 2m)에서 시작(겹쳐 깜빡이지 않게)
+	if not _joined:
+		_env(Color(0.3, 0.22, 0.17), 0.6, Color(0.01, 0.012, 0.025))
+		_top(Color(1.0, 0.85, 0.66), 0.5)
+	_floor(Rect2(b.position.x + fx, b.position.y - 0.8, b.size.x - fx, b.size.y + 0.8), Color(0.13, 0.075, 0.045), 0.35, false)
 	var outer := PlaneMesh.new()                       # 옆벽 너머(방 밖)도 어둡게 — 창밖 도시는 뒷벽 뒤(아래)에만 보인다
 	outer.size = Vector2(80.0, 30.0)
 	_mesh(self, outer, _shared(Color(0.03, 0.02, 0.02), 1.0), Vector3(cx, -0.02, wz + 15.0))
@@ -225,7 +263,7 @@ func _gunter_suite(b: Rect2) -> void:
 		_mesh(self, _box(Vector3(sw, 2.0, 0.3)), wall, Vector3(cx + (seg[0] + seg[1]) * 0.5, 1.45, wz))
 	var trim := _shared(Color(0.42, 0.3, 0.15), 0.4, 0.0, 0.5)
 	_mesh(self, _box(Vector3(ww, 0.14, 0.34)), trim, Vector3(cx, 0.07, wz + 0.02))
-	for sx in [-1.0, 1.0]:                                                                       # 옆벽(낮게)
+	for sx in ([1.0] if _joined else [-1.0, 1.0]):                                               # 옆벽(낮게 — 이어 그릴 때 왼쪽은 문틀)
 		_mesh(self, _box(Vector3(0.3, 1.2, b.size.y + 2.6)), wall, Vector3(cx + sx * half, 0.6, cz - 0.5))
 	for sx in [-1.0, 1.0]:
 		_arch_window(Vector3(cx + 3.2 * sx, 0, wz), 1.6, 0.45, 2.45, hh)
@@ -236,10 +274,12 @@ func _gunter_suite(b: Rect2) -> void:
 	var tx := cx + 2.2
 	_gunter_table(Vector3(tx, 0, b.position.y - 0.42))
 	_armchair(Vector3(tx + 1.55, 0, b.position.y - 0.5), -70.0)
-	_chesterfield(Vector3(b.position.x - 0.95, 0, cz - 0.1), 90.0)
-	_floor_lamp(Vector3(b.position.x - 0.9, 0, cz - 1.75))
+	if not _joined:                                   # 왼쪽 소파 · 스탠드는 이어 그릴 때 문틀 자리라 뺀다
+		_chesterfield(Vector3(b.position.x - 0.95, 0, cz - 0.1), 90.0)
+		_floor_lamp(Vector3(b.position.x - 0.9, 0, cz - 1.75))
 	_sideboard(Vector3(b.end.x + 0.85, 0, cz + 0.4))
-	_omni(Vector3(b.position.x - 0.6, 1.9, cz - 1.5), Color(1.0, 0.74, 0.46), 1.2, 5.5)
+	if not _joined:                                   # 이어 그릴 때는 복도 점광 셋이 있어 방은 둘만(폰 — 점광 다섯)
+		_omni(Vector3(b.position.x - 0.6, 1.9, cz - 1.5), Color(1.0, 0.74, 0.46), 1.2, 5.5)
 	_omni(Vector3(tx + 0.5, 1.6, b.position.y - 0.1), Color(1.0, 0.8, 0.55), 1.3, 5.0)
 	_omni(Vector3(cx, 2.2, wz + 1.0), Color(0.5, 0.6, 1.0), 0.9, 8.0)                    # 창으로 드는 밤빛
 

@@ -17,8 +17,8 @@
   3. 자동 결투  godot --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 --seed S  (시드 1 · 2 · 3,
                게임 전체 — 무대 · 인형 · 연출 · 화면 표시까지 돌려 멈춤 · 스크립트 오류가 없는지)
   3. 11장 자동 판  같은 명령에 --mode stage (시드 1 · 2, 150초 — 호텔 캐슬 5방 · 여럿 · 교대 · 방 넘김 · 무대 다시 만들기)
-  3. 0 · 1장 자동 판  --mode ch0 (120초 — 프롤로그를 봇이 한 번은 깬다) · --mode ch1 (360초 — 회암시 6방 · 1인 판 · 아군 서진태)
-               · --mode ch2 (300초 — 하성 본사 8방 · 방마다 조작 인물 김신 / 서진태 · 따돌리기 방)
+  3. 0 · 1장 자동 판  --mode ch0 (120초 — 프롤로그를 봇이 한 번은 깬다) · --mode ch1 (360초 — 회암시 5방 · 1인 판 · 아군 서진태 · 김대건 합류)
+               · --mode ch2 (300초 — 하성 본사 8방 · 방마다 조작 인물 김신 / 서진태 · 따돌리기 방 둘)
   3. 리플레이    11장 seed 2 판의 입력 기록(--save-replay .tools/replay_stage2.json)을 다른 프로세스에서 --replay 로 다시 돌려
                끝 · 중간 해시(60프레임마다)가 같은지(src/combat/replay.gd — 결정성 · 멀티 ④ 바탕)
   3. 그림 A · B   --art a · b(GLB 툰 모델 · 도트 빌보드)로 11장 신겐 방 · 1장 윤덕수 방 · 2장 로비 · 위층 · 폐차장(하성 무대 · 서진태 조작 · 따돌리기) 20초 · 성능 판 --crowd 30 20초 — 오류 없이 도는지
@@ -419,10 +419,10 @@ def main():
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "stage",
                             "--room", "3", "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))
     for art in ("a", "b"):
-        results.append(run(f"그림 {art.upper()} (1장 윤덕수 방 · 20초)",
+        results.append(run(f"그림 {art.upper()} (1장 회암시 거리 · 강만재 → 윤덕수 · 20초)",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "ch1",
-                            "--room", "4", "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))
-    for art, room, name in (("a", "1", "2장 로비 · 서진태"), ("b", "5", "2장 위층 복도 · 남궁혁"), ("a", "6", "2장 폐차장 · 신태진")):
+                            "--room", "3", "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))
+    for art, room, name in (("a", "1", "2장 1층 · 서진태"), ("b", "5", "2장 위층 복도 · 남궁혁"), ("a", "6", "2장 폐차장 · 신태진")):
         results.append(run(f"그림 {art.upper()} ({name} · 20초)",
                            [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--autoplay", "--mode", "ch2",
                             "--room", room, "--art", art, "--seconds", "20"], lambda out: (("RESULT" in out), "")))

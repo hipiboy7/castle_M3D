@@ -97,7 +97,10 @@ func test_chapter_data_ids_exist() -> void:
 					if a[2].has("ai"):
 						check(EnemyAI.PROFILES.has(str(a[2]["ai"])), "%s 방 %s 덧붙임 AI %s" % [id, room["id"], a[2]["ai"]])
 			var boss := str(room.get("boss", ""))
-			check(boss == "" or room["enemies"].any(func(e): return e[0] == boss), "%s 방 %s 보스 %s 가 그 방 적" % [id, room["id"], boss])
+			var foes: Array = room["enemies"].duplicate()          # + 싸움 중에 들어오는 적(triggers spawn — 보스가 나중에 들어오는 방)
+			for t in room.get("triggers", []):
+				foes.append_array(t.get("spawn", []))
+			check(boss == "" or foes.any(func(e): return e[0] == boss), "%s 방 %s 보스 %s 가 그 방 적" % [id, room["id"], boss])
 		for cid in ids:
 			var ch := Addendum.character(cid)
 			check(ch.has("name") and Addendum.rank_at(cid, T.PERIOD) != "", "%s 인물 %s 1층(이름 · 등급)" % [id, cid])
@@ -228,7 +231,7 @@ func test_stages_of_chapter() -> void:
 	var s1 := Campaign.stages("ch1")
 	check(s1.size() == Hoeam.ROOMS.size() and str(s1[0]["title"]) != "", "1장 스테이지 = 방 %d %s" % [Hoeam.ROOMS.size(), s1])
 	var s2 := Campaign.stages("ch2")
-	check(s2.size() == Haseong.ROOMS.size() and str(s2[1]["title"]).contains("로비"), "2장 스테이지 = 방 %d %s" % [Haseong.ROOMS.size(), s2])
+	check(s2.size() == Haseong.ROOMS.size() and str(s2[1]["title"]).contains("1층"), "2장 스테이지 = 방 %d %s" % [Haseong.ROOMS.size(), s2])
 
 
 

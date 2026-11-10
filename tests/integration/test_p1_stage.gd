@@ -1,7 +1,8 @@
 extends "res://tests/helpers.gd"
 ## 통합 시험(B 등급) — 0장 프롤로그(군터 호텔) · 1장 회암시 판(src/combat/stage.gd + 장 표 prologue.gd · hoeam.gd +
 ## src/combat/enemy_ai.gd 0 · 1장 프로필): 같은 시드 같은 결과 · 봇이 0장을 끝낸다 · 1장 시점(김신 내성 중위 · 맨손 · 서진태 아군) ·
-## 총잡이는 떨어져서 쏜다(kite) · 김대건 크로스 카운터 · 2차(배율 · 2차 표) · 강만재 하이가드 · 보스가 몇 초 만에 녹지 않는다.
+## 총잡이는 떨어져서 쏜다(kite) · 김대건 크로스 카운터 · 2차(배율 · 2차 표) · 강만재 하이가드 · 보스가 몇 초 만에 녹지 않되 1분 안에 쓰러진다.
+## 스테이지(사용자 2026-11-10): 0장 = 호텔 한 맵(복도 → 군터의 방) · 1장 = 김대건을 쓰러뜨리면 회유 · 합류, 거리에서 강만재 → 윤덕수.
 
 const Stage = preload("res://src/combat/stage.gd")
 const EnemyAI = preload("res://src/combat/enemy_ai.gd")
@@ -27,9 +28,27 @@ func test_p1_deterministic() -> void:
 
 func test_bot_clears_ch0() -> void:
 	var r := Stage.simulate(1, 60 * 150, {"chapter": "ch0"})
-	check(r["over"] == "win" and int(r["cleared"]) == 2, "봇이 0장(복도 · 군터 방)을 끝낸다 %s" % r)
+	check(r["over"] == "win" and int(r["cleared"]) == 1, "봇이 0장(복도 → 군터의 방 — 스테이지 하나)을 끝낸다 %s" % r)
 	var secs := float(r["frames"]) / 60.0
-	check(secs >= 45.0 and secs <= 120.0, "0장 판 길이 %.0f초 (봇 기준 60 ~ 100)" % secs)
+	check(secs >= 30.0 and secs <= 100.0, "0장 판 길이 %.0f초 (봇 기준 30 ~ 100)" % secs)
+
+
+## 0장 한 맵: 경호원이 다 쓰러지고 문틀 너머(x 8.6)에 들어서야 군터가 일어선다 — 그 전에는 방을 넘지 않는다
+func test_ch0_gunter_after_corridor() -> void:
+	var d := Stage.make(1, {"chapter": "ch0"})
+	_past_intro(d, Prologue.INTRO_T)
+	check(Prologue.ROOMS.size() == 2 and d["enemies"].all(func(e): return e.char_id == "gunter_guard"), "스테이지 하나 + 끝 방 · 처음엔 경호원만")
+	for e in d["enemies"]:
+		e.hp = 0.0
+		e.die()
+	for i in 10:
+		Stage.step(d, {})
+		d["world"].events.clear()
+	check(d["stage"] == "fight" and not d["enemies"].any(func(e): return e.char_id == "gunter"), "복도만 비우면 아직 — 군터의 방으로 걸어가야 %s" % d["stage"])
+	d["heroes"][0].pos = Vector2(9.0, 0.0)
+	Stage.step(d, {})
+	check(d["enemies"].any(func(e): return e.char_id == "gunter" and e.alive()) and d["boss"] != null and d["boss"].char_id == "gunter",
+		"문틀을 지나면 군터가 일어선다(큰 막대)")
 
 
 func test_ch1_start() -> void:
@@ -45,11 +64,22 @@ func test_ch1_start() -> void:
 
 ## 총잡이(kite): 서 있는 김신에게 다가붙지 않고 떨어져서 쏜다 — 군터 · 대머리 · 장발. 주먹잡이는 다가온다
 func test_gunmen_keep_distance_and_shoot() -> void:
-	var d := Stage.make(2, {"chapter": "ch0", "room": 1})
-	var g = d["enemies"][0]
+	var d := Stage.make(2, {"chapter": "ch0"})
 	var kim = d["heroes"][0]
-	check(g.char_id == "gunter" and d["ais"][g].kite, "군터 방 — 군터는 총잡이")
 	_past_intro(d, Prologue.INTRO_T)
+	for e in d["enemies"]:
+		e.hp = 0.0
+		e.die()
+	kim.pos = Vector2(9.0, 0.0)                              # 군터의 방에 들어선다(trigger x)
+	Stage.step(d, {})
+	d["world"].events.clear()
+	var g = null
+	for e in d["enemies"]:
+		if e.char_id == "gunter":
+			g = e
+	check(g != null and d["ais"][g].kite, "군터의 방 — 군터는 총잡이")
+	if g == null:
+		return
 	var closest := INF
 	var shot := false
 	var hp0: float = kim.hp
@@ -135,10 +165,59 @@ func test_manjae_high_guard() -> void:
 	check(is_equal_approx(d["ais"][mj].guard_rate, g + float(EnemyAI.PROFILES["manjae"]["guard_add"])), "하이가드 = 능력치 막기 + guard_add")
 
 
-## 보스는 몇 초 만에 녹지 않는다(봇 판 — 김대건은 25초가 지나도 서 있고, 김신도 맞는다). 수치 조정 회귀 막기
+## 보스는 몇 초 만에 녹지 않지만 1분 안에 쓰러진다(봇 판 — 1장 보스는 모두 김신보다 아랫급, 사용자 2026-11-10 "보스가 김신보다 약한대도
+## 강하게 표현될 때가 있음"). 김대건은 10초가 지나도 서 있고 김신을 맞힌다 · 그래도 1분 안. 수치 조정 회귀 막기
 func test_bosses_last() -> void:
-	var r := Stage.simulate(1, 60 * 25 + Hoeam.INTRO_T, {"chapter": "ch1", "room": 2})
-	check(int(r["cleared"]) == 0 and r["over"] == "", "김대건은 25초 안에 안 쓰러진다 %s" % r)
-	check(float(r["heroes_hp"][0]) < 200.0, "김대건이 김신을 맞힌다 (hp %s)" % [r["heroes_hp"]])
-	var r2 := Stage.simulate(1, 60 * 30 + Hoeam.INTRO_T, {"chapter": "ch1", "room": 4})
-	check(int(r2["cleared"]) == 0, "윤덕수는 30초 안에 안 쓰러진다 %s" % r2)
+	var r := Stage.simulate(1, 60 * 10 + Hoeam.INTRO_T, {"chapter": "ch1", "room": 2})
+	check(int(r["cleared"]) == 0 and r["over"] == "", "김대건은 10초 안에 안 쓰러진다 %s" % r)
+	var full: float = Stage.make(1, {"chapter": "ch1", "room": 2})["heroes"][0].hp_max
+	check(float(r["heroes_hp"][0]) < full - 1.0, "김대건이 김신을 맞힌다 (hp %s / %.0f)" % [r["heroes_hp"], full])
+	for c in [[2, "junkyard_dusk"], [3, "street"]]:
+		var r2 := Stage.simulate(1, 60 * 120, {"chapter": "ch1", "room": c[0]})
+		var t := float(r2["times"].get(c[1], -1)) / 60.0
+		check(t > 10.0 and t < 60.0, "%s 봇이 1분 안에 넘는다 (%.0f초) %s" % [c[1], t, r2["times"]])
+
+
+## 김대건을 쓰러뜨리면 우리 편으로 일어서고(recruit) 회유 대사(원작 016/016-020 · 017/029)가 도는 동안 모두 멈춘다 → 합류 대사 뒤에 방을 넘는다
+func test_daegeon_persuaded_joins() -> void:
+	var d := Stage.make(1, {"chapter": "ch1", "room": 2})
+	_past_intro(d, Hoeam.INTRO_T)
+	var dg = d["enemies"][0]
+	dg.hp = 0.0
+	dg.die()
+	var lines: Array = []
+	var recruited := false
+	Stage.step(d, {})
+	recruited = d["world"].events.any(func(e): return e[0] == "recruit" and e[1] == dg)
+	for e in d["world"].events:
+		if e[0] == "line":
+			lines.append(str(e[2]))
+	d["world"].events.clear()
+	check(recruited and dg.team == 0 and dg.alive() and d["allies"].has(dg), "김대건이 우리 편으로 일어선다")
+	check(lines.any(func(t): return t.contains("함께 윤덕수를")) and lines.any(func(t): return t.contains("각오들 단단히")),
+		"회유 · 합류 대사(원작) %s" % [lines])
+	check(Stage._held(d), "회유 대사 동안 모두 멈춘다")
+	var n := 0
+	while d["stage"] == "fight" and n < 60 * 40:
+		Stage.step(d, {})
+		d["world"].events.clear()
+		n += 1
+	check(d["stage"] == "clear" and n > 60 * 15, "대사가 다 지나간 뒤에 방을 넘는다 (%.1f초)" % (n / 60.0))
+
+
+## 회암시 거리: 강만재가 먼저 — 강만재가 쓰러지면 윤덕수가 나서서 큰 막대가 된다. 김대건 · 서진태는 아군
+func test_street_manjae_then_deoksu() -> void:
+	var d := Stage.make(1, {"chapter": "ch1", "room": 3})
+	_past_intro(d, Hoeam.INTRO_T)
+	check(d["allies"].any(func(a): return a.char_id == "kimdaegeon") and d["allies"].any(func(a): return a.char_id == "jintae"), "합류한 김대건 · 서진태가 아군")
+	check(not d["enemies"].any(func(e): return e.char_id == "yundeoksu"), "처음엔 윤덕수가 없다")
+	for e in d["enemies"]:
+		if e.char_id == "gangmanjae":
+			e.hp = 0.0
+			e.die()
+	Stage.step(d, {})
+	var yd = null
+	for e in d["enemies"]:
+		if e.char_id == "yundeoksu":
+			yd = e
+	check(yd != null and yd.oneshot_immune and str(d["boss_id"]) == "yundeoksu", "강만재가 쓰러지면 윤덕수가 마지막 보스로")
