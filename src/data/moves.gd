@@ -115,6 +115,11 @@ const M := {
 	"s_triple": {"label": "리천식 삼연타", "startup": 3, "active": 12, "recovery": 14, "damage": 7, "reach": 14,
 		"radius": 9, "arc": 60, "lunge": 8, "knockback": 0.5, "hitstop": 6, "posture": 12, "hits": 3, "shape": "punch",
 		"sfx": "swing", "hit_sfx": "hit", "skill": true, "skill_id": "triple", "fx": "triple", "stun_3d": [90, 30]},
+	# 촌경(castle_common skills.json inch — 효과 없음, 이름만): 한 치 거리에서 허리 · 발끝으로 내지르는 짧은 주먹 — 준비가 거의 없고
+	# 붙어야 닿는다(reach 짧음 · lunge 거의 없음). 가드를 뚫고(guard_break) 크게 날린다(넉백 · 체간). 10장 리천을 이긴 뒤(beat:richeon)
+	"s_inch": {"label": "촌경", "startup": 4, "active": 3, "recovery": 18, "damage": 15, "reach": 9, "radius": 9,
+		"lunge": 2, "knockback": 9.0, "hitstop": 12, "posture": 45, "guard_break": true, "shape": "punch", "sfx": "swing",
+		"hit_sfx": "hit_heavy", "shake": 6, "skill": true, "skill_id": "inch", "whiff": 10},
 	# 보스 — 백도찬 (사시미 나이프 파이팅). 패턴 · 박자는 src/combat/boss_ai.gd (castle_M P2 설계서 8.2절)
 	"b_slash1": {"label": "사시미 베기", "startup": 14, "active": 3, "recovery": 10, "damage": 9, "reach": 14, "radius": 10,
 		"arc": 70, "lunge": 5, "posture": 10, "telegraph": "parry", "shape": "slash", "sfx": "knife"},

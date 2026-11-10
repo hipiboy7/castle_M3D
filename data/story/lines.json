@@ -284,5 +284,15 @@
     },
     "down": "쓰러졌다 — 교대",
     "lose": ["패배", "쓰러졌다 — 다시 · 흰 ! 쳐내기 · 빨간 ! 구르기"]
+  },
+  "stage": {
+    "_about": "방 규칙 칸(src/combat/stage.gd 머리) 공통 글 — 방 대사(rooms.<방>.timeout · protect)가 없을 때. %s = 이름 · 기술 · 초",
+    "timeout": ["시간 초과", "제한 시간 안에 끝내지 못했다 — 다시"],
+    "protect": ["%s 쓰러졌다", "지켜야 할 사람이 쓰러졌다 — 다시"],
+    "learn": ["%s · 새 기술", "%s"],
+    "watch": "관전",
+    "escape_hint": "출구로 — %d초",
+    "survive_hint": "버티기 — %d초",
+    "limit_hint": "남은 시간 — %d초"
   }
 }

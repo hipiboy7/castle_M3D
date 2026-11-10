@@ -14,9 +14,9 @@ const BOSS_ID := "baekdochan"
 const DUEL_EVENT := "duel_offbeat:baekdochan"
 
 ## 기술 id(castle_common skills.json) → 이 판 동작(moves.gd). 여기 없는 기술은 이 판에 동작이 없어 고를 수 없다
-## (inch 촌경 — 받은 데이터에는 있다. vanish_step 좌우로 사라지는 스텝은 rc.2 폰 묶음 B 에서 동작을 얻었다)
+## (inch 촌경은 2026-11-10 동작을 얻었다 — 10장 리천을 이긴 뒤 stage trigger learn. vanish_step 좌우로 사라지는 스텝은 rc.2 폰 묶음 B 에서)
 ## (amur_dash 아무르 티그로 대시는 고르는 기술이 아니라 대시 + 공격 — moveset dash, 그래서 여기 없다)
-const MOVE_OF := {"kickarts": "s_kick", "triple": "s_triple", "offbeat": "s_offbeat", "offbeat2": "s_offbeat2",
+const MOVE_OF := {"kickarts": "s_kick", "triple": "s_triple", "inch": "s_inch", "offbeat": "s_offbeat", "offbeat2": "s_offbeat2",
 	"offbeat_rev": "s_offbeat_rev", "vanish_step": "s_vanish", "amur_triple": "s_amur3", "amur_weaving": "s_weave",
 	"jin_original": "s_jt_original", "jintae_vital": "s_jt_vital", "jintae_storm": "s_jt_storm", "woojin_core_counter": "s_wj_core"}
 

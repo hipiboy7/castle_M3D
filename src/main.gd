@@ -198,23 +198,28 @@ func _build_stage_view() -> void:
 		add_child(arena)
 		arena.build(not headless)
 	for f in d["world"].fighters:
-		var lname := _look_of(f)
-		var art := str(args["art"])
-		var p
-		if art != "puppet" and Looks.has_art(lname):
-			p = PuppetGlb.new() if art == "a" else PuppetDot.new()   # 그림 바꿔 끼우기 — 판정은 그대로(LSP)
-			lname += "_" + art
-		else:
-			p = Puppet.new()
-		p.process_mode = Node.PROCESS_MODE_PAUSABLE
-		add_child(p)
-		p.setup(Looks.look(lname))
-		p.update_from(f, 0.0, false)
-		pup[f] = p
+		_add_puppet(f)
 	_markers()
 	var hb = d["hero"]
 	var bb = d["boss"] if d["boss"] != null else hb
 	cam.snap(pup[hb].position, pup[bb].position)
+
+
+## 사람 하나의 인형 — 방에 들어설 때 · 방 안에서 새로 선 사람(stage 신호 spawn — triggers)
+func _add_puppet(f) -> void:
+	var lname := _look_of(f)
+	var art := str(args["art"])
+	var p
+	if art != "puppet" and Looks.has_art(lname):
+		p = PuppetGlb.new() if art == "a" else PuppetDot.new()   # 그림 바꿔 끼우기 — 판정은 그대로(LSP)
+		lname += "_" + art
+	else:
+		p = Puppet.new()
+	p.process_mode = Node.PROCESS_MODE_PAUSABLE
+	add_child(p)
+	p.setup(Looks.look(lname))
+	p.update_from(f, 0.0, false)
+	pup[f] = p
 
 
 ## 발밑 고리(11장): 조작하는 사람 하늘색 · 짝 흐린 파랑 · 아군 초록. 결투는 없음
@@ -240,11 +245,22 @@ func _attack_label(h) -> String:
 	return "베기" if shape.begins_with("slash") or shape.begins_with("thrust") or shape in ["overhead_chop", "reverse_stab", "rising_slash"] else "치기"
 
 
-## 따돌리기 방(2장 남궁혁): 남은 초를 아래 알림 줄에 — 방을 넘으면 지운다
+## 방 규칙의 남은 초(따돌리기 2장 남궁혁 · 버티기 · 제한 시간 — stage.timers)와 관전 방을 아래 알림 줄에 — 방을 넘으면 지운다
 func _escape_hint() -> void:
-	var left := Stage.escape_left(d) if kind == "stage" else -1.0
-	if left >= 0.0:
-		hud.set_hint(str(Lines.at(d["tbl"].LINES + ".escape_hint")) % ceili(left))
+	var parts: Array = []
+	if kind == "stage":
+		var tm := Stage.timers(d)
+		if tm["auto"]:
+			parts.append(str(Lines.at("stage.watch")))
+		if float(tm["escape"]) >= 0.0:
+			var eh = Lines.at(str(d["tbl"].LINES) + ".escape_hint")
+			parts.append(str(eh if eh != null else Lines.at("stage.escape_hint")) % ceili(float(tm["escape"])))
+		if float(tm["survive"]) >= 0.0:
+			parts.append(str(Lines.at("stage.survive_hint")) % ceili(float(tm["survive"])))
+		if float(tm["limit"]) >= 0.0:
+			parts.append(str(Lines.at("stage.limit_hint")) % ceili(float(tm["limit"])))
+	if not parts.is_empty():
+		hud.set_hint(" · ".join(parts))
 		_esc_hint = true
 	elif _esc_hint:
 		hud.set_hint("")
@@ -796,7 +812,12 @@ func _after_tick() -> void:
 		touch.show_swap = mode == "fight" and _can_swap()     # 2장: 방마다 조작 인물이 바뀐다
 		if mode == "fight" or mode == "demo":
 			_music()                                          # 마지막 보스 방에서 곡이 바뀐다
-	var swapped: bool = w.events.any(func(e): return e[0] == "swap" or e[0] == "ko")
+	for e in w.events:
+		if e[0] == "spawn" and not pup.has(e[1]):          # 방 안에서 새로 선 사람(triggers spawn)
+			_add_puppet(e[1])
+		elif e[0] == "recruit" and pup.has(e[1]):
+			pup[e[1]].victory = false                       # 우리 편이 되어 다시 싸운다
+	var swapped: bool = w.events.any(func(e): return e[0] in ["swap", "ko", "spawn", "recruit"])
 	evfx.apply(d)
 	w.events.clear()
 	if swapped:
