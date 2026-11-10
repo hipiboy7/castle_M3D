@@ -5,7 +5,7 @@
 
 - 원작 컷 · 원작 그림을 쓴 자산은 **없다**(인물 · 무대는 코드로 만든 3D 관절 인형 · 도형 — `src/view/`)
 - 효과음 · 음악은 castle_M 이 절차 생성한 파일을 그대로 가져왔다(castle_M `tools/gen_sfx.py` · `tools/gen_music.py` + `tools/synth.py` · `tools/music.py`, 처음 출처는 캐슬 취호전 v1.4.1 — castle_M `6da1bb0`). 다시 만들려면 castle_M 에서 그 도구를 돌려 복사한다. 이 판으로 가져온 커밋 `b57db00`(2026-10-26, castle_M `c8fc86c` 무렵)
-- 외부 자산은 글꼴 하나 — 배포 허용(SIL OFL 1.1)
+- 외부 자산은 글꼴 하나 — 배포 허용(SIL OFL 1.1) — 와 인물 모델(CC0 — 아래 `models/kimshin_a.glb`)
 
 | 파일 (`assets/` 기준) | 출처 | 쓰는 곳 |
 |---|---|---|
@@ -39,7 +39,7 @@
 | `music/ending.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 13장을 깼을 때 (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
 | `music/dungeon.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 3 · 12장(교도소 · 교회) (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
 | `music/resolve.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 7장(1부 끝 — 대화) (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
-| `models/kimshin_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06, 외형은 castle_common canon look 글 — conf ai) | 그림 A 김신 (`src/view/puppet_glb.gd`, `--art a`) |
+| `models/kimshin_a.glb` | 외부 모델을 옮김 — Quaternius 'Ultimate Modular Men' Suit(poly.pizza 'Business Man' https://poly.pizza/m/JFrLIKqvCH) · **CC0 1.0** · `tools/import_model.gd` 가 이 판 뼈대 · 쉬는 자세 · 외형 색으로 옮김(2026-11-10 시험 — 원본은 저장소에 없음) | 그림 A 김신 (`src/view/puppet_glb.gd`, `--art a`) |
 | `models/shingen_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06, 〃) | 그림 A 사사키 신겐 |
 | `sprites/kimshin_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` 가 `models/kimshin_a.glb` 를 8방향으로 그려 도트로 줄임 | 그림 B 김신 (`src/view/puppet_dot.gd`, `--art b`) |
 | `sprites/kimshin_b.json` | 〃 — 도트 시트 칸 이름 · 크기 | 그림 B 김신 |
