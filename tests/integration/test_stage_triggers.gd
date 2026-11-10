@@ -289,3 +289,113 @@ func test_triggers_deterministic() -> void:
 	var b := Stage.simulate(7, 60 * 60, {"table": _tbl(rooms)})
 	check(a == b, "triggers 판 같은 시드 같은 결과\n%s\n%s" % [a, b])
 	check(a["over"] == "win", "봇이 두 무리를 넘어 끝까지 (%s)" % [a])
+
+
+# ---- 11 ~ 13장 덧붙임(2026-11-10): requires · 조작 인물 down/hp · cast · bounds/theme · hp_start · passive · fade · ally_heroes
+
+const H3 := {"HEROES": ["kimshin", "woojin", "jintae"]}
+
+
+func test_requires_orders_triggers() -> void:
+	var d := _mk([_room({"enemies": [["richeon", Vector2(3.0, 0.0)]],
+		"triggers": [{"when": "hp:richeon:0.5", "spawn": [["street_thug", Vector2(4.0, 1.5), {"tag": "majun"}]]},
+			{"when": "hp:kimshin:0.5", "requires": [0], "spawn_allies": [["hantaecheol", Vector2(-5.0, 0.0)]]}]}), END])
+	_fight(d)
+	var k = d["heroes"][0]
+	k.hp = k.hp_max * 0.4
+	_go(d, 1)
+	check(not d["fired"].has(1), "requires: 0번이 먼저 터지지 않으면 1번(hp:kimshin)은 안 터진다")
+	_one(d, "richeon").hp = _one(d, "richeon").hp_max * 0.4
+	_go(d, 1)
+	check(d["fired"].has(0) and d["fired"].has(1) and _one(d, "hantaecheol") != null, "0번이 터지면 같은 프레임에 1번도(hp:<조작 인물>)")
+
+
+func test_hero_down_switches_cast_instead_of_losing() -> void:
+	var rooms := [_room({"cast": ["jintae"], "hp_start": {"jintae": 0.3}, "enemies": [["street_thug", Vector2(3.0, 0.0)]],
+		"triggers": [{"when": "down:jintae", "cast": ["kimshin"], "cast_at": [Vector2(1.0, 0.0)]}]}), END]
+	var d := _mk(rooms, 1, H3)
+	var jt = d["heroes"][2]
+	check(absf(jt.hp - jt.hp_max * 0.3) < 0.01, "hp_start: 서진태 30%로 시작")
+	_fight(d)
+	jt.die()
+	var ev := _go(d, 1)
+	var k = d["heroes"][0]
+	check(d["world"].over == "", "down:<조작 인물> trigger 가 있으면 바로 지지 않는다")
+	check(d["cast"] == [0] and d["hero"] == k and d["world"].fighters.has(k), "cast: 김신이 들어와 조작 인물이 된다")
+	check(k.pos.distance_to(Vector2(1.0, 0.0)) < 0.5 and ev.any(func(e): return e[0] == "spawn" and e[1] == k), "cast_at 자리 · spawn 신호")
+	check(d["world"].fighters.has(jt), "쓰러진 서진태는 그 자리에 남는다")
+	var d2 := _mk([_room({"cast": ["jintae"], "enemies": [["street_thug", Vector2(3.0, 0.0)]]}), END], 1, H3)
+	_fight(d2)
+	d2["heroes"][2].die()
+	_go(d2, 1)
+	check(d2["world"].over == "lose", "trigger 가 없으면 그대로 진다")
+
+
+func test_cast_swap_alive_hero_leaves() -> void:
+	var d := _mk([_room({"cast": ["woojin"], "enemies": [["richeon", Vector2(3.0, 0.0)]],
+		"triggers": [{"when": "hp:richeon:0.7", "cast": ["kimshin"]}]}), END])
+	_fight(d)
+	var wj = d["heroes"][1]
+	_one(d, "richeon").hp = _one(d, "richeon").hp_max * 0.6
+	var ev := _go(d, 1)
+	check(not d["world"].fighters.has(wj) and ev.any(func(e): return e[0] == "leave" and e[1] == wj), "피우진 리타이어(퇴장 · leave 신호)")
+	check(d["hero"] == d["heroes"][0] and d["heroes"][0].pos.x < -5.0, "김신이 왼쪽 가장자리에서 등장")
+	check(ev.any(func(e): return e[0] == "cast"), "cast 신호(교대 버튼 다시)")
+
+
+func test_bounds_and_theme_widen_map() -> void:
+	var wide := Rect2(-6.0, -2.4, 24.0, 4.8)
+	var d := _mk([_room({"enemies": [["street_thug", Vector2(3.0, 1.5)]],
+		"triggers": [{"when": "time:0.1", "bounds": wide, "theme": "vision_center"}]}), END])
+	_fight(d)
+	var ev := _go(d, 8)
+	check(d["world"].bounds == wide and d["theme"] == "vision_center", "bounds · theme 이 바뀐다")
+	check(ev.any(func(e): return e[0] == "stage_view"), "stage_view 신호(무대 그림 다시)")
+	d["hero"].pos = Vector2(14.0, 0.0)
+	_go(d, 1)
+	check(d["hero"].pos.x > 13.0, "넓어진 맵 끝까지 간다 (%.1f)" % d["hero"].pos.x)
+
+
+func test_passive_enemy_only_takes_hits() -> void:
+	var d := _mk([_room({"enemies": [["richeon", Vector2(-2.6, 0.0), {"passive": true, "hp_k": 0.05}]]}), END])
+	var k = d["heroes"][0]
+	var n := 0
+	var quiet := true
+	while d["room_i"] == 0 and n < 60 * 40:
+		Stage.step(d)
+		d["world"].events.clear()
+		n += 1
+		if d["stage"] == "fight" and not d["enemies"].is_empty() and not d["enemies"][0].intent.is_empty():
+			quiet = false
+	check(quiet, "passive 적은 입력이 없다")
+	check(d["room_i"] == 1 and k.hp >= k.hp_max - 0.01, "맞기만 하는 적 — 김신은 한 대도 안 맞고 쓰러뜨린다 (%d 프레임 · %.0f)" % [n, k.hp])
+
+
+func test_fade_on_clear_and_end() -> void:
+	var rooms := [_room({"enemies": [["street_thug", Vector2(3.0, 1.5)]], "fade": ["만인지상의 자리에 오르다", "11장 끝"]}),
+		{"id": "end", "theme": "market_alley", "bounds": B, "cast": ["kimshin"], "heroes": [Vector2(0, 0)],
+			"allies": [], "enemies": [], "end": true, "fade": ["끝", "어둠"]}]
+	var d := _mk(rooms)
+	_fight(d)
+	d["enemies"][0].die()
+	var ev := _go(d, 1)
+	check(ev.any(func(e): return e[0] == "fade" and e[1] == "만인지상의 자리에 오르다"), "깨면 fade 신호")
+	_go(d, Stage.FADE_T - 10)
+	check(d["room_i"] == 0, "fade 방은 FADE_T 동안 머문다")
+	ev = _go(d, 30)
+	check(d["room_i"] == 1 and ev.any(func(e): return e[0] == "fade" and e[1] == "끝"), "끝 방도 fade")
+
+
+func test_ally_heroes_fight_as_bots() -> void:
+	var d := _mk([_room({"cast": ["woojin"], "heroes": [Vector2(-4.0, 1.0)], "ally_heroes": [["kimshin", Vector2(-4.0, -1.0)]],
+		"enemies": [["street_thug", Vector2(2.0, 1.5)], ["street_thug", Vector2(3.0, -1.5)]]}), END])
+	var k = d["heroes"][0]
+	check(d["world"].fighters.has(k) and d["ally_heroes"].has(k) and d["cast"] == [1], "김신은 판 위에 있지만 조작 인물이 아니다")
+	check(not Stage.can_swap(d), "교대 차례에 없다")
+	_fight(d)
+	var x0: float = k.pos.x
+	_go(d, 90)
+	check(k.pos.x > x0 + 0.5, "김신은 봇으로 적에게 간다")
+	k.die()
+	_go(d, 1)
+	check(d["world"].over == "", "ally_heroes 가 쓰러져도 지지 않는다")

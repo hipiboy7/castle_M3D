@@ -63,6 +63,7 @@ var paused := false
 var _fake_press := false
 var _fake_swap := false
 var _esc_hint := false
+var _faded := false                     # 방 끝 연출(stage fade)로 화면을 어둡게 했다
 var _logic_ticks := 0                      # 로직(Stage · Duel.step)이 돈 수 — 멈춤 지킴이(_watch_stall)
 var _stall_seen := 0
 var _stall_t := 0.0
@@ -174,6 +175,7 @@ func _new_run(ch: String, room := -1) -> void:
 		d = Duel.make(seed_now, opts)
 	rec = Replay.start(kind, seed_now, opts)
 	hud.clear_messages()
+	_undim()
 	evfx.later_msg = []
 	evfx.later_t = 0.0
 	_build_stage_view()
@@ -182,27 +184,32 @@ func _new_run(ch: String, room := -1) -> void:
 
 ## 무대 + 인형을 지금 판(방)에 맞게 다시 만든다 — 11장은 방을 넘을 때마다(신호 "room")
 func _build_stage_view() -> void:
-	if arena != null:
-		arena.queue_free()
 	for f in pup:
 		pup[f].queue_free()
 	pup.clear()
-	if kind == "stage":
-		arena = VIEWS[Campaign.view(chapter)].new()
-		arena.process_mode = Node.PROCESS_MODE_PAUSABLE
-		add_child(arena)
-		arena.build(str(d["room"]["theme"]), d["room"]["bounds"], not headless)
-	else:
-		arena = Arena.new()
-		arena.process_mode = Node.PROCESS_MODE_PAUSABLE
-		add_child(arena)
-		arena.build(not headless)
+	_build_arena()
 	for f in d["world"].fighters:
 		_add_puppet(f)
 	_markers()
 	var hb = d["hero"]
 	var bb = d["boss"] if d["boss"] != null else hb
 	cam.snap(pup[hb].position, pup[bb].position)
+
+
+## 무대 그림만 — 방에 들어설 때 · 싸움 중 맵이 넓어지거나 무대가 바뀔 때(stage 신호 stage_view — triggers bounds · theme)
+func _build_arena() -> void:
+	if arena != null:
+		arena.queue_free()
+	if kind == "stage":
+		arena = VIEWS[Campaign.view(chapter)].new()
+		arena.process_mode = Node.PROCESS_MODE_PAUSABLE
+		add_child(arena)
+		arena.build(str(d.get("theme", d["room"]["theme"])), d["world"].bounds, not headless)
+	else:
+		arena = Arena.new()
+		arena.process_mode = Node.PROCESS_MODE_PAUSABLE
+		add_child(arena)
+		arena.build(not headless)
 
 
 ## 사람 하나의 인형 — 방에 들어설 때 · 방 안에서 새로 선 사람(stage 신호 spawn — triggers)
@@ -808,6 +815,7 @@ func _player_intent() -> Dictionary:
 func _after_tick() -> void:
 	var w = d["world"]
 	if w.events.any(func(e): return e[0] == "room"):
+		_undim()
 		_build_stage_view()
 		touch.show_swap = mode == "fight" and _can_swap()     # 2장: 방마다 조작 인물이 바뀐다
 		if mode == "fight" or mode == "demo":
@@ -817,13 +825,31 @@ func _after_tick() -> void:
 			_add_puppet(e[1])
 		elif e[0] == "recruit" and pup.has(e[1]):
 			pup[e[1]].victory = false                       # 우리 편이 되어 다시 싸운다
-	var swapped: bool = w.events.any(func(e): return e[0] in ["swap", "ko", "spawn", "recruit"])
+		elif e[0] == "leave" and pup.has(e[1]):            # 조작 인물 묶음에서 빠짐(triggers cast)
+			pup[e[1]].queue_free()
+			pup.erase(e[1])
+		elif e[0] == "stage_view":
+			_build_arena()
+		elif e[0] == "cast":
+			touch.show_swap = mode == "fight" and _can_swap()
+		elif e[0] == "fade":                               # 방 끝 연출 — 어둡게 하며 글(11장 만인지상)
+			hud.set_dim(true)
+			hud.message(str(e[1]), str(e[2]), float(e[3]))
+			_faded = true
+	var swapped: bool = w.events.any(func(e): return e[0] in ["swap", "ko", "spawn", "recruit", "cast"])
 	evfx.apply(d)
 	w.events.clear()
 	if swapped:
 		_markers()
 	if w.over != "":
 		_end_fight(w.over)
+
+
+## 방 끝 연출(fade)로 어둡게 한 화면을 되돌린다 — 다음 방 · 새 판
+func _undim() -> void:
+	if _faded:
+		hud.set_dim(false)
+		_faded = false
 
 
 func _end_fight(result: String) -> void:

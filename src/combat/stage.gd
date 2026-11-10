@@ -9,7 +9,8 @@ extends RefCounted
 ## 따돌리기 방(방 표 escape — 2장 남궁혁 030/013-024): secs 안에 exit 안에 들어서면 적이 남아도 방을 넘고, 못 들어서면 진다
 ## (버티기로는 안 넘는다 — rc.2 폰 2026-11-07 사용자). 싸움이 시작될 때 안내 글(방 대사 guide), 시간 초과 패배 글은 d["lose_line"].
 ## 신호(world.events 에 더함): ["room", 방 번호] · ["line", 제목, 작은 글, 초, (늦춤 초)] · ["swap", 새로 조작하는 사람] · ["yield", 적] ·
-##   ["escape", 사람] · ["spawn", 새로 선 사람] · ["recruit", 우리 편이 된 사람] · ["learn", 조작 인물, [새 기술 이름]]
+##   ["escape", 사람] · ["spawn", 새로 선 사람] · ["recruit", 우리 편이 된 사람] · ["learn", 조작 인물, [새 기술 이름]] ·
+##   ["leave", 빠진 조작 인물] · ["cast"] · ["stage_view"](무대를 다시 그림) · ["fade", 제목, 작은 글, 초]
 ##
 ## ── 장 표 머리 칸 ─────────────────────────────────────────────────────────────────────────────────────────────
 ## EVENT · PERIOD · HEROES · LINES · CROWD_ID · ROLES · ROOMS · INTRO_T · CLEAR_T · END_T · HEAL_ON_CLEAR · MAX_ATTACKERS(꼭) ·
@@ -19,11 +20,14 @@ extends RefCounted
 ## 기본: id · theme · bounds(Rect2 — 넓게 쓰면 긴 맵: 카메라가 앞장선 사람을 따른다) · cast · heroes(자리) · allies [[id, 자리]] ·
 ##   enemies [[id, 자리, {덧붙임}]] · boss · end · kit · talk · escape
 ##   덧붙임(enemies · spawn · standing 의 셋째 · 넷째 칸): role · look · ai · name · hp_k · leader · tag(같은 인물 여럿을 가를 이름 —
-##   when "down:<tag>" · recruit · protect 가 id 대신 tag 로도 찾는다)
+##   when "down:<tag>" · recruit · protect 가 id 대신 tag 로도 찾는다) · passive(적 — 치지도 막지도 않고 맞기만, 11장 천일도)
 ## 규칙 칸:
-##   "triggers": [{when, ...do}] — 싸움 중 매 프레임 차례로 보고, 조건이 맞으면 한 번만 터진다(같은 프레임에 여럿도). 결정적.
-##     when:  "down:<id>"        그 사람(char_id 또는 tag — 여럿이면 모두)이 쓰러지거나 물러남(inert). 서 있는 사람(standing)은 안 센다
-##            "hp:<id>:<비율>"   그 사람 체력이 최대의 비율 이하(hp_floor · yield_at 와 같은 값이면 닿는 순간)
+##   "triggers": [{when, (requires), ...do}] — 싸움 중 매 프레임 차례로 보고, 조건이 맞으면 한 번만 터진다(같은 프레임에 여럿도). 결정적.
+##     requires: [번호, ..]      그 triggers 가 먼저 터져야 이것을 본다(12장 그롤라전 — 마준영 투입 뒤에야 피우진 투입)
+##     when:  "down:<id>"        그 사람(char_id 또는 tag — 여럿이면 모두)이 쓰러지거나 물러남(inert). 서 있는 사람(standing)은 안 센다.
+##                               조작 인물도 된다 — 이 trigger 가 남은 동안은 그 사람이 쓰러져 조작 인물이 없어도 지지 않는다
+##                               (12장 마학영전: {"when": "down:jintae", "cast": ["kimshin"]})
+##            "hp:<id>:<비율>"   그 사람(적 · 아군 · 조작 인물) 체력이 최대의 비율 이하(hp_floor · yield_at 와 같은 값이면 닿는 순간)
 ##            "time:<초>"        방 싸움 시간(대사 hold 동안은 멈춘다)
 ##            "x:<m>"            앞장선 조작 인물 x 가 m 이상(긴 복도 — 끝에서 다음 무리)
 ##            "after:<번호>:<초>" triggers 의 그 번호(0부터)가 터진 뒤 초
@@ -43,6 +47,9 @@ extends RefCounted
 ##            "inert": [id, ..]           그 사람만 멈춘다
 ##            "clear": true               방을 깬 것으로(say 가 있으면 대사가 끝난 뒤)
 ##            "escape": {"exit": Rect2, "secs": n}  지금부터 n 초 안에 출구로(따돌리기와 같은 판정 · 남은 초 표시 · 못 닿으면 짐)
+##            "cast": [id, ..] (+ "cast_at": [Vector2, ..])  조작 인물 묶음을 바꾼다 — 빠지는 사람은 퇴장(쓰러진 사람은 그 자리),
+##                                        들어오는 사람은 cast_at 자리(없으면 왼쪽 가장자리)에서(12장 신겐 2차전 피우진 → 김신)
+##            "bounds": Rect2 · "theme": 무대  싸움 중 맵을 넓히거나 무대를 바꾼다(main.gd 가 무대 그림을 다시 — 12장 구스타프전)
 ##            "learn": "<진행 사건 id>"   조작 인물들의 등급 · 기술을 그 사건까지(포함)의 castle_common 진행으로 다시(beat:richeon →
 ##                                        김신 재앙 · 촌경 · 리천식 삼연타). 새 기술 이름을 알림 글로
 ##   "survive": 초   그 시간을 버티면 방을 깬다. triggers 에 escape 가 있으면 깨지 않고 그 escape 를 마쳐야 깬다
@@ -51,6 +58,10 @@ extends RefCounted
 ##   "protect": [id, ..]  그중 누가 쓰러지면 진다(조작 인물 · 아군 — 패배 글 rooms.<방>.protect, 없으면 stage.protect)
 ##   "standing": [[id, Vector2, 팀, {덧붙임}], ..]  싸우지 않고 서 있는 사람(대화 장면 — 방 가운데를 보고, 맞지도 치지도 않는다)
 ##   "auto": true    컴퓨터끼리 싸우는 방(연출) — 조작 인물도 봇이 움직인다(사람 입력은 교대만). 화면 아래 '관전'
+##   "hp_start": {id: 비율}  조작 인물이 이 체력으로 방을 시작(12장 마학영전 서진태 0.3)
+##   "ally_heroes": [id 또는 [id, Vector2], ..]  cast 에 없는 조작 인물을 아군 봇으로 세운다(12장 최민욱 잡기 김신 — 쓰러져도 지지
+##                   않는다. 지키려면 protect 에)
+##   "fade": [제목, 작은 글] 또는 "키"  방을 깨면(끝 방 end 는 들어서면) 화면을 어둡게 하며 글(11장 '만인지상의 자리에 오르다') — FADE_T 머문다
 ##   "ranks": {id: 등급}  이 방에서 그 조작 인물 · 아군 · 적의 등급을 덮는다(기술 수도 다시 — 8장 교류회 김신 톱 · 류지학 내성 중위)
 ## 남은 초(escape · survive · limit)와 관전은 timers(d) → main.gd 가 화면 아래 한 줄로.
 ## 방을 넘지 않는 때: 대사(say)가 남음 · 앞으로 터질 spawn(time · after · x · survive 조건)이 남음 · 대화 방 talk 시간.
@@ -187,6 +198,8 @@ static func _npc(d: Dictionary, id: String, team: int, pos: Vector2, extra := {}
 		f.hp = f.hp_max
 	if extra.has("tag"):
 		d["tag_of"][f] = str(extra["tag"])
+	if team == 1 and extra.get("passive", false):
+		d["passive"][f] = true                         # 맞기만 하는 적(11장 천일도) — 치지도 막지도 않는다
 	var i: int = d["enemies"].size() + d["allies"].size() + 1
 	if team == 1:
 		f.is_boss = true                              # 적 쪽: 공격 준비 동안 상대 쪽으로 몸을 오래 튼다 · 늦은 쳐내기 없음
@@ -291,6 +304,9 @@ static func _enter(d: Dictionary, i: int) -> void:
 	d["say_until"] = 0
 	d["hold_until"] = 0
 	d["clear_at"] = -1
+	d["passive"] = {}
+	d["ally_heroes"] = []
+	d["theme"] = str(room.get("theme", ""))
 	w.fighters = []
 	w.pending = []
 	w.hitstop = 0
@@ -298,26 +314,19 @@ static func _enter(d: Dictionary, i: int) -> void:
 	d["cast"] = cast_of(T, room)
 	if not d["cast"].has(int(d["ctrl"])):
 		d["ctrl"] = d["cast"][0]
-	var kit: Dictionary = room.get("kit", {})
 	for j in d["cast"].size():
 		var h = d["heroes"][d["cast"][j]]
-		h.pos = room["heroes"][j]
-		h.facing = Vector2(1, 0)
-		h.vel = Vector2.ZERO
-		h.posture = 0.0
-		if h.alive():
-			h.set_state("idle")
-		var rk: String = str(kit.get(h.char_id, h.char_id))   # 방 표 kit: 이 방에서만 다른 동작 · 외형(2장 공사장 맨손 김신)
-		h.moveset = T.ROLES[rk]["moveset"]
-		if rk != h.char_id:
-			d["look_of"][h] = str(T.ROLES[rk]["look"])
-		else:
-			d["look_of"].erase(h)
-		var want := str(room.get("ranks", {}).get(h.char_id, d["base_rank"][h]))   # 방 표 ranks(8장 교류회 김신 톱)
-		if h.rank != want:
-			_set_rank(d, h, want)
-		_bare_skills(d, h, _room_bare(d, h))
-		w.add(h)
+		_place_hero(d, h, room["heroes"][j])
+		if room.get("hp_start", {}).has(h.char_id) and h.alive():
+			h.hp = h.hp_max * float(room["hp_start"][h.char_id])     # 방 표 hp_start(12장 마학영전 서진태 30%)
+	for a in room.get("ally_heroes", []):                # 조작하지 않는 조작 인물 — 아군 봇(12장 최민욱 잡기 김신)
+		var aid := str(a[0] if a is Array else a)
+		var h = d["heroes"][T.HEROES.find(aid)]
+		if d["cast"].has(T.HEROES.find(aid)):
+			continue
+		var b: Rect2 = room["bounds"]
+		_place_hero(d, h, a[1] if a is Array else Vector2(b.position.x + 0.8, b.get_center().y))
+		d["ally_heroes"].append(h)
 	for a in room["allies"]:
 		_npc(d, a[0], 0, a[1], a[2] if a.size() > 2 else {})
 	for e in room["enemies"]:
@@ -341,6 +350,29 @@ static func _enter(d: Dictionary, i: int) -> void:
 		after = 2.4
 	_line(d, "enter", 3.0, after)
 	_focus(d)
+
+
+## 조작 인물을 방에 세운다(자리 · 상태 · 방 표 kit 동작 · 외형 · ranks 등급 · 맨손 기술)
+static func _place_hero(d: Dictionary, h, pos: Vector2) -> void:
+	var T = d["tbl"]
+	var room: Dictionary = d["room"]
+	h.pos = pos
+	h.facing = Vector2(1, 0)
+	h.vel = Vector2.ZERO
+	h.posture = 0.0
+	if h.alive():
+		h.set_state("idle")
+	var rk: String = str(room.get("kit", {}).get(h.char_id, h.char_id))   # 방 표 kit: 이 방에서만 다른 동작 · 외형(2장 공사장 맨손 김신)
+	h.moveset = T.ROLES[rk]["moveset"]
+	if rk != h.char_id:
+		d["look_of"][h] = str(T.ROLES[rk]["look"])
+	else:
+		d["look_of"].erase(h)
+	var want := str(room.get("ranks", {}).get(h.char_id, d["base_rank"][h]))   # 방 표 ranks(8장 교류회 김신 톱)
+	if h.rank != want:
+		_set_rank(d, h, want)
+	_bare_skills(d, h, _room_bare(d, h))
+	d["world"].add(h)
 
 
 ## 서 있는 사람(방 표 standing): 판 · AI 없이 방 가운데를 보고 선다(inert — 치지도 맞지도 않는다)
@@ -419,7 +451,8 @@ static func step(d: Dictionary, human = null) -> void:
 				d["stage"] = "end" if d["room"].get("end", false) else "fight"
 				d["t"] = 0
 				if d["stage"] == "end":
-					_line(d, "end", 5.0)
+					if not _fade(d):
+						_line(d, "end", 5.0)
 				elif d["room"].has("talk"):
 					_say(d)
 				elif _ruled(d["room"]):
@@ -428,7 +461,8 @@ static func step(d: Dictionary, human = null) -> void:
 			if not _held(d):
 				d["fight_t"] += 1
 		"clear":
-			if d["t"] >= T.CLEAR_T and d["room_i"] + 1 < T.ROOMS.size():
+			var wait: int = maxi(int(T.CLEAR_T), FADE_T if d["room"].has("fade") else 0)
+			if d["t"] >= wait and d["room_i"] + 1 < T.ROOMS.size():
 				_enter(d, d["room_i"] + 1)
 				return
 		"end":
@@ -504,7 +538,7 @@ static func _intents(d: Dictionary, human) -> void:
 		if d["ais"][e].busy():
 			attackers += 1
 	for e in d["enemies"]:
-		if frozen or not fighting:
+		if frozen or not fighting or d["passive"].has(e):
 			e.intent = {}
 			continue
 		var ai = d["ais"][e]
@@ -516,7 +550,7 @@ static func _intents(d: Dictionary, human) -> void:
 		var h = d["heroes"][k]
 		if k == int(d["ctrl"]) and human != null and not _held(d):
 			h.intent = human
-		elif frozen or not h.alive() or not d["cast"].has(k):
+		elif frozen or not h.alive() or not (d["cast"].has(k) or d["ally_heroes"].has(h)):
 			h.intent = {}
 		else:
 			h.intent = _bot_intent(d, h, fighting)
@@ -595,7 +629,7 @@ static func _after(d: Dictionary) -> void:
 	for k in d["cast"]:
 		if d["heroes"][k].alive():
 			alive += 1
-	if alive == 0 and w.over == "":
+	if alive == 0 and w.over == "" and not _rescue(d):
 		w.over = "lose"
 		w.hitstop = maxi(w.hitstop, 30)
 	if d["stage"] == "fight" and w.over == "":
@@ -623,6 +657,21 @@ static func _after(d: Dictionary) -> void:
 		if won:
 			_clear(d, got_away)
 	_focus(d)
+
+
+## 조작 인물이 모두 쓰러져도 아직 지지 않는다: 그 사람의 down: trigger 가 남았다(12장 마학영전 — 서진태가 쓰러지면 김신이 나온다)
+static func _rescue(d: Dictionary) -> bool:
+	if d["stage"] != "fight":
+		return false
+	var trs: Array = d["room"].get("triggers", [])
+	for k in trs.size():
+		var p: PackedStringArray = str(trs[k]["when"]).split(":")
+		if d["fired"].has(k) or p[0] != "down":
+			continue
+		for c in d["cast"]:
+			if d["heroes"][c].char_id == p[1]:
+				return true
+	return false
 
 
 ## 남은 적(쓰러지지도 물러나지도 않은)
@@ -671,8 +720,24 @@ static func _clear(d: Dictionary, got_away: bool) -> void:
 	if got_away:
 		w.events.append(["escape", d["heroes"][d["ctrl"]]])
 		_line(d, "escape", 2.8)
+	elif _fade(d):
+		pass
 	elif not d["room"].has("talk"):
 		_line(d, "clear", 2.4)
+
+
+## 방 끝 연출(방 표 fade — [제목, 작은 글] 또는 lines.json 방 대사 키): 깸 · 끝 방에서 화면을 어둡게 하며 글. 띄웠으면 true
+const FADE_T := 240              # fade 방은 깬 뒤 이만큼 머문다(4초)
+
+
+static func _fade(d: Dictionary) -> bool:
+	var v = d["room"].get("fade", null)
+	if v is String:
+		v = Lines.at("%s.rooms.%s.%s" % [d["tbl"].LINES, d["room"]["id"], v])
+	if not (v is Array and v.size() >= 2):
+		return false
+	d["world"].events.append(["fade", str(v[0]), str(v[1]), FADE_T / 60.0])
+	return true
 
 
 ## 진다: limit 시간 초과 · protect 인물이 쓰러짐
@@ -711,7 +776,9 @@ static func _who(d: Dictionary, id: String) -> Array:
 static func _triggers(d: Dictionary) -> void:
 	var trs: Array = d["room"].get("triggers", [])
 	for k in trs.size():
-		if d["fired"].has(k) or not _when(d, str(trs[k]["when"])):
+		if d["fired"].has(k) or not trs[k].get("requires", []).all(func(j): return d["fired"].has(int(j))):
+			continue
+		if not _when(d, str(trs[k]["when"])):
 			continue
 		d["fired"][k] = d["fight_t"]
 		_do(d, trs[k])
@@ -765,6 +832,13 @@ static func _do(d: Dictionary, t: Dictionary) -> void:
 			_calm(f)
 	if t.has("learn"):
 		_learn(d, str(t["learn"]))
+	if t.has("cast"):
+		_set_cast(d, t["cast"], t.get("cast_at", []))
+	if t.has("bounds") or t.has("theme"):
+		if t.has("bounds"):
+			w.bounds = t["bounds"]
+		d["theme"] = str(t.get("theme", d["theme"]))
+		w.events.append(["stage_view"])                 # main.gd 가 무대 그림을 새 넓이 · 무대로 다시
 	if t.has("escape"):
 		d["esc"] = {"exit": t["escape"]["exit"], "secs": float(t["escape"]["secs"]), "t0": d["fight_t"]}
 	_say_lines(d, t.get("say", []))
@@ -772,6 +846,34 @@ static func _do(d: Dictionary, t: Dictionary) -> void:
 		d["hold_until"] = maxi(int(d["hold_until"]), int(d["say_until"]))
 	if t.get("clear", false):
 		d["clear_at"] = maxi(int(d["n"]), int(d["say_until"]))
+
+
+## 조작 인물 묶음을 바꾼다: 빠지는 사람은 퇴장(쓰러진 사람은 그 자리에 남는다), 들어오는 사람은 cast_at 자리(없으면 왼쪽 가장자리)에.
+## 지금 조작하는 사람이 빠지면 새 묶음의 첫 사람으로
+static func _set_cast(d: Dictionary, ids: Array, at: Array) -> void:
+	var T = d["tbl"]
+	var w = d["world"]
+	var now: Array = ids.map(func(id): return T.HEROES.find(str(id)))
+	for k in d["cast"]:
+		var h = d["heroes"][k]
+		if not now.has(k) and h.alive():
+			w.fighters.erase(h)
+			w.pending = w.pending.filter(func(p): return p[0] != h and p[1] != h)
+			w.events.append(["leave", h])
+	var b: Rect2 = w.bounds
+	for j in now.size():
+		var h = d["heroes"][now[j]]
+		if d["cast"].has(now[j]):
+			continue
+		d["ally_heroes"].erase(h)
+		if not w.fighters.has(h):
+			_place_hero(d, h, at[j] if j < at.size() else Vector2(b.position.x + 0.4, b.get_center().y))
+			w.events.append(["spawn", h])
+	d["cast"] = now
+	if not now.has(int(d["ctrl"])):
+		d["ctrl"] = now[0]
+		w.events.append(["swap", d["heroes"][now[0]]])
+	w.events.append(["cast"])
 
 
 ## 싸움에서 빠진다(치지도 맞지도 않는다)
