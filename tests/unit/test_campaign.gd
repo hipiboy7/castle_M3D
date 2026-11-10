@@ -183,6 +183,18 @@ func test_next_chapter_and_unlock() -> void:
 			"%s 를 깨면 %s 열림 · 이어하기 %s" % [ids[i], ids[i + 1], Save.next_chapter(all)])
 
 
+## 뒤 장을 깬 기록이 있으면 그 앞 장은 모두 열림 — 모든 장 열림(OPEN_ALL) 때 7 ~ 12장을 깬 세이브에서 5 · 6장이 잠겼다(rc.4 폰 2026-11-10)
+func test_unlock_before_furthest_clear() -> void:
+	var s := Save.fresh()
+	for id in ["ch0", "ch1", "ch2", "ch3", "ch7", "ch8", "ch9", "ch10", "ch11"]:
+		Save.record_clear(s, id, 1)
+	for id in ["ch4", "ch5", "ch6a", "ch6", "ch7", "ch12"]:
+		check(Save.unlocked_by_order(s, id), "%s: 뒤 장(11장)을 깼으면 열림" % id)
+	check(not Save.unlocked_by_order(s, "ch13"), "13장은 12장을 깨야")
+	Save.record_clear(s, "ch12", 1)
+	check(Save.unlocked_by_order(s, "ch13"), "12장을 깨면 13장")
+
+
 ## 중간 스테이지부터 한 판(난이도를 바꿔 다시 · 싸움 중 메뉴로 고른 스테이지)도 깬 장 — 가장 짧은 판은 첫 스테이지부터만(frames 0 = 안 잼)
 func test_clear_from_middle_keeps_best() -> void:
 	var s := Save.fresh()

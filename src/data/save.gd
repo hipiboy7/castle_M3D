@@ -93,13 +93,19 @@ static func unlocked(s: Dictionary, id: String) -> bool:
 	return Campaign.playable(id) and (Campaign.OPEN_ALL or unlocked_by_order(s, id))
 
 
-## 차례 규칙: 할 수 있는 장 중 첫 장은 열림, 그 뒤 장은 바로 앞 장을 깨야
+## 차례 규칙: 할 수 있는 장 중 첫 장은 열림, 그 뒤 장은 바로 앞 장을 깨야 — 또는 그 장이나 더 뒤 장을 깬 기록이 있으면(그 앞은 모두 열림.
+## 모든 장 열림(OPEN_ALL) 때 뒤 장만 깬 세이브에서 사이 장이 잠겼다 — rc.4 폰 2026-11-10 "5 · 6 · 13장을 못 함")
 static func unlocked_by_order(s: Dictionary, id: String) -> bool:
 	var ids := Campaign.playable_ids()
 	var i := ids.find(id)
 	if i < 0:
 		return false
-	return i == 0 or cleared(s, ids[i - 1])
+	if i == 0 or cleared(s, ids[i - 1]):
+		return true
+	for j in range(i, ids.size()):
+		if cleared(s, ids[j]):
+			return true
+	return false
 
 
 ## 속도 버튼: ×1 → ×1.5 → ×2 → ×1
