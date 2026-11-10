@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://blbx2xmp6ktov"
-path="res://.godot/imported/yeominsu_b.png-e442cc47c6cab0363092864a8cb731f8.ctex"
+uid="uid://ba30tmiqytp0k"
+path="res://.godot/imported/jackson_b.png-c48d1bdc7d565031833c01e621d92cf7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/roster/sprites/yeominsu_b.png"
-dest_files=["res://.godot/imported/yeominsu_b.png-e442cc47c6cab0363092864a8cb731f8.ctex"]
+source_file="res://assets/sprites/jackson_b.png"
+dest_files=["res://.godot/imported/jackson_b.png-c48d1bdc7d565031833c01e621d92cf7.ctex"]
 
 [params]
 

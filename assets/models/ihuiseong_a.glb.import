@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cgju45bcevm6v"
-path="res://.godot/imported/blackmamba_a.glb-899c47aa0ecd57bba871904d1e5392d6.scn"
+uid="uid://c3ig0fm1q5fj7"
+path="res://.godot/imported/ihuiseong_a.glb-6f59f54c9e6d091b8babe60ec12fd321.scn"
 
 [deps]
 
-source_file="res://assets/roster/models/blackmamba_a.glb"
-dest_files=["res://.godot/imported/blackmamba_a.glb-899c47aa0ecd57bba871904d1e5392d6.scn"]
+source_file="res://assets/models/ihuiseong_a.glb"
+dest_files=["res://.godot/imported/ihuiseong_a.glb-6f59f54c9e6d091b8babe60ec12fd321.scn"]
 
 [params]
 

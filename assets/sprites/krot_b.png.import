@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bt8vgqw8f8i6a"
-path="res://.godot/imported/ihuiseong_b.png-305539c5ec87949e0ca1eb0d2399378c.ctex"
+uid="uid://cmw61fjjvbvfv"
+path="res://.godot/imported/krot_b.png-7b447d1094e921319131044c870b35af.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/roster/sprites/ihuiseong_b.png"
-dest_files=["res://.godot/imported/ihuiseong_b.png-305539c5ec87949e0ca1eb0d2399378c.ctex"]
+source_file="res://assets/sprites/krot_b.png"
+dest_files=["res://.godot/imported/krot_b.png-7b447d1094e921319131044c870b35af.ctex"]
 
 [params]
 
