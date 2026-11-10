@@ -290,6 +290,94 @@ const M := {
 	"tk_yuwoosung_shield_hostage": {"startup": 20, "active": 5, "recovery": 18, "damage": 12, "reach": 12, "radius": 11, "lunge": 24, "knockdown": true, "knockback": 4.6, "hitstop": 9, "posture": 20, "telegraph": "", "shape": "shoulder_ram", "stance": 18, "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 3, "label": "시체 · 인질 방패", "skill": true, "stance_hit": "tk_yuwoosung_shield_hostage_hit"},
 	# yuwoosung · 시체 · 인질 방패 맞받기
 	"tk_yuwoosung_shield_hostage_hit": {"startup": 3, "active": 2, "recovery": 16, "damage": 16, "reach": 90, "radius": 5, "parryable": false, "knockback": 3.0, "hitstop": 10, "posture": 20, "shape": "shot", "sfx": "shot", "hit_sfx": "hit_heavy", "shake": 4, "label": "시체 · 인질 방패", "skill": true},
+	# insu · 맞받아치는 주먹·일격 — 상대에 맞춰 다가가 팔을 올리고 맞으며 버틴다(준비, 038/026 입에서 피 '왜, 이 정도도 못할 줄 알았나?') → 맞은 그 자리에서 운동화를 디디며 오른 주먹을 얼굴 · 머리에 꽂는다(실행, 038/027-029 '곱창 100인분 포장해 가라!' · p1:112/046 조르던 사내 머리를 때려 파편) → 상대가 떨어져 나가고 다음 동작으로. [근거: conf ai — 외침은 대사(기술명 아님)]
+	"tk_insu_punch": {"startup": 18, "active": 3, "recovery": 12, "damage": 6, "reach": 12, "radius": 9, "lunge": 4, "knockback": 1.2, "hitstop": 5, "posture": 8, "telegraph": "parry", "shape": "guard_counter", "sfx": "swing", "stance": 14, "label": "맞받아치는 주먹·일격", "skill": true, "stance_hit": "tk_insu_punch_hit"},
+	# insu · 맞받아치는 주먹·일격 맞받기
+	"tk_insu_punch_hit": {"startup": 2, "active": 3, "recovery": 14, "damage": 14, "reach": 13, "radius": 10, "lunge": 8, "knockback": 4.2, "knockdown": true, "hitstop": 11, "posture": 22, "parryable": false, "shape": "straight", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 4, "label": "맞받아치는 주먹·일격", "skill": true},
+	# medvedi · 징 장갑 일격·박치기 — 롱코트를 휘날리며 몸을 낮춰 파고들고(준비, 022/026 · 029 낮은 도약 돌진) → 어깨로 가슴을 들이받고 이어 머리로 받는다(실행, p1:090/002 총 든 상대 가슴을 어깨로) → 상대가 젖혀진다. [근거: conf ai — 기술명 없음 · '징 장갑' 주먹 컷(022/032)은 확인 못 함 → 어깨 · 머리만]
+	"tk_md_stud_strike": {"startup": 14, "active": 10, "recovery": 18, "damage": 11, "reach": 12, "radius": 11, "lunge": 24, "hits": 2, "knockback": 3.2, "hitstop": 9, "posture": 20, "telegraph": "parry", "shape": "shoulder_ram", "seq": ["shoulder_ram", "headbutt"], "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 4, "stun_3d": [30, 20], "whiff": 14, "label": "징 장갑 일격·박치기", "skill": true},
+	# medvedi · 권총 사격·견제 — 반지 낀 손으로 코트 앞자락을 젖히고 허리춤 권총을 잡는다(준비, 020/194) → 뽑아 내리며 한 발 쏜다(실행, 021/027 · 029 '탕') → '와라.' 한 마디(020/195). [근거: conf ai — 근거리 사격 컷(@5276) 위치 불확실]
+	"tk_md_pistol": {"startup": 22, "active": 2, "recovery": 18, "damage": 12, "reach": 150, "radius": 4, "parryable": false, "knockback": 2.0, "hitstop": 6, "posture": 12, "telegraph": "unblock", "shape": "draw_shot", "sfx": "shot", "hit_sfx": "hit_heavy", "shake": 3, "label": "권총 사격·견제", "skill": true},
+	# medvedi · 붙잡아 메쳐 꽂기 — 박치기로 붙은 채 상대 몸통을 두 팔로 감는다(준비) → 거꾸로 들어 넘겨 머리부터 갑판에 꽂는다(실행, p1:090/002@2468 · 021/088-093) → 던진 뒤 다음 상대로 돌진. [근거: conf ai — 효과음뿐]
+	"tk_md_throw": {"startup": 20, "active": 8, "recovery": 22, "damage": 13, "reach": 12, "radius": 11, "lunge": 12, "hits": 2, "parryable": false, "guard_break": true, "knockdown": true, "knockback": 4.4, "hitstop": 14, "posture": 22, "telegraph": "unblock", "shape": "grab", "seq": ["grab", "throw_slam"], "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 6, "whiff": 20, "label": "붙잡아 메쳐 꽂기", "skill": true},
+	# medvedi · 흘리고 받아치기·그립 풀기 — 들어오는 주먹 · 총구를 보며 고개를 숙인다(준비, p1:095/064 '또 흘렸다..') → 흘린 틈에 왼 주먹으로 턱을 올려 친다(실행) → 다음 동작으로. [근거: conf ai — 기술명 없음, 흘리기는 백도찬 속말로 확인 · '그립 풀기(팔뚝 비틀기)'는 맞받는 동작에 넣지 않음]
+	"tk_md_counter_deflect": {"startup": 18, "active": 3, "recovery": 12, "damage": 5, "reach": 11, "radius": 9, "lunge": 3, "knockback": 1.0, "hitstop": 5, "posture": 8, "telegraph": "parry", "shape": "duck", "sfx": "swing", "stance": 16, "label": "흘리고 받아치기·그립 풀기", "skill": true, "stance_hit": "tk_md_counter_deflect_hit"},
+	# medvedi · 흘리고 받아치기·그립 풀기 맞받기
+	"tk_md_counter_deflect_hit": {"startup": 2, "active": 4, "recovery": 14, "damage": 15, "reach": 12, "radius": 10, "arc": 60, "lunge": 6, "knockback": 4.0, "knockdown": true, "hitstop": 12, "posture": 26, "parryable": false, "shape": "uppercut", "hand": "L", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 4, "label": "흘리고 받아치기·그립 풀기", "skill": true},
+	# hide · 히데 카타나 베기 — 카타나를 가로로 비껴 쥐고 상대 옆으로 파고든다(준비, 108/032) → 사선으로 베고 되돌려 크게 쓸어 벤다(실행, 098/005 '츠악' · 108/033 '쒜액' · 108/039) → 칼을 거두고 거리를 둔다. [근거: conf ai — 원작 명칭 없음]
+	"tk_hide_katana_slash": {"startup": 12, "active": 10, "recovery": 16, "damage": 10, "reach": 18, "radius": 11, "arc": 130, "lunge": 12, "side": 8, "hits": 2, "knockback": 2.6, "hitstop": 7, "posture": 14, "telegraph": "parry", "shape": "slash", "seq": ["slash", "slash_back"], "sfx": "slash", "hit_sfx": "hit_heavy", "shake": 3, "label": "히데 카타나 베기", "skill": true},
+	# hide · 히데 카타나·권총 겸용 — 오른손 카타나를 앞에 세우고 왼손에 권총(준비, 043) → 곤봉 · 칼을 칼로 받아 낸 뒤 붙은 거리에서 왼손 권총을 쏜다(실행, 043/025-026) → 맞은 상대가 뒤집혀 날아간다(043/027). [근거: conf ai — 오토바이 주행 사격(079)은 넣지 않음 · 칼 + 권총 둘 다 듦(weapon sword, 왼손 총)]
+	"tk_hide_blade_pistol": {"startup": 18, "active": 3, "recovery": 14, "damage": 7, "reach": 15, "radius": 10, "arc": 80, "lunge": 4, "knockback": 1.6, "hitstop": 5, "posture": 10, "telegraph": "parry", "shape": "guard_counter", "sfx": "knife", "stance": 14, "label": "히데 카타나·권총 겸용", "skill": true, "stance_hit": "tk_hide_blade_pistol_hit"},
+	# hide · 히데 카타나·권총 겸용 맞받기
+	"tk_hide_blade_pistol_hit": {"startup": 3, "active": 2, "recovery": 14, "damage": 15, "reach": 30, "radius": 6, "parryable": false, "knockback": 4.6, "knockdown": true, "hitstop": 10, "posture": 20, "shape": "shot", "hand": "L", "sfx": "shot", "hit_sfx": "hit_heavy", "shake": 4, "label": "히데 카타나·권총 겸용", "skill": true},
+	# hide · 히데 메치기·벽 처박기 — 기합 '하압!'과 함께 상대 팔을 잡는다(준비, p1:097/018 · 108/041 도끼 쥔 팔) → 거꾸로 뒤집어 바닥에 메친 뒤 누운 몸통을 칼로 내려찌른다(실행, 097/020 '쿵' · 108/042 '처억') → '제길.. 짧다.'(108/043). [근거: conf ai — '벽 처박기'는 컷으로 확인 못 함(바닥 메치기만)]
+	"tk_hide_throw": {"startup": 20, "active": 12, "recovery": 22, "damage": 8, "reach": 12, "radius": 10, "lunge": 12, "hits": 3, "parryable": false, "guard_break": true, "knockdown": true, "knockback": 1.0, "hitstop": 12, "posture": 18, "telegraph": "unblock", "shape": "grab", "seq": ["grab", "throw_slam", "reverse_stab"], "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 5, "whiff": 20, "label": "히데 메치기·벽 처박기", "skill": true},
+	# hide · 히데 권총 사격 — 앞서 걷는 상대 뒤에서 품에 손을 넣는다(준비, p1:098/003 '슥') → 권총을 뽑아 겨누고 떨리는 손으로 쏜다(실행, '척' · 115/050 '탕 아앙 탕') → 비틀거리며 총을 거둔다. [근거: conf ai — 원작 명칭 없음]
+	"tk_hide_pistol": {"startup": 28, "active": 2, "recovery": 20, "damage": 15, "reach": 150, "radius": 4, "parryable": false, "knockback": 3.6, "knockdown": true, "hitstop": 8, "posture": 16, "telegraph": "unblock", "shape": "draw_shot", "sfx": "shot", "hit_sfx": "hit_heavy", "shake": 4, "label": "히데 권총 사격", "skill": true},
+	# blackmamba · 근접 권총 처형·기습 사격 — 소음권총을 쥔 채 웃으며 바짝 다가선다(준비, p1:109/060) → 근거리에서 두 발을 꽂고 앞차기로 밀어낸다(실행, p1:070/117 '탕' · 109/058 어깨 관통) → 다음 상대로. [근거: conf ai — 앞차기 연계는 단계 글(after)만]
+	"tk_bm_pistol_exec": {"startup": 12, "active": 14, "recovery": 18, "damage": 8, "reach": 60, "radius": 6, "lunge": 6, "hits": 3, "parryable": false, "knockback": 2.4, "hitstop": 6, "posture": 12, "telegraph": "unblock", "shape": "shot", "seq": ["shot", "shot", "front_kick"], "sfx": "shot", "hit_sfx": "hit_heavy", "shake": 3, "label": "근접 권총 처형·기습 사격", "skill": true},
+	# blackmamba · 카람빗 베기·찌르기 — 장갑 손으로 카람빗을 세워 든다(준비) → 들어온 칼날에 칼날을 맞물려 받아 내고(실행, 114/000-001 '카드득' 불꽃) 그대로 되베어 상대 칼을 튕겨 낸다 → 상대가 무기를 놓쳐 잠깐 빈다. [근거: conf ai — 원작은 받아 내는 장면(베는 쪽은 표영 113/034) → 맞받기는 게임화]
+	"tk_bm_karambit": {"startup": 16, "active": 3, "recovery": 12, "damage": 7, "reach": 12, "radius": 9, "arc": 70, "lunge": 4, "knockback": 1.0, "hitstop": 5, "posture": 10, "telegraph": "parry", "shape": "guard_counter", "sfx": "knife", "stance": 12, "label": "카람빗 베기·찌르기", "skill": true, "stance_hit": "tk_bm_karambit_hit"},
+	# blackmamba · 카람빗 베기·찌르기 맞받기
+	"tk_bm_karambit_hit": {"startup": 2, "active": 3, "recovery": 12, "damage": 10, "reach": 12, "radius": 10, "arc": 90, "lunge": 4, "knockback": 2.0, "hitstop": 10, "posture": 26, "parryable": false, "shape": "slash_back", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 3, "stun_3d": [30, 20], "label": "카람빗 베기·찌르기", "skill": true},
+	# blackmamba · 단검 찌르기·내리꽂기 — 단검을 역수로 쥐고 붙는다(준비, 022/046) → 옆구리를 찌르고 뽑아 다시 가슴에 천천히 밀어 넣는다(실행, p1:105/069 · 070 '푸확' · 022/053 '저억') → 피 묻은 단검을 치켜든다(105/073). [근거: conf ai — 원작 명칭 없음 · 찌르며 동시 사격(105/069)은 넣지 않음]
+	"tk_bm_dagger": {"startup": 10, "active": 10, "recovery": 16, "damage": 9, "reach": 11, "radius": 9, "lunge": 10, "hits": 2, "knockback": 1.4, "hitstop": 8, "posture": 18, "telegraph": "parry", "shape": "thrust", "seq": ["thrust", "reverse_stab"], "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 3, "label": "단검 찌르기·내리꽂기", "skill": true},
+	# akila · 정밀 사격 — 상대가 먼저 뽑게 두고 오른손 그립 · 왼손을 공이치기 위에(준비, 022/147) → 한 번의 총성처럼 들리는 세 발 연사로 손의 총만 골라 친다(실행, 022/148-151 '쾅' '카강') → 탄피 세 개가 떨어지고 재장전(022/166-170). [근거: conf ai — 원작 명칭 없음]
+	"tk_akila_precise_shot": {"startup": 18, "active": 6, "recovery": 24, "damage": 7, "reach": 170, "radius": 4, "hits": 3, "parryable": false, "knockback": 1.2, "hitstop": 4, "posture": 16, "telegraph": "unblock", "shape": "shot", "seq": ["shot", "shot", "shot"], "sfx": "shot", "hit_sfx": "hit_heavy", "shake": 3, "label": "정밀 사격", "skill": true},
+	# akila · 구르기 · 도약 사격 — 산탄총을 쥔 채 등을 바닥에 대고(준비, 052/033) → 옆으로 구르며 · 몸을 날리며 한 손 권총을 연사한다(실행, 052/034 · 053/045 '탕 탕') → 무릎을 꿇고 일어나 산탄총을 다시 쥔다. [근거: conf ai — 쌍권총이 아니라 한 손 권총(052/033-034)]
+	"tk_akila_dual_pistol": {"startup": 20, "active": 10, "recovery": 20, "damage": 9, "reach": 140, "radius": 5, "side": 22, "hits": 2, "parryable": false, "iframes": true, "knockback": 1.8, "hitstop": 5, "posture": 10, "telegraph": "unblock", "shape": "sidestep", "seq": ["shot", "shot"], "sfx": "shot", "hit_sfx": "hit_heavy", "shake": 2, "label": "구르기 · 도약 사격", "skill": true},
+	# akila · 칼 찌르기 · 내리찍기 — 말없이 듣다가 · 숨긴 왼손에 전투용 나이프를 역수로 쥔다(준비, 053/013 '들어온다...!') → 위에서 내리찍는다(실행, 053/018 · 009 재킷 옆구리에 꽂힘) → 칼이 손바닥을 꿰뚫은 채 맞잡힌다(053/019-020). [근거: conf ai — 1차 ref(009/000@11820) 좌표가 어긋남(실제 y≈12750)]
+	"tk_akila_knife": {"startup": 8, "active": 3, "recovery": 14, "damage": 13, "reach": 10, "radius": 9, "lunge": 6, "knockback": 2.0, "hitstop": 9, "posture": 18, "shape": "reverse_stab", "hand": "L", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 3, "label": "칼 찌르기 · 내리찍기", "skill": true},
+	# akila · 총 개머리 · 총구 타격 — 산탄총 · 카빈을 한 손에 쥐고 돌진한다(준비, 053/000) → 개머리로 얼굴을 옆으로 후려치고 이어 총구로 몸통을 찌른다(실행, 053/001 '퍼억' · 060/035 파편) → 왼손으로 옷깃을 잡는다(053/002). [근거: conf ai — 053/002 는 근접 사격인지 단정 못 함]
+	"tk_akila_gun_butt": {"startup": 14, "active": 10, "recovery": 16, "damage": 10, "reach": 15, "radius": 10, "arc": 100, "lunge": 14, "hits": 2, "knockback": 3.0, "hitstop": 8, "posture": 18, "telegraph": "parry", "shape": "backfist", "seq": ["backfist", "thrust"], "sfx": "swing", "hit_sfx": "hit_heavy", "shake": 3, "label": "총 개머리 · 총구 타격", "skill": true},
+	# akila · 리볼버 겨눔 위협 — 담배를 손가락으로 튕겨 버리고(준비, 074/000@2950) → 팔을 뻗어 리볼버를 정면으로 겨눈다(실행, '철컥' · '가능한 한발로 끝내라') → 쏘지 않으면 총구를 위로 세워 거둔다(074/004). [근거: conf ai — 원작은 위협만 하고 쏘지 않음 → 게임에서 늦은 큰 한 발로 해석]
+	"tk_akila_revolver_aim": {"startup": 34, "active": 2, "recovery": 20, "damage": 22, "reach": 170, "radius": 4, "parryable": false, "knockback": 4.4, "knockdown": true, "hitstop": 12, "posture": 28, "telegraph": "unblock", "shape": "draw_shot", "sfx": "shot", "hit_sfx": "hit_heavy", "shake": 5, "label": "리볼버 겨눔 위협", "skill": true},
+	# jeongdan · 정단 권총 사격 — 방패 대원 사이에서 몸을 낮추고 두 손으로 권총을 겨눈다(준비, 043/050) → 머리 · 허벅지를 골라 두 발(실행, 043/046 · 080/035-036 '허벅지 중앙에 한 방') → 다음 표적으로. [근거: conf ai — 원작 명칭 없음(내레이션)]
+	"tk_jd_shoot": {"startup": 22, "active": 10, "recovery": 18, "damage": 10, "reach": 160, "radius": 4, "hits": 2, "parryable": false, "knockback": 1.8, "hitstop": 5, "posture": 12, "telegraph": "unblock", "shape": "shot", "seq": ["shot", "shot"], "sfx": "shot", "hit_sfx": "hit_heavy", "shake": 3, "label": "정단 권총 사격", "skill": true},
+	# jeongdan · 몸으로 받아내기·팔 교차 — 피하지 않고 두 전완을 가슴 앞에 X 로 교차한다(준비, 008/209) → 공격을 팔로 받아 낸 뒤 하이킥을 올려 찬다(실행, 081/013-015 '퍽') → 다음 동작으로. [근거: conf ai — 081/013 하이킥 컷은 안경이 안 보여 귀속은 1차 서술]
+	"tk_jd_guard": {"startup": 18, "active": 3, "recovery": 12, "damage": 5, "reach": 11, "radius": 9, "lunge": 3, "knockback": 1.4, "hitstop": 5, "posture": 10, "telegraph": "parry", "shape": "guard_counter", "sfx": "swing", "stance": 16, "label": "몸으로 받아내기·팔 교차", "skill": true, "stance_hit": "tk_jd_guard_hit"},
+	# jeongdan · 몸으로 받아내기·팔 교차 맞받기
+	"tk_jd_guard_hit": {"startup": 3, "active": 4, "recovery": 14, "damage": 15, "reach": 15, "radius": 11, "arc": 90, "lunge": 4, "knockback": 4.4, "knockdown": true, "hitstop": 11, "posture": 24, "parryable": false, "shape": "round_kick", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 4, "label": "몸으로 받아내기·팔 교차", "skill": true},
+	# jintae · 서진태 잡아 메치기·조르기 — 상대를 붙잡아 끌어안는다(준비) → 무릎으로 올려 찍고 들어 메쳐 바닥 · 유리에 처박는다(실행, p1:044/040 '빠악' 무릎 · 050/005 거꾸로 처박힘) → 상대가 가구에 처박혀 쓰러진다. [근거: conf ai — 조르기는 넣지 않음(메치기 · 무릎만)]
+	"tk_jintae_throw_grapple": {"startup": 16, "active": 12, "recovery": 20, "damage": 8, "reach": 12, "radius": 10, "lunge": 12, "hits": 3, "parryable": false, "guard_break": true, "knockdown": true, "knockback": 3.0, "hitstop": 11, "posture": 18, "telegraph": "unblock", "shape": "grab", "seq": ["grab", "knee", "throw_slam"], "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 5, "whiff": 18, "label": "서진태 잡아 메치기·조르기", "skill": true},
+	# yeominsu · 막기 · 쳐내기 · 발 잡기 — 상대 발차기 · 훅을 보며 두 팔을 얼굴 앞에 교차하고 다리를 벌려 버틴다(준비, p1:076/002 바닥 긁힘) → 들어온 발을 손으로 잡아(038/083) 오른 주먹으로 반격한다(038/084) → 밀리지만 쓰러지지 않는다. [근거: conf ai — 기술명 없음(속말 '이건 잡아내야…')]
+	"tk_yeo_deflect": {"startup": 18, "active": 3, "recovery": 12, "damage": 5, "reach": 11, "radius": 9, "lunge": 3, "knockback": 1.0, "hitstop": 5, "posture": 10, "telegraph": "parry", "shape": "guard_counter", "sfx": "swing", "stance": 16, "label": "막기 · 쳐내기 · 발 잡기", "skill": true, "stance_hit": "tk_yeo_deflect_hit"},
+	# yeominsu · 막기 · 쳐내기 · 발 잡기 맞받기
+	"tk_yeo_deflect_hit": {"startup": 2, "active": 8, "recovery": 14, "damage": 8, "reach": 12, "radius": 10, "lunge": 4, "hits": 2, "knockback": 3.4, "hitstop": 10, "posture": 22, "parryable": false, "shape": "grab", "seq": ["grab", "straight"], "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 4, "stun_3d": [30, 20], "label": "막기 · 쳐내기 · 발 잡기", "skill": true},
+	# yeominsu · 큰 주먹 · 몸통 연타 — 주먹을 뒤로 크게 당긴다(준비) → 위에서 크게 휘둘러 내리친 뒤 옆구리에 두 대를 꽂는다(실행, p1:076/003 · 099/022 '돌덩이에 갖다 박은 느낌') → 상대가 튕긴다. [근거: conf ai — 원작 명칭 없음]
+	"tk_yeo_punch": {"startup": 16, "active": 16, "recovery": 18, "damage": 9, "reach": 13, "radius": 11, "arc": 100, "lunge": 8, "hits": 3, "knockback": 1.4, "hitstop": 8, "posture": 18, "telegraph": "parry", "shape": "hook", "seq": ["hook", "body_blow", "body_blow"], "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 3, "label": "큰 주먹 · 몸통 연타", "skill": true},
+	# yeominsu · 방망이 내려치기 · 올려치기 — 위에서 뛰어드는 상대를 보며 두 손으로 방망이를 치켜든다(준비) → 내려쳐 손의 권총을 쳐내고(125/018 '깡') 다시 올려 휘둘러 상체를 강타한다(125/047) → 상대가 튕겨 나간다. [근거: conf ai — 이름 글자 없이 외형으로 귀속(125/016-018)]
+	"tk_yeo_bat": {"startup": 18, "active": 12, "recovery": 20, "damage": 12, "reach": 17, "radius": 11, "arc": 100, "lunge": 8, "hits": 2, "guard_break": true, "knockdown": true, "knockback": 4.0, "hitstop": 10, "posture": 20, "telegraph": "parry", "shape": "overhead_chop", "seq": ["overhead_chop", "rising_slash"], "sfx": "swing", "hit_sfx": "hit_heavy", "shake": 4, "whiff": 14, "label": "방망이 내려치기 · 올려치기", "skill": true},
+	# yamamotokyoji · 쿄지 프라이팬 — 프라이팬을 얼굴 앞에 세운다(준비, 100/001) → 날아온 총알 · 주먹이 팬 가운데를 맞고 번쩍이면 그대로 팬을 둔기로 휘둘러 머리를 내려친다(실행, 102/012) → 문틀 뒤로 몸을 숨기고 살핀다(102/011). [근거: conf ai — 프라이팬(weapon other)]
+	"tk_kyoji_pan": {"startup": 20, "active": 4, "recovery": 16, "damage": 10, "reach": 14, "radius": 11, "arc": 100, "lunge": 6, "knockback": 2.4, "hitstop": 7, "posture": 14, "telegraph": "parry", "shape": "guard_counter", "sfx": "swing", "hit_sfx": "hit_heavy", "stance": 18, "label": "쿄지 프라이팬", "skill": true, "stance_hit": "tk_kyoji_pan_hit"},
+	# yamamotokyoji · 쿄지 프라이팬 맞받기
+	"tk_kyoji_pan_hit": {"startup": 3, "active": 4, "recovery": 16, "damage": 17, "reach": 14, "radius": 11, "lunge": 6, "knockback": 3.6, "hitstop": 13, "posture": 26, "parryable": false, "shape": "overhead_chop", "sfx": "swing", "hit_sfx": "hit_heavy", "shake": 5, "stun_3d": [30, 20], "label": "쿄지 프라이팬", "skill": true},
+	# toishi · 토이시 칼 대기 — 칼을 늘어뜨린 채 상대 뒤로 다가선다(준비, 018/107 '척') → 칼날을 앞으로 뻗어 어깨에 얹고 왼손으로 어깨를 붙잡은 뒤(018/109 '스릉' · 130-131) 칼을 아래서 위로 세운다(019/002 '스윽') → 칼을 곁에 세운 채 대치한다. [근거: conf ai — 원작은 베지 않고 위협만(칼 얹기 · 세우기) → 올려 베기는 게임화]
+	"tk_toishi_blade": {"startup": 20, "active": 10, "recovery": 20, "damage": 8, "reach": 16, "radius": 10, "lunge": 10, "hits": 2, "parryable": false, "knockback": 2.6, "hitstop": 10, "posture": 24, "telegraph": "unblock", "shape": "grab", "seq": ["grab", "rising_slash"], "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 3, "stun_3d": [40, 30], "whiff": 18, "label": "토이시 칼 대기", "skill": true},
+	# choedalcheon · 잡아 내리꽂기 · 얼굴 움켜쥐기 — 맞으며 기다리다 상대 머리를 움켜쥔다(준비) → 체중을 실어 머리를 바닥에 내리꽂고 손바닥으로 얼굴을 눌러 처박는다(실행, p1:059/046 '콰직' · 077/003 눈꺼풀) → 피투성이로 쓰러뜨린다. [근거: conf ai — 눈알 뽑기 세부는 일부만 봄 → 얼굴 누르기로]
+	"tk_chd_grab_slam": {"startup": 18, "active": 12, "recovery": 22, "damage": 8, "reach": 12, "radius": 10, "lunge": 10, "hits": 3, "parryable": false, "guard_break": true, "knockdown": true, "knockback": 0.6, "hitstop": 12, "posture": 18, "telegraph": "unblock", "shape": "grab", "seq": ["grab", "two_hand_slam", "palm"], "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 5, "stun_3d": [40, 30], "whiff": 20, "label": "잡아 내리꽂기 · 얼굴 움켜쥐기", "skill": true},
+	# choedalcheon · 방패 휘두르기 · 돌진 — 문짝 · 나무 판을 방패로 들고 총탄을 받는다(준비, 105/004 '팅') → 방패째 달려 들이받고 옆으로 후려친다(실행, 105/008 '파바바박' · 048/088 '쾅') → 쓰러진 상대를 방패로 누른다. [근거: conf ai — 방패(문짝 · 판, weapon other) · '두 장'은 확인 못 함]
+	"tk_chd_shield": {"startup": 18, "active": 12, "recovery": 20, "damage": 10, "reach": 14, "radius": 12, "arc": 120, "lunge": 28, "hits": 2, "guard_break": true, "knockdown": true, "knockback": 4.0, "hitstop": 9, "posture": 22, "telegraph": "parry", "shape": "shoulder_ram", "seq": ["shoulder_ram", "backfist"], "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 4, "whiff": 16, "label": "방패 휘두르기 · 돌진", "skill": true},
+	# choedalcheon · 받아 쥐고 카운터 — 상대 주먹 · 칼 든 손을 왼손으로 받아 쥔다(준비, p1:099/064 '턱') → 쥔 채 오른 주먹(오함마 같은 주먹)을 얼굴에 꽂는다(실행, 099/065 '콰직') → 맞히지만 자기도 상처를 입기도 한다. [근거: conf ai — 명칭 없음]
+	"tk_chd_catch_counter": {"startup": 18, "active": 4, "recovery": 14, "damage": 5, "reach": 12, "radius": 10, "lunge": 4, "knockback": 0.4, "hitstop": 6, "posture": 12, "telegraph": "parry", "shape": "grab", "hand": "L", "sfx": "wind", "stance": 14, "label": "받아 쥐고 카운터", "skill": true, "stance_hit": "tk_chd_catch_counter_hit"},
+	# choedalcheon · 받아 쥐고 카운터 맞받기
+	"tk_chd_catch_counter_hit": {"startup": 2, "active": 4, "recovery": 16, "damage": 17, "reach": 13, "radius": 10, "lunge": 6, "knockback": 4.8, "knockdown": true, "hitstop": 14, "posture": 28, "parryable": false, "shape": "straight", "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 5, "label": "받아 쥐고 카운터", "skill": true},
+	# choedalcheon · 무거운 물건 내려치기 — 기왓장 · 해머를 머리 위로 치켜든다(준비, 075/047) → 맞붙은 상대 머리에 내려친다(실행, p1:101/094 '쾅' · 075/048 쇠사슬 자물쇠) → 산산이 부서진다(101/095). [근거: conf ai — 기왓장 · 해머(weapon other)]
+	"tk_chd_heavy_swing": {"startup": 28, "active": 4, "recovery": 24, "damage": 21, "reach": 15, "radius": 11, "lunge": 8, "guard_break": true, "knockdown": true, "knockback": 3.0, "hitstop": 16, "posture": 30, "telegraph": "unblock", "shape": "two_hand_slam", "sfx": "swing", "hit_sfx": "hit_heavy", "shake": 7, "whiff": 24, "label": "무거운 물건 내려치기", "skill": true},
+	# pyoyoung · 카람빗 목 겨누기 · 긋기 — 상대 팔을 붙잡으며 파고든다(준비) → 카람빗 날을 목에 대고 긋고 몸을 돌려 한 번 더 벤다(실행, p1:109/041 · 102/015-018) → 칼을 돌리며 거리를 둔다. [근거: conf ai — 원작 명칭 없음]
+	"tk_pyoyoung_karambit_throat": {"startup": 12, "active": 14, "recovery": 18, "damage": 7, "reach": 12, "radius": 10, "arc": 90, "lunge": 12, "hits": 3, "parryable": false, "knockback": 2.4, "hitstop": 7, "posture": 16, "telegraph": "unblock", "shape": "grab", "seq": ["grab", "slash_back", "spin"], "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 3, "whiff": 16, "label": "카람빗 목 겨누기 · 긋기", "skill": true},
+	# choeminuk · 최민욱 주먹 강타 — 맞으면서도 몸을 낮춰 파고든다(준비, 128/042 방망이를 붕대 팔로 막음) → 명치에 주먹을 깊이 꽂고 이어 얼굴을 후려친다(실행, 109/047 · 128/044) → 상대 눈이 뒤집히며 쓰러진다(109/048). [근거: conf ai — 효과음뿐]
+	"tk_choe_fist": {"startup": 14, "active": 10, "recovery": 16, "damage": 11, "reach": 12, "radius": 10, "lunge": 12, "hits": 2, "knockback": 3.8, "knockdown": true, "hitstop": 10, "posture": 22, "telegraph": "parry", "shape": "body_blow", "seq": ["body_blow", "straight"], "sfx": "kick", "hit_sfx": "hit_heavy", "shake": 4, "stun_3d": [30, 20], "label": "최민욱 주먹 강타", "skill": true},
+	# choeminuk · 최민욱 손목·주먹 붙잡기 — 상대 주먹을 일부러 몸으로 맞으며 웃는다(준비, 130/025-027 '어차피 처맞는 거 더 처맞자고') → 들어온 손목 · 칼 쥔 손을 움켜쥐고 비튼다(실행, 109/040 '우드득' · 130/028 '콰득') → 상대가 고개를 숙이고 최민욱은 웃으며 말을 잇는다. [근거: conf ai — 손목 비트는 컷은 130/028 위쪽이 잘려 직접 못 봄]
+	"tk_choe_wrist_grab": {"startup": 18, "active": 3, "recovery": 12, "damage": 4, "reach": 12, "radius": 10, "lunge": 4, "knockback": 0.4, "hitstop": 5, "posture": 10, "telegraph": "parry", "shape": "guard_counter", "sfx": "wind", "stance": 16, "label": "최민욱 손목·주먹 붙잡기", "skill": true, "stance_hit": "tk_choe_wrist_grab_hit"},
+	# choeminuk · 최민욱 손목·주먹 붙잡기 맞받기
+	"tk_choe_wrist_grab_hit": {"startup": 2, "active": 4, "recovery": 12, "damage": 7, "reach": 12, "radius": 10, "lunge": 4, "knockback": 0.2, "hitstop": 14, "posture": 34, "parryable": false, "guard_break": true, "shape": "grab", "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 3, "stun_3d": [60, 40], "label": "최민욱 손목·주먹 붙잡기", "skill": true},
+	# choeminuk · 최민욱 머리 처박기·메치기 — 거구의 팔 아래로 파고들어 얼굴 · 머리를 붙잡는다(준비, 130/054) → 머리를 벽 · 바닥에 눌러 처박는다(실행, 130/055 '쾅' 파편 · 109/049-051) → 상대가 늘어지거나 총을 떨군다. [근거: conf ai — 원작 명칭 없음]
+	"tk_choe_head_smash": {"startup": 18, "active": 8, "recovery": 22, "damage": 12, "reach": 12, "radius": 10, "lunge": 14, "hits": 2, "parryable": false, "guard_break": true, "knockdown": true, "knockback": 1.0, "hitstop": 14, "posture": 22, "telegraph": "unblock", "shape": "grab", "seq": ["grab", "two_hand_slam"], "sfx": "wind", "hit_sfx": "hit_heavy", "shake": 6, "stun_3d": [40, 30], "whiff": 20, "label": "최민욱 머리 처박기·메치기", "skill": true},
+	# choeminuk · 최민욱 단검 쓰기 — 장갑 낀 손으로 허리 뒤 칼자루를 잡는다(준비, 131/037 '칼잡이..?') → 뽑으며 상대 칼을 흘리고 몸통을 가로로 긋는다(실행, 131/038 불꽃 · '방심했다') → 상대가 비틀거린다. [근거: conf ai — 원작 명칭 없음]
+	"tk_choe_dagger": {"startup": 8, "active": 3, "recovery": 14, "damage": 13, "reach": 13, "radius": 10, "arc": 130, "lunge": 8, "knockback": 2.4, "hitstop": 9, "posture": 20, "shape": "slash", "sfx": "knife", "hit_sfx": "hit_heavy", "shake": 3, "label": "최민욱 단검 쓰기", "skill": true},
+	# choeminuk · 최민욱 즉석 무기 내려치기 — 스패너를 붕대로 손에 감아 묶는다(준비, 127/065) → 머리 위로 치켜들어 내리친다(실행, 127/067-068) → 피범벅 조직원들이 쓰러지거나 무릎 꿇는다. [근거: conf ai — 몽키스패너(weapon other)]
+	"tk_choe_improv": {"startup": 22, "active": 4, "recovery": 20, "damage": 17, "reach": 14, "radius": 10, "lunge": 8, "knockback": 3.0, "knockdown": true, "hitstop": 14, "posture": 24, "telegraph": "parry", "shape": "overhead_chop", "sfx": "swing", "hit_sfx": "hit_heavy", "shake": 5, "stun_3d": [50, 30], "whiff": 16, "label": "최민욱 즉석 무기 내려치기", "skill": true},
 }
 
 const OVERRIDE := {
@@ -497,6 +585,41 @@ const BY_SKILL := {
 	"yuwoosung_gun_shot": "tk_yuwoosung_gun_shot",
 	"yuwoosung_prop_strike": "tk_yuwoosung_prop_strike",
 	"yuwoosung_shield_hostage": "tk_yuwoosung_shield_hostage",
+	"insu_punch": "tk_insu_punch",
+	"md_stud_strike": "tk_md_stud_strike",
+	"md_pistol": "tk_md_pistol",
+	"md_throw": "tk_md_throw",
+	"md_counter_deflect": "tk_md_counter_deflect",
+	"hide_katana_slash": "tk_hide_katana_slash",
+	"hide_blade_pistol": "tk_hide_blade_pistol",
+	"hide_throw": "tk_hide_throw",
+	"hide_pistol": "tk_hide_pistol",
+	"bm_pistol_exec": "tk_bm_pistol_exec",
+	"bm_karambit": "tk_bm_karambit",
+	"bm_dagger": "tk_bm_dagger",
+	"akila_precise_shot": "tk_akila_precise_shot",
+	"akila_dual_pistol": "tk_akila_dual_pistol",
+	"akila_knife": "tk_akila_knife",
+	"akila_gun_butt": "tk_akila_gun_butt",
+	"akila_revolver_aim": "tk_akila_revolver_aim",
+	"jd_shoot": "tk_jd_shoot",
+	"jd_guard": "tk_jd_guard",
+	"jintae_throw_grapple": "tk_jintae_throw_grapple",
+	"yeo_deflect": "tk_yeo_deflect",
+	"yeo_punch": "tk_yeo_punch",
+	"yeo_bat": "tk_yeo_bat",
+	"kyoji_pan": "tk_kyoji_pan",
+	"toishi_blade": "tk_toishi_blade",
+	"chd_grab_slam": "tk_chd_grab_slam",
+	"chd_shield": "tk_chd_shield",
+	"chd_catch_counter": "tk_chd_catch_counter",
+	"chd_heavy_swing": "tk_chd_heavy_swing",
+	"pyoyoung_karambit_throat": "tk_pyoyoung_karambit_throat",
+	"choe_fist": "tk_choe_fist",
+	"choe_wrist_grab": "tk_choe_wrist_grab",
+	"choe_head_smash": "tk_choe_head_smash",
+	"choe_dagger": "tk_choe_dagger",
+	"choe_improv": "tk_choe_improv",
 }
 
 ## 기술이 쓰는 무기(사양 weapon — none 은 뺌). 맨손 방(방 표 kit 의 ROLES bare — 13장 주먹 승부 · 2장 공사장)에서는 무기 기술을 안 쓴다
@@ -599,4 +722,26 @@ const WEAPON := {
 	"tk_yuwoosung_gun_shot": "gun",
 	"tk_yuwoosung_prop_strike": "other",
 	"tk_yuwoosung_shield_hostage": "gun",
+	"tk_md_pistol": "gun",
+	"tk_hide_katana_slash": "sword",
+	"tk_hide_blade_pistol": "sword",
+	"tk_hide_throw": "sword",
+	"tk_hide_pistol": "gun",
+	"tk_bm_pistol_exec": "gun",
+	"tk_bm_karambit": "knife",
+	"tk_bm_dagger": "knife",
+	"tk_akila_precise_shot": "gun",
+	"tk_akila_dual_pistol": "gun",
+	"tk_akila_knife": "knife",
+	"tk_akila_gun_butt": "gun",
+	"tk_akila_revolver_aim": "gun",
+	"tk_jd_shoot": "gun",
+	"tk_yeo_bat": "bat",
+	"tk_kyoji_pan": "other",
+	"tk_toishi_blade": "sword",
+	"tk_chd_shield": "other",
+	"tk_chd_heavy_swing": "other",
+	"tk_pyoyoung_karambit_throat": "knife",
+	"tk_choe_dagger": "knife",
+	"tk_choe_improv": "other",
 }

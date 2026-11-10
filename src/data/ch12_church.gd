@@ -105,12 +105,12 @@ const ROLES := {
 		"look": "grolla", "phase2_at": 0.5, "dmg_k": 0.95},
 	# 신겐 — 1차(3층 복도 — 60% 에서 위층으로) · 2차(피우진 — 70% 에서 김신 교대, 그 밑으로는 안 내려간다) · 3차(김신)
 	"shingen1": {"hp": 650.0, "posture": 380.0, "walk": 1.95, "run": 4.2, "stagger": 80, "poise": 18.0, "finisher_cap": 0.06, "ai": "shingen",
-		"look": "shingen", "yield_at": 0.6, "dmg_k": 0.7},
+		"look": "shingen", "yield_at": 0.6, "dmg_k": 0.5},
 	"shingen2": {"hp": 220.0, "posture": 340.0, "walk": 1.95, "run": 4.2, "stagger": 80, "poise": 16.0, "finisher_cap": 0.06, "ai": "shingen",
 		"look": "shingen", "hp_floor": 0.65, "dmg_k": 0.35},
 	"shingen": {"hp": 1000.0, "posture": 420.0, "walk": 1.95, "run": 4.2, "stagger": 80, "poise": 18.0, "finisher_cap": 0.05, "ai": "shingen",
 		"look": "shingen", "phase2_at": 0.5, "dmg_k": 0.95},
-	"hayabusa": {"hp": 300.0, "posture": 200.0, "walk": 2.1, "run": 4.6, "stagger": 75, "poise": 10.0, "ai": "hayabusa", "look": "hayabusa", "dmg_k": 0.5},
+	"hayabusa": {"hp": 300.0, "posture": 200.0, "walk": 2.1, "run": 4.6, "stagger": 75, "poise": 10.0, "ai": "hayabusa", "look": "hayabusa", "dmg_k": 0.35},
 	"toishi": {"hp": 260.0, "posture": 180.0, "walk": 2.0, "run": 4.4, "stagger": 75, "poise": 8.0, "ai": "x_blade", "look": "ds_suit", "dmg_k": 0.5},
 	"iwashiro": {"hp": 140.0, "posture": 80.0, "walk": 1.7, "run": 3.6, "stagger": 70, "ai": "x_brawler", "look": "iwashiro", "dmg_k": 0.5},
 	# 마학영(톱) — 주차장 보스(김신 재앙보다 한 급 아래) · 로비에서는 쓰러지지 않는 버티기 상대(hp_floor)
