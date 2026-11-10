@@ -149,6 +149,8 @@ static func _hero(d: Dictionary, id: String):
 
 
 static func _has_progress(id: String) -> bool:
+	if not Addendum._has_common(id):                  # castle_common 인물 표에 없는 조작 인물(12장 히데 · 현석 · 쿄지 …) — 진행 없음
+		return false
 	return Common.character(id).has("rank") and Common.character(id).get("rank") != null
 
 

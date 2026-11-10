@@ -25,9 +25,24 @@ func test_npcs_override_rank() -> void:
 	var d := Stage.make(1, {"chapter": "ch3", "room": 7})
 	var od = d["enemies"].filter(func(e): return e.char_id == "odohwa")[0]
 	check(od.rank == "내성 하위", "3장 오도화 = (현 시점) 내성 하위 — 장 표 NPCS (%s)" % od.rank)
-	var d2 := Stage.make(1, {"chapter": "ch13", "room": 2})
-	check(d2["boss"].char_id == "woojin" and d2["boss"].team == 1 and d2["boss"].rank == "외성 상위", "13장 주먹 승부의 피우진은 적 · 외성 상위")
-	check(d2["boss"].hp_max >= 1000.0, "13장 주먹 승부의 피우진(적)은 보스 체력 (%.0f)" % d2["boss"].hp_max)
+	# 13장 공터(2026-11-10 사용자): 경호대 50인(다섯 무리)을 다 쓰러뜨리면 피우진이 캐슬홀딩스 쪽에서 나와 김신과 1:1 — 백의는 물러선다
+	var d2 := Stage.make(1, {"chapter": "ch13", "room": 0})
+	var guards := 0
+	for i in 60 * 20:
+		Stage.step(d2)
+		d2["world"].events.clear()
+		for e in d2["enemies"]:
+			if e.char_id == "elite_guard" and e.alive():
+				e.die()
+				guards += 1
+		if d2["enemies"].any(func(e): return e.char_id == "woojin"):
+			break
+	var wj = d2["enemies"].filter(func(e): return e.char_id == "woojin")
+	check(guards == 50 and wj.size() == 1, "13장 공터: 경호대 50인 → 피우진 (%d명)" % guards)
+	if wj.size() == 1:
+		check(wj[0].team == 1 and wj[0].rank == "외성 상위" and wj[0].oneshot_immune, "13장 주먹 승부의 피우진은 적 · 외성 상위 · 보스")
+		check(wj[0].hp_max >= 700.0, "13장 주먹 승부의 피우진(적)은 보스 체력 (%.0f)" % wj[0].hp_max)
+		check(d2["allies"].all(func(a): return a.inert), "피우진이 나오면 백의는 물러선다(1:1)")
 	# 13장 대결 구도(canon fight:misulgwan_seupgyeok — 2026-11-10 사용자): 도학수 · 어광득은 김신(백의) 편, 피우진은 최민욱 쪽 — 조작 인물이 아니다
 	var d0 := Stage.make(1, {"chapter": "ch13", "room": 0})
 	var allies: Array = d0["allies"].map(func(a): return a.char_id)
@@ -70,13 +85,30 @@ func test_escape_rooms_and_determinism() -> void:
 	check(a == b, "같은 시드 같은 결과(8장 40초)")
 
 
+## 12 · 13장 사람 수(사용자 2026-11-10 숫자 그대로 — 무리로 나눠 들어온다): 방 enemies + triggers spawn 의 경호대
+func test_crowd_counts_12_13() -> void:
+	var want := {"ch12": {"church_steps": 100, "vision_front": 10, "lobby_hold": 50, "parking": 10}, "ch13": {"museum_front": 50}}
+	for ch in want:
+		for room in Campaign.table(ch).ROOMS:
+			if not want[ch].has(room["id"]):
+				continue
+			var n: int = room["enemies"].filter(func(e): return e[0] == "elite_guard").size()
+			var most: int = n
+			for t in room.get("triggers", []):
+				var k: int = t.get("spawn", []).filter(func(e): return e[0] == "elite_guard").size()
+				n += k
+				most = maxi(most, k)
+			check(n == int(want[ch][room["id"]]), "%s %s 경호대 %d명 (%d)" % [ch, room["id"], want[ch][room["id"]], n])
+			check(most <= 11, "%s %s 한 무리는 11명 이하 (%d)" % [ch, room["id"], most])
+
+
 ## 맨손 방에서는 무기 기술을 안 쓴다(13장 주먹 승부 — 칼 기술이 주먹 승부에 섞이지 않게), 칼 든 방에서는 쓴다
 func test_bare_room_drops_weapon_skills() -> void:
 	var Tech = preload("res://src/data/tech_moves.gd")
 	var rooms: Array = Campaign.table("ch13").ROOMS
 	var ri := -1
 	for i in rooms.size():
-		if rooms[i]["id"] == "fist_duel":
+		if rooms[i].get("kit", {}).get("kimshin", "") == "kimshin_bare":   # 공터 — 경호대를 넘으면 피우진과 주먹 승부
 			ri = i
 	var d := Stage.make(1, {"chapter": "ch13", "room": ri})
 	var kim = d["heroes"][0]
