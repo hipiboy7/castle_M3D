@@ -41,9 +41,9 @@ const ROLES := {
 	# 이스크라(아군 — 리사의 조커): 메드베디(거구 · 몸통 들이받아 거꾸로 내리꽂기 p1:090/002 — 피우진의 둘째 스승이라 같은 잡기 손) ·
 	# 라텔(양손 단검 · 카람빗 p1:092/003 — 표영과 같은 칼 손)
 	"medvedi": {"hp": 300.0, "posture": 110.0, "walk": 1.9, "run": 4.2, "stagger": 55, "look": "medvedi",
-		"moveset": {"combo": "w_jab", "dash": "w_dash", "finisher": "w_finisher"}},
+		"moveset": {"combo": "md_1", "dash": "md_dash", "finisher": "w_finisher"}},
 	"ratel": {"hp": 240.0, "posture": 80.0, "walk": 2.2, "run": 4.8, "stagger": 50, "look": "ratel",
-		"moveset": {"combo": "py_slash1", "dash": "py_dash", "finisher": "py_finisher"}},
+		"moveset": {"combo": "rt_1", "dash": "rt_dash", "finisher": "py_finisher"}},
 	# 스케일 킬러단 · 선진 선원(적)
 	"elite_guard": {"hp": 300.0, "posture": 70.0, "walk": 1.9, "run": 4.1, "stagger": 70, "poise": 4.0, "ai": "haseong_guard", "look": "guard"},
 	"pro_fighter": {"hp": 420.0, "posture": 120.0, "walk": 2.0, "run": 4.3, "stagger": 75, "poise": 10.0, "ai": "x_kicker", "look": "gunter_bald"},

@@ -62,7 +62,7 @@ const ROLES := {
 		"look": "iseul", "dmg_k": 0.8, "moveset": {"combo": "ia_hook", "dash": "ia_dash", "finisher": "ia_finisher"}},
 	# 아군(봇)
 	"insu": {"hp": 240.0, "posture": 50.0, "walk": 1.9, "run": 4.0, "stagger": 70, "look": "insu",
-		"moveset": {"combo": "ny_jab", "dash": "ny_dash", "finisher": "ny_finisher"}},
+		"moveset": {"combo": "in_1", "dash": "in_dash", "finisher": "ny_finisher"}},
 	"namgu_youth": {"hp": 220.0, "posture": 45.0, "walk": 1.9, "run": 4.0, "stagger": 70, "look": "namgu_youth",
 		"moveset": {"combo": "ny_jab", "dash": "ny_dash", "finisher": "ny_finisher"}},
 	# 부진파(김대건의 식구들 — 이름 없는 엑스트라. 인물 id 는 ds_member(DS 조직원 외형)를 빌리고 이름은 방 표 덧붙임 name)

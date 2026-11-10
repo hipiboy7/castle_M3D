@@ -3,6 +3,7 @@ extends RefCounted
 ## world.events 를 읽기만 한다 — 결투(duel)와 11장 판(stage)이 같은 신호를 쓴다. 그림은 pup(Fighter → 인형)으로 찾는다.
 
 const Lines = preload("res://src/data/lines.gd")
+const SLAMS := ["stomp", "two_hand_slam", "overhead_chop", "throw_slam", "hammer_fist"]   # 위에서 내려찍는 모양(2026-11-10 각법 axe 에서 갈라 나온 것)
 
 var fx
 var cam
@@ -60,8 +61,8 @@ func apply(d: Dictionary) -> void:
 				fx.hit(e[2], heavy)
 				snd.play(str(mv2["hit_sfx"]), -2.0)
 				var no := int(mv2.get("hit_no", 0))
-				if str(mv2["shape"]) == "axe":
-					cam.punch_zoom(0.88)                 # 각법: 내려찍힌 쪽으로 화면이 눌린다
+				if str(mv2["shape"]) == "axe" or (heavy and str(mv2["shape"]) in SLAMS):
+					cam.punch_zoom(0.88)                 # 각법 · 내려찍기 · 메치기: 내려찍힌 쪽으로 화면이 눌린다
 				if no > 0:
 					# 리천식 삼연타: 한 대마다 번호 · 충격 고리, 셋째는 크게
 					var last := no >= int(mv2["hits"])

@@ -9,20 +9,55 @@ func setup(lk: Dictionary) -> void:
 	guard_pose = _merge(P.NEUTRAL, gd)
 	for sh in P.SHAPES:
 		var keys: Dictionary = P.SHAPES[sh]
-		var w := _merge(guard_pose, keys["W"])
-		var s := _merge(w, keys["S"])
-		if sh.begins_with("slash"):
-			s = _merge(_merge(w, P.LUNGE_LEGS), keys["S"])
-		var f := _merge(s, keys["F"])
-		shape_keys[sh] = [w, s, f]
+		shape_keys[sh] = _shape_set(keys, sh.begins_with("slash"), false)
 		if P.MIRROR.has(sh):
 			# 왼손 · 왼발 판: 오른쪽 모양을 좌우로 뒤집는다 (삼연타 둘째 대 · 잽 · 훅 · 왼발 차기 ..)
-			var wl := _merge(guard_pose, _mirror(keys["W"]))
-			var sl := _merge(wl, _mirror(keys["S"]))
-			shape_keys[sh + "_L"] = [wl, sl, _merge(sl, _mirror(keys["F"]))]
+			shape_keys[sh + "_L"] = _shape_set(keys, false, true)
 	cur = guard_pose.duplicate()
 	_build()
 	_apply(cur)
+
+
+## 모양 하나의 자세 다섯 — [W 준비 끝, S 타격, F 회수, A 예비 동작, O 지나침] (앞 셋 차례는 그대로 — 삼연타 · 도트 굽기 · 모아 보기가 0 ~ 2 를 본다).
+## 2026-11-10 폰 리뷰 "공격 모션이 다 비슷하다": 몸통 비틀기 · 숙임과 내딛기(root_fwd)를 가드에서 더 크게(P.AMP_TORSO · AMP_STEP) 키우고,
+## A(준비 앞 — 타격 반대쪽으로 더 감고 무릎을 굽혀 가라앉음)와 O(타격 뒤 — 같은 쪽으로 조금 더 지나감)를 표에 없으면 W · S 에서 만든다
+## (표에 "A" · "O" 가 있으면 그 위에 덮는다 — A 는 W 위, O 는 S 위). 팔다리 각도는 표 그대로(늘리면 몸을 뚫는다) — 몸통 · 무릎 · 내딛기만
+func _shape_set(keys: Dictionary, lunge_legs: bool, mirror: bool) -> Array:
+	var raw := {}
+	for k in ["W", "S", "F", "A", "O"]:
+		if keys.has(k):
+			raw[k] = _mirror(keys[k]) if mirror else keys[k]
+	var w0 := _merge(guard_pose, raw["W"])
+	var s0 := _merge(_merge(w0, P.LUNGE_LEGS) if lunge_legs else w0, raw["S"])
+	var w := _amp(w0, true)
+	var s := _amp(s0, false)
+	var f := _amp(_merge(s0, raw["F"]), false)
+	var a := w.duplicate()
+	var o := s.duplicate()
+	for k in P.TORSO_KEYS:
+		var dv: Vector3 = (w[k] as Vector3) - (s[k] as Vector3)
+		a[k] = (w[k] as Vector3) + (dv * P.ANTICIPATE).clamp(-Vector3.ONE * P.KEY_MAX, Vector3.ONE * P.KEY_MAX)
+		o[k] = (s[k] as Vector3) - (dv * P.OVERSHOOT).clamp(-Vector3.ONE * P.KEY_MAX, Vector3.ONE * P.KEY_MAX)
+	a["root_fwd"] = float(w["root_fwd"]) - (float(s["root_fwd"]) - float(w["root_fwd"])) * P.ANTICIPATE
+	o["root_fwd"] = float(s["root_fwd"]) + (float(s["root_fwd"]) - float(w["root_fwd"])) * P.OVERSHOOT
+	for k in ["kn_r", "kn_l"]:
+		a[k] = float(a[k]) + P.SINK
+	if raw.has("A"):
+		a = _merge(a, raw["A"])
+	if raw.has("O"):
+		o = _merge(o, raw["O"])
+	return [w, s, f, a, o]
+
+
+## 가드에서 벗어난 만큼 몸통(골반 · 허리 · 가슴 · 머리) 각도와 내딛기를 키운다 — 다리 · 팔은 그대로. twist false(타격 · 회수)면 숙임 ·
+## 옆 기울기만 키우고 비틀기(y)는 표 그대로 — 비틀기를 키우면 가슴에 붙은 팔이 상대 쪽에서 벗어난다(스트레이트가 옆을 친다). 준비(W)는 더 감는다
+func _amp(p: Dictionary, twist: bool) -> Dictionary:
+	var q := p.duplicate()
+	var k3 := Vector3(P.AMP_TORSO, P.AMP_TORSO if twist else 1.0, P.AMP_TORSO)
+	for k in P.TORSO_KEYS:
+		q[k] = (guard_pose[k] as Vector3) + ((p[k] as Vector3) - (guard_pose[k] as Vector3)) * k3
+	q["root_fwd"] = float(p["root_fwd"]) * P.AMP_STEP
+	return q
 
 
 # ----------------------------------------------------------------------

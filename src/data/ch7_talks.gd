@@ -42,15 +42,15 @@ const ROLES := {
 		"moveset": {"combo": "w_jab", "dash": "w_dash", "finisher": "w_finisher"}},
 	# 관전 방의 봇(조작 인물 칸) — 1 방 임무열(칼) · 2 방 사인진 · 4 방 히데(칼) · 5 방 구스타프(주먹) · 6 방 마준영(발)
 	"immuyeol": {"hp": 520.0, "posture": 140.0, "walk": 2.0, "run": 4.4, "stagger": 50, "look": "immuyeol", "ai": "x_blade",
-		"moveset": {"combo": "k_slash1", "dash": "k_dash", "finisher": "k_finisher"}},
+		"moveset": {"combo": "im_1", "dash": "im_dash", "finisher": "k_finisher"}},
 	"sainjin": {"hp": 520.0, "posture": 160.0, "walk": 2.1, "run": 4.6, "stagger": 50, "look": "sainjin", "ai": "x_boxer",
-		"moveset": {"combo": "w_jab", "dash": "w_dash", "finisher": "w_finisher"}},
+		"moveset": {"combo": "si_1", "dash": "si_dash", "finisher": "w_finisher"}},
 	"hide": {"hp": 420.0, "posture": 120.0, "walk": 2.1, "run": 4.6, "stagger": 50, "look": "hide",
-		"moveset": {"combo": "k_slash1", "dash": "k_dash", "finisher": "k_finisher"}},
+		"moveset": {"combo": "hd_1", "dash": "hd_dash", "finisher": "k_finisher"}},
 	"gustav": {"hp": 600.0, "posture": 180.0, "walk": 2.0, "run": 4.4, "stagger": 55, "look": "gustav",
-		"moveset": {"combo": "gu_jab", "dash": "gu_dash", "finisher": "gu_finisher"}},
+		"moveset": {"combo": "gs_1", "dash": "gs_dash", "finisher": "gu_finisher"}},
 	"majunyeong": {"hp": 600.0, "posture": 180.0, "walk": 2.1, "run": 4.6, "stagger": 50, "look": "majunyeong",
-		"moveset": {"combo": "ny_jab", "dash": "ny_dash", "finisher": "ny_finisher"}},
+		"moveset": {"combo": "mz_1", "dash": "mz_dash", "finisher": "ny_finisher"}},
 	# 적 · 서 있는 사람
 	# 1 방 사인진(적 — 임무열을 붙드는 쪽): 쓰러지지 않는다 · 세게 치지 않는다(최민욱의 목소리가 싸움을 멈출 때까지)
 	"sainjin_guard": {"hp": 520.0, "posture": 200.0, "walk": 2.1, "run": 4.6, "stagger": 70, "ai": "x_boxer", "look": "sainjin", "hp_floor": 0.5, "dmg_k": 0.3},

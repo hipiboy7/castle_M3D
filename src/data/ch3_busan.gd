@@ -77,7 +77,7 @@ const ROLES := {
 	"masa": {"hp": 600.0, "posture": 160.0, "walk": 2.0, "run": 4.3, "stagger": 75, "poise": 18.0, "ai": "x_blade", "look": "masa", "dmg_k": 1.2},
 	# 아군(봇) — 샤이어(승표 · 민머리 복면 — 050/133-138 마사를 막는다) · 구일화(샤워장 — 천안 구일화, 주먹)
 	"shire": {"hp": 320.0, "posture": 120.0, "walk": 1.9, "run": 4.1, "stagger": 60, "look": "shire",
-		"moveset": {"combo": "ny_jab", "dash": "ny_dash", "finisher": "ny_finisher"}},
+		"moveset": {"combo": "sr_1", "dash": "sr_dash", "finisher": "ny_finisher"}},
 }
 
 const ROOMS := [
