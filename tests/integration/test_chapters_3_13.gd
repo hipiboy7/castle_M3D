@@ -27,11 +27,13 @@ func test_npcs_override_rank() -> void:
 	check(od.rank == "내성 하위", "3장 오도화 = (현 시점) 내성 하위 — 장 표 NPCS (%s)" % od.rank)
 	var d2 := Stage.make(1, {"chapter": "ch13", "room": 2})
 	check(d2["boss"].char_id == "woojin" and d2["boss"].team == 1 and d2["boss"].rank == "외성 상위", "13장 주먹 승부의 피우진은 적 · 외성 상위")
-	# 같은 인물이 한 장에서 아군(조작)도 되고 적도 될 때: 적 칸은 방 표 덧붙임 role 로 다른 역할(체력 · AI)을 쓴다
-	var d0 := Stage.make(1, {"chapter": "ch13", "room": 0})
-	var wj = d0["heroes"].filter(func(h): return h.char_id == "woojin")[0]
-	check(wj.hp_max < 400.0, "13장 습격의 피우진(조작 인물)은 사람 체력 — 적 역할 체력이 아니다 (%.0f)" % wj.hp_max)
 	check(d2["boss"].hp_max >= 1000.0, "13장 주먹 승부의 피우진(적)은 보스 체력 (%.0f)" % d2["boss"].hp_max)
+	# 13장 대결 구도(canon fight:misulgwan_seupgyeok — 2026-11-10 사용자): 도학수 · 어광득은 김신(백의) 편, 피우진은 최민욱 쪽 — 조작 인물이 아니다
+	var d0 := Stage.make(1, {"chapter": "ch13", "room": 0})
+	var allies: Array = d0["allies"].map(func(a): return a.char_id)
+	check(allies.has("dohaksu") and allies.has("eogwangdeuk") and d0["allies"].all(func(a): return a.team == 0), "13장 정문: 도학수 · 어광득은 아군 %s" % [allies])
+	check(not d0["enemies"].any(func(e): return ["dohaksu", "eogwangdeuk", "woojin"].has(e.char_id)), "13장 정문: 백의 사람 · 피우진은 적 칸에 없다")
+	check(not Campaign.table("ch13").HEROES.has("woojin"), "13장 피우진은 조작 인물이 아니다(최민욱 쪽)")
 
 
 func test_talk_room_says_lines_then_moves_on() -> void:

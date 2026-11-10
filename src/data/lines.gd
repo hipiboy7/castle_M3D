@@ -12,7 +12,7 @@ static func all() -> Dictionary:
 	return _data
 
 
-## 점으로 이은 길("ch6.fight" · "ch11.rooms.hall28.enter") → 값. 없으면 null
+## 점으로 이은 길("ch6.fight" · "ch11.rooms.hall35.enter") → 값. 없으면 null
 static func at(path: String):
 	var v = all()
 	for k in path.split("."):

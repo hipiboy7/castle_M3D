@@ -28,9 +28,9 @@ func test_ranks_and_parry_at_ch11() -> void:
 	for e in d["enemies"]:
 		if not d["ais"][e].skills.is_empty():
 			named += 1
-	check(named == 0, "28층 경호원(엑스트라)은 기술 묶음이 없다")
-	check(d["allies"].size() == 1 and d["allies"][0].char_id == "guilhwa" and d["allies"][0].rank == "전국구", "28층 아군 구일화(화진 전 전국구)")
-	check(d["enemies"].size() == 5, "28층 경호원 다섯")
+	check(named == 0, "35층 홀 경호원(엑스트라)은 기술 묶음이 없다")
+	check(d["allies"].size() == 1 and d["allies"][0].char_id == "guilhwa" and d["allies"][0].rank == "전국구", "35층 홀 아군 구일화(화진 전 전국구)")
+	check(d["enemies"].size() == 5, "35층 홀 경호원 다섯")
 
 
 func test_swap_and_auto_swap_on_down() -> void:
@@ -52,7 +52,7 @@ func test_swap_and_auto_swap_on_down() -> void:
 
 
 func test_attackers_capped() -> void:
-	var d := Stage.make(2, {"room": 1})                   # 71층 홀 — 4인
+	var d := Stage.make(2, {"room": 2})                   # 71층 회장실 앞 홀 — 최후의 4인
 	var worst := 0
 	for i in 1500:
 		Stage.step(d)
@@ -92,5 +92,5 @@ func test_shingen_yields_then_room_clears() -> void:
 
 func test_bots_clear_first_rooms() -> void:
 	var r := Stage.simulate(1, 60 * 240)
-	check(int(r["cleared"]) >= 2, "봇 둘이 28층 · 71층 홀을 넘는다 %s" % r)
-	check(r["times"].has("hall28") and int(r["times"]["hall28"]) < 60 * 60, "28층은 1분 안 %s" % r["times"])
+	check(int(r["cleared"]) >= 2, "봇이 35층 홀 · 비상구 계단을 넘는다 %s" % r)
+	check(r["times"].has("hall35") and int(r["times"]["hall35"]) < 60 * 60, "35층 홀은 1분 안 %s" % r["times"])

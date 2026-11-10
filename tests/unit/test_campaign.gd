@@ -220,7 +220,7 @@ func test_save_speed() -> void:
 func test_stages_of_chapter() -> void:
 	var st := Campaign.stages("ch11")
 	check(st.size() == Hotel.ROOMS.size(), "11장 스테이지 = 방 다섯 %s" % [st])
-	check(int(st[0]["room"]) == 0 and str(st[0]["title"]) == "28층 중앙홀", "첫 스테이지 이름은 방 들어서는 글 %s" % st[0])
+	check(int(st[0]["room"]) == 0 and str(st[0]["title"]) == "35층 중앙 엘리베이터 홀", "첫 스테이지 이름은 방 들어서는 글 %s" % st[0])
 	check(int(st[3]["room"]) == 3 and str(st[3]["title"]).contains("회장실"), "넷째 = 회장실 앞 %s" % st[3])
 	var d6 := Campaign.stages("ch6")
 	check(d6.size() == 1 and int(d6[0]["room"]) == 0 and str(d6[0]["title"]) != "", "결투 장은 스테이지 하나 %s" % [d6])
