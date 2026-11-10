@@ -15,8 +15,8 @@ func setup(lk: Dictionary) -> void:
 			s = _merge(_merge(w, P.LUNGE_LEGS), keys["S"])
 		var f := _merge(s, keys["F"])
 		shape_keys[sh] = [w, s, f]
-		if sh == "punch" or sh == "shot":
-			# 왼손 주먹: 오른손 주먹을 좌우로 뒤집는다 (삼연타 둘째 대)
+		if P.MIRROR.has(sh):
+			# 왼손 · 왼발 판: 오른쪽 모양을 좌우로 뒤집는다 (삼연타 둘째 대 · 잽 · 훅 · 왼발 차기 ..)
 			var wl := _merge(guard_pose, _mirror(keys["W"]))
 			var sl := _merge(wl, _mirror(keys["S"]))
 			shape_keys[sh + "_L"] = [wl, sl, _merge(sl, _mirror(keys["F"]))]
