@@ -63,6 +63,10 @@ var paused := false
 var _fake_press := false
 var _fake_swap := false
 var _esc_hint := false
+var _logic_ticks := 0                      # 로직(Stage · Duel.step)이 돈 수 — 멈춤 지킴이(_watch_stall)
+var _stall_seen := 0
+var _stall_t := 0.0
+const STALL_SECS := 1.5
 var _switch_to: Array = []                 # 메뉴로 고른 [장, 방] — mode "switch" 가 SWITCH_WAIT 프레임 뒤 판을 바꾼다
 const SWITCH_WAIT := 2
 const RESULT_AUTO := 600        # 이긴 결과 화면: 안 눌러도 10초 뒤 처음 화면(rc.2 폰: 2장 끝 화면이 굳은 것처럼 보였다 — 끝 방 글과 결과 글이 같아서)
@@ -285,6 +289,9 @@ func _start(m: String) -> void:
 	touch.show_art = false
 	touch.show_fight = true
 	menu.visible = false
+	if not paused and not menu_open:
+		get_tree().paused = false               # 판을 새로 시작하면 장면 트리 멈춤 · 소리 끔이 남지 않게(멈춤 지킴이 참고)
+		AudioServer.set_bus_mute(0, false)
 	_apply_speed()
 	_trace("MODE %s frame=%d" % [m, frames])      # 에뮬레이터 점검(scripts/emu_check.sh)이 logcat 에서 데모 시작을 기다린다
 	if m == "demo":
@@ -305,6 +312,30 @@ func _music() -> void:
 	var s := Campaign.song_for(chapter, int(d.get("room_i", 0)) if kind == "stage" else 0)
 	if snd.current != s or not snd.song_playing():
 		snd.song(s)
+
+
+## 멈춤 지킴이(사용자 2026-11-10 rc.8 폰 "다른 장에서 6장 넘어갈 때 멈춤. 소리도 안남. FPS 120" — v0.5.0-rc.1 에도 같은 말, 서버 ·
+## 에뮬레이터에서 재현 안 됨): 싸우는 중(멈춤 · 메뉴 아님)인데 로직이 STALL_SECS 동안 한 칸도 안 돌면 그때 상태를 logcat 에 남기고
+## 멈춤 · 속도 · 소리를 다시 건다(그림은 돌고 로직 · 소리만 선 상태 — 장면 트리 멈춤 · 물리 틱 · 소리 버스 중 하나로 본다)
+func _watch_stall(dt: float) -> void:
+	if (mode != "fight" and mode != "demo") or paused or menu_open:
+		_stall_t = 0.0
+		_stall_seen = _logic_ticks
+		return
+	if _logic_ticks != _stall_seen:
+		_stall_seen = _logic_ticks
+		_stall_t = 0.0
+		return
+	_stall_t += dt
+	if _stall_t < STALL_SECS:
+		return
+	print("STALL mode=%s kind=%s chapter=%s tree_paused=%s ticks=%d time_scale=%.2f mute=%s slowmo=%d over=%s frames=%d" % [mode, kind,
+		chapter, get_tree().paused, Engine.physics_ticks_per_second, Engine.time_scale, AudioServer.is_bus_mute(0),
+		int(d["world"].slowmo), str(d["world"].over), frames])
+	_stall_t = 0.0
+	get_tree().paused = false
+	AudioServer.set_bus_mute(0, false)
+	_apply_speed()
 
 
 func _trace(line: String) -> void:
@@ -704,6 +735,7 @@ func _physics_process(_dt: float) -> void:
 					Stage.step(d, it)
 				else:
 					Duel.step(d, it)
+				_logic_ticks += 1
 				_after_tick()
 		"result":
 			if args["autoplay"] and mode_t > 300:
@@ -820,6 +852,7 @@ func _summary() -> Dictionary:
 func _process(dt: float) -> void:
 	if d.is_empty():
 		return
+	_watch_stall(dt)
 	var partner = Stage.partner(d) if kind == "stage" else null
 	var phase: int = d["boss"].phase if d["boss"] != null else 1
 	if paused or menu_open:
