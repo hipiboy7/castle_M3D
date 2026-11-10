@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dd86vr5xb4mq7"
-path="res://.godot/imported/iwashiro_b.png-db13e36e76e71af96515b63a6ccce9d7.ctex"
+path="res://.godot/imported/iwashiro_b.png-13e15ad39288df3638cf576be8fea140.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/roster/sprites/iwashiro_b.png"
-dest_files=["res://.godot/imported/iwashiro_b.png-db13e36e76e71af96515b63a6ccce9d7.ctex"]
+source_file="res://assets/sprites/iwashiro_b.png"
+dest_files=["res://.godot/imported/iwashiro_b.png-13e15ad39288df3638cf576be8fea140.ctex"]
 
 [params]
 

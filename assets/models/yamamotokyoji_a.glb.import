@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cq4kigj7gaasw"
-path="res://.godot/imported/iwashiro_a.glb-bb644282c0f095e14eaa8e6838aeb6ac.scn"
+uid="uid://diaipjgmy1jau"
+path="res://.godot/imported/yamamotokyoji_a.glb-23ed79549fb56a8025110c245f41098b.scn"
 
 [deps]
 
-source_file="res://assets/roster/models/iwashiro_a.glb"
-dest_files=["res://.godot/imported/iwashiro_a.glb-bb644282c0f095e14eaa8e6838aeb6ac.scn"]
+source_file="res://assets/models/yamamotokyoji_a.glb"
+dest_files=["res://.godot/imported/yamamotokyoji_a.glb-23ed79549fb56a8025110c245f41098b.scn"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cjxkubq53rwfy"
-path="res://.godot/imported/hyeonseok_b.png-d60bc8e97f78ca7520db1a3316473c57.ctex"
+uid="uid://drak4d41ye4v0"
+path="res://.godot/imported/yamamotokyoji_b.png-ea059f8a98bbc9bc344b71a6f9473d35.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/roster/sprites/hyeonseok_b.png"
-dest_files=["res://.godot/imported/hyeonseok_b.png-d60bc8e97f78ca7520db1a3316473c57.ctex"]
+source_file="res://assets/sprites/yamamotokyoji_b.png"
+dest_files=["res://.godot/imported/yamamotokyoji_b.png-ea059f8a98bbc9bc344b71a6f9473d35.ctex"]
 
 [params]
 

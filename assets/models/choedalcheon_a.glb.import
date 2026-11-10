@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://diaipjgmy1jau"
-path="res://.godot/imported/yamamotokyoji_a.glb-8b7e99b2b1731e065e48875eb6c0d817.scn"
+uid="uid://wb0d68mjo3gw"
+path="res://.godot/imported/choedalcheon_a.glb-cae462d084087a6b4bc5f52a6e8681a8.scn"
 
 [deps]
 
-source_file="res://assets/roster/models/yamamotokyoji_a.glb"
-dest_files=["res://.godot/imported/yamamotokyoji_a.glb-8b7e99b2b1731e065e48875eb6c0d817.scn"]
+source_file="res://assets/models/choedalcheon_a.glb"
+dest_files=["res://.godot/imported/choedalcheon_a.glb-cae462d084087a6b4bc5f52a6e8681a8.scn"]
 
 [params]
 

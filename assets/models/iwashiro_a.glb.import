@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://wb0d68mjo3gw"
-path="res://.godot/imported/choedalcheon_a.glb-6a4792cf4ec9b1f6cc21643339a6cbd5.scn"
+uid="uid://cq4kigj7gaasw"
+path="res://.godot/imported/iwashiro_a.glb-a405d2898da69ec239f2fb50d9069032.scn"
 
 [deps]
 
-source_file="res://assets/roster/models/choedalcheon_a.glb"
-dest_files=["res://.godot/imported/choedalcheon_a.glb-6a4792cf4ec9b1f6cc21643339a6cbd5.scn"]
+source_file="res://assets/models/iwashiro_a.glb"
+dest_files=["res://.godot/imported/iwashiro_a.glb-a405d2898da69ec239f2fb50d9069032.scn"]
 
 [params]
 

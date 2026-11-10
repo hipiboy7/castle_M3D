@@ -255,7 +255,8 @@ const STAGED := ["vasily", "pyoyoung", "namilho", "bulgom", "moseunggyu", "odohw
 	"gustav", "barista", "jangho", "komodo", "keurisa", "medvedi", "ratel", "immuyeol", "choeminuk", "scaledanjang", "mark", "ryujihak",
 	"andycheong", "eunbo", "bison", "pantera", "akila", "richeon", "douchen", "hantaecheol", "yuwoosung", "lingling", "majunyeong",
 	"grolla", "eomji", "geomji", "choehyeokjin", "mahakyoung", "dohaksu", "eogwangdeuk", "sainjin", "jeongseono", "hide", "seungyeong",
-	"ihuiseong", "blackmamba", "yeominsu", "krot", "risa", "jackson"]   # 7 · 9장(2026-11-10 — 이희성 · 블랙맘바 · 여민수 · 크로트 · 리사 · 잭슨)
+	"ihuiseong", "blackmamba", "yeominsu", "krot", "risa", "jackson",   # 7 · 9장(2026-11-10 — 이희성 · 블랙맘바 · 여민수 · 크로트 · 리사 · 잭슨)
+	"choedalcheon", "hyeonseok", "iwashiro", "yamamotokyoji"]   # 12장(최달천 · 현석 · 이와시로 · 야마모토 쿄지)
 
 
 ## 그림 A · B 자리(장 이름 ART + 명부). 없으면 빈 표

@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dgp1chs6dof7u"
-path="res://.godot/imported/hyeonseok_a.glb-13d7feb2b9c93e410ec9bd400d9a4423.scn"
+path="res://.godot/imported/hyeonseok_a.glb-2c18cf7e8b8c7190387ca74138e8f19e.scn"
 
 [deps]
 
-source_file="res://assets/roster/models/hyeonseok_a.glb"
-dest_files=["res://.godot/imported/hyeonseok_a.glb-13d7feb2b9c93e410ec9bd400d9a4423.scn"]
+source_file="res://assets/models/hyeonseok_a.glb"
+dest_files=["res://.godot/imported/hyeonseok_a.glb-2c18cf7e8b8c7190387ca74138e8f19e.scn"]
 
 [params]
 
