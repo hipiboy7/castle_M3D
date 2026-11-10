@@ -140,6 +140,8 @@ static func stages(id: String) -> Array:
 		"stage":
 			var T = table(id)
 			for i in T.ROOMS.size():
+				if T.ROOMS[i].get("end", false) and i > 0:
+					continue                                 # 끝 방(글만 — 장 맺음)은 스테이지 메뉴에 안 보인다
 				var v = Lines.at("%s.rooms.%s.enter" % [T.LINES, T.ROOMS[i]["id"]])
 				out.append({"room": i, "title": str(v[0]) if v is Array else str(T.ROOMS[i]["id"])})
 	return out

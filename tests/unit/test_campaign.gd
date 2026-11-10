@@ -222,17 +222,22 @@ func test_save_speed() -> void:
 ## 스테이지 고르기(사용자 2026-11-06 "메뉴 · 선택 같은 거 … 스테이지 넘어갈 수 있게") — 장 안의 방 목록
 func test_stages_of_chapter() -> void:
 	var st := Campaign.stages("ch11")
-	check(st.size() == Hotel.ROOMS.size(), "11장 스테이지 = 방 다섯 %s" % [st])
+	check(st.size() == _menu_rooms(Hotel), "11장 스테이지 = 끝 방을 뺀 방 %s" % [st])
 	check(int(st[0]["room"]) == 0 and str(st[0]["title"]) == "35층 중앙 엘리베이터 홀", "첫 스테이지 이름은 방 들어서는 글 %s" % st[0])
 	check(int(st[3]["room"]) == 3 and str(st[3]["title"]).contains("회장실"), "넷째 = 회장실 앞 %s" % st[3])
 	var d6 := Campaign.stages("ch6")
 	check(d6.size() == 1 and int(d6[0]["room"]) == 0 and str(d6[0]["title"]) != "", "결투 장은 스테이지 하나 %s" % [d6])
 	check(Campaign.stages("nope").is_empty(), "없는 장은 스테이지 없음")
 	var s1 := Campaign.stages("ch1")
-	check(s1.size() == Hoeam.ROOMS.size() and str(s1[0]["title"]) != "", "1장 스테이지 = 방 %d %s" % [Hoeam.ROOMS.size(), s1])
+	check(s1.size() == _menu_rooms(Hoeam) and str(s1[0]["title"]) != "", "1장 스테이지 = 방 %d %s" % [Hoeam.ROOMS.size(), s1])
 	var s2 := Campaign.stages("ch2")
-	check(s2.size() == Haseong.ROOMS.size() and str(s2[1]["title"]).contains("1층"), "2장 스테이지 = 방 %d %s" % [Haseong.ROOMS.size(), s2])
+	check(s2.size() == _menu_rooms(Haseong) and str(s2[1]["title"]).contains("1층"), "2장 스테이지 = 방 %d %s" % [Haseong.ROOMS.size(), s2])
 
+
+
+## 스테이지 메뉴에 보이는 방 수 — 끝 방(end, 글만)은 빼고
+func _menu_rooms(T) -> int:
+	return T.ROOMS.filter(func(r): return not r.get("end", false)).size()
 
 
 ## canon 읽기(장 데이터 검사 전용 — data/common/canon/ 은 APK 에 안 들어간다: export_presets.cfg exclude_filter)
