@@ -10,6 +10,7 @@ extends Node3D
 
 const P = preload("res://src/view/poses.gd")
 const Looks = preload("res://src/view/looks.gd")
+const Ink = preload("res://src/view/ink.gd")                 # 붓칠 · 먹선 화풍(재질 · 번쩍임)
 const Fighter = preload("res://src/combat/fighter.gd")
 const FONT = preload("res://assets/fonts/Galmuri11-Bold.ttf")
 
@@ -36,6 +37,7 @@ const OVER_AT := 0.4              # 회수 앞부분(hold)의 이만큼 S → O(
 var look: Dictionary
 var J := {}
 var mats: Array = []
+var _flash_col := Color(0, 0, 0)              # 지난 번쩍임 색 — 같으면 재질을 건드리지 않는다
 var cur := {}
 var guard_pose := {}
 var shape_keys := {}
@@ -436,8 +438,11 @@ func _update_flash(f) -> void:
 			and f.t <= int(f.move["startup"]):              # 찌르는 순간 풀린다 (run #11: 맞은 뒤 멈춤 내내 붉었다)
 		var k := 0.6 + 0.4 * sin(time * 38.0)
 		col = Color(0.34 * k, 0.07 * k, 0.03 * k)       # 엇엇박 브레이크: 온몸이 붉게 달아오른다(부하)
+	if col == _flash_col:
+		return
+	_flash_col = col
 	for m in mats:
-		m.emission = col
+		Ink.set_flash(m, col)
 
 
 func _update_telegraph(f) -> void:

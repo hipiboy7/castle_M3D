@@ -1,8 +1,10 @@
 extends Camera3D
 ## 3/4 탑뷰 카메라 — 두 사람 사이(김신 쪽으로 조금)를 따라가고, 멀어지면 물러나고, 흔들림 · 결착 줌을 더한다.
-## 높이 · 거리 OFFSET 으로 내려다보는 각이 약 55도(castle_M 의 3/4 탑뷰와 같은 느낌, 아이소메트릭 아님). 인물이 화면 높이의 약 1/3 이 되게 가깝다(2026-10-26 자체 점검 1).
+## 높이 · 거리 OFFSET 으로 내려다보는 각이 약 55도. 2026-11-11 Hades 화풍(사용자 1 ~ 5 추천대로 — 4. 카메라 각): 화각을 38 → FOV 로 좁히고
+## 그만큼 멀리 — 원근이 납작해져(망원) 그린 그림처럼 보이고, 인물 크기는 그대로(옛 화각 38 · OFFSET (0, 10, 7) 과 같은 화면 높이).
 
-const OFFSET := Vector3(0, 10.0, 7.0)
+const OFFSET := Vector3(0, 13.0, 8.5)
+const FOV := 30.0
 
 var focus := Vector3.ZERO
 var dist_k := 1.0
@@ -11,7 +13,7 @@ var rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
-	fov = 38.0
+	fov = FOV
 	near = 0.3
 	far = 120.0
 	rng.seed = 5

@@ -140,6 +140,8 @@ func test_save_old_broken_newer() -> void:
 	check(arr["state"] == "broken", "모양이 다른 세이브도 깨진 것으로")
 	var newer := Save.parse('{"v": 99, "cleared": {}}')
 	check(newer["state"] == "newer", "더 새 형식은 읽기만(덮어쓰지 않는다)")
+	var dot := Save.parse('{"v": 1, "cleared": {}, "art": "b"}')
+	check(dot["save"]["art"] == "a" and not Save.ARTS.has("b"), "옛 세이브의 그림 B(도트)는 A 로 — 처음 화면에서 뺐다(2026-11-11)")
 	var odd := Save.parse('{"v": 1, "cleared": {"ch6": 3, "zz": {"count": 1}}, "art": "q"}')
 	check(not Save.cleared(odd["save"], "ch6") and odd["save"]["art"] == "a", "모양이 틀린 칸은 버리고 기본값 %s" % odd["save"])
 	check(odd["save"]["cleared"].has("zz"), "모르는 장 id 는 남긴다(다음 판이 만들 장)")

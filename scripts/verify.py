@@ -357,14 +357,14 @@ def step_save(g):
     if os.path.exists(path):
         os.remove(path)
     base = [g, "--headless", "--fixed-fps", "60", "--path", ".", "--", "--save", path, "--trace"]
-    ok = run("세이브 쓰기 (그림 A → B)", base + ["--seconds", "3", "--events", "60:art"], lambda out: ("SAVE new art=a" in out, ""))
+    ok = run("세이브 쓰기 (그림 A → 관절 인형 — B 는 2026-11-11 버튼에서 뺐다)", base + ["--seconds", "3", "--events", "60:art"], lambda out: ("SAVE new art=a" in out, ""))
     try:
         with open(path, encoding="utf-8") as f:
             art = json.load(f).get("art")
     except (OSError, ValueError):
         art = None
-    ok &= run("세이브 읽기", base + ["--seconds", "1"], lambda out: ("SAVE ok art=b" in out, f"파일 art={art}"))
-    return ok and art == "b"
+    ok &= run("세이브 읽기", base + ["--seconds", "1"], lambda out: ("SAVE ok art=puppet" in out, f"파일 art={art}"))
+    return ok and art == "puppet"
 
 
 def main():

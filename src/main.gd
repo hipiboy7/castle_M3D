@@ -9,7 +9,7 @@ extends Node3D
 ## 실행 인자(-- 뒤에): --autoplay 봇이 김신(끝나면 다음 시드로 다시) · --mode 장 id(ch0 · ch1 · ch6 · ch11 — 옛 이름 duel · stage 도 됨, 기본 ch6)
 ##   --seconds N N초(게임 시간) 뒤 결과를 찍고 끝 · --seed S · --shots 폴더:프레임,프레임 그 프레임 화면을 PNG 로
 ##   --touch PC 에서도 터치 버튼 · --room N stage 를 N번 방부터 · --crowd N 11장 첫 방에 경호원 N명 더(성능 점검)
-##   --art puppet|a|b 그림(김신 · 신겐만 — a = GLB 툰 모델(기본 · #9 결정) · b = 도트 빌보드). 처음 화면 '그림' 버튼 · 3 키로도 바꾼다
+##   --art puppet|a|b 그림(a = GLB 모델(기본 · #9 결정) · b = 도트 빌보드 — 개발만). 처음 화면 '그림' 버튼 · 3 키는 a ↔ puppet(Save.ARTS)
 ##   --save 경로 세이브 파일(창 없는 실행에서 세이브를 시험할 때 — 없으면 창 없는 실행은 세이브를 안 쓴다)
 ##   --safe L,T,R,B 안전 영역 여백(기준 화면 단위 — 노치 · 제스처 바 흉내) · --trace 흐름 줄(MODE · PAUSE)을 창 없이도 찍는다
 ##   --save-replay 경로 --seconds 로 끝날 때 마지막 판의 입력 기록을 저장 · --replay 경로 기록을 창 없이 다시 돌려 해시를 견주고 끝
@@ -30,8 +30,9 @@ const Lines = preload("res://src/data/lines.gd")
 const Puppet = preload("res://src/view/puppet3d.gd")
 const PuppetGlb = preload("res://src/view/puppet_glb.gd")
 const PuppetDot = preload("res://src/view/puppet_dot.gd")
-const ART_NAMES := {"puppet": "관절 인형", "a": "A · GLB 툰 모델", "b": "B · 도트 빌보드"}
+const ART_NAMES := {"puppet": "관절 인형", "a": "A · 붓칠 먹선 모델", "b": "B · 도트 빌보드(개발)"}
 const Arena = preload("res://src/view/arena3d.gd")
+const Ink = preload("res://src/view/ink.gd")                 # 붓칠 · 먹선 화풍(2026-11-11 — 무대 재질 · 화면 마무리)
 const Hotel3d = preload("res://src/view/hotel3d.gd")
 const Town3d = preload("res://src/view/town3d.gd")
 const Haseong3d = preload("res://src/view/haseong3d.gd")
@@ -130,6 +131,8 @@ func _ready() -> void:
 	hud = Hud.new()
 	add_child(hud)
 	hud.setup()
+	if not headless:
+		add_child(Ink.grade_layer())                # 3D 위 · HUD 밑 화면 마무리(채도 · 대비 · 비네트)
 	menu = TitleMenu.new()
 	hud.hint_y_fn = func() -> float: return menu.hint_y()
 	hud.root.add_child(menu)
@@ -208,11 +211,13 @@ func _build_arena() -> void:
 		arena.process_mode = Node.PROCESS_MODE_PAUSABLE
 		add_child(arena)
 		arena.build(str(d.get("theme", d["room"]["theme"])), d["world"].bounds, not headless)
+		Ink.stylize(arena, not headless)
 	else:
 		arena = Arena.new()
 		arena.process_mode = Node.PROCESS_MODE_PAUSABLE
 		add_child(arena)
 		arena.build(not headless)
+		Ink.stylize(arena, not headless)
 
 
 ## 사람 하나의 인형 — 방에 들어설 때 · 방 안에서 새로 선 사람(stage 신호 spawn — triggers)
@@ -490,7 +495,7 @@ func _title_pick() -> String:
 	if Input.is_action_just_pressed("art") or touch.peek_edge("art") or _fake_art:
 		_fake_art = false
 		touch.take_edges()
-		var order := ["puppet", "a", "b"]
+		var order: Array = Save.ARTS                # 그림 B(도트)는 고르지 않는다(2026-11-11 — --art b 개발 인자만)
 		args["art"] = order[(order.find(str(args["art"])) + 1) % order.size()]
 		save["art"] = args["art"]
 		_write_save()

@@ -3,7 +3,7 @@ extends "res://src/view/puppet3d.gd"
 ## 관절 인형(puppet3d)의 자세 계산(관절 노드 J)은 그대로 두고 그 메시만 숨긴 뒤, GLB 뼈를 같은 이름의 관절 각도로 돌린다
 ## (뼈의 쉬는 회전이 0 이라 관절 회전 = 뼈 회전). 무기 · 예고 · 발밑 고리는 인형 것을 그대로 쓴다.
 ## 바꿔 끼우기(CLAUDE.md 1절 · 2-1절 LSP): update_from(f, dt, frozen) · remove_glasses 를 그대로 물려받는다.
-## 툰: 빛을 2 ~ 3 단으로 끊는 재질(diffuse toon) + 뒷면을 조금 키운 검은 외곽선(next_pass).
+## 화풍: 붓칠 · 먹선 셀(src/view/ink.gd — 2026-11-11, 옛 diffuse toon + next_pass 외곽선을 갈음).
 
 const BONES := ["hips", "spine", "chest", "neck", "head", "sh_r", "el_r", "hand_r", "sh_l", "el_l", "hand_l",
 	"th_r", "kn_r", "ft_r", "th_l", "kn_l", "ft_l"]
@@ -23,6 +23,7 @@ func setup(lk: Dictionary) -> void:
 		bone_of[n] = skel.find_bone(n)
 	for mi in model.find_children("*", "MeshInstance3D", true, false):
 		mi.material_override = _toon()
+		mi.material_overlay = Ink.line(true)
 	if bone_of.get("head", -1) >= 0:                     # 머리를 작게(Looks.HEAD_K — GLB 는 그대로, 뼈 크기만. _drive 는 자리 · 회전만 쓴다)
 		skel.set_bone_pose_scale(bone_of["head"], Vector3.ONE * Looks.HEAD_K)
 	_drive()
@@ -48,27 +49,11 @@ func _find_skeleton(n: Node) -> Skeleton3D:
 	return null
 
 
-func _toon() -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.vertex_color_use_as_albedo = true
-	# 툰 단: 거칠기가 낮을수록 명암 경계가 또렷하다(0.6 은 흐릿한 그러데이션이라 '덩어리'처럼 보였다 — 폰 리뷰 2026-11-07).
-	# 반사광은 작고 약하게(검은 정장에 흰 얼룩이 생기지 않게), 테두리 빛은 옷 색을 따라(검은 옷의 몸 윤곽이 배경에서 떨어져 보이게)
-	m.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
-	m.specular_mode = BaseMaterial3D.SPECULAR_TOON
-	m.roughness = 0.42
-	m.metallic_specular = 0.25
-	m.rim_enabled = true
-	m.rim = 0.45
-	m.rim_tint = 0.55
-	var ol := StandardMaterial3D.new()                  # 외곽선 — 짙은 남색(순검정보다 덜 딱딱하다), 몸이 매끈해져 조금 가늘게
-	ol.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	ol.albedo_color = Color(0.03, 0.03, 0.06)
-	ol.cull_mode = BaseMaterial3D.CULL_FRONT
-	ol.grow = true
-	ol.grow_amount = 0.01
-	m.next_pass = ol
+## 붓칠 · 먹선 셀 재질(src/view/ink.gd — 2026-11-11 Hades 화풍): 꼭짓점 색 바탕 · 세 단 명암 · 빛 색 테두리 빛 + 먹선(화면 픽셀 너비 —
+## 멀어도 가늘어지지 않는다). 옛 툰(StandardMaterial3D DIFFUSE_TOON + grow 외곽선)을 갈음
+func _toon() -> Material:
+	var m := Ink.cel(Color(1, 1, 1), "cloth", true)
 	mats.append(m)                                      # 맞음 번쩍임 · 엇엇박 달아오름(인형의 _update_flash)이 이 재질에도
-	m.emission_enabled = true
 	return m
 
 

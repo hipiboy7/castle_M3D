@@ -15,6 +15,9 @@ func setup(lk: Dictionary) -> void:
 			shape_keys[sh + "_L"] = _shape_set(keys, false, true)
 	cur = guard_pose.duplicate()
 	_build()
+	for w in [weapon_r, weapon_l]:
+		if w != null:
+			_ink_lines(w)
 	_apply(cur)
 
 
@@ -794,20 +797,22 @@ func _mesh(parent: Node3D, mesh: Mesh, mat: Material, pos := Vector3.ZERO, rot :
 	return mi
 
 
-func _mat(c: Color, rough := 0.7, rim := 0.3, metal := 0.0) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.albedo_color = c
-	m.roughness = rough
-	m.metallic = metal
-	if rim > 0.0:
-		m.rim_enabled = true
-		m.rim = rim
-		m.rim_tint = 0.35
-	# 번쩍임 때 셰이더를 새로 만들지 않게 발광은 늘 켜 두고 색만 바꾼다
-	m.emission_enabled = true
-	m.emission = Color(0, 0, 0)
+## 인형 재질 — 붓칠 · 먹선 셀 셰이더(src/view/ink.gd cel, 2026-11-11). 거칠기 · 테두리 빛 인자는 종류를 고르는 데만 쓴다
+## (쇠 metal ≥ 0.5 · 광택 rough < 0.45 = 가죽 · 머리 반사광). 번쩍임은 Ink.set_flash
+func _mat(c: Color, rough := 0.7, rim := 0.3, metal := 0.0) -> Material:
+	var kind := "metal" if metal >= 0.5 else ("leather" if rough < 0.45 else "cloth")
+	var m := Ink.cel(c, kind)
 	mats.append(m)
 	return m
+
+
+## 무기(칼 · 총 · 몽둥이)에 먹선 — 관절 인형 몸은 공 · 캡슐 조각마다 윤곽이 생겨 구름처럼 보였다(2026-11-11 화면 확인). 몸 먹선은 GLB(puppet_glb)만
+func _ink_lines(n: Node) -> void:
+	var cache := {}
+	for mi in n.find_children("*", "MeshInstance3D", true, false):
+		var sz: Vector3 = mi.mesh.get_aabb().size * mi.scale
+		if maxf(sz.x, maxf(sz.y, sz.z)) >= Ink.LINE_MIN_SIZE * 0.3 and minf(sz.x, minf(sz.y, sz.z)) >= 0.03:
+			mi.material_overlay = Ink.line(true, mi.mesh is BoxMesh or mi.mesh is CylinderMesh, cache)
 
 
 func _capsule(r: float, h: float) -> CapsuleMesh:

@@ -1,7 +1,7 @@
 extends RefCounted
 ## 세이브 — 순수 로직(읽기 · 쓰기 파일은 main.gd 가 한다: user://save.json, 창 없는 실행은 파일을 안 쓴다).
 ## 형식(VERSION 1): {"v": 1, "cleared": {장 id: {"count": 깬 횟수, "best": 가장 짧은 판(로직 프레임)}}, "last": 마지막으로 한 장,
-##   "art": 고른 그림(puppet · a · b), "speed": 게임 속도(1 · 1.5 · 2 — 로직 프레임을 1초에 60 · 90 · 120 번, 판정은 그대로),
+##   "art": 고른 그림(puppet · a — B(도트)는 2026-11-11 처음 화면에서 뺐다, 옛 세이브의 b 는 A 로), "speed": 게임 속도(1 · 1.5 · 2 — 로직 프레임을 1초에 60 · 90 · 120 번, 판정은 그대로),
 ##   "difficulty": 난이도(easy · normal · hard · hell — src/data/difficulty.gd, 2026-11-09 칸을 더함 · 옛 세이브는 normal)}
 ## 형식 규칙(CLAUDE.md 2-1절 도메인 품질 '세이브는 형식 버전 · 옛 세이브 시험'):
 ##   - 칸을 더할 때는 VERSION 을 그대로 두고 _fill 에 기본값을 둔다(옛 세이브는 빠진 칸만 채워 읽는다)
@@ -14,7 +14,7 @@ const Campaign = preload("res://src/data/campaign.gd")
 const Difficulty = preload("res://src/data/difficulty.gd")
 
 const VERSION := 1
-const ARTS := ["puppet", "a", "b"]
+const ARTS := ["puppet", "a"]    # 2026-11-11 사용자 "3. (가)" — 붓칠 · 먹선 화풍 하나로, 그림 B(도트)는 고르지 않는다(--art b 개발 인자만)
 const DEFAULT_ART := "a"         # #9 결정(2026-11-06) — 본편 그림은 A(GLB 툰 모델)
 const SPEEDS := [1.0, 1.5, 2.0]  # 게임 속도 고르기(사용자 2026-11-06 "싸움이 너무 느린데 게임 속도를 더 빨리 할 수 있는 버튼")
 
