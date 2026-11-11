@@ -3,6 +3,7 @@ extends SceneTree
 ## work/looks/ref/<id>.png)과 나란히 보고 고치는 데 쓴다(castle_common 73차 · 사용자 답58 '원작 캐릭터를 다시 확인해서').
 ## 창이 있어야 그린다:  tools/xvfb_run.sh <godot> --path . -s res://tools/shot_looks.gd -- 출력폴더 [외형이름 ..]
 ## 출력: <출력폴더>/<외형이름>.png (앞 · 3/4 두 칸, 480x640 씩) — 저장소 밖에 둔다. 이름 끝이 _a 면 그림 A(GLB — src/view/puppet_glb.gd)로.
+## --game 을 이름 앞에 주면 세 칸(앞 · 게임 카메라 각 55도 3/4 · 뒤 위) 720x960 씩 — 안쪽 먹선 · 머리털 결 · 등 솔기 확인(화풍 2단계)
 
 const Puppet3D = preload("res://src/view/puppet3d.gd")
 const PuppetGlb = preload("res://src/view/puppet_glb.gd")
@@ -21,11 +22,16 @@ func _run() -> void:
 	var args := OS.get_cmdline_user_args()
 	var out := str(args[0]) if args.size() > 0 else "user://looks_shots"
 	var names: Array = args.slice(1) if args.size() > 1 else Looks.LOOKS.keys()
+	var game := names.has("--game")
+	names.erase("--game")
+	var w := 720 if game else W
+	var h := 960 if game else H
+	var views: Array = [[0.0, 0.15], [35.0, 1.43], [200.0, 0.9]] if game else [[0.0, 0.15], [35.0, 0.15]]   # [돌기(도), 올려보기 y]
 	if names == ["--art"]:                     # 그림 A 가 있는 이름 전부(장 이름 + 명부) — <이름>_a
 		names = Looks.art_names().map(func(n): return str(n) + "_a")
 	DirAccess.make_dir_recursive_absolute(out)
 	var vp := SubViewport.new()
-	vp.size = Vector2i(W, H)
+	vp.size = Vector2i(w, h)
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	vp.own_world_3d = true
 	root.add_child(vp)
@@ -43,25 +49,27 @@ func _run() -> void:
 	vp.add_child(sun)
 	var cam := Camera3D.new()
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	cam.size = 2.7
+	cam.size = 2.2 if game else 2.7
 	vp.add_child(cam)
 	for n in names:
 		var name := str(n)
 		var shots: Array[Image] = []
-		for yaw in [0.0, 35.0]:
+		for vw in views:
+			var yaw: float = vw[0]
 			var p = PuppetGlb.new() if name.ends_with("_a") and Looks.has_art(name.trim_suffix("_a")) else Puppet3D.new()
 			vp.add_child(p)
 			p.setup(Looks.look(name))
-			var d := Vector3(sin(deg_to_rad(yaw)), 0.15, -cos(deg_to_rad(yaw))).normalized()   # 인형 앞은 -Z
-			cam.look_at_from_position(Vector3(0, 1.15, 0) + d * 10.0, Vector3(0, 1.15, 0), Vector3.UP)
+			var d := Vector3(sin(deg_to_rad(yaw)), float(vw[1]), -cos(deg_to_rad(yaw))).normalized()   # 인형 앞은 -Z
+			var aim := Vector3(0, 1.05 if game else 1.15, 0)
+			cam.look_at_from_position(aim + d * 10.0, aim, Vector3.UP)
 			for i in 4:
 				await process_frame
 			shots.append(vp.get_texture().get_image())
 			p.queue_free()
 			await process_frame
-		var img := Image.create(W * 2, H, false, shots[0].get_format())
+		var img := Image.create(w * shots.size(), h, false, shots[0].get_format())
 		for i in shots.size():
-			img.blit_rect(shots[i], Rect2i(0, 0, W, H), Vector2i(W * i, 0))
+			img.blit_rect(shots[i], Rect2i(0, 0, w, h), Vector2i(w * i, 0))
 		img.save_png(out.path_join(name + ".png"))
 		print("SHOT %s" % name)
 	quit(0)

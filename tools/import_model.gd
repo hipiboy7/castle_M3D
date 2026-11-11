@@ -32,7 +32,10 @@ const SRC := {
 		"rig": "quaternius", "out": "res://assets/models/kimshin_a.glb",
 		"colors": {"Suit_Legs:Suit": "pants", "Suit": "suit", "White": "shirt", "Tie": "tie", "Skin": "skin", "Hair": "hair",
 			"Eyebrows": "brow", "Eye": "eye", "Black": "shoe"},
-		"arm": 1.15, "leg": 0.95, "hand": 0.72, "head": 1.12, "depth": 1.15, "curl": [80.0, 95.0, 70.0]},
+		"arm": 1.15, "leg": 0.95, "hand": 0.72, "head": 1.12, "depth": 1.15, "curl": [80.0, 95.0, 70.0],
+		# 2026-11-11 화풍 2단계(사용자 '(가)' — 김신도 스크립트로 다시 깎기): 로우폴리라 각지고(rc.7 폰 리뷰) 안쪽 먹선 · 칠을 넣을 수 없어
+		# make_models.gd 로 돌렸다. 표 · 도구는 남겨 둔다(active true 로 되돌리면 다시 이 원본으로)
+		"active": false},
 }
 
 var tris := 0
@@ -41,7 +44,7 @@ var tris := 0
 func _initialize() -> void:
 	var only := OS.get_cmdline_user_args()
 	for id in SRC:
-		if not only.is_empty() and not only.has(id):
+		if (not only.is_empty() and not only.has(id)) or not SRC[id].get("active", true):
 			continue
 		var t0 := Time.get_ticks_msec()
 		var err := _convert(id, SRC[id])
