@@ -264,9 +264,20 @@ const ART := {
 	"condor": {"glb": "res://assets/models/condor_a.glb", "dots": "res://assets/sprites/condor_b"},
 	"heron": {"glb": "res://assets/models/heron_a.glb", "dots": "res://assets/sprites/heron_b"},
 	"owl": {"glb": "res://assets/models/owl_a.glb", "dots": "res://assets/sprites/owl_b"},
+	# 무리(EXTRA_LOOKS) 중 그림이 없던 외형(2026-11-11 rc.12 폰 리뷰 '캐릭터 많이 나오니까 끊김') — 관절 인형은 조각 약 40개라 한 사람이
+	# 그리기 호출 약 40번(GLB 는 2 ~ 3번). 11장 주차장 · 3 ~ 10장 패거리 · 0장 · 2장. 그림 A 만(도트는 다음 묶음 굽기 때 — NO_DOTS)
+	"gunter_suit": {"glb": "res://assets/models/gunter_suit_a.glb", "dots": "res://assets/sprites/gunter_suit_b"},
+	"gunter_bald": {"glb": "res://assets/models/gunter_bald_a.glb", "dots": "res://assets/sprites/gunter_bald_b"},
+	"gunter_uzi": {"glb": "res://assets/models/gunter_uzi_a.glb", "dots": "res://assets/sprites/gunter_uzi_b"},
+	"gunter_brute": {"glb": "res://assets/models/gunter_brute_a.glb", "dots": "res://assets/sprites/gunter_brute_b"},
+	"ds_raider": {"glb": "res://assets/models/ds_raider_a.glb", "dots": "res://assets/sprites/ds_raider_b"},
+	"haseong_suit": {"glb": "res://assets/models/haseong_suit_a.glb", "dots": "res://assets/sprites/haseong_suit_b"},
+	"haseong_guard": {"glb": "res://assets/models/haseong_guard_a.glb", "dots": "res://assets/sprites/haseong_guard_b"},
+	"namgu_youth": {"glb": "res://assets/models/namgu_youth_a.glb", "dots": "res://assets/sprites/namgu_youth_b"},
 }
 ## 그림 B(도트)를 아직 굽지 않은 ART 인물 — 그림 B 로 고르면 관절 인형으로 그린다(has_art)
-const NO_DOTS := ["condor", "heron", "owl"]
+const NO_DOTS := ["condor", "heron", "owl", "gunter_suit", "gunter_bald", "gunter_uzi", "gunter_brute", "ds_raider", "haseong_suit",
+	"haseong_guard", "namgu_youth"]
 ## 명부(roster — 장 표에 아직 안 쓰는 looks.json 인물, looks_common ROSTER) 그림 자리. APK 에서 뺀다(export_presets.cfg exclude_filter
 ## assets/roster/*) — 편집기 · 시험 · 도구에서만 있고, 폰에서는 has_art 가 거짓이라 관절 인형으로 그린다
 const ROSTER_DIR := "res://assets/roster"

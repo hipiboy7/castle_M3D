@@ -62,15 +62,21 @@ static func _merge(a: Dictionary, b: Dictionary) -> Dictionary:
 	return out
 
 
+## 자세 칸 이름을 각도(Vector3) · 수(float) 둘로 갈라 둔 것 — _lerp_pose 가 칸마다 종류를 묻지 않게(사람마다 프레임마다 부른다 —
+## 11장 주차장 47명, 2026-11-11 rc.12 '끊김')
+static var _VKEYS: Array = []
+static var _FKEYS: Array = []
+
+
 static func _lerp_pose(a: Dictionary, b: Dictionary, k: float) -> Dictionary:
+	if _VKEYS.is_empty():
+		for key in P.NEUTRAL:
+			(_VKEYS if P.NEUTRAL[key] is Vector3 else _FKEYS).append(key)
 	var out := {}
-	for key in P.NEUTRAL:
-		var va = a.get(key, P.NEUTRAL[key])
-		var vb = b.get(key, P.NEUTRAL[key])
-		if va is Vector3:
-			out[key] = (va as Vector3).lerp(vb, k)
-		else:
-			out[key] = lerpf(float(va), float(vb), k)
+	for key in _VKEYS:
+		out[key] = (a.get(key, P.NEUTRAL[key]) as Vector3).lerp(b.get(key, P.NEUTRAL[key]), k)
+	for key in _FKEYS:
+		out[key] = lerpf(float(a.get(key, P.NEUTRAL[key])), float(b.get(key, P.NEUTRAL[key])), k)
 	return out
 
 

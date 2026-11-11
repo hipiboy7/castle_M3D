@@ -130,6 +130,8 @@ func _sheet(id: String) -> void:
 		for c in names.size():
 			p._apply(poses[names[c]])
 			p._ground()
+			if p.has_method("_drive"):
+				p._drive()                 # 그림 A: 뼈는 update_from 끝에 한 번 돈다 — 자세를 바로 넣었으면 직접
 			await process_frame
 			await process_frame
 			var img := vp.get_texture().get_image()

@@ -2,17 +2,27 @@ extends "res://src/view/puppet_pose.gd"
 ## 관절 인형의 모습 만들기 — setup(외형 표 src/view/looks.gd) → 뼈 노드 · 몸 · 얼굴 · 머리 · 모자 · 안경 · 무기. 뼈 길이 · 자세 · 움직임은
 ## 바탕 src/view/puppet_pose.gd(2026-11-09 나눔).
 
+static var _SHAPE_CACHE := {}       # 가드 종류 → shape_keys(setup)
+
+
 func setup(lk: Dictionary) -> void:
 	look = lk
 	var gd: Dictionary = {"kim": P.GUARD_KIM, "baek": P.GUARD_BAEK, "box": P.GUARD_BOX, "long": P.GUARD_LONG}.get(
 		str(lk.get("guard", "kim")), P.GUARD_KIM)
 	guard_pose = _merge(P.NEUTRAL, gd)
-	for sh in P.SHAPES:
-		var keys: Dictionary = P.SHAPES[sh]
-		shape_keys[sh] = _shape_set(keys, sh.begins_with("slash"), false)
-		if P.MIRROR.has(sh):
-			# 왼손 · 왼발 판: 오른쪽 모양을 좌우로 뒤집는다 (삼연타 둘째 대 · 잽 · 훅 · 왼발 차기 ..)
-			shape_keys[sh + "_L"] = _shape_set(keys, false, true)
+	# 모양 표는 가드 종류(guard_pose)와 P 상수로만 정해진다 — 가드 종류마다 한 번 짓고 나눠 쓴다(읽기만 — _lerp_pose · _merge 가 새로 만든다).
+	# 인형마다 지으면 한 사람 설 때 약 4ms(서버) — 11장 주차장 47명이 한꺼번에 서면 폰에서 1초 가까이 멈췄다(2026-11-11 rc.12 '끊김')
+	var gk := str(lk.get("guard", "kim"))
+	if _SHAPE_CACHE.has(gk):
+		shape_keys = _SHAPE_CACHE[gk]
+	else:
+		for sh in P.SHAPES:
+			var keys: Dictionary = P.SHAPES[sh]
+			shape_keys[sh] = _shape_set(keys, sh.begins_with("slash"), false)
+			if P.MIRROR.has(sh):
+				# 왼손 · 왼발 판: 오른쪽 모양을 좌우로 뒤집는다 (삼연타 둘째 대 · 잽 · 훅 · 왼발 차기 ..)
+				shape_keys[sh + "_L"] = _shape_set(keys, false, true)
+		_SHAPE_CACHE[gk] = shape_keys
 	cur = guard_pose.duplicate()
 	_build()
 	for w in [weapon_r, weapon_l]:

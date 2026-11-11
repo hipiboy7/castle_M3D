@@ -15,7 +15,7 @@ var bone_of := {}
 
 func setup(lk: Dictionary) -> void:
 	super.setup(lk)
-	_hide_puppet(J["fall"])
+	_strip_puppet(J["fall"])
 	model = load(str(lk["glb"])).instantiate()
 	J["body"].add_child(model)
 	skel = _find_skeleton(model)
@@ -26,17 +26,29 @@ func setup(lk: Dictionary) -> void:
 		mi.material_overlay = Ink.line(true)
 	if bone_of.get("head", -1) >= 0:                     # 머리를 작게(Looks.HEAD_K — GLB 는 그대로, 뼈 크기만. _drive 는 자리 · 회전만 쓴다)
 		skel.set_bone_pose_scale(bone_of["head"], Vector3.ONE * Looks.HEAD_K)
-	_drive()
+	_drive(true)
 
 
-## 관절 인형의 겉모양만 숨긴다 — 무기(손에 붙은 칼)는 남긴다
-func _hide_puppet(n: Node) -> void:
-	for c in n.get_children():
-		if c == weapon_r or c == weapon_l:
+## 관절 인형의 겉모양을 지운다 — 관절(J) 노드 · 무기(손에 붙은 칼)는 남긴다. 숨기기만 하면 관절이 돌 때마다 조각 약 40개에
+## 자리 바뀜이 퍼져(그리지 않아도) 한 사람 몫이 컸다(2026-11-11 rc.12 '캐릭터 많이 나오니까 끊김'). 안경 · 풀린 머리 조각도 함께 —
+## remove_glasses 는 GLB 에서 아무것도 안 한다(전에도 숨긴 조각이라 보이지 않았다)
+func _strip_puppet(n: Node) -> void:
+	var list := n.find_children("*", "MeshInstance3D", true, false)
+	list.reverse()                                       # 아이부터 — 부모를 먼저 지우면 아이가 함께 사라진다
+	for mi in list:
+		if not is_instance_valid(mi) or _in_weapon(mi):
 			continue
-		if c is MeshInstance3D:
-			c.visible = false
-		_hide_puppet(c)
+		mi.get_parent().remove_child(mi)
+		mi.free()
+	glasses = null
+	loose = null
+
+
+func _in_weapon(n: Node) -> bool:
+	for w in [weapon_r, weapon_l]:
+		if w != null and (w == n or w.is_ancestor_of(n) or n.is_ancestor_of(w)):
+			return true
+	return false
 
 
 func _find_skeleton(n: Node) -> Skeleton3D:
@@ -57,17 +69,15 @@ func _toon() -> Material:
 	return m
 
 
-func _apply(p: Dictionary) -> void:
-	super._apply(p)
-	_drive()
+## 뼈는 한 프레임에 한 번 — 관절 인형 자세(_apply) · 발 붙이기(_ground)가 끝난 뒤(전에는 둘 다 끝에 _drive 를 불러 두 번)
+func update_from(f, dt: float, frozen: bool) -> void:
+	super.update_from(f, dt, frozen)
+	if not frozen:
+		_drive()
 
 
-func _ground() -> void:
-	super._ground()
-	_drive()
-
-
-func _drive() -> void:
+## 관절 각도 → 뼈. 자리는 골반만 움직인다(관절 인형 _apply — 다른 관절은 지은 자리 그대로)라 all 일 때(setup)만 전부
+func _drive(all := false) -> void:
 	if skel == null:
 		return
 	for n in bone_of:
@@ -75,5 +85,6 @@ func _drive() -> void:
 		if i < 0:
 			continue
 		var j: Node3D = J[n]
-		skel.set_bone_pose_position(i, j.position)
+		if all or n == "hips":
+			skel.set_bone_pose_position(i, j.position)
 		skel.set_bone_pose_rotation(i, j.quaternion)

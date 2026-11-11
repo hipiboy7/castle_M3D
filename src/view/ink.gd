@@ -30,7 +30,12 @@ const AO_FLOOR := 0.32                          # 벽 · 기둥 밑동 그늘
 const SHADOW_TINT := Color(0.34, 0.3, 0.58)     # 그림자(환경광) 쪽으로 미는 색 — 차갑고 보랏빛
 const SHADOW_MIX := 0.4
 const AMBIENT_K := 0.82                         # 환경광 세기 × — 명암 대비를 키운다
-const SHADOW_DIST := 34.0                       # 해 그림자 거리(m) — 망원 카메라(camera_rig OFFSET)가 멀다
+## 해 그림자: 한 장(직교) · 26m — 망원 카메라(camera_rig OFFSET · FOV 30)가 보는 땅은 카메라에서 약 14 ~ 20m 라 4 분할(기본)은 앞 두 장이
+## 비고 인물이 두 장에 걸려 두 번 그려졌다. 직교 한 장이 해상도도 그만큼(2048 / 화면 너비 약 30m — 1.5cm)이고 그리기 호출은 11장 주차장
+## 892 → 약 600(2026-11-11 rc.12 폰 리뷰 '끊김' — tools/perf_probe.gd)
+const SHADOW_DIST := 26.0
+const SHADOW_MODE := DirectionalLight3D.SHADOW_ORTHOGONAL
+const GRADE_EXPOSURE := 0.9                     # 화면 전체 밝기 ×(rc.12 폰 리뷰 '밝기는 조금 밝음' — 1.0 → 0.9)
 const CHAR_RIM := 0.9
 const CHAR_LIGHT_K := 1.0
 const PROP_LIGHT_K := 1.0
@@ -80,6 +85,7 @@ static func grade_layer() -> CanvasLayer:
 	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var m := ShaderMaterial.new()
 	m.shader = GRADE
+	m.set_shader_parameter("exposure", GRADE_EXPOSURE)
 	r.material = m
 	cl.add_child(r)
 	return cl
@@ -93,6 +99,7 @@ static func stylize(root: Node, detail := true) -> void:
 		_env((c as WorldEnvironment).environment)
 	for l in root.find_children("*", "DirectionalLight3D", true, false):
 		l.directional_shadow_max_distance = maxf(l.directional_shadow_max_distance, SHADOW_DIST)   # 카메라가 멀어졌다(camera_rig FOV)
+		l.directional_shadow_mode = SHADOW_MODE
 	var cache := {}
 	for mi in root.find_children("*", "MeshInstance3D", true, false):
 		_mesh(mi as MeshInstance3D, cache)

@@ -9,13 +9,14 @@ uniform vec4 shadow_tint : source_color = vec4(0.10, 0.04, 0.16, 1.0);
 uniform vec4 high_tint : source_color = vec4(1.05, 0.98, 0.88, 1.0);
 uniform float vignette = 0.62;
 uniform float grain = 0.022;
+uniform float exposure = 1.0;       // 전체 밝기 ×(ink.gd GRADE_EXPOSURE)
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
 void fragment() {
-	vec3 c = texture(screen, SCREEN_UV).rgb;
+	vec3 c = texture(screen, SCREEN_UV).rgb * exposure;
 	float l = dot(c, vec3(0.299, 0.587, 0.114));
 	c = mix(vec3(l), c, sat);
 	c = (c - 0.5) * contrast + 0.5;

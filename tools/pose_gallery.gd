@@ -87,6 +87,8 @@ func _run() -> void:
 				p.cur = pose.duplicate()
 				p._apply(p.cur)
 				p._ground()
+				if p.has_method("_drive"):
+					p._drive()                 # 그림 A: 뼈는 update_from 끝에 한 번 돈다 — 자세를 바로 넣었으면 직접
 				lab.text = str(cells[c][2])
 				var d: Vector3 = (cells[c][1] as Vector3).normalized()     # 인형 앞은 -Z, +X = 오른쪽 옆
 				cam.look_at_from_position(Vector3(0, 1.05, 0) + d * 10.0, Vector3(0, 1.05, 0), Vector3.UP)
