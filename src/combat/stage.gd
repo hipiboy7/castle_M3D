@@ -35,6 +35,7 @@ extends RefCounted
 ##            "survive"          방 survive 초를 버팀
 ##     do(한 줄에 여럿):
 ##            "spawn": [[id, Vector2, {덧붙임}], ..]       적 등장(장 표 ROLES 에 그 id 가 있어야)
+##   (방 칸 max_attackers: 한꺼번에 치는 적 수 — 없으면 장 표 MAX_ATTACKERS. 10장 산 기슭 총격전 3)
 ##            "moveset": {id: {combo · dash · counter · finisher}}   그 사람의 기본 공격 묶음을 바꾼다(10장 아킬라 총격전)
 ##            "spawn_allies": [[id, Vector2, {덧붙임}], ..] 아군 등장(봇 — ROLES 에 moveset). 자리가 bounds 밖이면 가장자리에
 ##                                        선다(가장자리에 세우면 걸어 들어오는 것처럼)
@@ -550,7 +551,7 @@ static func _intents(d: Dictionary, human) -> void:
 			continue
 		var ai = d["ais"][e]
 		var was: bool = ai.busy()
-		e.intent = ai.decide(e.target(), was or attackers < int(d["tbl"].MAX_ATTACKERS))
+		e.intent = ai.decide(e.target(), was or attackers < int(d["room"].get("max_attackers", d["tbl"].MAX_ATTACKERS)))
 		if not was and ai.busy():
 			attackers += 1
 	for k in d["heroes"].size():

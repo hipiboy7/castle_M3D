@@ -50,6 +50,11 @@ func apply(d: Dictionary) -> void:
 				var p: Node3D = pup[f]
 				fx.swing(f, p.yaw, str(mv["hand"]) == "L")
 				snd.play(str(mv["sfx"]), -4.0, randf_range(0.95, 1.05))
+			if bool(mv.get("aim_line", false)) and f.t <= int(mv["startup"]) and f.t % 2 == 0:
+				# 저격 조준선(헤론 — 054/032): 겨누는 동안 붉은 선이 사거리 끝까지, 쏘기 직전일수록 짙다(앞 60% 는 따라오고 뒤는 굳는다 — 그때 비킨다)
+				var k := float(f.t) / maxf(1.0, float(mv["startup"]))
+				fx.spike(Vector3(f.pos.x, 0, f.pos.y), pup[f].yaw, 0.7, float(mv["reach"]), 1.38, 0.05 + 0.05 * k,
+					Color(1.0, 0.08, 0.05, 0.6 + 0.4 * k), 0.06)
 			var tg: Array = f.telegraph()
 			if not tg.is_empty() and int(tg[1]) == 6:
 				snd.play("shine", -10.0 if tg[0] == "parry" else -6.0, 1.3 if tg[0] == "parry" else 0.8)

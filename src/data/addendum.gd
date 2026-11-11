@@ -43,6 +43,24 @@ const CHARACTERS := {
 		"skills": ["guilhwa_headbutt", "guilhwa_forearm"],
 		"src": "사용자 2026-11-06 '(화진 전) 전국구, (교회 전) 평이스크라킬러급, 주먹/칼 사용, 기술은 알아서 생성. 능력치도 화진전/교회전 나눠서'",
 		"provisional": ["stats", "skills"]},
+	# 이스크라 '자유로운 영혼' 팀(10장 산 기슭 — 사용자 2026-11-11 "아킬라, 프리깃, 샤모를 대체할 새로운 자유로운 영혼 팀. 콘도르, 헤론, 오울"
+	#  · 원작 053 ~ 055 fight:akila_suv). castle_common canon 에 인물(condor · heron · owl)은 있으나 data/characters.json 에 없다.
+	#  콘도르 등급은 강함표(외성 중위), 헤론 · 오울 등급 · 셋의 능력치 · 기술 고르기는 이 판의 후보(요청 35행)
+	"condor": {"id": "condor", "name": "콘도르", "rank": "외성 중위", "weapons": ["쌍권총"],
+		"stats": {"힘": 66, "속도": 74, "기술": 78, "맷집": 64},
+		"skills": ["condor_volley", "condor_ambush"],
+		"src": "등급 ranks.json 강함표 외성 중위. 쌍권총 — 사용자 2026-11-11 · canon look '소음기 단 대형 자동권총 두 자루'(054/043-052)",
+		"provisional": ["stats", "skills"]},
+	"heron": {"id": "heron", "name": "헤론", "rank": "외성 하위", "weapons": ["저격 소총", "권총"],
+		"stats": {"힘": 58, "속도": 66, "기술": 80, "맷집": 56},
+		"skills": ["heron_snipe", "heron_triple"],
+		"src": "저격 소총 — 사용자 2026-11-11 · canon look '스코프 달린 저격소총과 권총 · 드론'(054/011-042). 등급은 이 판 후보(콘도르 밑)",
+		"provisional": ["rank", "stats", "skills"]},
+	"owl": {"id": "owl", "name": "오울", "rank": "외성 하위", "weapons": ["돌격소총", "연막탄", "수류탄"],
+		"stats": {"힘": 62, "속도": 70, "기술": 72, "맷집": 62},
+		"skills": ["owl_smoke", "owl_grenade"],
+		"src": "돌격소총 — 사용자 2026-11-11 · canon look '도트사이트 · 소음기 단 사막색 카빈과 연막탄'(054/012-013). 등급은 이 판 후보(콘도르 밑)",
+		"provisional": ["rank", "stats", "skills"]},
 	# 이름 없는 경호원(원작 057 '경호대 정장 8인' · '톤파 경호원') — 인물 표에 없는 엑스트라. 등급은 사다리의 '경호대급'
 	"castle_guard": {"id": "castle_guard", "name": "캐슬 경호원", "rank": "경호대급", "weapons": ["맨손", "곤봉"],
 		"stats": {"힘": 50, "속도": 50, "기술": 40, "맷집": 50}, "skills": [],
@@ -120,6 +138,19 @@ const CHARACTERS := {
 
 ## 기술(1층 정체) — from: 하향의 원본 기술 · refs: 원작 화/컷
 const SKILLS := {
+	# 자유로운 영혼 팀(10장 산 기슭 — 원작 054 ~ 055)
+	"condor_volley": {"id": "condor_volley", "name": "소음 쌍권총 연사", "owner": "condor", "move": "cd_twin",
+		"desc": "소음기 쌍권총을 앞으로 내밀어 번갈아 연사한다(두두두)", "refs": ["054/061-062"]},
+	"condor_ambush": {"id": "condor_ambush", "name": "벽 뒤 쌍권총 매복", "owner": "condor", "move": "cd_ambush",
+		"desc": "벽 뒤에 숨었다가 '가라' — 뛰어나오며 쌍권총을 퍼붓는다", "refs": ["055/028-032"]},
+	"heron_snipe": {"id": "heron_snipe", "name": "스코프 저격", "owner": "heron", "move": "hr_snipe",
+		"desc": "멀리서 조준선을 긋고 한 발 — 옆구리를 관통해 넘어뜨린다", "refs": ["054/032"]},
+	"heron_triple": {"id": "heron_triple", "name": "저격 3연사", "owner": "heron", "move": "hr_triple",
+		"desc": "저격 소총 세 발을 이어 몸통에 박는다", "refs": ["055/014-016"]},
+	"owl_smoke": {"id": "owl_smoke", "name": "연막 표식", "owner": "owl", "move": "ow_smoke",
+		"desc": "핀을 뽑아 보라 연막을 던져 좌표를 찍는다 — 맞으면 체간이 크게 흔들린다", "refs": ["054/024-025"]},
+	"owl_grenade": {"id": "owl_grenade", "name": "수류탄", "owner": "owl", "move": "ow_grenade",
+		"desc": "수류탄을 굴려 넣어 터뜨린다 — 넓게 넘어뜨린다", "refs": ["055/011-014"]},
 	"shingen_daegeuk": {"id": "shingen_daegeuk", "name": "대극 큰 호 베기", "owner": "shingen", "move": "s_sg_daegeuk",
 		"desc": "긴 칼(대극)로 흰 호를 그리며 크게 휘두르고 아래에서 위로 쳐올린다", "refs": ["062/084-106", "098/035-047"]},
 	"shingen_dive": {"id": "shingen_dive", "name": "낮은 파고들기", "owner": "shingen", "move": "s_sg_dive",

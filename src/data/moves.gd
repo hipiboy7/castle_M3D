@@ -19,6 +19,7 @@ const DEFAULTS := {
 	"shake": 0, "hits": 1, "side": 0.0, "skill": false, "feints": [], "any_state": false, "hand": "R",      # hand: 치는 손 · 발 (R · L)
 	"guard_break": false, "skill_id": "", "stun_3d": [], "fx": "", "whiff": 0, "brake": 0,
 	"iframes": false, "unblock_top": "", "vs_high": [], "zigzag": false, "seq": [], "stance": 0, "stance_hit": "",
+	"aim_line": false,      # 겨누는 동안(준비) 붉은 조준선을 사거리 끝까지(그림 — 헤론 저격, event_fx)
 	# (rc.2 폰 피드백 묶음 B — 3D 덧붙임 기술, 2026-11-08) iframes: 판정이 끝날 때까지 무적 / unblock_top: 맞는 쪽 등급이 이 등급
 	# 이하면 막기 · 쳐내기를 뚫는다 / (한 방 ko_rank 는 2층 — castle_common skills.json effects, common.skill_ko) /
 	# vs_high: [등급, 배율] 맞는 쪽이 그 등급 이상이면 피해 · 체간 × 배율(등급 차로 깎이지도 않는다) / zigzag: side 를 한쪽 → 반대쪽 /
@@ -201,17 +202,51 @@ const M := {
 	"t_shot": {"label": "근거리 사격", "startup": 28, "active": 2, "recovery": 18, "damage": 12, "reach": 155, "radius": 4,
 		"parryable": false, "knockback": 2.0, "hitstop": 6, "posture": 12, "telegraph": "unblock", "shape": "shot",
 		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 3, "skill": true, "skill_id": "g4_shot", "hand": "L"},
-	# 아킬라 총격 묶음(10장 산 기슭 — 구스타프 반피 뒤 뜨거운 피 셋이 나오면 총격전, 사용자 2026-11-10): 리볼버 속사 → 왼손 한 발 · 구르며 쏘기.
+	# 아킬라 총격 묶음(10장 산 기슭 — 구스타프 반피 뒤 자유로운 영혼 팀이 나오면 총격전, 사용자 2026-11-11): 리볼버 속사 → 왼손 한 발 → 펌프 산탄총 · 구르며 쏘기.
 	# 적의 t_shot 보다 빠르고 약하다(조작 인물 연타 — 겨눔 예고 없음)
-	"akg_1": {"label": "리볼버 속사", "startup": 9, "active": 2, "recovery": 12, "damage": 7, "reach": 155, "radius": 4,
+	"akg_1": {"label": "리볼버 속사", "startup": 9, "active": 2, "recovery": 12, "damage": 9, "reach": 155, "radius": 4,
 		"parryable": false, "knockback": 1.6, "hitstop": 5, "posture": 8, "shape": "shot", "sfx": "shot", "hit_sfx": "hit_heavy",
 		"shake": 2, "hand": "R", "next": "akg_2"},
-	"akg_2": {"label": "왼손 한 발", "startup": 8, "active": 2, "recovery": 16, "damage": 8, "reach": 155, "radius": 4,
+	"akg_2": {"label": "왼손 한 발", "startup": 8, "active": 2, "recovery": 16, "damage": 10, "reach": 155, "radius": 4,
 		"parryable": false, "knockback": 2.2, "hitstop": 6, "posture": 10, "shape": "draw_shot", "sfx": "shot", "hit_sfx": "hit_heavy",
-		"shake": 3, "hand": "L"},
+		"shake": 3, "hand": "L", "next": "akg_3"},
 	"akg_dash": {"label": "구르며 쏘기", "startup": 10, "active": 2, "recovery": 14, "damage": 8, "reach": 155, "radius": 4,
 		"parryable": false, "knockback": 2.0, "hitstop": 6, "posture": 10, "shape": "draw_shot", "sfx": "shot", "hit_sfx": "hit_heavy",
 		"shake": 3, "hand": "R", "iframes": true},
+	# 펌프 산탄총(046/044 · 052/005-007 · 053/072 — 허리 높이로 쏘며 돌진): 가깝고 넓게 · 크게 밀어낸다(연타 끝)
+	"akg_3": {"label": "펌프 산탄총", "startup": 12, "active": 3, "recovery": 22, "damage": 14, "reach": 70, "radius": 16,
+		"parryable": false, "knockback": 4.5, "hitstop": 8, "posture": 16, "shape": "shot", "sfx": "shot", "hit_sfx": "hit_heavy",
+		"shake": 5, "hand": "R", "knockdown": true},
+	# ---- 이스크라 '자유로운 영혼' 팀(10장 산 기슭 — 사용자 2026-11-11 "콘도르(총, 쌍권총) + 헤론(총, 저격 소총) + 오울(총, 돌격소총)").
+	# 원작 054 ~ 055 아킬라 사냥(fight:akila_suv): 헤론이 드론 · 저격, 오울이 카빈 연사 · 연막 표식 · 수류탄, 콘도르가 소음 쌍권총으로 몰이.
+	# 모두 겨누는 동안 빨간 ! (막을 수 없다 — 보고 구르거나 엄폐 · 거리)
+	"cd_twin": {"label": "소음 쌍권총 연사", "startup": 24, "active": 16, "recovery": 20, "damage": 4, "reach": 150, "radius": 6,
+		"parryable": false, "hits": 4, "knockback": 0.9, "hitstop": 3, "posture": 5, "telegraph": "unblock", "shape": "shot",
+		"sfx": "shot", "hit_sfx": "hit", "shake": 2, "seq": ["shot", "draw_shot", "shot", "draw_shot"]},          # 054/061-062 두두두
+	"cd_pair": {"label": "쌍권총 겨눠 두 발", "startup": 20, "active": 8, "recovery": 18, "damage": 7, "reach": 150, "radius": 4,
+		"parryable": false, "hits": 2, "knockback": 2.0, "hitstop": 6, "posture": 10, "telegraph": "unblock", "shape": "draw_shot",
+		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 3, "hand": "L"},                                          # 054/027-030 '됐나'
+	"cd_ambush": {"label": "벽 뒤 매복 속사", "startup": 16, "active": 24, "recovery": 24, "damage": 4, "reach": 130, "radius": 7,
+		"parryable": false, "hits": 6, "knockback": 1.0, "hitstop": 3, "posture": 6, "telegraph": "unblock", "shape": "shot",
+		"sfx": "shot", "hit_sfx": "hit", "shake": 3, "seq": ["shot", "draw_shot", "shot", "draw_shot", "shot", "draw_shot"]},   # 055/028-032 '가라'
+	"hr_snipe": {"label": "저격", "startup": 80, "active": 2, "recovery": 40, "damage": 22, "reach": 420, "radius": 3,
+		"parryable": false, "knockback": 3.5, "hitstop": 10, "posture": 30, "telegraph": "unblock", "shape": "shot", "aim_line": true,
+		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 6, "knockdown": true},                                    # 054/032 옆구리 관통
+	"hr_triple": {"label": "저격 3연사", "startup": 64, "active": 30, "recovery": 40, "damage": 9, "reach": 420, "radius": 3,
+		"parryable": false, "hits": 3, "knockback": 2.0, "hitstop": 7, "posture": 12, "telegraph": "unblock", "shape": "shot", "aim_line": true,
+		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 4},                                                       # 055/014-016 3연사
+	"hr_pistol": {"label": "권총", "startup": 22, "active": 2, "recovery": 18, "damage": 8, "reach": 120, "radius": 4,
+		"parryable": false, "knockback": 1.8, "hitstop": 5, "posture": 9, "telegraph": "unblock", "shape": "draw_shot",
+		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 2, "hand": "L"},
+	"ow_burst": {"label": "카빈 연사", "startup": 22, "active": 20, "recovery": 20, "damage": 3.5, "reach": 170, "radius": 6,
+		"parryable": false, "hits": 5, "knockback": 0.8, "hitstop": 3, "posture": 5, "telegraph": "unblock", "shape": "shot",
+		"sfx": "shot", "hit_sfx": "hit", "shake": 2},                                                             # 054/022 '잡았다' 연사
+	"ow_smoke": {"label": "연막 표식", "startup": 18, "active": 4, "recovery": 22, "damage": 3, "reach": 130, "radius": 14,
+		"parryable": false, "knockback": 0.5, "hitstop": 3, "posture": 18, "telegraph": "unblock", "shape": "toss", "fx": "smoke",
+		"sfx": "swing", "hit_sfx": "hit", "shake": 1},                                                            # 054/024-025 보라 연막 · 좌표
+	"ow_grenade": {"label": "수류탄", "startup": 34, "active": 4, "recovery": 26, "damage": 16, "reach": 140, "radius": 18,
+		"parryable": false, "knockback": 4.0, "hitstop": 9, "posture": 24, "telegraph": "unblock", "shape": "toss", "fx": "blast",
+		"sfx": "shot", "hit_sfx": "hit_heavy", "shake": 7, "knockdown": true},                                     # 055/011-014 굴러 들어온 수류탄
 	# 하야부사 — 긴칼(카타나). 신겐보다 짧고 느리다(하향)
 	"hy_slash1": {"label": "긴칼 베기", "startup": 13, "active": 3, "recovery": 11, "damage": 10, "reach": 20, "radius": 11,
 		"arc": 80, "lunge": 6, "posture": 12, "telegraph": "parry", "shape": "slash", "sfx": "knife"},

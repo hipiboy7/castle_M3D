@@ -63,11 +63,14 @@ const ROLES := {
 		"look": "lingling", "phase2_at": 0.5, "dmg_k": 0.8},
 	"yuwoosung": {"hp": 140.0, "posture": 300.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 32.0, "finisher_cap": 0.04, "ai": "x_swordmaster",
 		"look": "yuwoosung", "phase2_at": 0.5, "dmg_k": 0.38},
-	# 뜨거운 피 조직원(이스크라 — 산 기슭 총격전, 구스타프 반피 뒤 셋): 거리를 두고 쏜다
-	"hotblood_gunner": {"hp": 90.0, "posture": 40.0, "walk": 1.9, "run": 4.1, "stagger": 70, "poise": 2.0, "ai": "x_gun", "look": "gunter_uzi", "dmg_k": 0.45},
-	# 구스타프(이스크라 — 방패 · 총 · 타격): 거리를 두면 쏘는 x_gun, 방패는 단단함(poise)으로
-	"gustav": {"hp": 230.0, "posture": 400.0, "walk": 2.0, "run": 4.4, "stagger": 80, "poise": 40.0, "finisher_cap": 0.04, "ai": "x_gun",
-		"look": "gustav", "phase2_at": 0.5, "dmg_k": 0.4},
+	# 이스크라 '자유로운 영혼' 팀(산 기슭 총격전 — 구스타프 반피 뒤, 사용자 2026-11-11 · 원작 054 ~ 055): 셋 다 거리를 두는 총잡이
+	#  (enemy_ai condor · heron · owl). 체력은 낮게 — 원작에서 아킬라가 헤론 · 오울을 이마 한 발씩(055/034-035)
+	"condor": {"hp": 110.0, "posture": 90.0, "walk": 2.1, "run": 4.6, "stagger": 70, "poise": 6.0, "ai": "condor", "look": "condor", "dmg_k": 0.32},
+	"heron": {"hp": 95.0, "posture": 60.0, "walk": 2.0, "run": 4.4, "stagger": 70, "poise": 2.0, "ai": "heron", "look": "heron", "dmg_k": 0.4},
+	"owl": {"hp": 110.0, "posture": 70.0, "walk": 2.1, "run": 4.6, "stagger": 70, "poise": 4.0, "ai": "owl", "look": "owl", "dmg_k": 0.38},
+	# 구스타프(이스크라 — 타격): 산 기슭에선 맞붙는 주먹 · 발(x_master — 사용자 2026-11-11 "구스타프(타격)"), 단단함(poise)
+	"gustav": {"hp": 230.0, "posture": 400.0, "walk": 2.0, "run": 4.4, "stagger": 80, "poise": 40.0, "finisher_cap": 0.04, "ai": "x_master",
+		"look": "gustav", "dmg_k": 0.16},
 }
 
 const ROOMS := [
@@ -86,11 +89,12 @@ const ROOMS := [
 	{"id": "mountain_road", "theme": "mountain_road", "bounds": Rect2(-7.0, -2.4, 14.0, 4.8), "cast": ["akila"],
 		"heroes": [Vector2(-4.2, 0.2)], "allies": [],
 		"enemies": [["gustav", Vector2(2.8, 0.0)]], "boss": "gustav",
-		# 사용자 2026-11-10: 구스타프 피가 50% 떨어지면 뒤에 새 뜨거운 피 조직원 셋 → 총격전(아킬라 기본 공격이 리볼버로)
-		"triggers": [{"when": "hp:gustav:0.5", "say": "hotblood", "moveset": {"akila": {"combo": "akg_1", "dash": "akg_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
-			"spawn": [["pro_fighter", Vector2(6.4, -1.8), {"role": "hotblood_gunner", "name": "뜨거운 피"}],
-				["pro_fighter", Vector2(6.6, 0.0), {"role": "hotblood_gunner", "name": "뜨거운 피"}],
-				["pro_fighter", Vector2(6.4, 1.8), {"role": "hotblood_gunner", "name": "뜨거운 피"}]]}]},
+		# 사용자 2026-11-11: 아킬라 대 구스타프(타격) — 구스타프 피가 50% 떨어지면 신호탄(053/068) · 자유로운 영혼 팀 콘도르(쌍권총) ·
+		# 헤론(저격 소총) · 오울(돌격소총)이 뒤에서 들어오고 총격전(아킬라 기본 공격이 리볼버 → 산탄총으로, 산길이 넓어진다). 넷 다 쓰러뜨리면 끝
+		"max_attackers": 3,
+		"triggers": [{"when": "hp:gustav:0.5", "say": "freesoul", "bounds": Rect2(-9.0, -2.8, 18.0, 5.6),
+			"moveset": {"akila": {"combo": "akg_1", "dash": "akg_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
+			"spawn": [["condor", Vector2(6.2, -1.2)], ["owl", Vector2(6.8, 1.8)], ["heron", Vector2(8.4, -2.2)]]}]},
 	{"id": "hwajin_hall", "theme": "hwajin_hall", "bounds": Rect2(-7.0, -2.6, 14.0, 5.2), "cast": ["kimshin", "woojin"],
 		"heroes": [Vector2(-5.0, -0.6), Vector2(-5.2, 0.8)],
 		"allies": [["pyoyoung", Vector2(-4.2, 1.8)], ["street_thug", Vector2(-5.8, -1.8), {"role": "baekui_man", "name": "백의 조직원", "look": "ds_suit"}],

@@ -353,6 +353,14 @@ func _swing_more(mv: Dictionary, at: Vector3, yaw: float, reach: float, radius: 
 			spike(at, yaw, 0.8, reach, 1.35, 0.025, Color(1.0, 0.9, 0.6, 0.8), 0.08)
 		"toss":
 			spike(at, yaw, 0.6, reach + radius, 1.5, 0.04, Color(1.0, 0.95, 0.8, 0.7), 0.16)
+			var land := at + fwd * (reach + radius * 0.5)
+			if str(mv["fx"]) == "smoke":                             # 오울 연막 표식(054/024-025 보라 연막)
+				rise(land + Vector3(0, 0.2, 0), Color(0.62, 0.45, 0.85, 0.75), 34, 1.6)
+				ring(land, yaw, 0.6, 0.5, Color(0.6, 0.45, 0.85, 0.45), 1.2, 1.0, 2.6)
+			elif str(mv["fx"]) == "blast":                           # 오울 수류탄(055/011-014)
+				flash(land + Vector3(0, 0.5, 0), Color(1.0, 0.6, 0.25), 6.0, 0.22, 5.0)
+				spark(land + Vector3(0, 0.4, 0), Color(1.0, 0.72, 0.3), 34, 6.0, 0.4)
+				slam(land)
 		"duck", "weave", "sidestep":
 			pass                                                     # 피하기 — 궤적 없음
 		_:

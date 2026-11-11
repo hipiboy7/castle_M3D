@@ -20,6 +20,10 @@ var foes: Array = []
 var generic_skills := false
 var skill_turn := 0              # 아군(generic_skills): 되는 기술을 차례로 돌려 쓴다(늘 첫 기술만 쓰지 않게)
 
+const Moves = preload("res://src/data/moves.gd")
+const GUN_SHAPES := ["shot", "draw_shot"]
+const GUN_NEAR := 2.4                # 총잡이 봇이 이보다 붙으면 물러난다(m)
+const GUN_FAR_K := 0.8               # 사거리의 이만큼 안에서 쏜다
 const ALLY_NEUTRAL_WAIT := 150    # 아군은 상대가 빈틈이 없어도 기술을 마지막으로 쓴 뒤 이만큼(쉬는 틈 240 + 이것) 지나면 쓴다 — 2026-11-10 폰 리뷰
                                   # '기본기만 보인다'(전에는 빈틈 · 움찔에만 써서 드물었다). 6.5초에 한 번 꼴 — 몰아치지 않게
 
@@ -89,6 +93,21 @@ func decide() -> Dictionary:
 			it["move"] = to
 		elif me.can_act() or me.state == "attack":
 			it["attack"] = true
+		return it
+	# 총잡이(기본 공격이 총 — 10장 산 기슭 아킬라 총격전): 사거리 가운데(GUN_NEAR ~ 사거리 × GUN_FAR_K)를 지키며 쏜다
+	var combo := str(me.moveset.get("combo", ""))
+	if combo != "" and str(Moves.get_move(combo)["shape"]) in GUN_SHAPES:
+		var reach: float = float(Moves.get_move(combo)["reach"])
+		if d > reach * GUN_FAR_K:
+			it["move"] = to * 0.8
+		elif d < GUN_NEAR:
+			it["move"] = -to * 0.7
+		else:
+			it["move"] = Vector2(-to.y, to.x) * 0.4
+			poke_t -= 1
+			if poke_t <= 0 and me.can_act():
+				poke_t = 20 + rng.randi_range(0, 30)
+				it["attack"] = true
 		return it
 	# 기다리며 거리 조절, 가끔 먼저 찔러 본다 (맞수를 부르는 공격)
 	if d > 1.9:

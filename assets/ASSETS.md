@@ -41,6 +41,9 @@
 | `music/resolve.ogg` | 직접(절차 생성) — castle_M `tools/gen_music.py` (2026-11-09 castle_M `6d30a9e` 사본에서 가져옴) | 7장(1부 끝 — 대화) (`src/data/campaign.gd` song · `src/main.gd` `_music`) |
 | `models/kimshin_a.glb` | 외부 모델을 옮김 — Quaternius 'Ultimate Modular Men' Suit(poly.pizza 'Business Man' https://poly.pizza/m/JFrLIKqvCH) · **CC0 1.0** · `tools/import_model.gd` 가 이 판 뼈대 · 쉬는 자세 · 외형 색으로 옮김(2026-11-10 시험 — 원본은 저장소에 없음) | 그림 A 김신 (`src/view/puppet_glb.gd`, `--art a`) |
 | `models/shingen_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-06, 〃) | 그림 A 사사키 신겐 |
+| `models/condor_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-11, 외형 `src/view/looks.gd` — canon look 글 054 ~ 055) | 그림 A 콘도르(10장 산 기슭 자유로운 영혼 팀) |
+| `models/heron_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-11, 외형 `src/view/looks.gd` — canon look 글 054 ~ 055) | 그림 A 헤론(10장 산 기슭 자유로운 영혼 팀) |
+| `models/owl_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-11, 외형 `src/view/looks.gd` — canon look 글 054 ~ 055) | 그림 A 오울(10장 산 기슭 자유로운 영혼 팀) |
 | `sprites/kimshin_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` 가 `models/kimshin_a.glb` 를 8방향으로 그려 도트로 줄임 | 그림 B 김신 (`src/view/puppet_dot.gd`, `--art b`) |
 | `sprites/kimshin_b.json` | 〃 — 도트 시트 칸 이름 · 크기 | 그림 B 김신 |
 | `sprites/shingen_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/shingen_a.glb`) | 그림 B 사사키 신겐 |

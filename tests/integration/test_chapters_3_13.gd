@@ -4,6 +4,7 @@ extends "res://tests/helpers.gd"
 
 const Stage = preload("res://src/combat/stage.gd")
 const Campaign = preload("res://src/data/campaign.gd")
+const EnemyAI = preload("res://src/combat/enemy_ai.gd")
 const NEW := ["ch3", "ch4", "ch5", "ch6a", "ch7", "ch8", "ch9", "ch10", "ch12", "ch13"]
 
 
@@ -145,7 +146,8 @@ func test_bare_room_drops_weapon_skills() -> void:
 	check(d2["heroes"][0].skills.any(func(e): return Tech.WEAPON.has(str(e["move"]))), "칼 든 12장 김신은 칼 기술을 쓴다")
 
 
-## 10장 산 기슭(사용자 2026-11-10): 구스타프 피가 50% 아래면 뒤에 뜨거운 피 셋 → 총격전(아킬라 기본 공격이 리볼버)
+## 10장 산 기슭(사용자 2026-11-11): 아킬라 대 구스타프(타격) — 구스타프 피가 50% 아래면 자유로운 영혼 팀 콘도르(쌍권총) · 헤론(저격 소총) ·
+## 오울(돌격소총)이 뒤에서 → 총격전(아킬라 기본 공격이 리볼버 → 산탄총, 산길이 넓어짐). 넷 다 쓰러뜨려야 넘는다
 func test_ch10_mountain_road_gunfight() -> void:
 	var T = Campaign.table("ch10")
 	var ri := -1
@@ -155,13 +157,63 @@ func test_ch10_mountain_road_gunfight() -> void:
 	var d := Stage.make(3, {"chapter": "ch10", "room": ri})
 	var gus = d["enemies"].filter(func(e): return e.char_id == "gustav")[0]
 	var aki = d["heroes"].filter(func(h): return h.char_id == "akila")[0]
+	check(d["ais"][gus].prof == EnemyAI.PROFILES["x_master"] and not d["ais"][gus].prof.has("ranged"), "구스타프는 타격(총 없음)")
 	for n in 240:
 		Stage.step(d, {})
 	check(d["enemies"].size() == 1, "처음엔 구스타프 혼자")
+	var w0: float = d["world"].bounds.size.x
 	gus.hp = gus.hp_max * 0.45
 	for n in 10:
 		Stage.step(d, {})
-	var hot: Array = d["enemies"].filter(func(e): return e.name == "뜨거운 피")
-	check(hot.size() == 3, "뜨거운 피 셋이 나온다 — %d" % hot.size())
-	check(hot.all(func(e): return e.pos.x > gus.pos.x), "구스타프 뒤쪽에서")
+	var ids: Array = d["enemies"].map(func(e): return e.char_id)
+	for id in ["condor", "heron", "owl"]:
+		check(ids.has(id), "%s 등장 %s" % [id, ids])
+	var team: Array = d["enemies"].filter(func(e): return e.char_id in ["condor", "heron", "owl"])
+	check(team.all(func(e): return e.pos.x > gus.pos.x), "구스타프 뒤쪽에서")
+	check(team.all(func(e): return d["ais"][e].kite and d["ais"][e].prof.has("ranged")), "셋 다 거리를 두는 총잡이")
+	check(d["world"].bounds.size.x > w0, "산길이 넓어진다")
 	check(str(aki.moveset.get("combo", "")) == "akg_1" and Moves.get_move("akg_1")["shape"] == "shot", "아킬라 기본 공격이 리볼버")
+	check(Moves.get_move("akg_2")["next"] == "akg_3" and Moves.get_move("akg_3")["label"] == "펌프 산탄총", "리볼버 → 왼손 → 산탄총")
+	# 헤론은 멀리서 저격(조준선 · 막을 수 없음) — 적 기술 이름도 원작대로
+	var her = team.filter(func(e): return e.char_id == "heron")[0]
+	var snipe := Moves.get_move("hr_snipe")
+	check(bool(snipe["aim_line"]) and not snipe["parryable"] and float(snipe["reach"]) > float(Moves.get_move("t_shot")["reach"]) * 2.0, "저격은 조준선 · 사거리 길다")
+	check(d["ais"][her].skills.any(func(k): return k["name"] == "저격 3연사"), "헤론 기술 묶음에 저격 3연사 %s" % [d["ais"][her].skills.map(func(k): return k["name"])])
+	# 구스타프만 쓰러뜨려선 넘지 않는다
+	gus.hp = 0.0
+	for n in 30:
+		Stage.step(d, {})
+	check(d["stage"] == "fight", "자유로운 영혼 팀이 남으면 싸움이 이어진다 (%s)" % d["stage"])
+
+
+## 자유로운 영혼 팀 AI: 헤론은 멀리(near 밖으로 물러남) · 거리 안이면 저격, 오울은 연사 · 수류탄 · 연막 중 굴림
+func test_freesoul_ai_ranges() -> void:
+	var her = Fighter.new("헤론", 1)
+	her.char_id = "heron"
+	var kim = Fighter.new("아킬라", 0)
+	her.pos = Vector2(2.0, 0)
+	kim.pos = Vector2(0, 0)
+	var r := RandomNumberGenerator.new()
+	r.seed = 5
+	var ai = EnemyAI.new(her, "heron", r, 0.0)
+	ai.cooldown = 999
+	var it: Dictionary = ai.decide(kim, true)
+	check(it["move"].x > 0.0, "헤론은 붙으면 물러난다 %s" % it["move"])
+	her.pos = Vector2(9.0, 0)
+	ai.ranged_cd = 0
+	it = ai.decide(kim, true)
+	check(str(it.get("use", "")) == "hr_snipe", "멀리서 저격 %s" % it)
+	var seen := {}
+	for k in 30:
+		var owl = Fighter.new("오울", 1)
+		owl.char_id = "owl"
+		owl.pos = Vector2(4.0, 0)
+		var r2 := RandomNumberGenerator.new()
+		r2.seed = 100 + k
+		var a2 = EnemyAI.new(owl, "owl", r2, 0.0)
+		a2.ranged_cd = 0
+		a2.cooldown = 999
+		var it2: Dictionary = a2.decide(kim, true)
+		if it2.has("use"):
+			seen[str(it2["use"])] = true
+	check(seen.has("ow_burst") and seen.has("ow_grenade") and seen.has("ow_smoke"), "오울은 연사 · 수류탄 · 연막 %s" % [seen.keys()])

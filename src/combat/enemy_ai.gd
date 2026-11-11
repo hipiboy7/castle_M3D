@@ -193,6 +193,21 @@ const PROFILES := {
 		"weights": [[["one_two", 3], ["hook", 2], ["stab", 2], ["grab", 1]], [["combo", 3], ["rush", 2], ["grab", 2], ["hook", 1], ["stab", 1]]],
 		"cd": [36, 30], "near": 1.1, "far": 2.1, "engage": 2.3, "guard_add": 0.15, "ranged": ["t_shot", 2.6, 6.5, 240],
 		"phase2": {"dmg_k": 1.2, "cd_k": 0.65, "guard_add": 0.1}},
+	# ---- 이스크라 '자유로운 영혼' 팀(10장 산 기슭 · 원작 054 ~ 055 — 사용자 2026-11-11): 셋 다 거리를 두는 총잡이(kite).
+	# ranged_more: 거리 안에 드는 총 동작을 ranged 와 함께 후보로(차례로가 아니라 굴림). 붙으면 짧은 패턴
+	#  콘도르(지휘 · 소음 쌍권총): 가운데 거리에서 몰아친다 — 연사 · 겨눠 두 발
+	"condor": {"patterns": {"pair": [["cd_pair", 0]], "jab": [["x_jab", 3], ["x_straight", 0]]},
+		"weights": [[["pair", 3], ["jab", 1]], [["pair", 3], ["jab", 1]]], "cd": [50, 40], "near": 2.4, "far": 4.8, "engage": 4.8,
+		"guard_add": 0.1, "kite": true, "ranged": ["cd_twin", 2.0, 7.2, 130], "ranged_more": [["cd_pair", 2.0, 6.5]],
+		"phase2": {"cd_k": 0.75}},
+	#  헤론(저격 소총 · 드론): 가장 멀리 서서 조준선을 긋고 한 발 — 붙으면 권총
+	"heron": {"patterns": {"pistol": [["hr_pistol", 0]]},
+		"weights": [[["pistol", 1]], [["pistol", 1]]], "cd": [60, 40], "near": 4.2, "far": 7.5, "engage": 2.6,
+		"kite": true, "ranged": ["hr_snipe", 3.0, 18.0, 170]},
+	#  오울(돌격소총 · 연막 · 수류탄): 엄폐하듯 비스듬히 돌며 연사, 가끔 연막 표식 · 수류탄
+	"owl": {"patterns": {"burst": [["ow_burst", 0]], "smoke": [["ow_smoke", 8], ["ow_burst", 0]]},
+		"weights": [[["burst", 3], ["smoke", 1]], [["burst", 2], ["smoke", 1]]], "cd": [50, 40], "near": 3.0, "far": 5.6, "engage": 3.4,
+		"kite": true, "ranged": ["ow_burst", 2.4, 7.6, 120], "ranged_more": [["ow_grenade", 2.8, 6.2], ["ow_smoke", 2.0, 5.5]]},
 }
 
 ## 인물별 기본기(2026-11-10 폰 리뷰 '캐릭들 공격 모션이 다 비슷하던데'): 같은 원형(x_)을 쓰는 이름 있는 적마다 원형 동작을 그 사람 동작으로
@@ -280,6 +295,9 @@ static func moves_of(profile_id: String) -> Array:
 	for k in ["ranged", "counter"]:
 		if p.has(k) and not out.has(p[k][0]):
 			out.append(p[k][0])
+	for c in p.get("ranged_more", []):
+		if not out.has(c[0]):
+			out.append(c[0])
 	return out
 
 
@@ -351,8 +369,11 @@ func decide(target, may_attack: bool) -> Dictionary:
 	# 3. 총: 떨어져 있으면 겨눠 쏜다(빨간 ! — 보고 구른다)
 	if prof.has("ranged") and may_attack and ranged_cd == 0 and not foe.state in HELPLESS:
 		var rg: Array = prof["ranged"]
-		if d >= float(rg[1]) and d <= float(rg[2]):
-			it["use"] = rg[0]
+		var cands: Array = [rg] + prof.get("ranged_more", [])
+		cands = cands.filter(func(c): return d >= float(c[1]) and d <= float(c[2]))
+		if not cands.is_empty():
+			var pick: int = 0 if cands.size() == 1 else rng.randi_range(0, cands.size() - 1)   # 하나면 굴리지 않는다(다른 판의 시드 차례 그대로)
+			it["use"] = _mv(str(cands[pick][0]))
 			ranged_cd = int(rg[3]) + rng.randi_range(0, 90)
 			return it
 	# 4. 쿨다운이 끝나고 차례(may_attack)면 패턴을 고른다

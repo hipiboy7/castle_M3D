@@ -49,6 +49,20 @@ const LOOKS := {
 		"tie": Color(0.05, 0.05, 0.06), "skin": Color(0.84, 0.7, 0.58), "hair": Color(0.62, 0.62, 0.64), "hair_style": "crew",
 		"big": true, "scale": 1.2, "wide": 1.3, "depth": 1.35, "limb": 1.35, "head": 0.95, "jaw": true,
 		"weapon_r": "tanto", "weapon_l": "pistol", "grip_l": "fwd", "guard": "baek"},
+	# ---- 이스크라 '자유로운 영혼' 팀(10장 산 기슭 — canon look 글 conf ai, 054 ~ 055)
+	#  콘도르: 짙은 피부 · 옆머리를 민 백발 · 뒤로 작은 상투 · 콧수염 · 털깃 검은 모피 롱코트 · 올리브 바지 · 검은 부츠 · 소음 쌍권총
+	"condor": {"outfit": "coat", "suit": Color(0.08, 0.08, 0.09), "pants": Color(0.33, 0.36, 0.22), "shirt": Color(0.14, 0.14, 0.15),
+		"coat_collar": Color(0.2, 0.19, 0.18), "skin": Color(0.45, 0.32, 0.24), "hair": Color(0.88, 0.88, 0.86), "hair_style": "topknot",
+		"mustache": true, "big": false, "scale": 1.06, "shoulder": 1.12, "depth": 1.15, "limb": 1.2, "head": 0.92, "jaw": true,
+		"weapon_r": "pistol", "weapon_l": "pistol", "grip_l": "fwd", "guard": "baek"},
+	#  헤론: 뒤로 바짝 넘겨 묶은 검은 장발 · 창백한 얼굴 · 콧수염 · 귀 이어피스 · 검은 롱코트 · 검은 장갑 · 스코프 저격소총
+	"heron": {"outfit": "coat", "suit": Color(0.06, 0.06, 0.07), "pants": Color(0.07, 0.07, 0.08), "shirt": Color(0.1, 0.1, 0.11),
+		"skin": Color(0.95, 0.9, 0.88), "hair": Color(0.05, 0.05, 0.06), "hair_style": "ponytail", "mustache": true,
+		"big": false, "scale": 1.05, "limb": 1.15, "head": 0.9, "weapon_r": "rifle", "weapon_l": "", "guard": "long"},
+	#  오울: 뻗친 갈색(금빛) 머리 · 귀 이어피스 · 황갈색 위장 롱코트 · 갈색 전술 조끼 · 카키 바지 · 검은 부츠 · 사막색 카빈
+	"owl": {"outfit": "coat", "suit": Color(0.55, 0.47, 0.32), "pants": Color(0.45, 0.42, 0.3), "shirt": Color(0.36, 0.27, 0.18),
+		"skin": Color(0.86, 0.72, 0.6), "hair": Color(0.62, 0.46, 0.24), "hair_style": "messy",
+		"big": false, "scale": 1.04, "limb": 1.12, "head": 0.92, "weapon_r": "carbine", "weapon_l": "", "guard": "long"},
 	#  하야부사: 웨이브 진 검은 곱슬머리를 뒤로 넘김(목덜미까지) · 흰 피부 · 흰(밝은 회색) 정장 · 검은 셔츠 · 검은 넥타이 · 카타나
 	"hayabusa": {"suit": Color(0.74, 0.74, 0.76), "pants": Color(0.72, 0.72, 0.74), "shirt": Color(0.08, 0.08, 0.09),
 		"tie": Color(0.04, 0.04, 0.05), "skin": Color(0.95, 0.85, 0.76), "hair": Color(0.06, 0.06, 0.07),
@@ -246,7 +260,13 @@ const ART := {
 	"g4": {"glb": "res://assets/models/castle_g4_a.glb", "dots": "res://assets/sprites/castle_g4_b"},
 	"g4_leader": {"glb": "res://assets/models/castle_g4_leader_a.glb", "dots": "res://assets/sprites/castle_g4_leader_b"},
 	"ds_suit": {"glb": "res://assets/models/ds_member_a.glb", "dots": "res://assets/sprites/ds_member_b"},
+	# 10장 산 기슭 자유로운 영혼 팀(2026-11-11) — 그림 A 만(도트는 다음 묶음 굽기 때 — NO_DOTS)
+	"condor": {"glb": "res://assets/models/condor_a.glb", "dots": "res://assets/sprites/condor_b"},
+	"heron": {"glb": "res://assets/models/heron_a.glb", "dots": "res://assets/sprites/heron_b"},
+	"owl": {"glb": "res://assets/models/owl_a.glb", "dots": "res://assets/sprites/owl_b"},
 }
+## 그림 B(도트)를 아직 굽지 않은 ART 인물 — 그림 B 로 고르면 관절 인형으로 그린다(has_art)
+const NO_DOTS := ["condor", "heron", "owl"]
 ## 명부(roster — 장 표에 아직 안 쓰는 looks.json 인물, looks_common ROSTER) 그림 자리. APK 에서 뺀다(export_presets.cfg exclude_filter
 ## assets/roster/*) — 편집기 · 시험 · 도구에서만 있고, 폰에서는 has_art 가 거짓이라 관절 인형으로 그린다
 const ROSTER_DIR := "res://assets/roster"
@@ -333,7 +353,9 @@ static func shown_scale(base: String, s: float) -> float:
 
 
 ## 그림 A · B 가 있는가 — 명부 그림은 APK 에 없으니 파일이 있을 때만(폰에서는 관절 인형)
-static func has_art(name: String) -> bool:
+static func has_art(name: String, art := "") -> bool:
+	if NO_DOTS.has(name) and art == "b":
+		return false                     # 도트를 아직 굽지 않은 인물 — 그림 B 에서는 관절 인형(그림 B 굳힘 — 사용자 2026-11-08)
 	if ART.has(name):
 		return true
 	return LooksCommon.ROSTER.has(name) and ResourceLoader.exists(str(art_of(name)["glb"]))

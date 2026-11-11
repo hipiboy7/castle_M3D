@@ -704,6 +704,24 @@ func _knife(kind: String) -> Node3D:
 		_mesh(root, _cyl(0.024, 0.024, 0.05), gun, Vector3(0, 0.04, -0.012))
 		_mesh(root, _cyl(0.011, 0.011, 0.16), gun, Vector3(0, 0.13, -0.022))
 		return root
+	if kind == "rifle":
+		# 저격 소총(헤론 — 054/011-042): 검은 긴 총열 · 위에 스코프 · 나무 개머리(팔뚝 쪽)
+		var black := _mat(Color(0.09, 0.09, 0.1), 0.35, 0.1, 0.5)
+		_mesh(root, _box(Vector3(0.035, 0.06, 0.2)), _mat(Color(0.3, 0.2, 0.12), 0.7, 0.0), Vector3(0, -0.01, 0.1))     # 개머리
+		_mesh(root, _box(Vector3(0.04, 0.32, 0.05)), black, Vector3(0, 0.12, -0.01))                                   # 몸통
+		_mesh(root, _cyl(0.012, 0.012, 0.42), black, Vector3(0, 0.48, -0.015))                                         # 긴 총열
+		_mesh(root, _cyl(0.022, 0.022, 0.16), black, Vector3(0, 0.16, -0.06))                                         # 스코프
+		return root
+	if kind == "carbine":
+		# 카빈(오울 — 054/012-013): 사막색 몸통 · 짧은 총열 · 소음기 · 도트사이트 · 탄창
+		var tan := _mat(Color(0.72, 0.62, 0.44), 0.6, 0.0)
+		var black2 := _mat(Color(0.1, 0.1, 0.11), 0.4, 0.1, 0.5)
+		_mesh(root, _box(Vector3(0.035, 0.06, 0.14)), tan, Vector3(0, -0.01, 0.07))
+		_mesh(root, _box(Vector3(0.042, 0.26, 0.05)), tan, Vector3(0, 0.1, -0.01))
+		_mesh(root, _box(Vector3(0.03, 0.04, 0.09)), black2, Vector3(0, 0.06, 0.04))                                   # 탄창
+		_mesh(root, _cyl(0.016, 0.016, 0.16), black2, Vector3(0, 0.31, -0.015))                                        # 소음기
+		_mesh(root, _box(Vector3(0.025, 0.04, 0.03)), black2, Vector3(0, 0.12, -0.05))                                 # 도트사이트
+		return root
 	if kind == "uzi":
 		# 우지(장발 남자): 네모난 검은 몸통 · 손잡이 속 탄창이 아래로 길게
 		var black := _mat(Color(0.12, 0.12, 0.13), 0.4, 0.1, 0.5)

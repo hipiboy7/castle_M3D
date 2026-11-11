@@ -220,7 +220,7 @@ func _add_puppet(f) -> void:
 	var lname := _look_of(f)
 	var art := str(args["art"])
 	var p
-	if art != "puppet" and Looks.has_art(lname):
+	if art != "puppet" and Looks.has_art(lname, art):
 		p = PuppetGlb.new() if art == "a" else PuppetDot.new()   # 그림 바꿔 끼우기 — 판정은 그대로(LSP)
 		lname += "_" + art
 	else:
