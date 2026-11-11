@@ -22,7 +22,8 @@ func setup(lk: Dictionary) -> void:
 	for n in BONES:
 		bone_of[n] = skel.find_bone(n)
 	for mi in model.find_children("*", "MeshInstance3D", true, false):
-		mi.material_override = _toon()
+		var src: Material = (mi as MeshInstance3D).get_active_material(0)
+		mi.material_override = _toon(src.albedo_texture if src is BaseMaterial3D else null)
 		mi.material_overlay = Ink.line(true)
 	if bone_of.get("head", -1) >= 0:                     # 머리를 작게(Looks.HEAD_K — GLB 는 그대로, 뼈 크기만. _drive 는 자리 · 회전만 쓴다)
 		skel.set_bone_pose_scale(bone_of["head"], Vector3.ONE * Looks.HEAD_K)
@@ -63,8 +64,9 @@ func _find_skeleton(n: Node) -> Skeleton3D:
 
 ## 붓칠 · 먹선 셀 재질(src/view/ink.gd — 2026-11-11 Hades 화풍): 꼭짓점 색 바탕 · 세 단 명암 · 빛 색 테두리 빛 + 먹선(화면 픽셀 너비 —
 ## 멀어도 가늘어지지 않는다). 옛 툰(StandardMaterial3D DIFFUSE_TOON + grow 외곽선)을 갈음
-func _toon() -> Material:
+func _toon(tex: Texture2D = null) -> Material:
 	var m := Ink.cel(Color(1, 1, 1), "cloth", true)
+	Ink.paint(m, tex)                                   # GLB 에 든 그림(붓 결 · 빗금 — 2026-11-11 그림 입히기)
 	mats.append(m)                                      # 맞음 번쩍임 · 엇엇박 달아오름(인형의 _update_flash)이 이 재질에도
 	return m
 

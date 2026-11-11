@@ -80,6 +80,10 @@ var _fake_difficulty := false
 var _dev_win := false              # --events N:autowin — 그 뒤 싸움마다 적을 바로 쓰러뜨린다(verify '장 차례' — 0 ~ 13장을 깨며 다음 장이 열리나)
 var _menu_diff0 := ""             # 싸움 중 메뉴를 열 때의 난이도 — 바뀌었으면 닫을 때 지금 스테이지를 다시
 var headless := false
+const LOD_CROWD := 16            # 인형이 이보다 많으면 화면 밖 인형은 자세를 덜 자주(_process)
+const LOD_EVERY := 3
+var _lod_tick := 0
+var _lod_dt := {}
 var mode := "title"
 var kind := "duel"              # 지금 판 종류 (duel · stage — campaign.gd kind)
 var chapter := "ch6"            # 지금 장 id
@@ -193,6 +197,7 @@ func _build_stage_view() -> void:
 	for f in pup:
 		pup[f].queue_free()
 	pup.clear()
+	_lod_dt.clear()
 	_build_arena()
 	for f in d["world"].fighters:
 		_add_puppet(f)
@@ -923,7 +928,11 @@ func _process(dt: float) -> void:
 		hud.update_bars(d["hero"], d["boss"], phase, 0.0, partner)     # 접기 · 펴기에 자리만 다시 잡는다
 		return
 	evfx.tick_later(dt)
+	if not headless:
+		Ink.fit_3d_scale(get_window())                  # 접기 · 펴기로 창 크기가 바뀌면 3D 해상도를 다시 맞춘다
 	var frozen: bool = d["world"].hitstop > 0 and (mode == "fight" or mode == "demo")
+	var lod := pup.size() > LOD_CROWD and cam != null
+	_lod_tick += 1
 	for f in pup:
 		if not f.alive() and kind == "stage" and f != d["boss"] and d["enemies"].has(f):
 			_gone_t[f] = float(_gone_t.get(f, 0.0)) + dt    # 쓰러진 적은 몇 초 뒤 치운다(12장 개전 경호대 100 · 13장 공터 50 — 폰 성능)
@@ -933,6 +942,16 @@ func _process(dt: float) -> void:
 		elif _gone_t.has(f):
 			_gone_t.erase(f)                            # 다시 일어남(합류 recruit) — 다시 보인다
 			pup[f].visible = true
+		if lod and f != d["hero"] and not cam.is_position_in_frustum(pup[f].position + Vector3(0, 1.0, 0)):
+			# 사람이 많을 때(11장 주차장 47명 · 12장 개전) 화면 밖 인형은 자세를 LOD_EVERY 프레임에 한 번(밀린 시간을 모아서) — 자리는 매번
+			_lod_dt[f] = float(_lod_dt.get(f, 0.0)) + dt
+			if (_lod_tick + f.get_instance_id()) % LOD_EVERY != 0:
+				pup[f].position = Vector3(f.pos.x, 0, f.pos.y)
+				continue
+			pup[f].update_from(f, _lod_dt[f], frozen)
+			_lod_dt[f] = 0.0
+			continue
+		_lod_dt.erase(f)
 		pup[f].update_from(f, dt, frozen)
 	touch.set_label("attack", _attack_label(d["hero"]))
 	var hp: Vector3 = pup[d["hero"]].position

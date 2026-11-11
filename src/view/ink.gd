@@ -37,8 +37,24 @@ const SHADOW_DIST := 26.0
 const SHADOW_MODE := DirectionalLight3D.SHADOW_ORTHOGONAL
 const GRADE_EXPOSURE := 0.9                     # 화면 전체 밝기 ×(rc.12 폰 리뷰 '밝기는 조금 밝음' — 1.0 → 0.9)
 const CHAR_RIM := 0.9
+const CHAR_HATCH := 0.55                        # 인물 빛 빗금 — 중간 단 선 진하기(ink_cel hatch — 그림 A 만, 그림이 든 GLB)
+const CHAR_HATCH_LIFT := 0.14                   # 그림자 쪽 빗금 사이 밝힘
 const CHAR_LIGHT_K := 1.0
 const PROP_LIGHT_K := 1.0
+
+## 3D 내부 해상도: 창 픽셀이 RES_MAX_PIXELS 를 넘으면 그 비율로 줄여 그리고 늘려 보인다(쌍선형). 접는 폰 안쪽 2176x1812(390만) ·
+## 커버 2316x904(210만) — 바닥 붓 결 · 금 셰이더와 화면 마무리가 픽셀마다 돈다(2026-11-11 rc.13 '11장 조금 끊김 fps 30대'). HUD 는 그대로
+const RES_MAX_PIXELS := 1.6e6
+const RES_MIN_SCALE := 0.7
+
+
+static func fit_3d_scale(win: Window) -> void:
+	var px := float(win.size.x) * float(win.size.y)
+	var k := clampf(sqrt(RES_MAX_PIXELS / maxf(px, 1.0)), RES_MIN_SCALE, 1.0)
+	if absf(win.scaling_3d_scale - k) > 0.01:
+		win.scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR
+		win.scaling_3d_scale = k
+
 
 ## 인형 재질 — kind: "skin" · "cloth" · "metal" · "hair" · "leather"(테두리 빛 · 반사광만 다르다)
 static func cel(col: Color, kind := "cloth", vcol := false) -> ShaderMaterial:
@@ -51,6 +67,16 @@ static func cel(col: Color, kind := "cloth", vcol := false) -> ShaderMaterial:
 	m.set_shader_parameter("light_k", CHAR_LIGHT_K)
 	m.set_shader_parameter("mid", 0.6 if kind == "skin" else 0.5)
 	return m
+
+
+## 인물 그림(GLB 에 든 회색 그림 — tools/make_models.gd ③)을 셀 재질에 — 붓 결 · 빗금 칠 + 빛 빗금
+static func paint(m: ShaderMaterial, tex: Texture2D) -> void:
+	if tex == null:
+		return
+	m.set_shader_parameter("use_paint", true)
+	m.set_shader_parameter("paint_tex", tex)
+	m.set_shader_parameter("hatch", CHAR_HATCH)
+	m.set_shader_parameter("hatch_lift", CHAR_HATCH_LIFT)
 
 
 ## 먹선 재질(material_overlay) — 상자 · 원기둥은 꼭짓점 방향으로 민다(모서리 법선이 갈라져 끊기지 않게). 나눠 쓰기는 부르는 쪽이

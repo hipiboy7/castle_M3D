@@ -38,6 +38,20 @@ const INK_COL := Color(0.035, 0.028, 0.045)      # 안쪽 먹선 — 게임 먹(
 const INK_W := 0.008                             # 옷 먹선 너비(m — 가운데 굵고 끝이 가는 붓 자국)
 const INK_LIFT := 0.0035                         # 겉면에서 띄우는 높이(살과 겹쳐 깜빡이지 않게)
 var paint_k := 0.0
+## ③ 그림 입히기(2026-11-11 rc.13 사용자 "아직도 다 둥근 원과 입체도형들 같아. 이거 그림 입힐수는 없어?" → "(나) 전체 제작"):
+## 조각마다 UV 칸(cells)을 펴고 인물마다 PAINT_TEX² 회색 그림(GLB 에 넣는다)을 칠한다 — 붓 결 · 얼룩 · 머리털 가닥 · 가죽 광 · 오목한 데 · 아래를
+## 보는 면의 펜 빗금(원작 웹툰의 잉크 빗금 — castle_common work/looks/ref 원작 조각을 보고 맞춤, 원작 픽셀은 쓰지 않는다). 게임의 셀 셰이더
+## (ink_cel paint_tex)가 바탕색에 곱하고, 빛에 따라 생기는 빗금(명암 경계 · 그림자)은 셰이더가 같은 UV 로 긋는다.
+## 칸 0 은 민 칸(얼굴 조각 · 먹선 띠 · 작은 소품 — 1.0, 셰이더 빗금이 안 걸리는 자리 PLAIN_UV)
+const PAINT_TEX := 512
+const PAINT_GAIN := 1.3                          # 그림 값 = 곱 / PAINT_GAIN(1.0 이 넘는 광도 담게) — ink_cel paint_gain 과 같다
+const CELL_PAD := 2
+const PLAIN := 8                                 # 민 칸 크기(텍셀, 왼쪽 위)
+const PLAIN_UV := Vector2(2.25, 4.5)             # 민 칸 안 — 셰이더 빗금(간격 4.5 텍셀 두 방향)이 둘 다 비는 자리
+var cells: Array = []            # [{pos: 행 × 열 Vector3, col: 행 × 열 Color, wrap}] — 0 은 민 칸
+var vbuf: Array = []             # [위치, 색, 뼈, 가중치, 칸, 칸 안 uv] — 다 모은 뒤 칸을 배치하고 SurfaceTool 로
+var paint_look: Dictionary = {}
+var cur_hint := ""               # 지금 만드는 칸의 종류(_body 가 머리털 동안 "hair") — 비면 바탕색으로 가른다
 var crev: Array = []             # 오목한 데 [중심, 반지름, 세기] — _body 가 뼈대 자리로 채운다
 
 
@@ -97,10 +111,20 @@ func _make(lk: Dictionary, path: String) -> int:
 	var sk := _skeleton(lk)
 	root.add_child(sk)
 	sk.owner = root
+	cells = [{"pos": [], "col": [], "wrap": false}]
+	vbuf.clear()
+	paint_look = lk
+	_body(lk)
+	var rects := _pack_cells()
 	st = SurfaceTool.new()
 	st.set_skin_weight_count(SurfaceTool.SKIN_4_WEIGHTS)
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_body(lk)
+	for v in vbuf:
+		st.set_color(v[1])
+		st.set_bones(v[2])
+		st.set_weights(v[3])
+		st.set_uv(_atlas_uv(rects, int(v[4]), v[5]))
+		st.add_vertex(v[0])
 	st.index()
 	st.generate_normals()
 	var mesh := st.commit()
@@ -111,6 +135,7 @@ func _make(lk: Dictionary, path: String) -> int:
 	var m := StandardMaterial3D.new()
 	m.vertex_color_use_as_albedo = true
 	m.roughness = 0.8
+	m.albedo_texture = ImageTexture.create_from_image(_paint(rects))
 	mi.material_override = m
 	var skin := Skin.new()
 	for n in bones:
@@ -281,7 +306,9 @@ func _body(lk: Dictionary) -> void:
 		_mask(lk, hc, hk)
 	else:
 		_face(lk, hc, hk)
+		cur_hint = "hair"
 		_hair(lk, hc, hk, hair)
+		cur_hint = ""
 		_hair_ink(lk, hc, hk, hair)
 		_props(lk, hc, hk)
 	head_warp = Vector3.ZERO
@@ -482,10 +509,12 @@ func _head_fem(c: Vector3, r: Vector3, col: Color) -> void:
 			var p := Vector3(n.x * r.x * (1.0 - 0.3 * pow(low, 1.6)), n.y * r.y * (1.0 + 0.06 * low), n.z * r.z * (1.0 - 0.08 * pow(low, 2.0)))
 			row.append([c + p, ["head"], [1.0]])
 		grid.append(row)
+	var cell := _new_cell(_grid_pos(grid), col, true)
 	for i in rings:
 		for j in seg:
 			var j2 := (j + 1) % seg
-			_quad(grid[i][j], grid[i][j2], grid[i + 1][j2], grid[i + 1][j], [col], [])
+			_quad(_e(grid[i][j], cell, _cuv(cell, i, j)), _e(grid[i][j2], cell, _cuv(cell, i, j + 1)),
+				_e(grid[i + 1][j2], cell, _cuv(cell, i + 1, j + 1)), _e(grid[i + 1][j], cell, _cuv(cell, i + 1, j)), [col], [])
 
 
 ## 타원체 겉면 점 q 의 바깥 법선
@@ -586,10 +615,12 @@ func _head_male(c: Vector3, r: Vector3, col: Color) -> void:
 			var u := TAU * j / seg
 			row.append([_hw(c, r, c + Vector3(sin(v) * cos(u) * r.x, cos(v) * r.y, sin(v) * sin(u) * r.z)), ["head"], [1.0]])
 		grid.append(row)
+	var cell := _new_cell(_grid_pos(grid), col, true)
 	for i in rings:
 		for j in seg:
 			var j2 := (j + 1) % seg
-			_quad(grid[i][j], grid[i][j2], grid[i + 1][j2], grid[i + 1][j], [col], [])
+			_quad(_e(grid[i][j], cell, _cuv(cell, i, j)), _e(grid[i][j2], cell, _cuv(cell, i, j + 1)),
+				_e(grid[i + 1][j2], cell, _cuv(cell, i + 1, j + 1)), _e(grid[i + 1][j], cell, _cuv(cell, i + 1, j)), [col], [])
 
 
 ## 머리 겉면 점 q 를 지금 머리 다듬기(head_warp)로 옮긴다 — 0 이면 그대로(여성 · 복면)
@@ -944,15 +975,40 @@ func _on_ell(c: Vector3, r: Vector3, dir: Vector3) -> Vector3:
 
 # ---- 도형 (정점마다 뼈 · 가중치)
 func _vert(p: Vector3, col: Color, b: Array, w: Array) -> void:
-	st.set_color(_painted(p, col) if paint_k > 0.0 else col)
+	_vert_uv(p, col, b, w, 0, Vector2.ZERO)
+
+
+## 칸 cell 의 칸 안 uv(0 ~ 1 — u 둘레 · v 길이)로 꼭짓점 하나. 칸 0(민 칸)이면 uv 는 무시
+func _vert_uv(p: Vector3, col: Color, b: Array, w: Array, cell: int, uv: Vector2) -> void:
 	var bi := PackedInt32Array([0, 0, 0, 0])
 	var wi := PackedFloat32Array([0, 0, 0, 0])
 	for k in b.size():
 		bi[k] = bones[b[k]]
 		wi[k] = w[k]
-	st.set_bones(bi)
-	st.set_weights(wi)
-	st.add_vertex(p)
+	vbuf.append([p, _painted(p, col) if paint_k > 0.0 else col, bi, wi, cell, uv])
+
+
+## 새 UV 칸: pos = 행(v 방향) × 열(u 방향) 겉면 점, col = 같은 모양의 바탕색(칠하기 전 — 종류 가르기) 또는 Color 하나, wrap = 열이 둘레로 닫힘
+func _new_cell(pos: Array, col, wrap: bool) -> int:
+	var cg: Array = []
+	if col is Array:
+		cg = col
+	else:
+		for row in pos:
+			var r: Array = []
+			r.resize(row.size())
+			r.fill(col)
+			cg.append(r)
+	cells.append({"pos": pos, "col": cg, "wrap": wrap, "hint": cur_hint})
+	return cells.size() - 1
+
+
+## 칸 격자 (i 행, j 열)의 uv — 닫힌 둘레는 j = 열 수(이음매)에서 u = 1
+func _cuv(cell: int, i: int, j: int) -> Vector2:
+	var c: Dictionary = cells[cell]
+	var rows: int = (c["pos"] as Array).size()
+	var cols: int = (c["pos"][0] as Array).size()
+	return Vector2(float(j) / float(cols if c["wrap"] else maxi(cols - 1, 1)), float(i) / float(maxi(rows - 1, 1)))
 
 
 ## 칠(①): 높이 그러데이션 × 오목한 데 그늘. 먹선 띠(INK_COL)는 그대로
@@ -972,7 +1028,26 @@ func _painted(p: Vector3, col: Color) -> Color:
 func _quad(a, b, c, d, cols: Array, wts: Array) -> void:
 	# a b c d 는 [위치, 뼈 목록, 가중치 목록]
 	for v in [a, c, b, a, d, c]:             # Godot 앞면 감기 방향(뒤집으면 외곽선 판만 보인다 — 첫 시도)
-		_vert(v[0], cols[0], v[1], v[2])
+		if v.size() > 4:
+			_vert_uv(v[0], cols[0], v[1], v[2], v[3], v[4])
+		else:
+			_vert(v[0], cols[0], v[1], v[2])
+
+
+## 격자 점 [위치, 뼈, 가중치] 에 칸 · uv 를 붙인 꼭짓점(_quad 가 읽는다)
+func _e(entry: Array, cell: int, uv: Vector2) -> Array:
+	return [entry[0], entry[1], entry[2], cell, uv]
+
+
+## 격자(행 × 열 [위치, ..])의 위치만
+func _grid_pos(grid: Array) -> Array:
+	var out: Array = []
+	for row in grid:
+		var r: Array = []
+		for v in row:
+			r.append(v[0] if v is Array else v)
+		out.append(r)
+	return out
 
 
 ## 관: p0(own 뼈 시작) → p1. 시작 쪽 30% 는 prev 뼈와, 끝 쪽 30% 는 next 뼈와 가중치를 나눈다(관절 가운데서 반반)
@@ -1003,10 +1078,12 @@ func _tube(p0: Vector3, p1: Vector3, r0: float, r1: float, col: Color, own: Stri
 			var p := p0 + axis * t + (side * cos(a) + fwd * sin(a) * dz) * r
 			row.append([p, b, w])
 		rows.append(row)
+	var cell := _new_cell(_grid_pos(rows), col, true)
 	for i in rings:
 		for j in seg:
 			var j2 := (j + 1) % seg
-			_quad(rows[i][j], rows[i + 1][j], rows[i + 1][j2], rows[i][j2], [col], [])
+			_quad(_e(rows[i][j], cell, _cuv(cell, i, j)), _e(rows[i + 1][j], cell, _cuv(cell, i + 1, j)),
+				_e(rows[i + 1][j2], cell, _cuv(cell, i + 1, j + 1)), _e(rows[i][j2], cell, _cuv(cell, i, j + 1)), [col], [])
 	_cap(rows[0], p0, col, true)
 	_cap(rows[rings], p1, col, false)
 
@@ -1039,12 +1116,17 @@ func _blob(c: Vector3, r: Vector3, col: Color, bone: String) -> void:
 			var vc := sheen_col if shine and i == 2 and n.z < -0.15 else col     # 앞쪽 위(위도 45도) 띠
 			row.append([c + Vector3(n.x * r.x, n.y * r.y, n.z * r.z), [bone], [1.0], vc])
 		grid.append(row)
+	var cg: Array = []
+	for row in grid:
+		cg.append(row.map(func(e): return e[3]))
+	var cell := _new_cell(_grid_pos(grid), cg, true)
 	for i in rings:
 		for j in seg:
 			var j2 := (j + 1) % seg
 			var q: Array = [grid[i][j], grid[i][j2], grid[i + 1][j2], grid[i + 1][j]]
-			for t in [q[0], q[2], q[1], q[0], q[3], q[2]]:
-				_vert(t[0], t[3], t[1], t[2])
+			var qu: Array = [_cuv(cell, i, j), _cuv(cell, i, j + 1), _cuv(cell, i + 1, j + 1), _cuv(cell, i + 1, j)]
+			for k in [0, 2, 1, 0, 3, 2]:
+				_vert_uv(q[k][0], q[k][3], q[k][1], q[k][2], cell, qu[k])
 
 
 func _cone(base: Vector3, tip: Vector3, r: float, col: Color, bone: String) -> void:
@@ -1169,15 +1251,17 @@ func _loft(rings: Array, sq: float, seg: int, cap0: float, cap1: float) -> void:
 			var p: Vector3 = rg[0] + side * signf(cu) * pow(absf(cu), e) * rg[1] + fwd * signf(su) * pow(absf(su), e) * rg[2]
 			row.append([p, rg[3], rg[4], rg[5]])
 		rows.append(row)
+	var cg: Array = []
+	for row in rows:
+		cg.append(row.map(func(e): return e[3]))
+	var cell := _new_cell(_grid_pos(rows), cg, true)
 	for i in rows.size() - 1:
 		for j in seg:
 			var j2 := (j + 1) % seg
-			var a: Array = rows[i][j]
-			var b: Array = rows[i + 1][j]
-			var c: Array = rows[i + 1][j2]
-			var d: Array = rows[i][j2]
-			for v in [a, c, b, a, d, c]:
-				_vert(v[0], v[3], v[1], v[2])
+			var q: Array = [rows[i][j], rows[i + 1][j], rows[i + 1][j2], rows[i][j2]]
+			var qu: Array = [_cuv(cell, i, j), _cuv(cell, i + 1, j), _cuv(cell, i + 1, j + 1), _cuv(cell, i, j + 1)]
+			for k in [0, 2, 1, 0, 3, 2]:
+				_vert_uv(q[k][0], q[k][3], q[k][1], q[k][2], cell, qu[k])
 	if cap0 >= 0.0:                                                  # 끝 뚜껑 — 축 바깥으로 cap 만큼 둥글게 부푼 부채꼴
 		_dome(rows[0], rings[0][0] - up * cap0, true)
 	if cap1 >= 0.0:
@@ -1222,11 +1306,14 @@ func _sq_blob(c: Vector3, r: Vector3, n: float, col: Color, bone: String, seg :=
 			var z := k * signf(sin(u)) * pow(absf(sin(u)), e)
 			row.append(c + Vector3(x * r.x, signf(cv) * pow(absf(cv), e) * r.y, z * r.z))
 		grid.append(row)
+	var cell := _new_cell(grid, col, true)
 	for i in rings:
 		for j in seg:
 			var j2 := (j + 1) % seg
-			for p in [grid[i][j], grid[i + 1][j2], grid[i][j2], grid[i][j], grid[i + 1][j], grid[i + 1][j2]]:
-				_vert(p, col, [bone], [1.0])
+			var q: Array = [[grid[i][j], i, j], [grid[i + 1][j2], i + 1, j + 1], [grid[i][j2], i, j + 1], [grid[i][j], i, j],
+				[grid[i + 1][j], i + 1, j], [grid[i + 1][j2], i + 1, j + 1]]
+			for t in q:
+				_vert_uv(t[0], col, [bone], [1.0], cell, _cuv(cell, t[1], t[2]))
 
 
 ## a → b 가는 줄(흉터 · 사슬 · 모피 깃) — a · b 를 끝으로 하는 기운 타원체 하나(조각을 이으면 외곽선이 마디마다 생긴다)
@@ -1246,10 +1333,12 @@ func _line(a: Vector3, b: Vector3, r: float, col: Color, bone: String) -> void:
 			var u := TAU * j / seg
 			row.append([c + up * cos(v) * (half.length() + r) + (side * cos(u) + fwd * sin(u)) * sin(v) * r, [bone], [1.0]])
 		grid.append(row)
+	var cell := _new_cell(_grid_pos(grid), col, true)
 	for i in rings:
 		for j in seg:
 			var j2 := (j + 1) % seg
-			_quad(grid[i][j], grid[i][j2], grid[i + 1][j2], grid[i + 1][j], [col], [])
+			_quad(_e(grid[i][j], cell, _cuv(cell, i, j)), _e(grid[i][j2], cell, _cuv(cell, i, j + 1)),
+				_e(grid[i + 1][j2], cell, _cuv(cell, i + 1, j + 1)), _e(grid[i + 1][j], cell, _cuv(cell, i + 1, j)), [col], [])
 
 
 # ---- 안쪽 먹선(② — 2026-11-11 화풍 2단계)
@@ -1451,3 +1540,231 @@ func _hair_ink(lk: Dictionary, hc: Vector3, hk: float, hair: Color) -> void:
 			var q := _on_ell(c, R, Vector3(xk * spread, cos(th), sin(th)))
 			pts.append([q, _ell_normal(c, R, q)])
 		_ink_strip(pts, 0.006 * hk, ["head"], [1.0], col)
+
+
+
+# ---- 그림 입히기(③ — UV 칸 배치 · 칠)
+## 칸 크기(m): 둘레(가장 긴 행) × 길이(열마다 평균)
+func _cell_dims(c: Dictionary) -> Vector2:
+	var pos: Array = c["pos"]
+	var w := 0.0
+	for row in pos:
+		var per := 0.0
+		for j in row.size() - 1:
+			per += (row[j + 1] as Vector3).distance_to(row[j])
+		if c["wrap"] and row.size() > 1:
+			per += (row[row.size() - 1] as Vector3).distance_to(row[0])
+		w = maxf(w, per)
+	var h := 0.0
+	var cols: int = (pos[0] as Array).size()
+	for j in cols:
+		for i in pos.size() - 1:
+			h += (pos[i + 1][j] as Vector3).distance_to(pos[i][j])
+	return Vector2(w, h / maxf(cols, 1))
+
+
+## 칸을 PAINT_TEX² 에 선반 쌓기로 — 밀도(텍셀/m)를 줄여 가며 다 들어갈 때까지. 돌려줌: 칸 번호 → Rect2i(0 은 민 칸)
+func _pack_cells() -> Array:
+	var dims: Array = [Vector2.ZERO]
+	for k in range(1, cells.size()):
+		dims.append(_cell_dims(cells[k]))
+		cells[k]["dims"] = dims[k]
+	var dens := 420.0
+	while dens > 20.0:
+		var rects := _shelf(dims, dens)
+		if not rects.is_empty():
+			return rects
+		dens *= 0.92
+	push_error("UV 칸이 들어가지 않는다")
+	return []
+
+
+func _shelf(dims: Array, dens: float) -> Array:
+	var sizes: Array = [Vector2i(PLAIN, PLAIN)]
+	for k in range(1, dims.size()):
+		var d: Vector2 = dims[k]
+		sizes.append(Vector2i(mini(PAINT_TEX, maxi(4, ceili(d.x * dens)) + 2 * CELL_PAD), mini(PAINT_TEX, maxi(4, ceili(d.y * dens)) + 2 * CELL_PAD)))
+	var order := range(1, sizes.size())
+	order.sort_custom(func(a, b): return sizes[a].y > sizes[b].y)
+	var rects: Array = []
+	rects.resize(sizes.size())
+	rects[0] = Rect2i(Vector2i.ZERO, sizes[0])
+	var x := PLAIN
+	var y := 0
+	var shelf_h := PLAIN
+	for k in order:
+		var sz: Vector2i = sizes[k]
+		if x + sz.x > PAINT_TEX:
+			y += shelf_h
+			x = 0
+			shelf_h = 0
+		if y + sz.y > PAINT_TEX:
+			return []
+		rects[k] = Rect2i(Vector2i(x, y), sz)
+		x += sz.x
+		shelf_h = maxi(shelf_h, sz.y)
+	return rects
+
+
+func _atlas_uv(rects: Array, cell: int, uv: Vector2) -> Vector2:
+	if cell == 0:
+		return PLAIN_UV / float(PAINT_TEX)
+	var r: Rect2i = rects[cell]
+	var inner := Vector2(r.size - Vector2i(2 * CELL_PAD, 2 * CELL_PAD))
+	return (Vector2(r.position) + Vector2(CELL_PAD, CELL_PAD) + uv * inner) / float(PAINT_TEX)
+
+
+## 칸 종류: 머리털(칸을 만들 때 hint) · 살 · 가죽(구두 · 가죽옷 · 허리띠) · 천
+func _kind_of(hint: String, col: Color) -> String:
+	if hint != "":
+		return hint
+	var lk := paint_look
+	if _near(col, lk["skin"]):
+		return "skin"
+	if _near(col, lk.get("shoe", Color(0.05, 0.05, 0.06))) or (lk.get("belt") != null and _near(col, lk["belt"])):
+		return "leather"
+	if lk.get("leather", false) and _near(col, lk["suit"]):
+		return "leather"
+	if lk.get("gloves") != null and _near(col, lk["gloves"]):
+		return "leather"
+	return "cloth"
+
+
+func _near(a: Color, b) -> bool:
+	if not (b is Color):
+		return false
+	return absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b) < 0.03
+
+
+## 정수 격자 값 잡음(0 ~ 1) — px > 0 이면 x 를 그 주기로 감는다(둘레 이음매가 안 보이게)
+func _h2(ix: int, iy: int) -> float:
+	var h := (ix * 374761393 + iy * 668265263) & 0x7fffffff
+	h = ((h ^ (h >> 13)) * 1274126177) & 0x7fffffff
+	return float((h ^ (h >> 16)) & 0xffff) / 65535.0
+
+
+func _vn(x: float, y: float, px := 0) -> float:
+	var ix := floori(x)
+	var iy := floori(y)
+	var fx := x - ix
+	var fy := y - iy
+	fx = fx * fx * (3.0 - 2.0 * fx)
+	fy = fy * fy * (3.0 - 2.0 * fy)
+	var ix1 := ix + 1
+	if px > 0:
+		ix = posmod(ix, px)
+		ix1 = posmod(ix1, px)
+	return lerpf(lerpf(_h2(ix, iy), _h2(ix1, iy), fx), lerpf(_h2(ix, iy + 1), _h2(ix1, iy + 1), fx), fy)
+
+
+## 펜 빗금(텍셀 자리 — 대각선, 손떨림 · 펜을 뗀 자리). 0 ~ 1
+func _hatch(tx: float, ty: float) -> float:
+	var wob := (_vn(tx * 0.06, ty * 0.06) - 0.5) * 3.0
+	var d := fposmod((tx + ty + wob) / 4.0, 1.0)
+	var line := 1.0 - smoothstep(0.18, 0.36, absf(d - 0.25) * 2.0)
+	return line * smoothstep(0.28, 0.42, _vn(tx * 0.08 + 3.0, ty * 0.08 + 1.0))
+
+
+func _crev_ao(p: Vector3) -> float:
+	var k := 1.0
+	for c in crev:
+		var d: float = p.distance_to(c[0])
+		if d < c[1]:
+			var u: float = 1.0 - d / c[1]
+			k *= 1.0 - float(c[2]) * u * u
+	return 1.0 - k
+
+
+## 회색 그림(LA8): L = 곱 / PAINT_GAIN(붓 결 · 얼룩 · 오목한 데 빗금), A = 빛 빗금 자리(셰이더 ink_cel 이 명암 경계 · 그림자에서 긋는다 —
+## 0 빗금 없음(살 · 민 칸) · 0.5 빗금 받는 칸의 선 사이 · 1 선). 칸마다 칸 안 uv → 격자 겉면 점 · 법선 · 바탕색 → 종류별 칠
+func _paint(rects: Array) -> Image:
+	var base := int(round(255.0 / PAINT_GAIN))
+	var data := PackedByteArray()
+	data.resize(PAINT_TEX * PAINT_TEX * 2)
+	for t in PAINT_TEX * PAINT_TEX:
+		data[t * 2] = base
+		data[t * 2 + 1] = 0
+	for k in range(1, cells.size()):
+		var c: Dictionary = cells[k]
+		var r: Rect2i = rects[k]
+		var pos: Array = c["pos"]
+		var cg: Array = c["col"]
+		var nr := pos.size()
+		var nc: int = (pos[0] as Array).size()
+		var wrap: bool = c["wrap"]
+		var dims: Vector2 = c["dims"]
+		var cen := Vector3.ZERO
+		for row in pos:
+			for q in row:
+				cen += q
+		cen /= float(nr * nc)
+		var kinds := {}
+		var iw := maxi(1, r.size.x - 2 * CELL_PAD)
+		var ih := maxi(1, r.size.y - 2 * CELL_PAD)
+		var pu1 := maxi(3, roundi(dims.x * 26.0))
+		var pu2 := maxi(2, roundi(dims.x * 3.0))
+		var pu3 := maxi(3, roundi(dims.x * 11.0))
+		var ph := maxi(6, roundi(dims.x * 70.0))
+		for ty in r.size.y:
+			var v := clampf((ty - CELL_PAD + 0.5) / ih, 0.0, 1.0)
+			var fv := v * (nr - 1)
+			var i0 := mini(int(fv), nr - 2) if nr > 1 else 0
+			var i1 := mini(i0 + 1, nr - 1)
+			var tv := fv - i0
+			for tx in r.size.x:
+				var u := clampf((tx - CELL_PAD + 0.5) / iw, 0.0, 1.0)
+				var fu := u * (nc if wrap else nc - 1)
+				var j0 := mini(int(fu), nc - 1)
+				var j1 := (j0 + 1) % nc if wrap else mini(j0 + 1, nc - 1)
+				var tu := fu - j0
+				var a0: Vector3 = (pos[i0][j0] as Vector3).lerp(pos[i0][j1], tu)
+				var a1: Vector3 = (pos[i1][j0] as Vector3).lerp(pos[i1][j1], tu)
+				var p: Vector3 = a0.lerp(a1, tv)
+				var du: Vector3 = ((pos[i0][j1] as Vector3) - pos[i0][j0]).lerp((pos[i1][j1] as Vector3) - pos[i1][j0], tv)
+				var dv: Vector3 = a1 - a0
+				var n := du.cross(dv)
+				if n.length_squared() < 1e-12:
+					n = p - cen
+				n = n.normalized()
+				if n.dot(p - cen) < 0.0:
+					n = -n
+				var col: Color = cg[roundi(fv)][roundi(fu) % nc]
+				var kind: String = kinds.get(col, "")
+				if kind == "":
+					kind = _kind_of(str(c["hint"]), col)
+					kinds[col] = kind
+				var y := v * dims.y
+				var m := 1.0
+				var pen := -1.0                                          # 빛 빗금 선(0 ~ 1, -1 = 빗금 없음)
+				var hx := tx + r.position.x
+				var hy := ty + r.position.y
+				var ao := _crev_ao(p)
+				var under := clampf((-n.y - 0.3) / 0.5, 0.0, 1.0)
+				match kind:
+					"hair":
+						var nn := _vn(u * ph, y * 3.0 + _vn(u * ph * 0.25, y * 1.2, maxi(1, ph / 4)) * 2.0, ph)
+						m = 0.8 + 0.42 * nn
+						if nn < 0.26:
+							m *= 0.72                                    # 가닥 사이 짙은 결
+						pen = 1.0 - smoothstep(0.2, 0.34, nn)            # 그림자에선 가닥 결이 빗금
+						if v > 0.62:
+							m *= lerpf(1.0, 0.84, (v - 0.62) / 0.38)     # 아래쪽(목덜미 · 끝)으로 짙게
+					"skin":
+						m = 1.0 + (_vn(u * pu2 * 2.0, y * 9.0, pu2 * 2) - 0.5) * 0.05
+						var a_s := clampf(ao * 1.2 + under * 0.5, 0.0, 1.0)
+						if a_s > 0.05:
+							m *= 1.0 - 0.32 * a_s * _hatch(hx, hy)
+					_:
+						m += (_vn(u * pu1, y * 4.0, pu1) - 0.5) * 0.15                 # 붓 결(길이 방향)
+						m += (_vn(u * pu2, y * 2.4 + 5.3, pu2) - 0.5) * 0.12           # 얼룩
+						if kind == "leather":
+							m += 0.26 * smoothstep(0.7, 0.9, _vn(u * pu3, y * 1.6 + 2.0, pu3))   # 가죽 광(긴 줄)
+						var hl := _hatch(hx, hy)
+						var a := clampf(ao * 1.6 + under * 0.85, 0.0, 1.0)
+						if a > 0.05:
+							m *= 1.0 - 0.52 * a * hl
+						pen = hl
+				var at := ((r.position.y + ty) * PAINT_TEX + r.position.x + tx) * 2
+				data[at] = clampi(roundi(m / PAINT_GAIN * 255.0), 0, 255)
+				data[at + 1] = 0 if pen < 0.0 else clampi(roundi((0.5 + 0.5 * pen) * 255.0), 0, 255)
+	return Image.create_from_data(PAINT_TEX, PAINT_TEX, false, Image.FORMAT_LA8, data)

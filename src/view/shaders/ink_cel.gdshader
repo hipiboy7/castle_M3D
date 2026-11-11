@@ -20,9 +20,20 @@ uniform float rim = 0.0;            // 테두리 빛 세기(인물 · 무기)
 uniform float rim_w = 0.6;          // 테두리 빛 시작(1 - N·V)
 uniform float spec = 0.0;           // 딱 끊긴 반사광(쇠 · 가죽 · 머리)
 uniform vec3 emission = vec3(0.0);  // 맞음 번쩍임 · 엇엇박 달아오름(puppet_pose _update_flash)
+// 인물 그림(그림 A GLB 에 든 회색 그림 — tools/make_models.gd ③): 붓 결 · 얼룩 · 머리털 가닥 · 가죽 광 · 오목한 데 빗금. 값 × paint_gain 을 곱한다
+uniform bool use_paint = false;
+uniform sampler2D paint_tex : filter_linear_mipmap, repeat_disable;
+uniform float paint_gain = 1.3;
+// 빛 빗금(펜 해칭 — 원작 웹툰의 명암 경계 · 그림자 빗금): 그림의 A 채널에 손으로 그은 선(떨림 · 끊김 — make_models _hatch · 머리는 가닥 결).
+// A 0 = 빗금 없음(살 · 얼굴), 0.5 = 선 사이, 1 = 선. hatch = 중간 단에서 선 자리를 어둡게, hatch_lift = 그림자 쪽 선 사이를 밝혀 선이 드러나게
+uniform float hatch = 0.0;
+uniform float hatch_lift = 0.0;
+uniform float hatch_light = 0.45;   // 이 밝기(빛 색 × 세기 평균) 이상인 빛만 빗금을 긋는다
 
 varying vec3 wpos;
 varying vec3 wnrm;
+varying float pen_on;       // 빗금 받는 자리(fragment → light)
+varying float pen_line;
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -82,6 +93,14 @@ void fragment() {
 	if (use_tex) {
 		c *= texture(tex, UV).rgb;
 	}
+	pen_on = 0.0;
+	pen_line = 0.0;
+	if (use_paint) {
+		vec4 pt = texture(paint_tex, UV);
+		c *= pt.r * paint_gain;
+		pen_on = smoothstep(0.2, 0.4, pt.a);
+		pen_line = smoothstep(0.62, 0.88, pt.a);
+	}
 	if (paint > 0.0) {
 		vec3 an = abs(wnrm);
 		vec2 q = an.y > 0.6 ? wpos.xz : (an.x > an.z ? wpos.zy : wpos.xy);
@@ -119,7 +138,16 @@ void light() {
 		a = smoothstep(0.0, 1.0, a);                     // 점광: 빛 웅덩이 가운데를 조금 더 밝게(가장자리는 부드럽게)
 	}
 	float t = mix(mid * smoothstep(0.0, band, ndl), 1.0, smoothstep(0.42, 0.42 + band, ndl));
-	DIFFUSE_LIGHT += LIGHT_COLOR * (a * t * light_k);
+	float lit = a * t;
+	if (hatch > 0.0 && pen_on > 0.0) {
+		// 센 빛(해 · 달 · 실내 위 빛)만 — 뒤에서 오는 약한 윤곽 빛은 앞면 전체가 '그림자'라 빗금이 밝은 면을 덮었다(흰 정장 신겐)
+		float strong = smoothstep(hatch_light * 0.7, hatch_light, dot(LIGHT_COLOR, vec3(0.3333)));
+		float edge = smoothstep(-0.06, 0.04, ndl) * (1.0 - smoothstep(0.14, 0.28, ndl)) * a;     // 명암 경계 띠
+		float deep = 1.0 - smoothstep(0.06, 0.28, lit);
+		DIFFUSE_LIGHT += LIGHT_COLOR * (light_k * hatch_lift * deep * strong * pen_on * (1.0 - pen_line));
+		lit *= 1.0 - hatch * edge * strong * pen_line;
+	}
+	DIFFUSE_LIGHT += LIGHT_COLOR * (lit * light_k);
 	if (rim > 0.0) {
 		float fr = 1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0);
 		float edge = smoothstep(rim_w, rim_w + 0.06, fr) * smoothstep(-0.25, 0.25, ndl);
