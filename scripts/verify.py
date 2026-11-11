@@ -8,6 +8,8 @@
   0. 공통 데이터  data/common/ 의 받은 파일이 도장 SOURCE.json 의 sha256(줄 끝 CRLF → LF)과 같다(손으로 고치지 않았다 —
                다르면 실패). 옆에 castle_common(환경 변수 CASTLE_COMMON, 없으면 이 저장소 옆 폴더)이 있으면 그 파일과
                같은지 — 다르면 알림(--strict 는 실패), 없으면(CI) 건너뛴다. castle_M scripts/verify.py 3-1 과 같은 방식
+               공개 저장소라 data/common/ 은 커밋하지 않는다(.gitignore — castle_common 캐슬_게임공통.md 2절 10항, 2026-11-11):
+               git 이 data/common 을 들고 있으면 실패 · 받은 커밋(도장)이 data/castle_common.ref(CI 가 받는 커밋)와 다르면 실패
   0. 자산 출처    assets/ 의 파일(.import 빼고)이 모두 assets/ASSETS.md 에 있고, 목록에만 있는 파일이 없다(개발 규격 6절)
   0-1. 외형 생성물  tools/looks_from_common.py --check (castle_common looks.json → src/view/looks_common.gd)
   1. 가져오기   godot --headless --path . --import  (스크립트 문법 · 자원 가져오기)
@@ -122,7 +124,17 @@ def step_common(strict):
     if edited:
         print("[FAIL] 공통 데이터 — 도장과 다른 파일(손으로 고치지 않는다 — castle_common 에서 고치고 받는다): " + ", ".join(edited))
         return False
-    ok, msg = True, f"castle_common {stamp['castle_common'][:7]} 받음 · 파일 {len(want)}개 도장과 같다"
+    ref_path = os.path.join(ROOT, "data", "castle_common.ref")
+    ref = open(ref_path, encoding="utf-8").read().strip() if os.path.exists(ref_path) else ""
+    if ref != stamp["castle_common"]:
+        print(f"[FAIL] 공통 데이터 — 받은 castle_common {stamp['castle_common'][:7]} 이 data/castle_common.ref({ref[:7] or '없음'})와 다르다 "
+              "— 받은 뒤 ref 를 그 커밋으로(CI 는 ref 커밋을 받아 빌드한다)")
+        return False
+    tracked = subprocess.run(["git", "-C", ROOT, "ls-files", "data/common"], capture_output=True, text=True).stdout.strip()
+    if tracked:
+        print("[FAIL] 공통 데이터 — data/common 이 git 에 있다(공개 저장소 — 받은 사본은 커밋하지 않는다): git rm -r --cached data/common")
+        return False
+    ok, msg = True, f"castle_common {stamp['castle_common'][:7]} 받음 · 파일 {len(want)}개 도장과 같다 · ref 같음 · 커밋 안 됨"
     if os.path.isdir(os.path.join(COMMON_SRC, "data")):
         up = {rel: (_digest(_src_path(rel)) if os.path.isfile(_src_path(rel)) else None) for rel in want}
         for pat, pre in (("data/*.json", ""), ("cases/*.json", "cases/"), ("docs/개발규격/*.md", "docs/개발규격/")):

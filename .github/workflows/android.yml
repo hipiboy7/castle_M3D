@@ -1,5 +1,6 @@
 # 캐슬 M 3D 초안 — 검증 · APK · 화면 찍기 · 에뮬레이터 점검
 #  build    : Godot(고정 버전) + 안드로이드 템플릿 → scripts/verify.py(가져오기 · 테스트 · 자동 결투) → APK(arm64 + x86_64 한 파일)
+#             (그 앞에 castle_common 을 읽기 전용 토큰으로 받아 sync — data/common 은 커밋하지 않는다, 2026-11-11)
 #             → APK 안에 공통 데이터(data/common/*.json)가 들었는지 → 가상 화면(xvfb + 소프트웨어 OpenGL)에서 폰 2340x1080 스크린샷
 #  emulator : APK 를 x86_64 API 34 에뮬레이터에 설치 · 실행 → 데모 스크린샷 · logcat 오류 · FPS (scripts/emu_check.sh)
 #             — 수동 실행(workflow_dispatch 입력 emulator)과 태그 push 때만(개발 규격 1 · 9절, 사용자 2026-11-04). push 에는 build 만
@@ -24,6 +25,7 @@ on:
       - "icon.svg"
       - "scripts/**"
       - ".github/workflows/android.yml"
+      - ".gitignore"
   workflow_dispatch:
     inputs:
       emulator:
@@ -44,6 +46,45 @@ jobs:
       GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD: android
     steps:
       - uses: actions/checkout@v7
+
+      # castle_common(비공개 — 공통 규칙 · 데이터 · 받는 도구)을 받아 data/common 에 둔다. 이 저장소는 공개라 받은 사본을 커밋하지
+      # 않는다(.gitignore — castle_common 캐슬_게임공통.md 2절 10항 · 2026-11-11 사용자 "(a) 진행"). 받는 커밋 = data/castle_common.ref
+      # (작업 서버에서 받고 시험한 그 커밋 — verify 가 도장과 같은지 본다). 토큰 = 저장소 Secrets CASTLE_COMMON_TOKEN(castle_common 하나만 ·
+      # Contents 읽기 전용 fine-grained 토큰). 5.8GB 저장소라 sync 가 읽는 폴더만 받는다(sync 의 check 가 보는 sources 색인 · 프로필 포함 약 70MB)
+      - name: castle_common 커밋 · 토큰 확인
+        id: cc
+        env:
+          CC_TOKEN: ${{ secrets.CASTLE_COMMON_TOKEN }}
+        run: |
+          if [ -z "$CC_TOKEN" ]; then echo "::error::Secrets CASTLE_COMMON_TOKEN 이 없다 — castle_common 읽기 전용 토큰을 저장소 Secrets 에 넣는다(CLAUDE.md 3절)"; exit 1; fi
+          echo "ref=$(tr -d '[:space:]' < data/castle_common.ref)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+        with:
+          repository: hipiboy7/castle_common
+          ref: ${{ steps.cc.outputs.ref }}
+          token: ${{ secrets.CASTLE_COMMON_TOKEN }}
+          path: .castle_common
+          persist-credentials: false
+          filter: blob:none
+          sparse-checkout: |
+            data
+            cases
+            canon
+            docs
+            tools
+            ref
+            rules
+            packs
+            sources/index
+            sources/character_profile
+            work/text
+
+      - name: castle_common 받기 (sync → data/common)
+        run: |
+          mv .castle_common ../castle_common
+          python3 -B ../castle_common/tools/sync.py castle_M3D --dest data/common
+          test -f data/common/SOURCE.json
 
       - uses: actions/setup-java@v6
         with:
