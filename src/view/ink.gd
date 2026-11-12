@@ -41,6 +41,13 @@ const CHAR_HATCH := 0.55                        # 인물 빛 빗금 — 중간 �
 const CHAR_HATCH_LIFT := 0.14                   # 그림자 쪽 빗금 사이 밝힘
 const CHAR_LIGHT_K := 1.0
 const PROP_LIGHT_K := 1.0
+## 화풍 3단계(2026-11-12 — 무대 소품 · 바닥 무늬): 바닥은 무대가 재질 메타 ink_pattern(set3d _floor — tiles · planks · slabs · carpet)으로
+## 무늬를 고르고, 소품은 색 · 재질 값으로 손칠(나무 결 · 쇠 · 천)을 고른다. 상자 · 원기둥 위 모서리는 밝은 붓 자국(EDGE)
+const PATTERNS := {"tiles": [1, 1.0], "planks": [2, 1.0], "slabs": [3, 3.0], "carpet": [4, 0.9]}   # 이름 → [셰이더 번호, 칸 m]
+const PATTERN_K := 0.85                         # 무늬 진하기
+const EDGE_PROP := 0.7                          # 소품 모서리 칠
+const EDGE_WALL := 0.35                         # 벽 · 기둥(넓은 면 — 옅게)
+const EDGE_PX := 3.0
 
 ## 3D 내부 해상도: 창 픽셀이 RES_MAX_PIXELS 를 넘으면 그 비율로 줄여 그리고 늘려 보인다(쌍선형). 접는 폰 안쪽 2176x1812(390만) ·
 ## 커버 2316x904(210만) — 바닥 붓 결 · 금 셰이더와 화면 마무리가 픽셀마다 돈다(2026-11-11 rc.13 '11장 조금 끊김 fps 30대'). HUD 는 그대로
@@ -146,7 +153,7 @@ static func _mesh(mi: MeshInstance3D, cache: Dictionary) -> void:
 	var kind := _kind(mi, mesh)
 	var any := false
 	if mi.material_override != null:
-		var nm = _convert(mi.material_override, kind, cache)
+		var nm = _convert(mi.material_override, kind, cache, _edge_mode(mesh))
 		if nm != null:
 			mi.material_override = nm
 			any = true
@@ -155,7 +162,7 @@ static func _mesh(mi: MeshInstance3D, cache: Dictionary) -> void:
 			var src: Material = mi.get_surface_override_material(s)
 			if src == null:
 				src = mesh.surface_get_material(s)
-			var nm2 = _convert(src, kind, cache)
+			var nm2 = _convert(src, kind, cache, _edge_mode(mesh))
 			if nm2 != null:
 				mi.set_surface_override_material(s, nm2)
 				any = true
@@ -178,7 +185,33 @@ static func _kind(mi: MeshInstance3D, mesh: Mesh) -> String:
 	return "prop"
 
 
-static func _convert(src: Material, kind: String, cache: Dictionary):
+## 모서리 칠 방식 — 1 상자 · 2 원기둥(가운데가 원점인 Godot 기본 도형만), 0 없음
+static func _edge_mode(mesh: Mesh) -> int:
+	if mesh is BoxMesh:
+		return 1
+	if mesh is CylinderMesh:
+		return 2
+	return 0
+
+
+## 소품 손칠 — 1 나무 결 · 2 쇠 · 3 천 · 0 민 칠(돌 · 플라스틱 · 칠한 벽)
+static func surface_of(s: StandardMaterial3D) -> int:
+	if s.metallic > 0.5:
+		return 2
+	var c := s.albedo_color
+	if c.s > 0.3 and c.h > 0.03 and c.h < 0.13 and c.v < 0.75 and s.roughness >= 0.5:
+		return 1
+	if s.roughness >= 0.9 and c.s > 0.25:
+		return 3
+	return 0
+
+
+## 바닥 무늬 이름 — 무대가 정한 메타(ink_pattern), 없으면 ""(무늬 없음 — 결이 든 바닥 · 땅)
+static func pattern_of(s: StandardMaterial3D) -> String:
+	return str(s.get_meta("ink_pattern", "")) if s.has_meta("ink_pattern") else ""
+
+
+static func _convert(src: Material, kind: String, cache: Dictionary, emode := 0):
 	if not (src is StandardMaterial3D):
 		return null
 	var s := src as StandardMaterial3D
@@ -188,7 +221,9 @@ static func _convert(src: Material, kind: String, cache: Dictionary):
 		return null
 	if s.emission_enabled and s.emission.get_luminance() * s.emission_energy_multiplier > 0.02:
 		return null                                       # 스스로 빛나는 것(창 · 등 · 간판)은 그대로 — 빛 번짐
-	var key := "%d/%s" % [s.get_instance_id(), kind]
+	if kind == "floor":
+		emode = 0
+	var key := "%d/%s/%d" % [s.get_instance_id(), kind, emode]
 	if cache.has(key):
 		return cache[key]
 	var m := ShaderMaterial.new()
@@ -213,14 +248,32 @@ static func _convert(src: Material, kind: String, cache: Dictionary):
 		"floor":
 			m.set_shader_parameter("paint", FLOOR_PAINT * (0.5 if polished else 1.0))
 			m.set_shader_parameter("cracks", 0.0 if polished else FLOOR_CRACKS)
+			var pat := pattern_of(s)
+			if PATTERNS.has(pat):
+				m.set_shader_parameter("pattern", int(PATTERNS[pat][0]))
+				m.set_shader_parameter("tile", float(s.get_meta("ink_tile", PATTERNS[pat][1])))
+				m.set_shader_parameter("pattern_k", PATTERN_K)
+				if pat != "slabs":
+					m.set_shader_parameter("cracks", 0.0)
 		"wall":
 			m.set_shader_parameter("paint", WALL_PAINT)
 			m.set_shader_parameter("ao_floor", AO_FLOOR)
+			_edge(m, emode, EDGE_WALL)
 		_:
 			m.set_shader_parameter("paint", PROP_PAINT)
 			m.set_shader_parameter("ao_floor", AO_FLOOR * 0.6)
+			m.set_shader_parameter("surf", surface_of(s))
+			_edge(m, emode, EDGE_PROP)
 	if s.metallic > 0.5:
 		m.set_shader_parameter("spec", 0.8)
 		m.set_shader_parameter("rim", 0.4)
 	cache[key] = m
 	return m
+
+
+static func _edge(m: ShaderMaterial, emode: int, k: float) -> void:
+	if emode == 0:
+		return
+	m.set_shader_parameter("edge_k", k)
+	m.set_shader_parameter("edge_mode", emode)
+	m.set_shader_parameter("edge_px", EDGE_PX)

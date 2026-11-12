@@ -7,7 +7,8 @@ extends "res://src/view/haseong3d.gd"
 ## 원작 근거는 장 표 CANON(장소 id)과 머리 주석(화/컷) — 모양은 canon locations · fights place_text(conf ai) 판독이라 연출에만.
 ## 폰 성능: 점광 3개 이하 · 그림자는 해(천장) 하나 · 재질은 _shared · 소품 30 ~ 90 메시.
 
-## 무대 표 — 색은 Color, 소품 칸은 아래 _prop 의 이름
+## 무대 표 — 색은 Color, 소품 칸은 아래 _prop 의 이름. floor [색, 거칠기, 줄눈, (무늬)] · ground [어두운 색, 밝은 색, 거칠기, (무늬, 칸 m)] —
+## 무늬는 Ink.PATTERNS(tiles · planks · slabs · carpet — 화풍 3단계 2026-11-12), floor 는 안 주면 색으로 고른다(set3d floor_pattern)
 const SETS := {
 	# ---- 3장 청주 교도소 · 블라디보스토크 · 부산(p1:037-060)
 	"prison_cell": {"env": [Color(0.32, 0.34, 0.36), 0.7, Color(0.03, 0.03, 0.04)], "top": [Color(0.86, 0.92, 1.0), 0.75],
@@ -86,7 +87,7 @@ const SETS := {
 		"props": [["tank", -5.0, -0.6], ["vent", 4.6, -0.3]]},
 	# 놀이공원 분수대 광장(p1:087/005-008 — 대관람차 · 성 모양 탑 · 범퍼카 · 분수 · 'CAFFEE' 간판, 낮) — 하성 김태훈과의 회담
 	"park_plaza": {"env": [Color(0.5, 0.5, 0.5), 0.8, Color(0.62, 0.72, 0.85)], "sun": [Color(1.0, 0.96, 0.88), 1.1, Vector3(-55, 30, 0)],
-		"ground": [Color(0.52, 0.48, 0.44), Color(0.62, 0.58, 0.52), 0.7],
+		"ground": [Color(0.52, 0.48, 0.44), Color(0.62, 0.58, 0.52), 0.7, "tiles", 1.2],
 		"props": [["building", -4.4, -2.8, {"col": Color(0.85, 0.55, 0.6)}], ["building", 3.8, -3.0, {"col": Color(0.55, 0.7, 0.9)}],
 			["stall", -1.6, -0.9, {"col": Color(0.95, 0.4, 0.3)}], ["neon", 2.2, -0.9, {"text": "CAFFEE", "col": Color(1.0, 0.85, 0.3)}],
 			["round_table", -4.2, 3.4], ["round_table", 4.2, 3.4], ["lamp", 0.0, -0.4, {"col": Color(1.0, 0.9, 0.7)}], ["plant", 5.6, -0.4]]},
@@ -173,7 +174,7 @@ const SETS := {
 			["car", 5.0, -1.2, {"col": Color(0.1, 0.1, 0.12)}], ["line", 0, 3.4, {"w": 14.0, "d": 0.12, "col": Color(0.9, 0.8, 0.3)}]]},
 	# ---- 12장 교회 비전센터 · 스카이 브리지 · 공사장 · 지하(2부 70-126)
 	"church_yard": {"env": [Color(0.24, 0.28, 0.34), 0.6, Color(0.04, 0.05, 0.07)], "sun": [Color(0.7, 0.78, 0.9), 0.5, Vector3(-55, 25, 0)],
-		"ground": [Color(0.16, 0.17, 0.18), Color(0.26, 0.27, 0.28), 0.3], "rain": 380, "fog": [Color(0.2, 0.24, 0.3), 0.03],
+		"ground": [Color(0.16, 0.17, 0.18), Color(0.26, 0.27, 0.28), 0.3, "tiles", 1.0], "rain": 380, "fog": [Color(0.2, 0.24, 0.3), 0.03],
 		"props": [["church", 0, -3.2], ["cross", 0, -3.0, {"y": 7.4}], ["lamp", -5.0, -0.5, {"col": Color(1.0, 0.85, 0.6)}], ["lamp", 5.0, -0.5, {"col": Color(1.0, 0.85, 0.6)}], ["puddle", -1.6, 2.0], ["puddle", 2.4, 3.4]]},
 	"green_office": {"env": [Color(0.22, 0.32, 0.26), 0.65, Color(0.01, 0.03, 0.02)], "top": [Color(0.7, 1.0, 0.75), 0.6],
 		"floor": [Color(0.26, 0.3, 0.28), 0.4, true], "window": 3.0, "rain_view": true,
@@ -213,10 +214,10 @@ const SETS := {
 			["sign", -6.2, -0.75, {"text": "B1", "col": Color(0.4, 1.0, 0.5)}], ["plant", 6.0, -0.4]]},
 	# ---- 13장 미술관 앞(2부 127-134)
 	"museum_plaza": {"env": [Color(0.42, 0.42, 0.44), 0.75, Color(0.55, 0.57, 0.6)], "sun": [Color(0.9, 0.92, 0.95), 0.75, Vector3(-55, 20, 0)],
-		"ground": [Color(0.46, 0.45, 0.43), Color(0.58, 0.57, 0.55), 0.7], "tiles_out": true,
+		"ground": [Color(0.46, 0.45, 0.43), Color(0.58, 0.57, 0.55), 0.7, "slabs", 2.0], "tiles_out": true,
 		"props": [["museum", 0, -3.4], ["statue", -5.0, -0.6], ["statue", 5.0, -0.6]]},
 	"red_plaza": {"env": [Color(0.5, 0.24, 0.2), 0.7, Color(0.45, 0.1, 0.08)], "sun": [Color(1.0, 0.5, 0.35), 0.9, Vector3(-20, 40, 0)],
-		"ground": [Color(0.3, 0.26, 0.24), Color(0.4, 0.34, 0.3), 0.35], "rain": 300, "fog": [Color(0.45, 0.16, 0.12), 0.03],
+		"ground": [Color(0.3, 0.26, 0.24), Color(0.4, 0.34, 0.3), 0.35, "tiles", 0.7], "rain": 300, "fog": [Color(0.45, 0.16, 0.12), 0.03],
 		"props": [["museum", 0, -3.6, {"col": Color(0.3, 0.26, 0.26)}], ["puddle", -2.0, 2.0, {"col": Color(0.6, 0.15, 0.1, 0.6)}], ["puddle", 2.8, 3.2, {"col": Color(0.6, 0.15, 0.1, 0.6)}]]},
 	# 13장 다시 짬: 미술관 안(사인진 · 그림 앞의 최민욱 — 가운데 큰 그림은 스테인드 판으로)
 	"museum_hall": {"env": [Color(0.4, 0.38, 0.36), 0.75, Color(0.03, 0.03, 0.03)], "top": [Color(1.0, 0.96, 0.9), 0.8],
@@ -249,9 +250,10 @@ func build(th: String, b: Rect2, detail := true) -> void:
 	if s.has("fog"):
 		_fog(s["fog"][0], s["fog"][1])
 	if s.has("floor"):
-		_floor(b, s["floor"][0], s["floor"][1], s["floor"][2])
+		_floor(b, s["floor"][0], s["floor"][1], s["floor"][2], str(s["floor"][3]) if s["floor"].size() > 3 else "")
 	if s.has("ground"):
-		_ground(b, s["ground"][0], s["ground"][1], s["ground"][2], th.hash() % 97)
+		var gr: Array = s["ground"]
+		_ground(b, gr[0], gr[1], gr[2], th.hash() % 97, 8.0, 2.0, str(gr[3]) if gr.size() > 3 else "", float(gr[4]) if gr.size() > 4 else 0.0)
 	if s.has("wall"):
 		_back_wall(b, s["wall"][0], s["wall"][1])
 	if s.has("window"):
@@ -334,9 +336,12 @@ func _prop_build(kind: String, at: Vector3, o: Dictionary, b: Rect2) -> void:
 			pm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 			var c := _mesh(self, _cyl(1.0, 1.0, 0.005), pm, at + Vector3(0, 0.004, 0))
 			c.scale = Vector3(1.4, 1, 0.8)
-		"mat", "rug":
-			_decal(Rect2(at.x - float(o.get("w", 6.0)) * 0.5, at.z - float(o.get("d", 3.0)) * 0.5, o.get("w", 6.0), o.get("d", 3.0)),
-				_shared(o.get("col", Color(0.4, 0.1, 0.1)), 0.9))
+		"mat", "rug":                                    # 깔개 — rug 는 카펫 무늬(화풍 3단계), 싸움 매트는 민 천
+			var rm := _shared(o.get("col", Color(0.4, 0.1, 0.1)), 0.9)
+			if kind == "rug":
+				rm = _mat(o.get("col", Color(0.4, 0.1, 0.1)), 0.9)
+				rm.set_meta("ink_pattern", "carpet")
+			_decal(Rect2(at.x - float(o.get("w", 6.0)) * 0.5, at.z - float(o.get("d", 3.0)) * 0.5, o.get("w", 6.0), o.get("d", 3.0)), rm)
 		"cage":                                          # 철망 — 뒤 · 양옆(앞은 열어 둔다 — 카메라)
 			var m := _shared(Color(0.3, 0.32, 0.34), 0.5, 0.0, 0.7)
 			var net := _mat(Color(0.5, 0.52, 0.55, 0.35), 0.5, 0.0, 0.5)

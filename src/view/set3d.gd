@@ -122,13 +122,16 @@ func _omni(at: Vector3, col: Color, energy: float, rng: float) -> void:
 	add_child(l)
 
 
-func _floor(b: Rect2, col: Color, rough: float, tiles: bool) -> void:
+## 바닥 — 무늬(화풍 3단계 2026-11-12, ink_cel 이 세계 좌표로 그린다 — Ink.PATTERNS): pattern 을 안 주면 tiles 면 판석, 갈색이면 마루,
+## 채도 높으면 카펫, 아니면 콘크리트 판. 상세 그림이 아니면(헤드리스) 옛 줄눈 상자만 — 무늬는 셰이더라 상세 그림에서 줄눈 상자를 안 둔다
+func _floor(b: Rect2, col: Color, rough: float, tiles: bool, pattern := "") -> void:
 	var m := _mat(col, rough, 0.0, 0.0)
 	m.metallic_specular = 0.7
+	m.set_meta("ink_pattern", pattern if pattern != "" else floor_pattern(col, tiles))
 	var pm := PlaneMesh.new()
 	pm.size = Vector2(b.size.x + 4.0, b.size.y + 4.0)
 	_mesh(self, pm, m, Vector3(b.get_center().x, 0, b.get_center().y + 0.6))
-	if tiles:                                            # 대리석 줄눈
+	if tiles and not _detail:                            # 대리석 줄눈(헤드리스 — 상세 그림은 무늬가 그린다)
 		var j := _mat(col.darkened(0.25), 0.6)
 		for x in range(int(b.position.x) - 1, int(b.end.x) + 2, 2):
 			_mesh(self, _box(Vector3(0.02, 0.004, b.size.y + 3.0)), j, Vector3(x, 0.002, b.get_center().y + 0.6))
@@ -136,8 +139,20 @@ func _floor(b: Rect2, col: Color, rough: float, tiles: bool) -> void:
 			_mesh(self, _box(Vector3(b.size.x + 3.0, 0.004, 0.02)), j, Vector3(b.get_center().x, 0.002, z))
 
 
+## 바닥 빛깔 · 줄눈 여부 → 무늬 이름(순수)
+static func floor_pattern(col: Color, tiles: bool) -> String:
+	if tiles:
+		return "tiles"
+	if col.s > 0.3 and col.h > 0.02 and col.h < 0.13:
+		return "planks"
+	if col.s > 0.3:
+		return "carpet"
+	return "slabs"
+
+
 func _rug(r: Rect2, col: Color) -> void:
 	var m := _mat(col, 0.95)
+	m.set_meta("ink_pattern", "carpet")
 	_mesh(self, _box(Vector3(r.size.x, 0.01, r.size.y)), m, Vector3(r.get_center().x, 0.005, r.get_center().y))
 	var edge := _mat(Color(0.75, 0.6, 0.25), 0.6, 0.0, 0.5)
 	for z in [r.position.y, r.end.y]:
@@ -334,9 +349,14 @@ func _fog(col: Color, density: float) -> void:
 
 ## 넓은 땅(바깥 — 카메라가 걸을 곳 둘레 6m 까지 본다). 상세 그림이면 lo ~ hi 잔무늬 결(_noise_tex)을 period(m)마다 되풀이,
 ## 아니면 가운데 빛깔 하나
-func _ground(b: Rect2, lo: Color, hi: Color, rough: float, seed_v: int, margin := 8.0, period := 2.0) -> void:
+## pattern(화풍 3단계 — Ink.PATTERNS 이름, 칸 tile m)을 주면 그 위에 판석 · 판 무늬(광장 · 앞마당). 아스팔트 · 흙은 "" — 금만
+func _ground(b: Rect2, lo: Color, hi: Color, rough: float, seed_v: int, margin := 8.0, period := 2.0, pattern := "", tile := 0.0) -> void:
 	var m := _mat(lo.lerp(hi, 0.5), rough)
 	m.metallic_specular = 0.4
+	if pattern != "":
+		m.set_meta("ink_pattern", pattern)
+		if tile > 0.0:
+			m.set_meta("ink_tile", tile)
 	var size := Vector2(b.size.x + margin * 2.0, b.size.y + margin * 2.0)
 	if _detail:
 		m.albedo_color = Color.WHITE
