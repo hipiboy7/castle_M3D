@@ -196,6 +196,20 @@ func ring(at: Vector3, yaw: float, r: float, width: float, col: Color, life: flo
 	_items.append([mi, life, life, m, m.albedo_color, s0, s1])
 
 
+## 잔상(좌우로 사라지는 스텝 — 2026-11-12 사용자 "필수 기술인데 가끔 기술이 안보임"): 사람 키만 한 흐린 푸른 몸 그림자가
+## 그 자리에 남았다가 사라진다(더하기 섞기 — 어두운 바닥에서 또렷하다)
+func ghost(at: Vector3, yaw: float, life := 0.28) -> void:
+	var m := _add_mat(Color(0.45, 0.62, 1.0, 0.55))
+	m.vertex_color_use_as_albedo = false
+	var cap := CapsuleMesh.new()
+	cap.radius = 0.2
+	cap.height = 1.55
+	cap.radial_segments = 10
+	cap.rings = 3
+	cap.material = m
+	_place(cap, m, at + Vector3(0, 0.8, 0), yaw, life)
+
+
 ## 몸 둘레에서 솟는 입자 (엇엇박 부하) — 몸통 크기 상자에서 위로
 func rise(at: Vector3, col: Color, amount: int, life: float) -> void:
 	var p := CPUParticles3D.new()

@@ -233,13 +233,17 @@ func test_ch2_ojiin_yields() -> void:
 	oj.hp = oj.hp_max * 0.3
 	d["world"]._check_hp(oj)
 	var yielded := false
-	for i in 60 * 5:                                          # 둘째 무리 대사(wave2)가 지나가면 넘는다
+	for i in 60 * 15:                                         # 둘째 무리 대사(wave2) · 문으로 걷기(ceo_door)가 지나가면 대표실
 		Stage.step(d, {})
 		yielded = yielded or d["world"].events.any(func(e): return e[0] == "yield")
 		d["world"].events.clear()
-		if d["stage"] != "fight":
+		if d.get("theme", "") == "haseong_office" or d["stage"] != "fight":
 			break
-	check(yielded and oj.alive() and oj.inert and d["stage"] == "clear", "오지인이 비켜서고 방을 넘는다 %s" % d["stage"])
+	check(yielded and oj.inert, "오지인이 비켜선다")
+	# 복도 → 대표실은 한 방(2026-11-12 사용자 "스테이지로 나누지말고"): 방을 넘지 않고 무대만 바뀐다
+	check(d["stage"] == "fight" and d["room"]["id"] == "guard_corridor" and d["theme"] == "haseong_office", "같은 방에서 대표실로 %s %s" % [d["stage"], d.get("theme", "")])
+	check(d["enemies"].any(func(e): return e.char_id == "kimjaehoon") and not d["world"].fighters.any(func(f): return f.char_id == "haseong_guard"),
+		"대표실: 김재훈이 있고 복도의 쓰러진 경호원은 치웠다")
 
 
 ## 1층: 하성 인력 30명이 세 무리(12 · 10 · 8 — 2026-11-12 사용자 '2배로')로 — 셋째 무리와 함께 황보민철. 서진태 쪽 아군은 이슬 · 청년회 3명 · 부진파 2명
@@ -286,12 +290,9 @@ func test_ch2_upper_hall_protect() -> void:
 
 ## 대표실: 강창석 · 김재훈 모두 김신의 한 방 — 둘 다 쓰러지면 김신의 멘트(원작 029/090 · 093-096) 뒤에 넘는다
 func test_ch2_ceo_one_hit() -> void:
-	var d := Stage.make(1, {"chapter": "ch2", "room": _room_of("ceo_office")})
-	for e in d["enemies"]:
-		check(not e.oneshot_immune, "%s 는 한 방을 받는다(방 보스 없음)" % e.name)
-	var r := Stage.simulate(1, 60 * 150, {"chapter": "ch2", "room": _room_of("ceo_office")})
-	var t := float(r["times"].get("ceo_office", -1)) / 60.0
-	check(t > 0.0 and t < 120.0, "봇이 넘는다 — 김재훈 창문 장면까지 (%.1f초)" % t)     # 장면 대사 약 1분(2026-11-12 사용자 12번)
+	var r := Stage.simulate(1, 60 * 400, {"chapter": "ch2", "room": _room_of("guard_corridor")})
+	var t := float(r["times"].get("guard_corridor", -1)) / 60.0
+	check(t > 0.0 and t < 300.0, "봇이 넘는다 — 복도 · 대표실 · 김재훈 창문 장면까지 한 방 (%.1f초)" % t)     # 장면 대사 약 1분(2026-11-12 사용자 12번)
 
 
 ## 봇이 2장 보스 방을 넘는다 — 몇 초 만에 녹지 않지만 1분 안(2장 보스는 모두 조작 인물보다 아랫급 — 사용자 2026-11-10). 수치 조정 회귀 막기

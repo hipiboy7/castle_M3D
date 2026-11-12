@@ -20,10 +20,11 @@ func _past_intro(d: Dictionary, n: int) -> void:
 
 func test_p1_deterministic() -> void:
 	for ch in ["ch0", "ch1"]:
-		var a := Stage.simulate(5, 4000, {"chapter": ch})
-		var b := Stage.simulate(5, 4000, {"chapter": ch})
+		var n := 6500 if ch == "ch0" else 4000            # 0장은 첫 방이 주점 장면(절뚝이며 걷는 의뢰인 — 싸움이 늦게 시작한다)
+		var a := Stage.simulate(5, n, {"chapter": ch})
+		var b := Stage.simulate(5, n, {"chapter": ch})
 		check(a == b, "%s 같은 시드면 같은 판\n%s\n%s" % [ch, a, b])
-		check(Stage.simulate(6, 4000, {"chapter": ch}) != a, "%s 시드가 다르면 다른 판" % ch)
+		check(Stage.simulate(6, n, {"chapter": ch}) != a, "%s 시드가 다르면 다른 판" % ch)
 
 
 func test_bot_clears_ch0() -> void:

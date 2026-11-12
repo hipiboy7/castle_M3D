@@ -115,7 +115,10 @@
 | `models/haseong_guard_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-11 — 외형 `src/view/looks.gd` LOOKS, 관절 인형이던 무리를 GLB 로 · 성능) | 그림 A 하성 경비 · 칼잡이(2 · 3 ~ 10장 엑스트라) |
 | `models/namgu_youth_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-11 — 외형 `src/view/looks.gd` LOOKS, 관절 인형이던 무리를 GLB 로 · 성능) | 그림 A 남구 청년(2장 엑스트라) |
 | `models/kimshin_coat_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-12 — 외형 `src/view/looks.gd` LOOKS) | 그림 A 김신 롱코트(프롤로그 주점) |
-| `models/client_woman_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-12 — 외형 `src/view/looks.gd` LOOKS) | 그림 A 후드 쓴 의뢰인 여자(프롤로그 주점) |
+| `models/client_woman_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-12 — 외형 `src/view/looks.gd` LOOKS) | 그림 A 의뢰인 여자(프롤로그 주점 — 찢긴 옷 · 멍) |
+| `models/risa_p1_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-12 — 외형 `src/view/looks.gd` LOOKS risa_p1 · castle_common looks.json risa periods 0 을 보고 맞춤, 픽셀 안 씀) | 그림 A 리사 프롤로그(모피 코트를 걸침) |
+| `sprites/chasumin_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`roster/sprites` 에서 옮김 — 2장 끝 사무실 STAGED, 2026-11-12) | 그림 B 차수민 |
+| `sprites/chasumin_b.json` | 〃 | 그림 B 차수민 |
 | `models/hahoe_mask_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-12 — 외형 `src/view/looks.gd` LOOKS) | 그림 A 하회탈 가면(3장 부산 밤 시장 골목) |
 | `models/redspot_mask_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-12 — 외형 `src/view/looks.gd` LOOKS) | 그림 A 붉은 점 가면(3장 부산 밤 시장 골목) |
 | `sprites/baekdochan_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/baekdochan_a.glb`) | 그림 B 백도찬(6장) |

@@ -19,6 +19,7 @@ extends Node3D
 ## 창 없이 점검: <godot> --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 [--mode stage]
 ## 첫 화면에서 6초 동안 아무것도 안 누르면 데모(봇) — 6장 · 11장을 번갈아. 에뮬레이터 스크린샷도 이것을 찍는다.
 
+const Scene = preload("res://src/combat/scene.gd")
 const Duel = preload("res://src/combat/duel.gd")
 const Stage = preload("res://src/combat/stage.gd")
 const Replay = preload("res://src/combat/replay.gd")
@@ -1079,10 +1080,23 @@ func _process(dt: float) -> void:
 	touch.set_label("attack", _attack_label(d["hero"]))
 	touch.set_label("parry", "피하기" if d["hero"].evade_btn else "쳐내기")   # 칼날 쳐내기가 없는 사람은 피하기(2026-11-12)
 	var hp: Vector3 = pup[d["hero"]].position if pup.has(d["hero"]) else _cam_last     # 장면에서 퇴장한 조작 인물(2장 이슬 한 합 뒤)
+	# 장면 중에는 말하는 사람을 따라간다 — 걸어 나가는 사람(leave nowait)은 화면에서 뺀다(2026-11-12 사용자 "멘트를 할 때는 이슬쪽에
+	# 포커싱이 맞춰져야하는데 뛰어나간 김신쪽에 포커싱이 맞춰져 있어서 멘트하는게 하나도 안보여")
+	var gone_out: Array = Scene.leaving(d) if _in_scene else []
+	if _in_scene:
+		var sp = Scene.speaker(d)
+		if sp != null and pup.has(sp) and d["world"].fighters.has(sp) and not gone_out.has(sp):
+			hp = pup[sp].position
+		elif gone_out.has(d["hero"]) or not d["world"].fighters.has(d["hero"]):
+			var rest: Array = d["world"].fighters.filter(func(x): return pup.has(x) and not gone_out.has(x))
+			if not rest.is_empty():
+				hp = pup[rest[0]].position
 	_cam_last = hp
 	if kind == "stage":
 		var pts: Array = []
 		for f in pup:
+			if gone_out.has(f):
+				continue
 			if (f.alive() and not f.inert) or (_in_scene and d["world"].fighters.has(f)):   # 장면 중에는 지켜보는 사람 · 말하는 사람도 화면에
 				pts.append(pup[f].position)
 		cam.follow_group(hp, pts, dt, d["world"].shake)

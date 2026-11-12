@@ -123,10 +123,24 @@ const LOOKS := {
 		"skin": Color(0.91, 0.77, 0.65), "hair": Color(0.11, 0.11, 0.15), "hair_style": "fringe", "glasses": false, "big": false,
 		"scale": 1.04, "shoulder": 1.12, "eye_h": 0.007, "depth": 1.1, "limb": 1.15, "head": 0.9, "brow_tilt": 12.0, "jaw": true,
 		"piercing": true, "sole": Color(0.9, 0.9, 0.88), "weapon_r": "", "weapon_l": "", "guard": "box"},
-	#  후드 쓴 의뢰인 여자(p1:002/002-011 — 군터에게 남편과 아들을 잃은 여자): 낡은 회색 후드 외투 · 긴 갈색 머리 · 맨손
-	"client_woman": {"outfit": "jacket", "female": true, "suit": Color(0.34, 0.33, 0.33), "pants": Color(0.2, 0.19, 0.2), "shirt": Color(0.5, 0.47, 0.44),
-		"collar": "crew", "skin": Color(0.9, 0.8, 0.74), "hair": Color(0.32, 0.22, 0.16), "hair_style": "long", "hat": "hood", "hat_col": Color(0.3, 0.29, 0.29),
-		"lips": Color(0.6, 0.38, 0.38), "big": false, "scale": 0.94, "limb": 0.92, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  의뢰인 여자(p1:002/002-011 — 군터에게 남편과 아들을 잃고 사창가에 팔린 여자, 막 당하고 뛰어든다): 2026-11-12 사용자 "오지인만큼
+	#        이쁘게 … 의뢰를 부탁하는 여자는 옷이 찢어져있고, 절뚝거리고" — 오지인 몸매 · 날카로운 눈 · 흐트러진 긴 갈색 머리 ·
+	#        찢긴 아이보리 블라우스(왼 소매가 찢겨 나감) · 찢긴 짙은 치마 · 맨다리 · 멍 · 터진 입가 · 절뚝(limp — puppet_pose)
+	"client_woman": {"outfit": "shirt", "female": true, "suit": Color(0.8, 0.76, 0.69), "shirt": Color(0.8, 0.76, 0.69), "long_sleeve": true,
+		"collar": "open", "skin": Color(0.94, 0.86, 0.8), "pants": Color(0.94, 0.86, 0.8), "skirt": true, "skirt_col": Color(0.2, 0.18, 0.2), "skirt_len": 0.95,
+		"belt": Color(0.2, 0.18, 0.2), "torn": true, "torn_sleeve": "l", "bruise": Color(0.42, 0.26, 0.4), "limp": true,
+		"hair": Color(0.3, 0.2, 0.14), "hair_style": "long", "hair_long": true, "messy": true, "lips": Color(0.74, 0.38, 0.42),
+		"big": false, "scale": 0.92, "wide": 0.84, "shoulder": 0.82, "depth": 0.85, "limb": 0.78, "head": 0.98, "eye_h": 0.008, "brow_k": 0.7,
+		"weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  리사 프롤로그(castle_common looks.json risa periods 0 — p1:002/008 '베이지 모피 코트 · 검은 짧은 원피스 · 긴 웨이브 금발을 한쪽으로 ·
+	#        큰 진주 드롭 귀걸이'): 2026-11-12 사용자 "리사는 의자에 앉아있어야해. 그것도 고고하게 여성들이 입는 그 비싼 코트 걸치고" —
+	#        코트는 소매에 팔을 넣지 않고 어깨에 걸친다(make_models _drape). 몸 · 얼굴은 리사(looks_common) 그대로
+	"risa_p1": {"outfit": "shirt", "female": true, "suit": Color(0.07, 0.07, 0.08), "shirt": Color(0.07, 0.07, 0.08), "sleeveless": true, "collar": "crew",
+		"skin": Color(0.93, 0.86, 0.8), "pants": Color(0.93, 0.86, 0.8), "skirt": true, "skirt_col": Color(0.07, 0.07, 0.08), "skirt_len": 0.6,
+		"belt": Color(0.07, 0.07, 0.08), "drape": Color(0.8, 0.75, 0.67), "fur": Color(0.92, 0.88, 0.8),
+		"hair": Color(0.85, 0.82, 0.7), "hair_style": "wavy", "hair_long": true, "piercing": true, "lips": Color(0.62, 0.17, 0.2),
+		"shoe": Color(0.06, 0.05, 0.05), "big": false, "scale": 0.9, "wide": 0.8, "shoulder": 0.78, "depth": 0.82, "limb": 0.74, "head": 0.95,
+		"eye_h": 0.008, "brow_k": 0.7, "weapon_r": "", "weapon_l": "", "guard": "box"},
 	#  불휘 가면 둘(fight:bulhwi p1:044/012-042 — '하회탈 가면(흰 셔츠)' · '붉은 점 가면(민소매)', 김신 양옆 협공 — 2026-11-12 사용자
 	#        "남일호급 캐릭터들 2명 더 … 나머지 2명은 전국구급"): 얼굴을 다 덮는 가면 · 맨주먹 / 높은 발차기
 	"hahoe_mask": {"outfit": "shirt", "suit": Color(0.9, 0.9, 0.88), "pants": Color(0.16, 0.15, 0.16), "shirt": Color(0.9, 0.9, 0.88),
@@ -294,12 +308,13 @@ const ART := {
 	# 2026-11-12 새 외형(그림 B 도트는 굽지 않음 — NO_DOTS): 프롤로그 주점 김신 롱코트 · 의뢰인 · 3장 불휘 가면 둘
 	"kim_coat": {"glb": "res://assets/models/kimshin_coat_a.glb", "dots": "res://assets/sprites/kimshin_p1_b"},
 	"client_woman": {"glb": "res://assets/models/client_woman_a.glb", "dots": ""},
+	"risa_p1": {"glb": "res://assets/models/risa_p1_a.glb", "dots": ""},
 	"hahoe_mask": {"glb": "res://assets/models/hahoe_mask_a.glb", "dots": ""},
 	"redspot_mask": {"glb": "res://assets/models/redspot_mask_a.glb", "dots": ""},
 }
 ## 그림 B(도트)를 아직 굽지 않은 ART 인물 — 그림 B 로 고르면 관절 인형으로 그린다(has_art)
 const NO_DOTS := ["condor", "heron", "owl", "gunter_suit", "gunter_bald", "gunter_uzi", "gunter_brute", "ds_raider", "haseong_suit",
-	"haseong_guard", "namgu_youth", "kim_coat", "client_woman", "hahoe_mask", "redspot_mask"]
+	"haseong_guard", "namgu_youth", "kim_coat", "client_woman", "hahoe_mask", "redspot_mask", "risa_p1"]
 ## 명부(roster — 장 표에 아직 안 쓰는 looks.json 인물, looks_common ROSTER) 그림 자리. APK 에서 뺀다(export_presets.cfg exclude_filter
 ## assets/roster/*) — 편집기 · 시험 · 도구에서만 있고, 폰에서는 has_art 가 거짓이라 관절 인형으로 그린다
 const ROSTER_DIR := "res://assets/roster"
@@ -308,7 +323,7 @@ const STAGED := ["vasily", "pyoyoung", "namilho", "bulgom", "moseunggyu", "odohw
 	"gustav", "barista", "jangho", "komodo", "keurisa", "medvedi", "ratel", "immuyeol", "choeminuk", "scaledanjang", "mark", "ryujihak",
 	"andycheong", "eunbo", "bison", "pantera", "akila", "richeon", "douchen", "hantaecheol", "yuwoosung", "lingling", "majunyeong",
 	"grolla", "eomji", "geomji", "choehyeokjin", "mahakyoung", "dohaksu", "eogwangdeuk", "sainjin", "jeongseono", "hide", "seungyeong",
-	"ihuiseong", "blackmamba", "yeominsu", "krot", "risa", "jackson",   # 7 · 9장(2026-11-10 — 이희성 · 블랙맘바 · 여민수 · 크로트 · 리사 · 잭슨)
+	"ihuiseong", "blackmamba", "yeominsu", "krot", "risa", "jackson", "chasumin",   # 차수민(2장 끝 사무실 — 2026-11-12)   # 7 · 9장(2026-11-10 — 이희성 · 블랙맘바 · 여민수 · 크로트 · 리사 · 잭슨)
 	"choedalcheon", "hyeonseok", "iwashiro", "yamamotokyoji",
 	"jeongdan", "jeonghwa", "cheonildo"]   # 11 · 12장(최달천 · 현석 · 이와시로 · 야마모토 쿄지 · 정단 · 이정화 · 천일도)
 

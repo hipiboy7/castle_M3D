@@ -24,7 +24,7 @@ extends "res://src/view/town3d.gd"
 ##   상세(detail — 헤드리스는 끔)일 때만 그림자 · 바닥 결 · 작은 소품(종이 · 칼 · 유리 조각 · 모니터 · 책상 위 물건)
 
 ## 이 그림이 그리는 무대 이름(시험 test_campaign 이 장 표의 theme 이 여기 있는지 본다)
-const HASEONG_THEMES := ["haseong_lobby", "haseong_corridor", "haseong_stairs", "haseong_office", "haseong_upper"]
+const HASEONG_THEMES := ["haseong_lobby", "haseong_corridor", "haseong_stairs", "haseong_office", "haseong_upper", "junkyard_office"]
 
 const SIGN := "HASUNG"                 # 회사 간판 글(원작 표기 — 머리 주석)
 const FLOOR_NO := "33"                 # 최상층 아래 층 번호(원작에 없음 — 그림만)
@@ -57,6 +57,9 @@ func build(th: String, b: Rect2, detail := true) -> void:
 		"haseong_office":
 			_hs_begin(th, detail)
 			_hs_office(b)
+		"junkyard_office":
+			_hs_begin(th, detail)
+			_hs_junk_office(b)
 		_:
 			super.build(th, b, detail)
 
@@ -566,6 +569,60 @@ func _hs_office(b: Rect2) -> void:
 		_mesh(self, _cyl(0.008, 0.008, 0.03), brass, dk + Vector3(0.2 + 0.04 * i, y + 0.015, -0.1 + 0.03 * (i % 2)))
 	_mesh(self, _box(Vector3(0.42, 0.08, 0.06)), _shared(Color(0.05, 0.04, 0.03), 0.3), dk + Vector3(0.2, y + 0.04, 1.0))
 	_label(dk + Vector3(0.2, y + 0.045, 1.035), "대표이사", Color(0.85, 0.7, 0.35), 22, 0.004)
+
+
+## 부진폐차장 사무실(2장 끝 — 2026-11-12 사용자 "사무실로 가서 김신, 김대건, 서진태, 차수민, 이슬이 차수민 폐차장 내부 쇼파에 다 같이
+## 앉아서 멘트하는걸로"): 컨테이너 사무실 — 낡은 나무 바닥 · 함석 벽 · 창 너머 폐차 더미 불빛 · ㄷ 자 소파 셋(뒤 · 왼쪽 · 오른쪽)과 낮은 탁자 ·
+## 차수민 책상(서류 · 전화) · 철제 서류장 · 달력. 앉는 자리는 haseong.gd junkyard_end standing(소파 위)
+func _hs_junk_office(b: Rect2) -> void:
+	var cx := b.get_center().x
+	var cz := b.get_center().y
+	_env(Color(0.3, 0.24, 0.18), 0.6, Color(0.02, 0.015, 0.01))
+	_top(Color(1.0, 0.85, 0.65), 0.5)
+	var fw := Color(0.3, 0.22, 0.15)
+	var fm := _mat(fw, 0.7)
+	if _detail:
+		fm.albedo_color = Color.WHITE
+		fm.albedo_texture = _hs_cached("junk_planks", func() -> Texture2D: return _stripe_tex([fw, fw.darkened(0.1), fw, fw.lightened(0.05), fw.darkened(0.35)]))
+		fm.uv1_scale = Vector3(1, (b.size.y + 4.0) / 1.0, 1)
+	_mesh(self, _hs_plane(Vector2(b.size.x + 4.0, b.size.y + 4.0)), fm, Vector3(cx, 0, cz + 1.0))
+	_back_wall(b, Color(0.36, 0.38, 0.36), 3.0)
+	var wz := b.position.y - 1.07                                         # 뒷벽 앞면 = wz + 0.42(_back_wall z - 0.8 + 0.15)
+	for k in 9:                                                           # 함석 골
+		_mesh(self, _box(Vector3(0.04, 2.9, 0.03)), _shared(Color(0.28, 0.3, 0.28), 0.6, 0.0, 0.4), Vector3(cx - 4.0 + k, 1.45, wz + 0.42))
+	# 창(밤 폐차장 — 주황 작업등 · 쌓인 차) · 달력 · 시계
+	_mesh(self, _box(Vector3(2.2, 1.1, 0.04)), _glow(Color(0.95, 0.6, 0.3), 0.6), Vector3(cx + 1.8, 1.7, wz + 0.45))
+	_mesh(self, _box(Vector3(2.3, 0.08, 0.1)), _shared(Color(0.2, 0.2, 0.2), 0.5), Vector3(cx + 1.8, 1.12, wz + 0.48))
+	_mesh(self, _box(Vector3(0.05, 1.1, 0.08)), _shared(Color(0.2, 0.2, 0.2), 0.5), Vector3(cx + 1.8, 1.7, wz + 0.48))
+	_mesh(self, _box(Vector3(0.5, 0.7, 0.02)), _shared(Color(0.92, 0.9, 0.85), 0.9), Vector3(cx - 1.6, 1.8, wz + 0.44))
+	_mesh(self, _box(Vector3(0.5, 0.12, 0.025)), _shared(Color(0.75, 0.15, 0.12), 0.8), Vector3(cx - 1.6, 2.1, wz + 0.45))
+	# ㄷ 자 소파(낡은 갈색 가죽 · 녹색 천) · 낮은 탁자(재떨이 · 캔)
+	_hs_sofa(Vector3(cx, 0, cz - 1.35), 0.0, Color(0.36, 0.24, 0.16), 2.6)
+	_hs_sofa(Vector3(cx - 2.25, 0, cz + 0.15), 90.0, Color(0.22, 0.3, 0.24), 2.0)
+	_hs_sofa(Vector3(cx + 2.25, 0, cz + 0.15), -90.0, Color(0.22, 0.3, 0.24), 2.0)
+	var tb := Vector3(cx, 0, cz + 0.05)
+	_mesh(self, _box(Vector3(1.6, 0.06, 0.9)), _shared(Color(0.22, 0.14, 0.08), 0.4), tb + Vector3(0, 0.42, 0))
+	for sx in [-1.0, 1.0]:
+		for sz in [-1.0, 1.0]:
+			_mesh(self, _box(Vector3(0.06, 0.4, 0.06)), _shared(Color(0.15, 0.1, 0.06), 0.5), tb + Vector3(0.7 * sx, 0.2, 0.38 * sz))
+	_mesh(self, _cyl(0.09, 0.07, 0.04), _shared(Color(0.55, 0.55, 0.58), 0.3, 0.0, 0.7), tb + Vector3(-0.3, 0.47, 0.1))
+	for k in 3:
+		_mesh(self, _cyl(0.035, 0.035, 0.12), _shared([Color(0.75, 0.1, 0.1), Color(0.2, 0.45, 0.8), Color(0.85, 0.8, 0.2)][k], 0.3, 0.0, 0.6),
+			tb + Vector3(0.2 + 0.12 * k, 0.51, -0.12 + 0.1 * (k % 2)))
+	# 차수민 책상 · 의자 · 서류장(오른쪽 뒤)
+	var dk := Vector3(b.end.x + 0.6, 0, b.position.y + 0.3)
+	_mesh(self, _box(Vector3(1.6, 0.06, 0.8)), _shared(Color(0.4, 0.32, 0.22), 0.5), dk + Vector3(0, 0.76, 0))
+	_mesh(self, _box(Vector3(1.5, 0.72, 0.7)), _shared(Color(0.32, 0.25, 0.17), 0.6), dk + Vector3(0, 0.36, 0))
+	_mesh(self, _box(Vector3(0.5, 0.04, 0.35)), _shared(Color(0.95, 0.93, 0.88), 0.9), dk + Vector3(-0.3, 0.8, 0.05))
+	_mesh(self, _box(Vector3(0.22, 0.09, 0.18)), _shared(Color(0.08, 0.08, 0.08), 0.4), dk + Vector3(0.45, 0.83, 0.0))
+	var fc := Vector3(b.position.x - 0.5, 0, b.position.y + 0.1)
+	_mesh(self, _box(Vector3(0.6, 1.4, 0.55)), _shared(Color(0.42, 0.45, 0.44), 0.5, 0.0, 0.5), fc + Vector3(0, 0.7, 0))
+	for k in 3:
+		_mesh(self, _box(Vector3(0.5, 0.02, 0.02)), _shared(Color(0.2, 0.2, 0.2), 0.4), fc + Vector3(0, 0.35 + 0.42 * k, 0.28))
+	# 빛: 천장 형광등(살짝 푸른) · 창 너머 주황 · 탁자 위 따뜻한 채움
+	_omni(Vector3(cx, 2.7, cz - 0.4), Color(0.9, 0.95, 1.0), 1.2, 7.0)
+	_omni(Vector3(cx + 1.8, 1.8, wz + 1.2), Color(1.0, 0.6, 0.3), 0.6, 4.5)
+	_omni(Vector3(cx, 1.4, cz + 1.2), Color(1.0, 0.82, 0.6), 0.5, 4.0)
 
 
 ## 큰 지도 화면(026/019 — 불 꺼진 방에서 빛나는 벽 화면): 검은 테 · 파란 지도 결(32x16 — 땅 · 격자 · 붉은 점)

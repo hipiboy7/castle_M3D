@@ -277,8 +277,13 @@ func _locomotion(f, dt: float) -> Dictionary:
 		p = _merge(p, P.FLICK if f.parry_side == "R" else _mirror(P.FLICK))   # 들어오는 쪽 팔로 바깥으로 튕긴다
 	p["chest"] = p["chest"] + Vector3(1.4 * sin(time * 2.3), 0, 0)      # 숨
 	var sp: float = f.speed_now
+	var limp: bool = look.get("limp", false)
+	if limp:
+		p = _merge(p, P.LIMP_IDLE)                       # 다친 왼다리에 무게를 안 싣고 · 오른손으로 왼팔을 감싼다(의뢰인)
 	if sp < 0.2:
 		return p
+	if limp:
+		return _limp_walk(p, sp, dt)
 	var mv: Vector2 = f.move_vec.normalized()
 	var fwd: float = mv.dot(f.facing)
 	var side: float = mv.dot(Vector2(-f.facing.y, f.facing.x))
@@ -306,6 +311,24 @@ func _locomotion(f, dt: float) -> Dictionary:
 	p["sh_r"] = p["sh_r"] + Vector3(swing * s, 0, 0)
 	p["sh_l"] = p["sh_l"] + Vector3(-swing * s, 0, 0)
 	return p
+
+
+## 절뚝 걸음(2026-11-12 사용자 "의뢰를 부탁하는 여자는 … 절뚝거리고"): 다친 왼다리는 무릎을 거의 안 굽히고 짧게 끌고,
+## 그 다리를 디딜 때 몸이 그쪽으로 푹 꺼졌다가(골반 · 가슴 기울기) 성한 오른다리로 서둘러 옮긴다 — 걸음 주기가 고르지 않다
+func _limp_walk(p: Dictionary, sp: float, dt: float) -> Dictionary:
+	phase = fmod(phase + TAU * (1.3 + 0.3 * clampf(sp / 1.5, 0.0, 1.0)) * dt, TAU)
+	var u := phase / TAU                                  # 0 ~ 1
+	var on_bad := u < 0.62                                # 주기의 앞 62% — 다친 왼다리로 디디는 동안(오래 · 힘겹게)
+	var k := sin(PI * (u / 0.62 if on_bad else (u - 0.62) / 0.38))
+	var q := p.duplicate()
+	q["pelvis"] = Vector3(10, 0, (-9.0 if on_bad else 3.0) * k)
+	q["chest"] = Vector3(14, 0, (8.0 if on_bad else -2.0) * k)
+	q["head"] = Vector3(10, 0, (-6.0 if on_bad else 0.0) * k)
+	q["th_l"] = Vector3(-10 + (0.0 if on_bad else 16.0 * k), 0, 6)
+	q["kn_l"] = 6.0
+	q["th_r"] = Vector3((30.0 * k if on_bad else -14.0 * k) + 6.0, 0, 4)
+	q["kn_r"] = 10.0 + (60.0 * k if on_bad else 8.0)
+	return q
 
 
 ## 동작 → 자세 모양 이름(되베기 · 왼손 주먹 · 왼손 총은 쪽을 붙인다) — 도트 시트 칸 이름도 이것(tools/make_sprites.gd · puppet_dot.gd)

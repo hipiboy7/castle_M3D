@@ -30,7 +30,6 @@ const CANON := {
 	"lobby": {"fight": "fight:haseong_lobby", "place": "haseong_hq"},
 	"upper_hall": {"fight": "fight:namgunghyuk", "place": "haseong_hq"},
 	"guard_corridor": {"fight": "fight:gyeonghotim", "place": "haseong_hq"},
-	"ceo_office": {"fight": "fight:kimjaehoon_daepyosil", "place": "haseong_hq"},
 	"upper_corridor": {"fight": "fight:kimshin_namgunghyuk", "place": "haseong_hq"},
 	"junkyard_night": {"fight": "fight:kimshin_sintaejin", "place": "bujinpyechajang"},
 	"junkyard_end": {"fight": "", "place": "bujinpyechajang"},
@@ -91,6 +90,7 @@ const ROLES := {
 	# 남궁혁: 쓰러뜨릴 수 없다(hp_floor — 두 위층 복도 모두 따돌리기). 피우진 · 김대건(경호대급)에게는 등급 차로 세다
 	"namgunghyuk": {"hp": 2400.0, "posture": 700.0, "walk": 2.0, "run": 4.4, "stagger": 80, "poise": 36.0, "finisher_cap": 0.04, "ai": "namgung",
 		"look": "namgunghyuk", "hp_floor": 0.4, "dmg_k": 1.0},
+	"chasumin": {"hp": 120.0, "posture": 40.0, "walk": 1.8, "run": 3.6, "stagger": 60, "look": "chasumin"},   # 2장 끝 사무실(부진폐차장 사장)
 	"sintaejin": {"hp": 760.0, "posture": 360.0, "walk": 2.1, "run": 4.6, "stagger": 80, "poise": 28.0, "finisher_cap": 0.1, "ai": "sintaejin",
 		"look": "sintaejin", "phase2_at": 0.5, "dmg_k": 0.8},
 }
@@ -134,6 +134,7 @@ const ROOMS := [
 			["haseong_suit", Vector2(6.2, 2.8), {"tag": "w3"}], ["haseong_suit", Vector2(7.0, -2.0), {"tag": "w3"}], ["haseong_suit", Vector2(7.0, -0.4), {"tag": "w3"}],
 			["haseong_suit", Vector2(7.0, 1.2), {"tag": "w3"}], ["haseong_suit", Vector2(7.0, 2.8), {"tag": "w3"}]]}]},
 	# 위층 복도(긴 맵 24m): 남궁혁이 복도를 막고, 피우진 · 김대건이 붙잡는 동안 김신은 오른쪽 끝 계단으로. 둘 중 하나가 쓰러지면 진다.
+	# 제한 시간 10초(2026-11-12 사용자 "2장 \"위층 복도 남궁혁\"편에서는 제한 시간을 10초 바꿔" — 전에는 40초)
 	# 특별 경호대 10명 = 앞 5(g1) + 김신이 복도 가운데를 넘으면 끝 쪽 5(g2)
 	{"id": "upper_hall", "theme": "haseong_upper", "bounds": Rect2(-12.0, -2.0, 24.0, 4.0), "cast": ["kimshin"],
 		"heroes": [Vector2(-10.6, 0.0)], "allies": [["woojin", Vector2(-9.8, -1.2)], ["kimdaegeon", Vector2(-9.8, 1.2)]],
@@ -141,31 +142,36 @@ const ROOMS := [
 			["haseong_guard", Vector2(-3.0, -1.4), {"tag": "g1"}], ["haseong_guard", Vector2(-2.4, 1.2), {"tag": "g1"}],
 			["haseong_guard", Vector2(-1.2, -0.2), {"tag": "g1"}], ["haseong_guard", Vector2(0.4, 1.4), {"tag": "g1"}], ["haseong_guard", Vector2(1.2, -1.2), {"tag": "g1"}]],
 		"boss": "namgunghyuk", "protect": ["woojin", "kimdaegeon"],
-		"escape": {"secs": 40.0, "exit": Rect2(10.6, -2.0, 1.4, 4.0)},
+		"escape": {"secs": 10.0, "exit": Rect2(10.6, -2.0, 1.4, 4.0)},
 		"triggers": [
 			{"when": "x:2", "spawn": [["haseong_guard", Vector2(6.0, -1.4), {"tag": "g2"}], ["haseong_guard", Vector2(6.6, 1.2), {"tag": "g2"}],
 				["haseong_guard", Vector2(7.6, -0.2), {"tag": "g2"}], ["haseong_guard", Vector2(8.6, 1.4), {"tag": "g2"}], ["haseong_guard", Vector2(9.2, -1.2), {"tag": "g2"}]]}]},
 	# 대표실 앞 복도: 특별 경호대 20명 = 10(w1) → 10(w2) + 오지인(비켜선다 — 2026-11-12 사용자 '하성 조직원 숫자 2배로')
-	{"id": "guard_corridor", "theme": "haseong_corridor", "bounds": Rect2(-7.0, -2.0, 14.0, 4.0), "cast": ["kimshin"],
-		"heroes": [Vector2(-5.2, 0.0)], "allies": [],
+	# 대표실 앞 복도 → 대표실(한 방 — 2026-11-12 사용자 "'대표실 앞 복도 불 꺼짐'와 '대표실 불꺼짐'은 하나로 합치고, 대표실 앞 복도에서
+	# 문을 열고 방 안으로 들어가면 대표실 불꺼짐이 이어지도록해. 스테이지로 나누지말고"): 복도 경호팀 20 · 오지인을 넘기면 김신이 오른쪽
+	# 대표실 문으로 걸어가(장면 ceo_door) 그 자리에서 무대가 대표실로 바뀐다(triggers bounds · theme · purge — 쓰러진 경호원은 치운다).
+	# 대표실: 강창석 · 김재훈 — 김재훈이 쓰러지면 창 장면 → 방을 깬다. 복도 자리는 맵 넓히기(MAP_K 1.4 × 1.25)를 미리 곱한 값(fixed — 대표실 넓이가 그대로이게)
+	{"id": "guard_corridor", "fixed": true, "theme": "haseong_corridor", "bounds": Rect2(-9.8, -2.5, 19.6, 5.0), "cast": ["kimshin"],
+		"heroes": [Vector2(-7.28, 0.0)], "allies": [],
 		"enemies": [
-			["haseong_guard", Vector2(0.4, -1.6), {"tag": "w1"}], ["haseong_guard", Vector2(0.4, 0.0), {"tag": "w1"}], ["haseong_guard", Vector2(0.4, 1.6), {"tag": "w1"}],
-			["haseong_guard", Vector2(1.8, -1.0), {"tag": "w1"}], ["haseong_guard", Vector2(1.8, 0.3), {"tag": "w1"}], ["haseong_guard", Vector2(1.8, 1.6), {"tag": "w1"}],
-			["haseong_guard", Vector2(3.2, -1.6), {"tag": "w1"}], ["haseong_guard", Vector2(3.2, 0.0), {"tag": "w1"}], ["haseong_guard", Vector2(3.2, 1.6), {"tag": "w1"}],
-			["haseong_guard", Vector2(4.4, 0.0), {"tag": "w1"}],
-			["ojiin", Vector2(5.2, 0.2)]], "boss": "ojiin",
+			["haseong_guard", Vector2(0.56, -2.0), {"tag": "w1"}], ["haseong_guard", Vector2(0.56, 0.0), {"tag": "w1"}], ["haseong_guard", Vector2(0.56, 2.0), {"tag": "w1"}],
+			["haseong_guard", Vector2(2.52, -1.25), {"tag": "w1"}], ["haseong_guard", Vector2(2.52, 0.375), {"tag": "w1"}], ["haseong_guard", Vector2(2.52, 2.0), {"tag": "w1"}],
+			["haseong_guard", Vector2(4.48, -2.0), {"tag": "w1"}], ["haseong_guard", Vector2(4.48, 0.0), {"tag": "w1"}], ["haseong_guard", Vector2(4.48, 2.0), {"tag": "w1"}],
+			["haseong_guard", Vector2(6.16, 0.0), {"tag": "w1"}],
+			["ojiin", Vector2(7.28, 0.25)]], "boss": "ojiin",
 		"triggers": [
 			{"when": "down:w1", "say": "wave2", "spawn": [
-			["haseong_guard", Vector2(6.0, -1.7), {"tag": "w2"}], ["haseong_guard", Vector2(6.0, -0.8), {"tag": "w2"}], ["haseong_guard", Vector2(6.0, 0.0), {"tag": "w2"}],
-			["haseong_guard", Vector2(6.0, 0.8), {"tag": "w2"}], ["haseong_guard", Vector2(6.0, 1.7), {"tag": "w2"}], ["haseong_guard", Vector2(6.8, -1.3), {"tag": "w2"}],
-			["haseong_guard", Vector2(6.8, -0.6), {"tag": "w2"}], ["haseong_guard", Vector2(6.8, 0.2), {"tag": "w2"}], ["haseong_guard", Vector2(6.8, 0.9), {"tag": "w2"}],
-			["haseong_guard", Vector2(6.8, 1.7), {"tag": "w2"}]]}]},
-	# 대표실: 방 보스가 없다 — 강창석 · 김재훈 모두 김신의 등급 차 한 방. 둘 다 쓰러지면 김신의 멘트 뒤에 방을 넘는다
-	{"id": "ceo_office", "fixed": true, "theme": "haseong_office", "bounds": Rect2(-5.6, -2.6, 11.2, 5.2), "cast": ["kimshin"],
-		"heroes": [Vector2(-3.8, 0.4)], "allies": [],
-		"enemies": [["gangchangseok", Vector2(1.6, -1.2)], ["kimjaehoon", Vector2(3.0, 0.8)]], "boss": "",
-		# 김재훈이 쓰러지면 장면(2026-11-12 사용자 12번 — 강창석은 원작처럼 달아나고 029/039-043, 창을 쏴 깨고 끌고 가 '달게 받아라' → 창 밖으로)
-		"triggers": [{"when": "down:kimjaehoon", "scene": "jaehoon_window", "scene_end": "clear"}]},
+			["haseong_guard", Vector2(8.4, -2.125), {"tag": "w2"}], ["haseong_guard", Vector2(8.4, -1.0), {"tag": "w2"}], ["haseong_guard", Vector2(8.4, 0.0), {"tag": "w2"}],
+			["haseong_guard", Vector2(8.4, 1.0), {"tag": "w2"}], ["haseong_guard", Vector2(8.4, 2.125), {"tag": "w2"}], ["haseong_guard", Vector2(9.52, -1.625), {"tag": "w2"}],
+			["haseong_guard", Vector2(9.52, -0.75), {"tag": "w2"}], ["haseong_guard", Vector2(9.52, 0.25), {"tag": "w2"}], ["haseong_guard", Vector2(9.52, 1.125), {"tag": "w2"}],
+			["haseong_guard", Vector2(9.52, 2.125), {"tag": "w2"}]]},
+			# 1: 복도를 다 넘기면 대표실 문으로(문 = 복도 뒷벽 오른쪽 haseong3d _hs_ceo_door — b.end.x - 1.6)
+			{"when": "clear", "scene": "ceo_door"},
+			# 2: 문을 열고 들어서면 — 무대가 대표실로(같은 방 · 스테이지 넘김 없음)
+			{"when": "after:1:0.05", "purge": true, "bounds": Rect2(-5.6, -2.6, 11.2, 5.2), "theme": "haseong_office", "boss": "", "say": "office",
+				"spawn": [["gangchangseok", Vector2(1.6, -1.2)], ["kimjaehoon", Vector2(3.0, 0.8)]], "scene": "ceo_enter"},
+			# 3: 김재훈이 쓰러지면 장면(2026-11-12 사용자 12번 — 강창석은 원작처럼 달아나고 029/039-043, 창을 쏴 깨고 끌고 가 '달게 받아라' → 창 밖으로)
+			{"when": "down:kimjaehoon", "scene": "jaehoon_window", "scene_end": "clear"}]},
 	# 위층 복도(긴 맵 22m) — 남궁혁을 피해 10초 안에 오른쪽 끝 문으로
 	{"id": "upper_corridor", "theme": "haseong_upper", "bounds": Rect2(-11.0, -2.0, 22.0, 4.0), "cast": ["kimshin"],
 		"heroes": [Vector2(-10.2, 0.0)], "allies": [],
@@ -174,8 +180,15 @@ const ROOMS := [
 	{"id": "junkyard_night", "theme": "junkyard_night", "bounds": Rect2(-6.4, -2.8, 12.8, 5.6), "cast": ["kimshin"],
 		"heroes": [Vector2(-3.6, 0.2)], "allies": [],
 		"enemies": [["sintaejin", Vector2(2.4, 0.0)]], "boss": "sintaejin"},
-	{"id": "junkyard_end", "theme": "junkyard_night", "bounds": Rect2(-5.0, -2.4, 10.0, 4.8), "cast": ["kimshin"],
-		"heroes": [Vector2(-1.6, 0.4)], "allies": [], "enemies": [], "boss": "", "end": true},
+	# 2장 끝 — 차수민의 부진폐차장 사무실(2026-11-12 사용자 "'부진폐차장'은 필요 없고, 사무실로 가서 김신, 김대건, 서진태, 차수민, 이슬이
+	# 차수민 폐차장 내부 쇼파에 다 같이 앉아서 멘트하는걸로 해"): ㄷ 자 소파에 다섯이 앉고, 묶인 신태진은 바닥(원작 p1:034 — 대화 상대).
+	# 싸움 없는 장면 방 — 장면이 끝나면 2장을 깬다(scene end win)
+	{"id": "junkyard_end", "fixed": true, "theme": "junkyard_office", "bounds": Rect2(-4.0, -2.0, 8.0, 4.0), "cast": ["kimshin"],
+		"heroes": [Vector2(-0.6, -1.3)], "allies": [], "enemies": [], "boss": "",
+		"standing": [["jintae", Vector2(2.2, 0.15), 0], ["chasumin", Vector2(0.6, -1.3), 0], ["iseul", Vector2(-2.2, -0.3), 0], ["kimdaegeon", Vector2(-2.2, 0.6), 0],
+			["sintaejin", Vector2(0.5, 1.35), 0]],
+		"poses": {"kimshin": "sit", "jintae": "sit", "chasumin": "sit", "iseul": "sit", "kimdaegeon": "sit", "sintaejin": "lie_up"},
+		"scene": "office_talk"},
 ]
 
 const INTRO_T := 75

@@ -68,6 +68,11 @@ const M := {
 		"lunge": 10, "side": 16, "zigzag": true, "hits": 2, "knockback": 1.8, "hitstop": 6, "posture": 16, "shape": "thrust",
 		"sfx": "slash", "hit_sfx": "hit_heavy", "shake": 2, "skill": true, "skill_id": "vanish_step", "iframes": true,
 		"unblock_top": "내성 중위", "seq": ["thrust", "thrust"]},
+	# 맨손 방(칼이 없는 김신 — 0장 호텔 · 1장 · 2장 공사장 · 4장 철창 · 13장 앞마당)의 같은 스텝: 비켜 들며 두 주먹(2026-11-12 사용자 "필수 기술")
+	"s_vanish_bare": {"label": "좌우로 사라지는 스텝", "startup": 12, "active": 10, "recovery": 12, "damage": 10, "reach": 13, "radius": 10,
+		"lunge": 10, "side": 16, "zigzag": true, "hits": 2, "knockback": 1.8, "hitstop": 6, "posture": 16, "shape": "punch",
+		"sfx": "swing", "hit_sfx": "hit_heavy", "shake": 2, "skill": true, "skill_id": "vanish_step", "iframes": true,
+		"unblock_top": "내성 중위", "seq": ["punch", "punch_L"]},
 	# 서진태 오리지널: 오른손으로 왼쪽 · 왼손으로 오른쪽 · 오른손으로 찌르기 — 외성 하위 이하 한 방
 	"s_jt_original": {"label": "서진태 오리지널", "startup": 4, "active": 18, "recovery": 14, "damage": 10, "reach": 14, "radius": 10,
 		"arc": 90, "lunge": 10, "knockback": 1.6, "hitstop": 6, "posture": 14, "hits": 3, "shape": "slash", "sfx": "slash",

@@ -119,6 +119,8 @@ func _separate() -> void:
 			var b = fighters[j]
 			if a.state == "roll" or b.state == "roll" or not a.alive() or not b.alive():
 				continue
+			if a.scripted and b.scripted:
+				continue                                # 장면 중(scene.gd)에는 밀어내지 않는다 — 멱살 끌기에서 끄는 사람이 뒤로 밀려 창 반대쪽으로 갔다(2026-11-12)
 			var d: Vector2 = b.pos - a.pos
 			var n := d.length()
 			var need: float = Fighter.BODY_R * 2.0

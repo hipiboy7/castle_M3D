@@ -60,12 +60,22 @@ const WALL_STEP := {"chest": Vector3(-6, 0, 0), "th_r": Vector3(80, 0, 6), "kn_r
 const CROUCH := {"pelvis": Vector3(16, 0, 0), "spine": Vector3(10, 0, 0), "chest": Vector3(10, 0, 0), "head": Vector3(-14, 0, 0),
 	"th_r": Vector3(70, -6, 12), "kn_r": 110.0, "ft_r": -30.0, "th_l": Vector3(40, 6, 14), "kn_l": 100.0, "ft_l": -40.0}
 
+# 절뚝(의뢰인 — puppet_pose _limp_walk): 선 자세 — 성한 오른다리에 무게 · 왼무릎을 살짝 굽혀 띄우고 · 오른손으로 왼팔을 감싼다 · 고개를 숙인다
+const LIMP_IDLE := {"pelvis": Vector3(6, 0, -6), "chest": Vector3(12, 0, 6), "head": Vector3(14, 6, 0),
+	"th_l": Vector3(14, 0, 6), "kn_l": 22.0, "ft_l": 10.0, "th_r": Vector3(-2, 0, 4), "kn_r": 6.0,
+	"sh_r": Vector3(46, 40, 8), "el_r": 110.0, "sh_l": Vector3(16, -10, 10), "el_l": 40.0}
+
 # 장면 자세(src/combat/scene.gd pose — fighter.pose): 서 있는 동안만 이 자세(걷거나 치면 보통으로)
 const SCENE := {
 	# 의자에 앉음 — 허벅지 앞으로 · 무릎 굽힘(발이 땅에 닿게 인형이 골반을 내린다), 팔은 무릎 위
 	"sit": {"pelvis": Vector3(-4, 0, 0), "spine": Vector3(6, 0, 0), "chest": Vector3(6, 0, 0), "head": Vector3(-2, 0, 0),
 		"th_r": Vector3(86, -6, 8), "kn_r": 92.0, "ft_r": 4.0, "th_l": Vector3(84, 6, 10), "kn_l": 88.0, "ft_l": 4.0,
 		"sh_r": Vector3(34, 10, 8), "el_r": 48.0, "sh_l": Vector3(32, 6, 8), "el_l": 46.0},
+	# 다리를 꼬고 앉음(리사 프롤로그 — 2026-11-12 "고고하게"): 등을 곧게 펴고 턱을 들고, 오른 다리를 왼 무릎 위로 꼰다 · 오른손은 무릎 위,
+	# 왼팔은 팔걸이에. 발은 왼발만 땅에 닿는다(인형이 가장 낮은 발로 골반을 내린다)
+	"sit_cross": {"pelvis": Vector3(-6, 0, 0), "spine": Vector3(-2, 0, 0), "chest": Vector3(-4, 0, 0), "head": Vector3(-10, -8, 0),
+		"th_r": Vector3(84, 14, -20), "kn_r": 72.0, "ft_r": 26.0, "th_l": Vector3(86, 4, 6), "kn_l": 90.0, "ft_l": 10.0,
+		"sh_r": Vector3(36, 24, 4), "el_r": 40.0, "sh_l": Vector3(6, -6, 34), "el_l": 70.0},
 	# 바(카운터)에 기대섬 — 한쪽 팔꿈치를 걸치고 다리를 꼰다
 	"lean": {"pelvis": Vector3(0, -20, 6), "chest": Vector3(-6, -16, 8), "head": Vector3(-6, 14, 0),
 		"sh_l": Vector3(20, -10, 46), "el_l": 96.0, "sh_r": Vector3(8, 6, 10), "el_r": 30.0,

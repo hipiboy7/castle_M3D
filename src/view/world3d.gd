@@ -19,7 +19,9 @@ const SETS := {
 		"floor": [Color(0.2, 0.13, 0.09), 0.5, false], "wall": [Color(0.18, 0.12, 0.09), 3.2],
 		"omni": [[1.6, 2.4, 0.4, Color(1.0, 0.72, 0.42), 2.2, 6.5], [-1.0, 2.6, 2.6, Color(0.9, 0.6, 0.35), 0.9, 4.5]],
 		"props": [["bar", 1.6, -0.6, {"w": 6.0}], ["stool", -0.4, 0.15], ["stool", 0.8, 0.15], ["stool", 2.0, 0.15], ["stool", 3.2, 0.15],
-			["round_table", -2.0, 2.2], ["round_table", 4.6, 2.6], ["sofa", -5.0, -0.2], ["plant", -3.6, -0.4], ["neon", 3.8, -0.75, {"text": "BAR", "col": Color(1.0, 0.45, 0.3)}],
+			["round_table", -2.0, 2.2], ["round_table", 4.6, 2.6], ["plant", -3.6, -0.4],
+			# 안락의자(z 는 뒷가장자리 기준 — 방 표 자리 + 2.2): 리사(2.6, 0.75) · 구석 어둠의 김신(-5.0, -1.7)
+			["armchair", 2.6, 2.95, {"face": -1.0}], ["armchair", -5.0, 0.5, {"face": 1.0, "col": Color(0.2, 0.17, 0.16)}], ["neon", 3.8, -0.75, {"text": "BAR", "col": Color(1.0, 0.45, 0.3)}],
 			["door", -6.4, 1.6]]},
 	"club_cage": {"env": [Color(0.3, 0.2, 0.26), 0.6, Color(0.02, 0.01, 0.02)], "top": [Color(1.0, 0.8, 0.85), 0.6],
 		"floor": [Color(0.12, 0.1, 0.12), 0.5, false], "wall": [Color(0.16, 0.1, 0.14), 3.2],
@@ -290,7 +292,7 @@ func _clutter(b: Rect2, indoor: bool, seed_v: int) -> void:
 
 
 ## 부서지는 소품 종류 → [부딪힘 반지름, 줄이면 하나씩(split)] — 사람이 날아와 부딪히면 부서진다(src/view/breakables.gd · 2026-11-12)
-const BREAK_KINDS := {"slots": [0.5, true], "stool": [0.3, false], "small_crate": [0.32, false], "barrel": [0.36, false], "crate": [0.5, true], "sofa": [0.8, false],
+const BREAK_KINDS := {"slots": [0.5, true], "stool": [0.3, false], "small_crate": [0.32, false], "barrel": [0.36, false], "crate": [0.5, true], "sofa": [0.8, false], "armchair": [0.6, false],
 	"plant": [0.45, false], "desk": [1.0, false], "round_table": [0.8, false], "trophy": [0.4, true], "bed": [1.0, false],
 	"shelf": [0.6, true], "long_table": [1.2, false], "stall": [0.9, true], "speaker": [0.45, true], "lantern": [0.3, true],
 	"books": [0.5, true], "pews": [1.0, true], "cubicle": [0.9, true], "blocks": [0.5, true], "tub": [0.6, false],
@@ -411,6 +413,16 @@ func _prop_build(kind: String, at: Vector3, o: Dictionary, b: Rect2) -> void:
 			_pillar(at, o.get("col", Color(0.75, 0.7, 0.6)))
 		"sofa":
 			_sofa(at)
+		"armchair":                                      # 1인 안락의자(가죽 · 등받이 · 팔걸이) — face: 앉은 사람이 보는 쪽(-1 = -x, 1 = +x)
+			var fx: float = o.get("face", -1.0)
+			var lea := _shared(o.get("col", Color(0.55, 0.12, 0.14)), 0.45)   # 어두운 주점 바닥과 갈리게 밝은 버건디(처음 짙은 가죽은 안 보였다)
+			_mesh(self, _box(Vector3(0.66, 0.42, 0.66)), lea, at + Vector3(0, 0.21, 0))
+			_mesh(self, _box(Vector3(0.16, 0.62, 0.7)), lea, at + Vector3(-0.3 * fx, 0.62, 0))
+			for sz in [-1.0, 1.0]:
+				_mesh(self, _box(Vector3(0.62, 0.2, 0.12)), lea, at + Vector3(0.02 * fx, 0.52, 0.31 * sz))
+			for sx in [-1.0, 1.0]:
+				for sz in [-1.0, 1.0]:
+					_mesh(self, _cyl(0.03, 0.03, 0.08), _shared(Color(0.75, 0.6, 0.3), 0.3, 0.0, 0.8), at + Vector3(0.28 * sx, 0.04, 0.28 * sz))
 		"plant":
 			_plant(at)
 		"desk":

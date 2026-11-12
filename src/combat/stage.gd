@@ -53,6 +53,7 @@ extends RefCounted
 ##            "cast": [id, ..] (+ "cast_at": [Vector2, ..])  조작 인물 묶음을 바꾼다 — 빠지는 사람은 퇴장(쓰러진 사람은 그 자리),
 ##                                        들어오는 사람은 cast_at 자리(없으면 왼쪽 가장자리)에서(12장 신겐 2차전 피우진 → 김신)
 ##            "bounds": Rect2 · "theme": 무대  싸움 중 맵을 넓히거나 무대를 바꾼다(main.gd 가 무대 그림을 다시 — 12장 구스타프전)
+##            "purge": true               쓰러진 적을 판에서 치운다(무대가 바뀌는 방 — 2장 복도 → 대표실, spawn 보다 먼저)
 ##            "learn": "<진행 사건 id>"   조작 인물들의 등급 · 기술을 그 사건까지(포함)의 castle_common 진행으로 다시(beat:richeon →
 ##                                        김신 재앙 · 촌경 · 리천식 삼연타). 새 기술 이름을 알림 글로
 ##   "survive": 초   그 시간을 버티면 방을 깬다. triggers 에 escape 가 있으면 깨지 않고 그 escape 를 마쳐야 깬다
@@ -308,13 +309,28 @@ static func _ally_kit(f, role: Dictionary, st: Dictionary, c: Dictionary) -> voi
 ## 1층 기술 중 이 판 동작이 있는 것 — 공통 기술(묶음 B 조작 인물 기술 — 1장 아군 서진태)은 MOVE_OF, 3D 덧붙임은 addendum move
 ## 맨손 방(외형 *_bare — 0 · 1장 김신 · 2장 공사장 · 4장 케이지 · 13장 주먹 승부)에서는 무기 기술(tech_moves WEAPON — 칼 · 총 ·
 ## 소품)을 빼고, 다른 방에서는 다시 모두 쓴다(사용자 2026-11-10 "기술에 따른 행동을 다 구체화")
+## 맨손 방에서도 남기는 칼 기술 → 맨손 동작(2026-11-12 사용자 "김신의 좌우로 사라지는 스탭은 필수 기술인데 가끔 기술이 안보임" —
+## 칼 기술이라 맨손 방(0장 호텔 · 1장 · 2장 공사장 · 4장 철창 · 13장 앞마당)에서 빠졌다)
+const BARE_SWAP := {"s_vanish": "s_vanish_bare"}
+
+
 static func _bare_skills(d: Dictionary, h, bare: bool) -> void:
 	if not d.has("skills_all"):
 		d["skills_all"] = {}
 	if not d["skills_all"].has(h):
 		d["skills_all"][h] = h.skills
 	var all: Array = d["skills_all"][h]
-	h.skills = all.filter(func(e): return not Tech.WEAPON.has(str(e["move"]))) if bare else all
+	if not bare:
+		h.skills = all
+	else:
+		h.skills = []
+		for e in all:
+			if BARE_SWAP.has(str(e["move"])):            # 칼 없이도 쓰는 필수 기술은 맨손 동작으로 바꿔 남긴다(사라지는 스텝)
+				var e2: Dictionary = e.duplicate()
+				e2["move"] = BARE_SWAP[str(e["move"])]
+				h.skills.append(e2)
+			elif not Tech.WEAPON.has(str(e["move"])):
+				h.skills.append(e)
 	h.skill_idx = clampi(h.skill_idx, 0, maxi(0, h.skills.size() - 1))
 
 
@@ -915,6 +931,10 @@ static func _when(d: Dictionary, when: String) -> bool:
 
 static func _do(d: Dictionary, t: Dictionary) -> void:
 	var w = d["world"]
+	if t.get("purge", false):
+		for f in d["enemies"].duplicate():
+			if not f.alive() or f.inert:
+				Scene._remove(d, f)
 	for s in t.get("spawn", []):
 		var f = _npc(d, str(s[0]), 1, _spawn_at(d, s), s[2] if s.size() > 2 else {})
 		f.oneshot_immune = f.char_id == d["boss_id"]

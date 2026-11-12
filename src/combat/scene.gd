@@ -14,10 +14,13 @@ extends RefCounted
 ##   {"use": who, "move": 동작 이름}      동작 하나(판정 없음) — 끝날 때까지 기다린다(nowait: true 면 걸어 두고 바로 다음)
 ##   {"freeze": true | false}             판을 그 순간에 세운다 / 다시 돌린다(말풍선은 그대로 — 3장 크리샤 빨간 !)
 ##   {"wait": 초}
-##   {"leave": who, (dir: -1 | 1)}       맵 가장자리 밖으로 걸어 나가 사라진다(dir 없으면 가까운 옆)
+##   {"leave": who, (dir: -1 | 1)}       맵 가장자리 밖으로 걸어 나가 사라진다(dir 없으면 가까운 옆). slow: true — 천천히 걷는다,
+##                                       nowait: true — 걸어 나가게 두고 바로 다음 단계(나가는 동안 남은 사람이 말한다 · 카메라는 남은 쪽)
 ##   {"stand": who}                      쓰러진 사람을 일으킨다(체력 1 — 장면 속에서만)
 ##   {"down": who}                       그 자리에 쓰러뜨린다
-##   {"carry": who, "target": who2, "to": Vector2}  who 가 who2 를 앞에 붙잡고(멱살) 그 자리까지 끈다
+##   {"carry": who, "target": who2, "to": Vector2, (push_to: Vector2)}  who 가 who2 를 앞에 붙잡고(멱살) 그 자리까지 끈다.
+##                                       push_to 가 있으면 그쪽을 보고 밀고 가 who2 가 to 에 닿는다(2장 대표실 창 — 2026-11-12 사용자 "창문쪽으로
+##                                       끌고가야되는데, 오히려 안쪽(아래쪽)으로 끌고와버려")
 ##   {"toss": who, "to": Vector2, "secs": 초}        날아가 사라진다(창 밖 — 맵 밖도 된다. 판에서 빠진다)
 ##   {"fx": 종류, "at": Vector2}          무대 연출(glass — 유리 깨짐 · shot — 총소리 · 섬광 · smash — 부서짐)
 ##   {"place": who, "at": Vector2}       바로 그 자리에(장면 시작 전 세우기)
@@ -27,9 +30,11 @@ extends RefCounted
 const SAY_MIN := 1.6
 const SAY_MAX := 4.2
 const SAY_PER_CHAR := 0.085
-const WALK_TIMEOUT := 8.0
+const WALK_TIMEOUT := 12.0           # 절뚝이며 걷는 의뢰인(0장 주점) 6m 도 닿게
 const LEAVE_PAD := 1.4             # 가장자리 밖 이만큼 나가면 사라진다
 const CARRY_GAP := 0.55
+const LEAVE_SLOW := 0.42           # 천천히 퇴장(걷기 입력 크기 — 2026-11-12 사용자 "김신과 김대건은 천천히 퇴장해")
+const LEAVE_TIMEOUT := 14.0        # 나가는 사람(nowait)이 이만큼 지나도 가장자리에 못 닿으면 치운다
 
 
 ## 장면 시작 — 지금 판의 모든 사람을 멈추고 단계 목록을 건다(end_mode: 단계에 end 가 없을 때 끝나면 할 일)
@@ -73,6 +78,7 @@ static func tick(d: Dictionary) -> void:
 	var sc: Dictionary = d["scene"]
 	for f in d["world"].fighters:
 		f.intent = {}
+	_tick_leaving(d, sc)
 	var guard := 0
 	while d.has("scene") and guard < 16:
 		guard += 1
@@ -110,6 +116,7 @@ static func _run(d: Dictionary, sc: Dictionary, st: Dictionary) -> bool:
 		if first:
 			if who != null:
 				who.facing = _face_to_talk(d, who)
+				sc["speaker"] = who
 			w.events.append(["bubble", who, str(st["say"][1]), secs - 0.15, str(st["say"][0])])
 		return t >= int(secs * 60.0)
 	if st.has("says"):
@@ -184,6 +191,7 @@ static func _run(d: Dictionary, sc: Dictionary, st: Dictionary) -> bool:
 		var ids: Array = st["leave"] if st["leave"] is Array else [st["leave"]]
 		var b2: Rect2 = w.bounds
 		var left := 0
+		var k := LEAVE_SLOW if st.get("slow", false) else 1.0
 		for id in ids:
 			var l = who_of(d, str(id))
 			if l == null or not w.fighters.has(l):
@@ -191,7 +199,14 @@ static func _run(d: Dictionary, sc: Dictionary, st: Dictionary) -> bool:
 			var dir := float(st.get("dir", 0.0))
 			if dir == 0.0:
 				dir = -1.0 if l.pos.x - b2.position.x < b2.end.x - l.pos.x else 1.0
-			l.intent = {"move": Vector2(dir, 0.0)}
+			if st.get("nowait", false):
+				if first:
+					var lv: Array = sc.get("leaving", [])
+					lv.append([l, dir * k, int(d["n"])])
+					sc["leaving"] = lv
+					l.intent = {"move": Vector2(dir * k, 0.0)}
+				continue
+			l.intent = {"move": Vector2(dir * k, 0.0)}
 			var gone: bool = l.pos.x <= b2.position.x + 0.05 or l.pos.x >= b2.end.x - 0.05
 			if gone or t > int(WALK_TIMEOUT * 60.0):
 				_remove(d, l)
@@ -217,9 +232,15 @@ static func _run(d: Dictionary, sc: Dictionary, st: Dictionary) -> bool:
 		if c == null:
 			return true
 		sc["carry"] = [c, tg]
-		var done := _walk(c, v2(st["to"]), false, t)
+		var goal: Vector2 = v2(st["to"])
+		if st.has("push_to"):
+			var fd: Vector2 = (v2(st["push_to"]) - c.pos).normalized()
+			sc["carry_face"] = fd
+			goal -= fd * CARRY_GAP
+		var done := _walk(c, goal, false, t)
 		if done:
 			sc["carry"] = null
+			sc.erase("carry_face")
 		return done
 	if st.has("toss"):
 		var tf = who_of(d, str(st["toss"]), true)
@@ -255,6 +276,8 @@ static func _hold_carry(d: Dictionary, sc: Dictionary) -> void:
 		return
 	var c = cr[0]
 	var tg = cr[1]
+	if sc.has("carry_face"):
+		c.facing = sc["carry_face"]                     # 미는 쪽(창)을 본 채로 — 걸음 방향이 몸을 돌리지 않게
 	tg.pos = c.pos + c.facing * CARRY_GAP
 	tg.facing = -c.facing
 	if tg.state != "stun":
@@ -263,6 +286,35 @@ static func _hold_carry(d: Dictionary, sc: Dictionary) -> void:
 
 
 ## 판에서 뺀다(맵 밖으로 나감 · 창 밖으로 날아감)
+## 걸어 나가는 사람(leave nowait): 그쪽으로 계속 걷다가 가장자리에 닿거나 LEAVE_TIMEOUT 이 지나면 치운다
+static func _tick_leaving(d: Dictionary, sc: Dictionary) -> void:
+	var lv: Array = sc.get("leaving", [])
+	if lv.is_empty():
+		return
+	var w = d["world"]
+	var b2: Rect2 = w.bounds
+	for i in range(lv.size() - 1, -1, -1):
+		var l = lv[i][0]
+		if not w.fighters.has(l):
+			lv.remove_at(i)
+			continue
+		var gone: bool = l.pos.x <= b2.position.x + 0.05 or l.pos.x >= b2.end.x - 0.05
+		if gone or int(d["n"]) - int(lv[i][2]) > int(LEAVE_TIMEOUT * 60.0):
+			_remove(d, l)
+			lv.remove_at(i)
+		else:
+			l.intent = {"move": Vector2(float(lv[i][1]), 0.0)}
+
+
+## 장면 카메라가 볼 사람: 지금 말하는 사람(없으면 null) — main.gd 가 따라간다. 걸어 나가는 사람은 화면에서 뺀다(leaving)
+static func speaker(d: Dictionary):
+	return d["scene"].get("speaker") if d.has("scene") else null
+
+
+static func leaving(d: Dictionary) -> Array:
+	return d["scene"].get("leaving", []).map(func(x): return x[0]) if d.has("scene") else []
+
+
 static func _remove(d: Dictionary, f) -> void:
 	var w = d["world"]
 	w.fighters.erase(f)
@@ -276,6 +328,9 @@ static func _remove(d: Dictionary, f) -> void:
 
 static func _finish(d: Dictionary, mode: String) -> void:
 	var sc: Dictionary = d["scene"]
+	for lv in sc.get("leaving", []):
+		if d["world"].fighters.has(lv[0]):
+			_remove(d, lv[0])                    # 아직 덜 나간 사람도 장면이 끝나면 치운다
 	d.erase("scene")
 	for f in d["world"].fighters:
 		f.scripted = false

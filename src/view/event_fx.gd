@@ -43,10 +43,29 @@ func tick_later(dt: float) -> void:
 			later_msg = []
 
 
+## 좌우로 사라지는 스텝(zigzag 동작 — s_vanish · s_vanish_bare): 준비 동안 몸이 거의 사라지고(세 프레임에 한 번만 비친다)
+## 지나간 자리마다 잔상이 남는다 — 전에는 옆으로 빠르게 미끄러질 뿐이라 기술이 나간 줄 몰랐다(2026-11-12 사용자 "가끔 기술이 안보임")
+func _vanish(f, p: Node3D) -> void:
+	var on: bool = f.state == "attack" and bool(f.move.get("zigzag", false)) and f.t >= 2 and f.t <= int(f.move["startup"])
+	if on:
+		p.visible = f.t % 3 == 0
+		if f.t % 2 == 0:
+			fx.ghost(Vector3(f.pos.x, float(f.air), f.pos.y), p.yaw)
+		if f.t == 2:
+			snd.play("wind", -6.0, 1.4)
+		p.set_meta("vanish", true)
+	elif p.has_meta("vanish"):
+		p.remove_meta("vanish")
+		p.visible = true
+		fx.ghost(Vector3(f.pos.x, float(f.air), f.pos.y), p.yaw, 0.18)
+
+
 ## 한 프레임 판정 뒤: 공격 시작 궤적 · 예고 소리 · 신호(맞음 · 쳐내기 · 막기 · 제압 · 2차 · 쓰러짐) → 연출 · 소리
 func apply(d: Dictionary) -> void:
 	var w = d["world"]
 	for f in w.fighters:
+		if pup.has(f):
+			_vanish(f, pup[f])
 		if f.state == "attack" and pup.has(f):
 			var mv: Dictionary = f.move
 			if f.t == int(mv["startup"]) + 1:

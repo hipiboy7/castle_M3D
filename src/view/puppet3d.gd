@@ -535,7 +535,7 @@ func _hair(head: Node3D, m: Material, style: String) -> void:
 		_mesh(head, _sphere(0.1, 0.2), m, Vector3(0, -0.01, 0.05), Vector3.ZERO, Vector3(1.0, 0.95, 0.85))       # 뒤통수 ~ 목덜미
 	elif style == "bald":
 		pass                                                     # 대머리(군터 경호원) — 머리털 없음
-	elif look.get("female", false) and style in ["long", "bob", "ponytail"]:
+	elif look.get("female", false) and style in ["long", "bob", "ponytail", "wavy"]:
 		_hair_fem(head, m, style)
 	elif style == "long" or style == "bob":
 		# 어깨까지 오는 장발(우지 든 남자) · 턱선 단발(bob — 인형은 같은 모양): 가운데 가르마 + 옆 · 뒤로 늘어진 머리

@@ -22,7 +22,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CC = os.environ.get("CASTLE_COMMON", os.path.join(ROOT, "..", "castle_common"))
 LINES = os.path.join(ROOT, "data", "story", "lines.json")
-PRE_CUTS = 14
+PRE_CUTS = 0          # 대결 범위 앞 컷(2026-11-12 14 → 0: 앞 컷은 대개 다른 장면이라 방과 안 맞는 말이 섞였다 — 사용자 "스테이지에 맞지 않는 멘트")
 OPEN_MAX = 10
 MID_MAX = 4
 CLOSE_MAX = 8
@@ -110,6 +110,21 @@ def tables() -> dict:
     return out
 
 
+def split_shared(sc: dict, k: int, n: int) -> dict:
+    """같은 대결을 여러 방이 나눠 쓰면(6장 선실 · 함교, 11장 28층 · 69층) 줄을 방 차례대로 나눈다 — 전에는 방마다 같은 말이 되풀이됐다"""
+    if n <= 1:
+        return sc
+    body = sc["open"] + sc["mid"] + sc["close"]
+    a = len(body) * k // n
+    b = len(body) * (k + 1) // n
+    part = body[a:b]
+    if not part:
+        return {}
+    o = part[: min(OPEN_MAX, max(1, len(part) // 2))]
+    rest = part[len(o):]
+    return {"open": o, "mid": rest[:-CLOSE_MAX][:MID_MAX] if len(rest) > CLOSE_MAX else [], "close": rest[-CLOSE_MAX:]}
+
+
 def main():
     fs = fights()
     data = json.load(open(LINES, encoding="utf-8"))
@@ -118,10 +133,18 @@ def main():
         if key not in data:
             continue
         canon = {}
+        shared = {}
+        used = set()
+        for room, fid in rooms.items():
+            shared.setdefault(fid, []).append(room)
         for room, fid in rooms.items():
             if not fid or fid not in fs:
                 continue
-            sc = scenes_for(fs[fid])
+            sc = split_shared(scenes_for(fs[fid]), shared[fid].index(room), len(shared[fid]))
+            # 앞 방에서 이미 나온 말은 뺀다(대결 범위가 겹치면 — 6장 선실 · 함교가 같은 말로 시작했다)
+            sc = {k: [ln for ln in v if (ln[0], ln[1]) not in used] for k, v in sc.items()}
+            for v in sc.values():
+                used.update((ln[0], ln[1]) for ln in v)
             if sc and any(sc.values()):
                 canon[room] = sc
                 total += sum(len(v) for v in sc.values())
