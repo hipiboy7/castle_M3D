@@ -108,3 +108,19 @@ func test_bots_clear_first_rooms() -> void:
 	var r := Stage.simulate(1, 60 * 240, {"room": 1})
 	check(int(r["cleared"]) >= 2, "봇이 28층 중앙홀 · 69층 계단을 넘는다 %s" % r)
 	check(r["times"].has("hall28") and int(r["times"]["hall28"]) < 60 * 60, "28층 중앙홀은 1분 안 %s" % r["times"])
+
+
+## 원작 대사 고르기(2026-11-13 rc.16 폰 리뷰 '방에 맞지 않는 멘트'): 말하는 사람이 반 넘게 방에 없으면 남은 줄은 대답 없는 토막이라
+## 그 대목(open · close)을 통째로 안 튼다. 다 있는 짧은 대목 · 내레이션(@) · 이름 모를 사람(?)은 남긴다
+func test_canon_keep_drops_broken_talk() -> void:
+	var here := func(id: String) -> bool: return id in ["kimshin", "boss"]
+	var full := [["kimshin", "a"], ["boss", "b"]]
+	check(Stage.canon_keep(full, here).size() == 2, "다 있는 두 줄은 그대로")
+	var half := [["kimshin", "a"], ["other", "b"], ["boss", "c"], ["@", "d"]]
+	check(Stage.canon_keep(half, here).size() == 3, "없는 사람 한 줄만 빼고(@ 는 남김)")
+	var broken := [["other", "a"], ["other", "b"], ["kimshin", "c"], ["other", "d"], ["boss", "e"]]
+	check(Stage.canon_keep(broken, here).is_empty(), "반 넘게 없으면 대목째 뺀다")
+	var thin := [["other", "a"], ["kimshin", "b"]]
+	check(Stage.canon_keep(thin, here).is_empty(), "짧은 대목에서 빠진 줄이 있으면 남는 한 줄도 뺀다")
+	var d := Stage.make(1, {"chapter": "ch11", "room": 2})
+	check(Stage.canon_steps(d, "open").is_empty(), "11장 69층(말하는 이희성이 방에 없다) — 원작 대사 안 튼다")

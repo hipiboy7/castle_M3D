@@ -115,6 +115,8 @@ static func make(seed_value: int, opts := {}) -> Dictionary:
 ## 무대 그림(world3d · town3d · haseong3d)은 bounds 를 따라 바닥 · 벽 · 소품 자리를 잡는다. 장 표 MAP_K(Vector2 — 1 이면 그대로)로 장마다,
 ## 방 표 "fixed": true 면 그 방은 그대로(무대가 고정 치수인 방 — 0장 호텔 복도 · 장면 자리를 m 로 적은 방)
 const MAP_K := Vector2(1.4, 1.25)
+const CANON_KEEP := 0.5          # 원작 대사 한 대목에서 방에 있는 사람 말이 이만큼 안 되면 대목째 안 튼다(canon_keep)
+const CANON_SHORT := 2           # 이 줄 수 이하로 남는데 빠진 줄이 있으면 역시 안 튼다
 const LONG_MAP := 18.0
 
 
@@ -1106,8 +1108,22 @@ static func canon_steps(d: Dictionary, part: String) -> Array:
 	if not (v is Array) or v.is_empty():
 		return []
 	var out: Array = []
-	for ln in v:
+	for ln in canon_keep(v, func(id: String) -> bool: return Scene.who_of(d, id, true) != null):
 		out.append({"say": [str(ln[0]), str(ln[1])]})
+	return out
+
+
+## 원작 한 대목에서 틀 줄(2026-11-13 — rc.16 폰 리뷰 '방에 맞지 않는 멘트', tools/canon_audit.gd 로 67방 중 26방):
+## 말하는 사람이 방에 없으면 그 줄은 빠진다(scene.gd 와 같음). 남는 줄이 CANON_KEEP 보다 적거나, 짧은 대목(CANON_SHORT 줄 이하)인데
+## 한 줄이라도 빠지면 남은 말은 대답 없는 토막 · 다른 장면 말이라 대목째 안 튼다. 내레이션(@) · 이름 모를 사람(?)은 늘 있다고 본다
+static func canon_keep(lines: Array, here: Callable) -> Array:
+	var out: Array = []
+	for ln in lines:
+		var id := str(ln[0])
+		if id == "@" or id.begins_with("?") or here.call(id):
+			out.append(ln)
+	if out.size() < lines.size() and (out.size() < lines.size() * CANON_KEEP or out.size() <= CANON_SHORT):
+		return []
 	return out
 
 
@@ -1133,7 +1149,7 @@ static func _canon_mid(d: Dictionary) -> void:
 		return
 	d["canon_mid"] = k + 1
 	var half: int = int(ceil(v.size() / 2.0))
-	var lines: Array = v.slice(k * half, (k + 1) * half)
+	var lines: Array = canon_keep(v.slice(k * half, (k + 1) * half), func(id: String) -> bool: return Scene.who_of(d, id, true) != null)
 	var delay := 0.0
 	for ln in lines:
 		var who = Scene.who_of(d, str(ln[0]), true)

@@ -1,7 +1,7 @@
 extends Node3D
 ## 결투 무대 — 인천항 제3부두, 밤 (castle_M 6장 결투 무대 `dock` 의 3D 판: 컨테이너 · 가로등 · 계류 기둥 · 드럼통 · 크레인 다리).
-## 빛: 달빛(차가운 주광, 그림자) · 가로등(따뜻한 점광) · 뒤쪽 역광(실루엣) · 어두운 남색 환경광 · 얕은 안개.
-## 바닥은 젖은 아스팔트 — 거칠기를 얼룩지게 해 가로등 빛이 물웅덩이처럼 번진다. 크기는 combat/world.gd bounds 와 맞춘다.
+## 빛: 달빛(차가운 주광, 그림자 하나) · 가로등(따뜻한 점광 — 그림자 없음) · 뒤쪽 역광(실루엣) · 어두운 남색 환경광 · 얕은 안개.
+## 바닥은 젖은 아스팔트(화풍 셀 셰이더). 크기는 combat/world.gd bounds 와 맞춘다.
 
 const HALF_W := 7.4
 const HALF_D := 4.4
@@ -76,9 +76,11 @@ func _lights(detail: bool) -> void:
 	rim.light_energy = 0.45
 	rim.rotation_degrees = Vector3(-20, 180, 0)
 	add_child(rim)
-	# 가로등: 뒤쪽 둘(그림자) · 앞 모서리 하나
+	# 가로등 셋(그림자 없음): 점광 그림자(OmniLight shadow)는 모든 무대 중 여기에만 있던 것 — 폰(Compatibility · Adreno)에서만 도는
+	# 셰이더 갈래 · 그림자 아틀라스라, 서버 · 에뮬레이터에서 재현 안 되는 '6장 들어가면 화면 굳음'(rc.1 · rc.8 · rc.14)의 첫 용의자로 뺐다(2026-11-13).
+	# 그림자는 달빛(방향광) 하나 — 다른 무대와 같은 길
 	for p in [Vector3(-4.2, 0, -5.0), Vector3(3.8, 0, -5.0), Vector3(7.6, 0, 3.4)]:
-		lamps.append(_lamp(p, detail and p.z < 0))
+		lamps.append(_lamp(p, false))
 
 
 func _lamp(at: Vector3, shadow: bool) -> OmniLight3D:
@@ -101,23 +103,11 @@ func _lamp(at: Vector3, shadow: bool) -> OmniLight3D:
 
 
 func _ground() -> void:
-	var noise := FastNoiseLite.new()
-	noise.seed = 6
-	noise.frequency = 0.035
-	noise.fractal_octaves = 4
-	var tex := NoiseTexture2D.new()
-	tex.noise = noise
-	tex.width = 256
-	tex.height = 256
-	tex.seamless = true
-	var ramp := Gradient.new()                       # 거칠기 0.72 ~ 0.95 — 대비가 크면 표범 무늬처럼 번쩍인다
-	ramp.set_color(0, Color(0.72, 0.72, 0.72))
-	ramp.set_color(1, Color(0.95, 0.95, 0.95))
-	tex.color_ramp = ramp
+	# 거칠기 얼룩(NoiseTexture2D)은 뺐다(2026-11-13): 화풍(Ink.stylize)이 셀 셰이더로 바꿔 입히며 거칠기 그림을 쓰지 않는데,
+	# 판마다 일꾼 스레드에서 256² 잡음을 새로 굽는다 — 여기에만 있던 비동기 텍스처(6장 화면 굳음 용의자 둘째)
 	var asphalt := StandardMaterial3D.new()
 	asphalt.albedo_color = Color(0.12, 0.125, 0.145)     # 무늬는 거칠기에만 — 색 얼룩(구름 · 대리석 같음)을 없앴다
-	asphalt.roughness_texture = tex                  # 얼룩진 거칠기 = 젖은 곳은 빛을 비춘다
-	asphalt.roughness = 1.0
+	asphalt.roughness = 0.85
 	asphalt.metallic_specular = 0.6
 	asphalt.uv1_scale = Vector3(16, 16, 16)
 	var ground := PlaneMesh.new()
