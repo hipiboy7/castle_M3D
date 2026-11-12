@@ -118,6 +118,15 @@ const LOOKS := {
 	"ds_raider": {"suit": Color(0.1, 0.1, 0.11), "pants": Color(0.38, 0.28, 0.19), "shirt": Color(0.1, 0.1, 0.11), "collar": "turtle",
 		"skin": Color(0.88, 0.74, 0.62), "hair": Color(0.1, 0.1, 0.1), "hair_style": "bald", "mask": Color(0.05, 0.05, 0.06),
 		"big": false, "scale": 1.02, "limb": 1.12, "weapon_r": "pipe", "weapon_l": "", "guard": "long"},
+	#  김신(프롤로그 주점 — 2026-11-12 사용자 5번 "구석에는 김신이 롱코트를 입고 어두움 속에 앉아있음"): kim_bare 위에 무릎까지 오는 검은 롱코트
+	"kim_coat": {"outfit": "coat", "suit": Color(0.07, 0.07, 0.09), "pants": Color(0.2, 0.2, 0.23), "shirt": Color(0.06, 0.06, 0.08), "collar": "turtle",
+		"skin": Color(0.91, 0.77, 0.65), "hair": Color(0.11, 0.11, 0.15), "hair_style": "fringe", "glasses": false, "big": false,
+		"scale": 1.04, "shoulder": 1.12, "eye_h": 0.007, "depth": 1.1, "limb": 1.15, "head": 0.9, "brow_tilt": 12.0, "jaw": true,
+		"piercing": true, "sole": Color(0.9, 0.9, 0.88), "weapon_r": "", "weapon_l": "", "guard": "box"},
+	#  후드 쓴 의뢰인 여자(p1:002/002-011 — 군터에게 남편과 아들을 잃은 여자): 낡은 회색 후드 외투 · 긴 갈색 머리 · 맨손
+	"client_woman": {"outfit": "jacket", "female": true, "suit": Color(0.34, 0.33, 0.33), "pants": Color(0.2, 0.19, 0.2), "shirt": Color(0.5, 0.47, 0.44),
+		"collar": "crew", "skin": Color(0.9, 0.8, 0.74), "hair": Color(0.32, 0.22, 0.16), "hair_style": "long", "hat": "hood", "hat_col": Color(0.3, 0.29, 0.29),
+		"lips": Color(0.6, 0.38, 0.38), "big": false, "scale": 0.94, "limb": 0.92, "weapon_r": "", "weapon_l": "", "guard": "box"},
 	#  불휘 가면 둘(fight:bulhwi p1:044/012-042 — '하회탈 가면(흰 셔츠)' · '붉은 점 가면(민소매)', 김신 양옆 협공 — 2026-11-12 사용자
 	#        "남일호급 캐릭터들 2명 더 … 나머지 2명은 전국구급"): 얼굴을 다 덮는 가면 · 맨주먹 / 높은 발차기
 	"hahoe_mask": {"outfit": "shirt", "suit": Color(0.9, 0.9, 0.88), "pants": Color(0.16, 0.15, 0.16), "shirt": Color(0.9, 0.9, 0.88),
@@ -151,7 +160,7 @@ const LOOKS := {
 	"kimdaegeon": {"outfit": "shirt", "suit": Color(0.92, 0.92, 0.93), "pants": Color(0.13, 0.15, 0.25), "shirt": Color(0.92, 0.92, 0.93),
 		"skin": Color(0.87, 0.72, 0.6), "hair": Color(0.06, 0.06, 0.07), "hair_style": "buzz", "scar": "nose", "eye_h": 0.007,
 		"brow_tilt": 14.0, "tattoo": Color(0.3, 0.4, 0.4), "tattoo_side": "both", "buckle": Color(0.2, 0.2, 0.22),
-		"big": true, "scale": 1.12, "wide": 1.22, "depth": 1.28, "limb": 1.32, "head": 0.94, "jaw": true,
+		"big": false, "scale": 1.04, "shoulder": 1.12, "depth": 1.1, "limb": 1.15, "head": 0.92, "muscle": 0.6, "jaw": true,
 		"weapon_r": "", "weapon_l": "", "guard": "box"},
 	#  강만재(p1:019 거리 — '부장님' · '삼겹살'): 짙은 피부 · 두꺼운 목의 근육질 거구 · 아주 짧은 검은 머리에 흰 붕대를 머리띠처럼 ·
 	#        왼뺨 사선 흉터 두 줄 · 귀 검은 귀걸이 · 베이지 정장 재킷 · 깃 푼 흰 셔츠 · 베이지 바지(대표 look — 019 의 갈색 재킷은 짙은 피부와 섞여 대표 차림으로)
@@ -282,10 +291,15 @@ const ART := {
 	"haseong_suit": {"glb": "res://assets/models/haseong_suit_a.glb", "dots": "res://assets/sprites/haseong_suit_b"},
 	"haseong_guard": {"glb": "res://assets/models/haseong_guard_a.glb", "dots": "res://assets/sprites/haseong_guard_b"},
 	"namgu_youth": {"glb": "res://assets/models/namgu_youth_a.glb", "dots": "res://assets/sprites/namgu_youth_b"},
+	# 2026-11-12 새 외형(그림 B 도트는 굽지 않음 — NO_DOTS): 프롤로그 주점 김신 롱코트 · 의뢰인 · 3장 불휘 가면 둘
+	"kim_coat": {"glb": "res://assets/models/kimshin_coat_a.glb", "dots": "res://assets/sprites/kimshin_p1_b"},
+	"client_woman": {"glb": "res://assets/models/client_woman_a.glb", "dots": ""},
+	"hahoe_mask": {"glb": "res://assets/models/hahoe_mask_a.glb", "dots": ""},
+	"redspot_mask": {"glb": "res://assets/models/redspot_mask_a.glb", "dots": ""},
 }
 ## 그림 B(도트)를 아직 굽지 않은 ART 인물 — 그림 B 로 고르면 관절 인형으로 그린다(has_art)
 const NO_DOTS := ["condor", "heron", "owl", "gunter_suit", "gunter_bald", "gunter_uzi", "gunter_brute", "ds_raider", "haseong_suit",
-	"haseong_guard", "namgu_youth"]
+	"haseong_guard", "namgu_youth", "kim_coat", "client_woman", "hahoe_mask", "redspot_mask"]
 ## 명부(roster — 장 표에 아직 안 쓰는 looks.json 인물, looks_common ROSTER) 그림 자리. APK 에서 뺀다(export_presets.cfg exclude_filter
 ## assets/roster/*) — 편집기 · 시험 · 도구에서만 있고, 폰에서는 has_art 가 거짓이라 관절 인형으로 그린다
 const ROSTER_DIR := "res://assets/roster"
@@ -331,8 +345,22 @@ static func look(name: String) -> Dictionary:
 		lk.merge(LooksCommon.ROSTER[base], true)
 	if LooksCommon.BY_NAME.has(base):        # 원작 조각 대조 겉모습(castle_common data/looks.json — 사용자 답58)
 		lk.merge(LooksCommon.BY_NAME[base], true)
-	lk["scale"] = shown_scale(base, float(lk.get("scale", 1.06 if lk.get("big", false) else 1.0)))
-	var wd: float = float(lk.get("wide", 1.08 if lk.get("big", false) else 1.0))
+	var big: bool = lk.get("big", false)
+	var raw_s := float(lk.get("scale", 1.06 if big else 1.0))
+	var wd: float = float(lk.get("wide", 1.08 if big else 1.0))
+	var main_male: bool = not EXTRA_LOOKS.has(base) and not lk.get("female", false)
+	var bulky: bool = big or wd > 1.15 or float(lk.get("limb", 1.0)) > 1.25 or float(lk.get("depth", 1.0)) > 1.25
+	if main_male:
+		# 근육 몸(2026-11-12 사용자 "덩치가 큰 애들 사이즈가 너무 크고 너무 도형 형태 … 사이즈를 줄이고, 근육질인 것 같은 모형으로"):
+		# 큰 인물은 키 · 너비 · 두께 · 팔다리 굵기를 BIG_TAME 만큼 덜 키우고(통 → 역삼각), 대신 근육(make_models — 가슴 · 승모 · 어깨 · 이두 · 허벅지)
+		lk["muscle"] = float(lk.get("muscle", clampf(0.55 + (wd - 1.0) * 1.6, 0.55, 1.0) if bulky else 0.35))
+		if bulky:
+			raw_s = minf(raw_s, BIG_MAX_SCALE)
+			wd = 1.0 + (wd - 1.0) * BIG_TAME
+			for k in ["depth", "limb", "shoulder"]:
+				if lk.has(k):
+					lk[k] = 1.0 + (float(lk[k]) - 1.0) * BIG_TAME
+	lk["scale"] = shown_scale(base, raw_s)
 	if EXTRA_LOOKS.has(base):                         # 무리는 몸 너비를 EXTRA_MAX_WIDE 까지만(큰 경호원 · 거구도 메인보다 작게)
 		lk["wide"] = minf(wd, EXTRA_MAX_WIDE)
 		if lk.has("shoulder"):
@@ -355,6 +383,8 @@ static func look(name: String) -> Dictionary:
 ## rc.2 폰(2026-11-07 "메인은 무리보다 덩치가 조금 더 컸으면 · 머리는 '머리만' 조금 더 작게 · 관절 인형이 그나마 낫다"):
 ## MAIN_BASE 1.03 → 1.05 · 메인 몸 너비 MAIN_WIDE · HEAD_K 0.82 → 0.75 · 무리는 키 EXTRA_MAX_SCALE · 너비 EXTRA_MAX_WIDE 까지만
 ## (표의 큰 무리 — 하성 경호팀 1.1 · 4인 1.14 · 군터 거구 1.22 — 가 메인 1.05 보다 커 보였다)
+const BIG_TAME := 0.35            # 큰 인물 너비 · 두께 · 팔다리를 1 위로 이만큼만(2026-11-12 사용자 '사이즈를 줄이고')
+const BIG_MAX_SCALE := 1.12       # 큰 인물 표의 키 상한(화면 키 = MAIN_BASE + 0.08 × MAIN_SPREAD 안쪽)
 const MAIN_BASE := 1.05
 const MAIN_SPREAD := 0.5
 const MAIN_WIDE := 1.07

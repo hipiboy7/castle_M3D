@@ -884,6 +884,13 @@ const M := {
 	"ku_front": {"base": "x_frontkick", "label": "로우킥", "shape": "low_kick"},
 	"ku_spin": {"base": "x_spinkick", "label": "하이킥 내려찍기", "shape": "axe_kick"},
 	"ku_jab": {"base": "x_jab", "label": "짧은 연타", "shape": "straight", "hand": "L"},
+	# 앉아 치기 · 공중 치기(2026-11-12 앉기 · 점프 — fighter_body CROUCH_MOVE · AIR_MOVE): 누구나 쓰는 바탕 동작
+	"c_sweep": {"label": "앉아 쓸기", "startup": 8, "active": 4, "recovery": 16, "damage": 9, "reach": 14, "radius": 11, "lunge": 6,
+		"knockback": 1.2, "hitstop": 5, "posture": 14, "shape": "sweep", "sfx": "kick", "hit_sfx": "hit"},
+	"air_kick": {"label": "날아차기", "startup": 5, "active": 5, "recovery": 14, "damage": 12, "reach": 15, "radius": 12, "lunge": 10,
+		"knockback": 3.0, "hitstop": 7, "posture": 16, "shape": "flying_kick", "sfx": "kick", "hit_sfx": "hit_heavy"},
+	# 크리샤의 빨간 ! (3장 피우진 특급훈련 끝 — 사용자 2026-11-12: 피우진 체력 1/5 이하에서 쓰고, 쓰는 순간 경기가 멈춘다)
+	"ku_red": {"base": "x_flykick", "label": "날아 무릎 찍기", "shape": "flying_kick"},
 	# 링링 — 사슬 식칼 · 식칼 치켜들어 내려베기
 	"ll_round": {"base": "x_roundkick", "label": "식칼 긋기", "shape": "slash"},
 	"ll_jab": {"base": "x_jab", "label": "사슬 식칼 던져 긋기", "shape": "thrust", "hand": "L"},

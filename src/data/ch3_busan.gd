@@ -46,6 +46,9 @@ const NPCS := {
 	"odohwa": {"rank": "내성 하위"},       # (현 시점) 오도화 — (전성기) 내성 상위는 회상
 	# 부산 밤 시장 골목(2026-11-12 사용자 "남일호는 평이스크라급이고 나머지 2명 캐릭터는 전국구급")
 	"namilho": {"rank": "이스크라 평 킬러급"},
+	# 피우진 특급훈련(2026-11-12 사용자 14번 — "크리샤는 이스크라 평킬러급")
+	"keurisa": {"rank": "이스크라 평 킬러급"},
+	"pro_fighter": {"name": "격투장 격투가"},
 	"hahoe_mask": {"rank": "전국구", "name": "하회탈 가면"},
 	"redspot_mask": {"rank": "전국구", "name": "붉은 점 가면"},
 	"pyoyoung": {"rank": "전국구"},        # (1부) 표영
@@ -79,10 +82,16 @@ const ROLES := {
 		"look": "hahoe_mask", "dmg_k": 1.2},
 	"redspot_mask": {"hp": 500.0, "posture": 170.0, "walk": 2.2, "run": 4.8, "stagger": 75, "poise": 18.0, "finisher_cap": 0.12, "ai": "x_kicker",
 		"look": "redspot_mask", "dmg_k": 1.2},
+	# 피우진 특급훈련: 격투장 격투가 → 바실리 → 크리샤(이스크라 — 한 명씩), 지켜보는 메드베디 · 리사
+	"pro_fighter": {"hp": 260.0, "posture": 120.0, "walk": 2.0, "run": 4.3, "stagger": 70, "poise": 8.0, "ai": "x_kicker", "look": "gunter_bald", "dmg_k": 0.7},
+	"keurisa": {"hp": 900.0, "posture": 400.0, "walk": 2.2, "run": 4.8, "stagger": 75, "poise": 30.0, "finisher_cap": 0.06, "ai": "x_kicker",
+		"look": "keurisa", "dmg_k": 1.4},
+	"medvedi": {"hp": 300.0, "posture": 110.0, "walk": 1.9, "run": 4.2, "stagger": 55, "look": "medvedi"},
+	"risa": {"hp": 200.0, "posture": 60.0, "walk": 1.9, "run": 4.0, "stagger": 60, "look": "risa"},
 	"bulgom": {"hp": 1500.0, "posture": 460.0, "walk": 1.8, "run": 3.9, "stagger": 80, "poise": 34.0, "finisher_cap": 0.06, "ai": "x_grappler",
 		"look": "bulgom", "phase2_at": 0.5, "dmg_k": 2.2},
 	"moseunggyu": {"hp": 360.0, "posture": 300.0, "walk": 1.8, "run": 3.9, "stagger": 80, "poise": 32.0, "finisher_cap": 0.06, "ai": "x_brawler",
-		"look": "moseunggyu", "phase2_at": 0.5, "dmg_k": 0.7},
+		"look": "moseunggyu", "phase2_at": 0.5, "dmg_k": 0.58},   # 맵을 넓힌 뒤(2026-11-12) 봇 2/4 → 낮춤
 	"odohwa": {"hp": 2600.0, "posture": 800.0, "walk": 2.0, "run": 4.4, "stagger": 80, "poise": 38.0, "finisher_cap": 0.04, "ai": "x_axe",
 		"look": "odohwa", "hp_floor": 0.4, "dmg_k": 1.8},
 	"masa": {"hp": 600.0, "posture": 160.0, "walk": 2.0, "run": 4.3, "stagger": 75, "poise": 18.0, "ai": "x_blade", "look": "masa", "dmg_k": 1.2},
@@ -107,9 +116,18 @@ const ROOMS := [
 			["gang_blade", Vector2(4.8, -2.0), {"name": "칫솔 칼잡이", "tag": "w2"}], ["gang_brute", Vector2(4.8, -0.6), {"name": "턱수염 재소자", "tag": "w2"}], ["street_thug", Vector2(4.8, 0.8), {"name": "습격 무리", "tag": "w2"}],
 			["gang_blade", Vector2(4.8, 2.0), {"name": "칫솔 칼잡이", "tag": "w2"}], ["street_thug", Vector2(5.6, -2.0), {"name": "습격 무리", "tag": "w2"}], ["gang_blade", Vector2(5.6, -0.6), {"name": "칫솔 칼잡이", "tag": "w2"}],
 			["gang_brute", Vector2(5.6, 0.8), {"name": "턱수염 재소자", "tag": "w2"}]]}]},
+	# 피우진 특급훈련(2026-11-12 사용자 14번): 격투장 격투가 → 바실리 → 크리샤 차례로 한 명씩. 크리샤가 나오면 피우진은 체력 12% 밑으로 안 내려가고,
+	# 체력 1/5 이하가 되면 크리샤가 빨간 ! 기술 → 그 순간 경기가 멈추고 메드베디 · 크리샤 대사 → 시험 통과(방을 깸)
 	{"id": "ballerino_cage", "theme": "club_cage", "bounds": Rect2(-5.0, -2.2, 10.0, 4.4), "cast": ["woojin"],
 		"heroes": [Vector2(-3.0, 0.2)], "allies": [],
-		"enemies": [["vasily", Vector2(2.2, 0.0)]], "boss": "vasily"},
+		"standing": [["medvedi", Vector2(-4.4, -1.9), 0], ["risa", Vector2(-3.6, -2.0), 0]],
+		"enemies": [["pro_fighter", Vector2(2.2, 0.0), {"tag": "f1"}]], "boss": "pro_fighter",
+		"triggers": [
+			{"when": "down:f1", "boss": "vasily", "say": "vasily_in", "spawn": [["vasily", Vector2(4.6, 0.0)]]},
+			{"when": "down:vasily", "boss": "keurisa", "say": "keurisa_in", "spawn": [["keurisa", Vector2(4.6, 0.0)]]},
+			{"when": "after:1:0.1", "hp_floor": {"woojin": 0.12, "keurisa": 0.3}},      # 시험 — 크리샤는 쓰러지지 않는다(이스크라)
+			{"when": "hp:woojin:0.2", "requires": [1], "scene": "keurisa_red", "scene_end": "clear"},
+			{"when": "after:1:70", "requires": [1], "scene": "keurisa_red", "scene_end": "clear"}]},   # 오래 버티면 크리샤가 먼저 빨간 !
 	{"id": "busan_arcade", "theme": "busan_arcade", "bounds": Rect2(-6.0, -2.4, 12.0, 4.8), "cast": ["jintae"],
 		"heroes": [Vector2(-4.0, 0.2)], "allies": [],
 		# 서진태 대 표영 + 핀아웃 10명(2026-11-12 사용자 "표영 쪽 일반 캐릭터 숫자를 10명으로") — 오락실 게임기는 부딪히면 부서진다(무대 breakable)

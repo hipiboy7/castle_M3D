@@ -44,6 +44,8 @@ var buttons := [
 	{"id": "skill", "label": "기술", "r": 60.0, "off": Vector2(-300, -270)},
 	{"id": "skill_next", "label": "바꾸기", "r": 44.0, "off": Vector2(-440, -330)},
 	{"id": "dash", "label": "대시", "r": 52.0, "off": Vector2(-450, -70)},      # 대시 + 베기 = 대시기(rc.2 폰 묶음 B)
+	{"id": "jump", "label": "점프", "r": 50.0, "off": Vector2(-575, -150)},     # 점프(공중 치기 · 벽 밟기) — 2026-11-12
+	{"id": "crouch", "label": "앉기", "r": 46.0, "off": Vector2(-585, -290)},   # 누르는 동안 앉기(높은 공격을 피함 · 앉아 쓸기)
 	{"id": "pause", "label": "멈춤", "r": 34.0, "off": Vector2(-56, 92), "at": "tr"},
 	{"id": "speed", "label": "×1", "r": 34.0, "off": Vector2(-56, 180), "at": "tr"},
 	{"id": "menu", "label": "메뉴", "r": 34.0, "off": Vector2(-144, 92), "at": "tr"},

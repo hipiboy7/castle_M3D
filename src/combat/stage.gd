@@ -19,7 +19,7 @@ extends RefCounted
 ## ── 방 표 칸(ROOMS 한 줄 — 아래 '규칙 칸'은 모두 없어도 된다. 없으면 예전과 똑같이 돈다) ──────────────────────────────
 ## 기본: id · theme · bounds(Rect2 — 넓게 쓰면 긴 맵: 카메라가 앞장선 사람을 따른다) · cast · heroes(자리) · allies [[id, 자리]] ·
 ##   enemies [[id, 자리, {덧붙임}]] · boss · end · kit · talk · escape
-##   덧붙임(enemies · spawn · standing 의 셋째 · 넷째 칸): role · look · ai · name · hp_k · leader · tag(같은 인물 여럿을 가를 이름 —
+##   덧붙임(enemies · spawn · standing 의 셋째 · 넷째 칸): role · look · ai · name · hp_k · leader · near · off(spawn — 그 사람 곁) · tag(같은 인물 여럿을 가를 이름 —
 ##   when "down:<tag>" · recruit · protect 가 id 대신 tag 로도 찾는다) · passive(적 — 치지도 막지도 않고 맞기만, 11장 천일도)
 ## 규칙 칸:
 ##   "triggers": [{when, (requires), ...do}] — 싸움 중 매 프레임 차례로 보고, 조건이 맞으면 한 번만 터진다(같은 프레임에 여럿도). 결정적.
@@ -47,6 +47,7 @@ extends RefCounted
 ##            "hold": true                이 대사가 끝날 때까지 모두 멈춘다(사람 입력도 — 연출). 싸움 시간도 멈춘다
 ##            "calm": true                모든 적 · 아군이 싸움을 멈춘다(inert — 싸움이 파함. 적이 다 멈추면 대사 뒤에 방을 넘는다)
 ##            "inert": [id, ..]           그 사람만 멈춘다
+##            "hp_floor": {id: 비율}       그 사람 체력이 이 비율 밑으로 안 내려간다(조작 인물도)
 ##            "clear": true               방을 깬 것으로(say 가 있으면 대사가 끝난 뒤)
 ##            "escape": {"exit": Rect2, "secs": n}  지금부터 n 초 안에 출구로(따돌리기와 같은 판정 · 남은 초 표시 · 못 닿으면 짐)
 ##            "cast": [id, ..] (+ "cast_at": [Vector2, ..])  조작 인물 묶음을 바꾼다 — 빠지는 사람은 퇴장(쓰러진 사람은 그 자리),
@@ -63,6 +64,9 @@ extends RefCounted
 ##   "hp_start": {id: 비율}  조작 인물이 이 체력으로 방을 시작(12장 마학영전 서진태 0.3)
 ##   "ally_heroes": [id 또는 [id, Vector2], ..]  cast 에 없는 조작 인물을 아군 봇으로 세운다(12장 최민욱 잡기 김신 — 쓰러져도 지지
 ##                   않는다. 지키려면 protect 에)
+##   "scene": "이름" 또는 [단계, ..]  싸움 앞 장면(src/combat/scene.gd — 말풍선 · 걷기 · 퇴장 · 동작). triggers 의 do 에도 "scene"
+##                   (+ "scene_end": fight | clear | win — 단계에 end 가 없을 때). 이름은 lines.json <LINES>.scenes.<이름>
+##   "poses": {id: 자세}  들어설 때부터 장면 자세(poses.gd SCENE — 앉기 sit · 기대기 lean …)
 ##   "fade": [제목, 작은 글] 또는 "키"  방을 깨면(끝 방 end 는 들어서면) 화면을 어둡게 하며 글(11장 '만인지상의 자리에 오르다') — FADE_T 머문다
 ##   "ranks": {id: 등급}  이 방에서 그 조작 인물 · 아군 · 적의 등급을 덮는다(기술 수도 다시 — 8장 교류회 김신 톱 · 류지학 내성 중위)
 ## 남은 초(escape · survive · limit)와 관전은 timers(d) → main.gd 가 화면 아래 한 줄로.
@@ -80,12 +84,13 @@ const Addendum = preload("res://src/data/addendum.gd")
 const Campaign = preload("res://src/data/campaign.gd")
 const Lines = preload("res://src/data/lines.gd")
 const Difficulty = preload("res://src/data/difficulty.gd")
+const Scene = preload("res://src/combat/scene.gd")
 
 const RECRUIT_HP := 0.5          # recruit: 우리 편이 될 때 체력을 최대의 이만큼까지(3층 · 잠정)
 const PENDING_SPAWN := ["time", "after", "x", "survive"]   # 앞으로 반드시(또는 걸어가면) 터질 조건 — spawn 이 남았으면 방을 넘지 않는다
 
 
-## opts: chapter(장 id — 기본 ch11) · room(시작 방 번호 — 시험용) · crowd(첫 방에 엑스트라를 이만큼 더 — 성능 점검 '적 30명') ·
+## opts: talk(원작 대사 장면 — 화면 있는 게임만) · chapter(장 id — 기본 ch11) · room(시작 방 번호 — 시험용) · crowd(첫 방에 엑스트라를 이만큼 더 — 성능 점검 '적 30명') ·
 ##   difficulty(난이도 — 적에게만 배율, src/data/difficulty.gd · 기본 보통) · table(장 표를 직접 — 시험의 작은 예시 표, 사전도 된다)
 static func make(seed_value: int, opts := {}) -> Dictionary:
 	var w = World.new()
@@ -95,13 +100,70 @@ static func make(seed_value: int, opts := {}) -> Dictionary:
 	var d := {"kind": "stage", "chapter": ch, "tbl": T, "world": w, "heroes": [], "ctrl": 0, "room_i": -1, "room": {}, "enemies": [], "allies": [],
 		"ais": {}, "bots": {}, "yield": {}, "seed": seed_value, "stage": "intro", "t": 0, "fight_t": 0, "cleared": 0,
 		"times": {}, "look_of": {}, "hero": null, "boss": null, "crowd": int(opts.get("crowd", 0)), "n": 0, "cast": [],
-		"difficulty": Difficulty.valid(opts.get("difficulty", Difficulty.DEFAULT)), "know": {}, "base_rank": {}, "standing": []}
+		"difficulty": Difficulty.valid(opts.get("difficulty", Difficulty.DEFAULT)), "know": {}, "base_rank": {}, "standing": [],
+		"talk": bool(opts.get("talk", false))}
 	for id in T.HEROES:
 		var h = _hero(d, id)
 		d["bots"][h] = Bot.new(h, null, _rng(seed_value * 7919 + d["heroes"].size() + 1))
 		d["heroes"].append(h)
 	_enter(d, int(opts.get("room", 0)))
 	return d
+
+
+## 맵 넓히기(2026-11-12 사용자 "각 스테이지별 맵 크기를 더 크고 넓게"): 방 표의 넓이 · 자리를 방 가운데에서 가로 x · 세로 y 배로 —
+## 무대 그림(world3d · town3d · haseong3d)은 bounds 를 따라 바닥 · 벽 · 소품 자리를 잡는다. 장 표 MAP_K(Vector2 — 1 이면 그대로)로 장마다,
+## 방 표 "fixed": true 면 그 방은 그대로(무대가 고정 치수인 방 — 0장 호텔 복도 · 장면 자리를 m 로 적은 방)
+const MAP_K := Vector2(1.4, 1.25)
+const LONG_MAP := 18.0
+
+
+static func scaled_room(room: Dictionary, k: Vector2) -> Dictionary:
+	if room.get("fixed", false) or room.has("escape") or k.is_equal_approx(Vector2.ONE):
+		return room                                  # 따돌리기 방(출구까지 초를 잰 긴 복도)은 그대로
+	var b: Rect2 = room["bounds"]
+	if b.size.x >= LONG_MAP:
+		k.x = 1.0                                    # 이미 긴 맵(복도 · 거리 18m 이상)은 세로만
+	var c := b.get_center()
+	var r := room.duplicate(true)
+	var sp := func(p: Vector2) -> Vector2: return c + (p - c) * k
+	var sr := func(q: Rect2) -> Rect2: return Rect2(c + (q.position - c) * k, q.size * k)
+	r["bounds"] = sr.call(b)
+	r["heroes"] = room["heroes"].map(func(p): return sp.call(p))
+	for key in ["allies", "enemies", "standing"]:
+		var rows: Array = []
+		for row in room.get(key, []):
+			var nr: Array = row.duplicate(true)
+			nr[1] = sp.call(row[1])
+			rows.append(nr)
+		r[key] = rows
+	if room.has("ally_heroes"):
+		r["ally_heroes"] = room["ally_heroes"].map(func(a): return [a[0], sp.call(a[1])] if a is Array else a)
+	if room.has("escape"):
+		r["escape"]["exit"] = sr.call(room["escape"]["exit"])
+	var trs: Array = []
+	for t in room.get("triggers", []):
+		var nt: Dictionary = t.duplicate(true)
+		var w := str(t["when"])
+		if w.begins_with("x:"):
+			nt["when"] = "x:%.3f" % (c.x + (float(w.substr(2)) - c.x) * k.x)
+		for key in ["spawn", "spawn_allies"]:
+			if t.has(key):
+				var rows2: Array = []
+				for row in t[key]:
+					var nr2: Array = row.duplicate(true)
+					nr2[1] = sp.call(row[1])
+					rows2.append(nr2)
+				nt[key] = rows2
+		if t.has("cast_at"):
+			nt["cast_at"] = t["cast_at"].map(func(p): return sp.call(p))
+		if t.has("bounds"):
+			nt["bounds"] = sr.call(t["bounds"])
+		if t.has("escape"):
+			nt["escape"]["exit"] = sr.call(t["escape"]["exit"])
+		trs.append(nt)
+	if room.has("triggers"):
+		r["triggers"] = trs
+	return r
 
 
 static func _rng(s: int) -> RandomNumberGenerator:
@@ -142,6 +204,7 @@ static func _hero(d: Dictionary, id: String):
 	_base(f, T.ROLES[id], Addendum.stats_at(id, T.PERIOD))
 	f.moveset = T.ROLES[id]["moveset"]
 	f.can_parry = bool(c.get("can_parry", false))
+	f.evade_btn = not f.can_parry                       # 쳐내기가 없는 조작 인물은 쳐내기 버튼 = 피하기(2026-11-12 사용자)
 	d["know"][f] = pr[1]
 	d["base_rank"][f] = str(tconst(T, "HERO_RANKS", {}).get(id, pr[0]))
 	_set_rank(d, f, d["base_rank"][f])
@@ -292,7 +355,7 @@ static func _line(d: Dictionary, key: String, secs := 2.6, delay := 0.0) -> void
 static func _enter(d: Dictionary, i: int) -> void:
 	var w = d["world"]
 	var T = d["tbl"]
-	var room: Dictionary = T.ROOMS[i]
+	var room: Dictionary = scaled_room(T.ROOMS[i], tconst(T, "MAP_K", Vector2.ONE if T is Dictionary else MAP_K))   # 시험의 사전 표는 그대로
 	d["room_i"] = i
 	d["room"] = room
 	for f in d["enemies"] + d["allies"] + d["standing"]:
@@ -312,6 +375,8 @@ static func _enter(d: Dictionary, i: int) -> void:
 	d["say_until"] = 0
 	d["hold_until"] = 0
 	d["clear_at"] = -1
+	d["canon_closed"] = false
+	d["canon_mid"] = 0
 	d["passive"] = {}
 	d["ally_heroes"] = []
 	d["theme"] = str(room.get("theme", ""))
@@ -343,6 +408,9 @@ static func _enter(d: Dictionary, i: int) -> void:
 		e.oneshot_immune = e.char_id == d["boss_id"]     # 방의 보스는 등급 차 한 방을 안 받는다
 	for s in room.get("standing", []):
 		_stand(d, _npc(d, s[0], int(s[2]), s[1], s[3] if s.size() > 3 else {}))
+	for id in room.get("poses", {}):                 # 방 표 poses: 들어설 때부터 장면 자세(프롤로그 주점 — 앉은 김신 · 바에 기댄 리사)
+		for f in _who(d, str(id)):
+			f.pose = str(room["poses"][id])
 	if i == 0 and int(d["crowd"]) > 0:
 		for k in int(d["crowd"]):                    # 성능 점검: 경호원을 둥글게 더 세운다
 			var a := TAU * k / float(d["crowd"])
@@ -368,6 +436,9 @@ static func _place_hero(d: Dictionary, h, pos: Vector2) -> void:
 	h.facing = Vector2(1, 0)
 	h.vel = Vector2.ZERO
 	h.posture = 0.0
+	h.inert = false                                   # 앞 방 장면에서 퇴장했으면(scene.gd leave) 다시 싸운다
+	h.scripted = false
+	h.pose = ""
 	if h.alive():
 		h.set_state("idle")
 	var rk: String = str(room.get("kit", {}).get(h.char_id, h.char_id))   # 방 표 kit: 이 방에서만 다른 동작 · 외형(2장 공사장 맨손 김신)
@@ -453,11 +524,27 @@ static func step(d: Dictionary, human = null) -> void:
 	var T = d["tbl"]
 	d["t"] += 1
 	d["n"] += 1
+	if human != null:
+		d["human_any"] = true
+	if Scene.active(d):
+		# 장면 연출(방 표 scene · triggers scene): 사람 입력은 '넘기기'(공격 버튼 — 지금 말풍선을 끝냄)만, AI 없음, 싸움 시간 멈춤
+		if human != null and human.get("attack", false):
+			Scene.skip(d)
+		Scene.tick(d)
+		if not Scene.frozen(d):
+			w.tick()
+		Scene.after_tick(d)
+		_focus(d)
+		return
 	match str(d["stage"]):
 		"intro":
 			if d["t"] >= T.INTRO_T:
 				d["stage"] = "end" if d["room"].get("end", false) else "fight"
 				d["t"] = 0
+				if d["stage"] == "fight" and d["room"].has("scene"):
+					Scene.start(d, scene_steps(d, d["room"]["scene"]))       # 싸움 앞 장면(끝나면 싸움 — 단계 end 가 정한다)
+				elif d["stage"] == "fight" and human_seen(d) and human != null:
+					Scene.start(d, canon_steps(d, "open"))                    # 원작 대사(사람이 할 때만 — 봇 판 · 데모는 건너뜀)
 				if d["stage"] == "end":
 					if not _fade(d):
 						_line(d, "end", 5.0)
@@ -665,8 +752,16 @@ static func _after(d: Dictionary) -> void:
 			won = true                                      # 버텼다
 		if not won and left == 0 and not _waits(d):
 			won = not (d["room"].has("talk") and float(d["fight_t"]) < talk_secs(d) * 60.0)   # 대화 방: 대사가 다 지나갈 때까지 머문다
+		if won and not got_away and human_seen(d) and not d.get("canon_closed", false) and not _has_scene_trigger(d):
+			d["canon_closed"] = true
+			var cs := canon_steps(d, "close")
+			if not cs.is_empty():
+				Scene.start(d, cs, "clear")                    # 끝 원작 대사 → 장면이 끝나면 방을 깬다(clear_at)
+				won = false
 		if won:
 			_clear(d, got_away)
+		elif d["stage"] == "fight" and human_seen(d):
+			_canon_mid(d)
 	_focus(d)
 
 
@@ -696,7 +791,7 @@ static func _left(d: Dictionary) -> int:
 
 ## 적이 다 쓰러져도 아직 방을 넘지 않는다: 대사가 남음 · 앞으로 터질 spawn 이 남음
 static func _waits(d: Dictionary) -> bool:
-	if int(d["n"]) < int(d["say_until"]):
+	if int(d["n"]) < int(d["say_until"]) or Scene.active(d):
 		return true
 	var trs: Array = d["room"].get("triggers", [])
 	for k in trs.size():
@@ -821,11 +916,11 @@ static func _when(d: Dictionary, when: String) -> bool:
 static func _do(d: Dictionary, t: Dictionary) -> void:
 	var w = d["world"]
 	for s in t.get("spawn", []):
-		var f = _npc(d, str(s[0]), 1, s[1], s[2] if s.size() > 2 else {})
+		var f = _npc(d, str(s[0]), 1, _spawn_at(d, s), s[2] if s.size() > 2 else {})
 		f.oneshot_immune = f.char_id == d["boss_id"]
 		w.events.append(["spawn", f])
 	for s in t.get("spawn_allies", []):
-		w.events.append(["spawn", _npc(d, str(s[0]), 0, s[1], s[2] if s.size() > 2 else {})])
+		w.events.append(["spawn", _npc(d, str(s[0]), 0, _spawn_at(d, s), s[2] if s.size() > 2 else {})])
 	if t.has("boss"):
 		d["boss_id"] = str(t["boss"])
 		for e in d["enemies"]:
@@ -856,10 +951,29 @@ static func _do(d: Dictionary, t: Dictionary) -> void:
 	if t.has("escape"):
 		d["esc"] = {"exit": t["escape"]["exit"], "secs": float(t["escape"]["secs"]), "t0": d["fight_t"]}
 	_say_lines(d, t.get("say", []))
+	for id in t.get("hp_floor", {}):
+		for f in _who(d, str(id)):
+			f.hp_floor = float(t["hp_floor"][id])     # 그 사람이 이 체력 비율 밑으로 안 내려간다(3장 특급훈련 — 피우진이 시험 전에 쓰러지지 않게)
+	if t.has("scene"):
+		Scene.start(d, scene_steps(d, t["scene"]), str(t.get("scene_end", "fight")))
 	if t.get("hold", false):
 		d["hold_until"] = maxi(int(d["hold_until"]), int(d["say_until"]))
 	if t.get("clear", false):
 		d["clear_at"] = maxi(int(d["n"]), int(d["say_until"]))
+
+
+## spawn 자리: 덧붙임 near(사람 id · tag) 가 있고 그 사람이 서 있으면 그 사람 자리 + off(맵 안으로), 아니면 표의 자리
+## (1장 회암시 거리 — 윤덕수는 김신 곁에, 강창석 · DS 는 서진태 · 김대건 곁에)
+static func _spawn_at(d: Dictionary, s: Array) -> Vector2:
+	var ex: Dictionary = s[2] if s.size() > 2 else {}
+	if not ex.has("near"):
+		return s[1]
+	var who: Array = _who(d, str(ex["near"])).filter(func(f): return f.alive())
+	if who.is_empty():
+		return s[1]
+	var at: Vector2 = who[0].pos + ex.get("off", Vector2(1.6, 0.0))
+	var b: Rect2 = d["world"].bounds
+	return Vector2(clampf(at.x, b.position.x + 0.3, b.end.x - 0.3), clampf(at.y, b.position.y + 0.3, b.end.y - 0.3))
 
 
 ## 조작 인물 묶음을 바꾼다: 빠지는 사람은 퇴장(쓰러진 사람은 그 자리에 남는다), 들어오는 사람은 cast_at 자리(없으면 왼쪽 가장자리)에.
@@ -962,6 +1076,60 @@ static func _learn(d: Dictionary, event: String) -> void:
 		var ln = Lines.at("stage.learn")
 		if ln is Array and ln.size() >= 2:
 			d["world"].events.append(["line", str(ln[0]) % h.name, str(ln[1]) % ", ".join(got), 3.0, 0.0])
+
+
+## 원작 대사(tools/canon_scenes.py 가 lines.json <LINES>.canon.<방> 에 쓴다 — 2026-11-12 사용자 "각 스테이지별 원작 그대로의 캐릭터들 멘트"):
+## open 싸움 앞 · close 방을 깨기 전 = 장면(말풍선 — 누르면 넘김), mid = 보스 체력 2/3 · 1/3 에서 말풍선만(멈추지 않음).
+## 그 방에 없는 사람의 말은 건너뛴다(scene.gd). 사람이 할 때만(봇 판 · 데모 · 시험은 건너뜀 — human_seen)
+static func canon_steps(d: Dictionary, part: String) -> Array:
+	var v = Lines.at("%s.canon.%s.%s" % [d["tbl"].LINES, d["room"]["id"], part])
+	if not (v is Array) or v.is_empty():
+		return []
+	var out: Array = []
+	for ln in v:
+		out.append({"say": [str(ln[0]), str(ln[1])]})
+	return out
+
+
+## 원작 대사 장면을 트는 판 — 판 opts talk(main.gd 가 화면이 있을 때만 true — 창 없는 verify · 시험 · 봇 판은 아님)
+static func human_seen(d: Dictionary) -> bool:
+	return d.get("talk", false) and d.get("human_any", false)     # 사람이 한 번이라도 조작한 판(처음 화면 뒤 데모는 아님)
+
+
+static func _has_scene_trigger(d: Dictionary) -> bool:
+	return d["room"].get("triggers", []).any(func(t): return t.has("scene")) or d["room"].has("talk")
+
+
+static func _canon_mid(d: Dictionary) -> void:
+	var b = d["boss"]
+	if b == null or not b.alive():
+		return
+	var v = Lines.at("%s.canon.%s.mid" % [d["tbl"].LINES, d["room"]["id"]])
+	if not (v is Array) or v.is_empty():
+		return
+	var k: int = int(d.get("canon_mid", 0))
+	var marks := [0.66, 0.33]
+	if k >= marks.size() or b.hp > b.hp_max * float(marks[k]):
+		return
+	d["canon_mid"] = k + 1
+	var half: int = int(ceil(v.size() / 2.0))
+	var lines: Array = v.slice(k * half, (k + 1) * half)
+	var delay := 0.0
+	for ln in lines:
+		var who = Scene.who_of(d, str(ln[0]), true)
+		if who == null:
+			continue
+		var secs := Scene.say_secs(str(ln[1]))
+		d["world"].events.append(["bubble_later", who, str(ln[1]), secs, delay])
+		delay += secs
+
+
+## 장면 단계: 방 표 · trigger 의 scene 이 글이면 lines.json <LINES>.scenes.<이름>(대사와 함께 — 하드코딩 금지), 목록이면 그대로
+static func scene_steps(d: Dictionary, sc) -> Array:
+	if sc is Array:
+		return sc
+	var v = Lines.at("%s.scenes.%s" % [d["tbl"].LINES, str(sc)])
+	return v if v is Array else []
 
 
 ## 대화 방(방 표 talk — 5 · 7장처럼 싸움 없는 장면): 대사 rooms.<방>.say(줄마다 [제목, 작은 글, (refs)])를 SAY_SECS 마다 하나씩.

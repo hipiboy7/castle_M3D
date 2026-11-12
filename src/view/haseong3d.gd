@@ -514,7 +514,10 @@ func _hs_office(b: Rect2) -> void:
 	for i in nb:
 		var bx := gx0 + bay * (i + 0.5)
 		if i == broken:
-			_mesh(self, _hs_jagged(bay, hh - 0.2, 5), _hs_glass(Color(0.7, 0.8, 0.95, 0.22)), Vector3(bx, 0.1, wz))
+			# 김신이 총으로 깨는 칸(2026-11-12 사용자 '대표실 창문 쏴서 깨트리고') — 처음엔 성한 유리, 장면 fx glass 에 깨진 테로
+			var whole := _mesh(self, _box(Vector3(bay, hh - 0.2, 0.02)), glass, Vector3(bx, hh * 0.5, wz))
+			var shards := _mesh(self, _hs_jagged(bay, hh - 0.2, 5), _hs_glass(Color(0.7, 0.8, 0.95, 0.22)), Vector3(bx, 0.1, wz))
+			_brk_glass(whole, shards, Vector2(bx, wz), 1.0)
 		else:
 			_mesh(self, _box(Vector3(bay, hh - 0.2, 0.02)), glass, Vector3(bx, hh * 0.5, wz))
 		_mesh(self, _box(Vector3(0.08, hh, 0.14)), frame, Vector3(gx0 + bay * i, hh * 0.5, wz + 0.02))

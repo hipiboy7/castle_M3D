@@ -51,6 +51,40 @@ const RELAX := {
 	"th_r": Vector3(6, -4, 6), "kn_r": 8.0, "ft_r": -2.0, "th_l": Vector3(-6, 6, 8), "kn_l": 4.0, "ft_l": 2.0,
 }
 
+# 피하기(옆 · 뒤로 몸을 빼며 숙임) · 점프(무릎을 당김) · 앉기(낮게 웅크림) — 2026-11-12
+const EVADE := {"pelvis": Vector3(-6, 0, 14), "spine": Vector3(-4, 0, 8), "chest": Vector3(-10, -10, 12), "head": Vector3(8, 14, -10),
+	"th_r": Vector3(-14, 0, 14), "kn_r": 34.0, "th_l": Vector3(20, 0, 4), "kn_l": 44.0}
+const JUMP := {"pelvis": Vector3(10, 0, 0), "chest": Vector3(8, 0, 0), "head": Vector3(-6, 0, 0),
+	"th_r": Vector3(70, -4, 8), "kn_r": 100.0, "ft_r": 20.0, "th_l": Vector3(40, 4, 10), "kn_l": 80.0, "ft_l": 20.0}
+const WALL_STEP := {"chest": Vector3(-6, 0, 0), "th_r": Vector3(80, 0, 6), "kn_r": 40.0, "th_l": Vector3(-20, 0, 8), "kn_l": 60.0}
+const CROUCH := {"pelvis": Vector3(16, 0, 0), "spine": Vector3(10, 0, 0), "chest": Vector3(10, 0, 0), "head": Vector3(-14, 0, 0),
+	"th_r": Vector3(70, -6, 12), "kn_r": 110.0, "ft_r": -30.0, "th_l": Vector3(40, 6, 14), "kn_l": 100.0, "ft_l": -40.0}
+
+# 장면 자세(src/combat/scene.gd pose — fighter.pose): 서 있는 동안만 이 자세(걷거나 치면 보통으로)
+const SCENE := {
+	# 의자에 앉음 — 허벅지 앞으로 · 무릎 굽힘(발이 땅에 닿게 인형이 골반을 내린다), 팔은 무릎 위
+	"sit": {"pelvis": Vector3(-4, 0, 0), "spine": Vector3(6, 0, 0), "chest": Vector3(6, 0, 0), "head": Vector3(-2, 0, 0),
+		"th_r": Vector3(86, -6, 8), "kn_r": 92.0, "ft_r": 4.0, "th_l": Vector3(84, 6, 10), "kn_l": 88.0, "ft_l": 4.0,
+		"sh_r": Vector3(34, 10, 8), "el_r": 48.0, "sh_l": Vector3(32, 6, 8), "el_l": 46.0},
+	# 바(카운터)에 기대섬 — 한쪽 팔꿈치를 걸치고 다리를 꼰다
+	"lean": {"pelvis": Vector3(0, -20, 6), "chest": Vector3(-6, -16, 8), "head": Vector3(-6, 14, 0),
+		"sh_l": Vector3(20, -10, 46), "el_l": 96.0, "sh_r": Vector3(8, 6, 10), "el_r": 30.0,
+		"th_r": Vector3(6, 14, -6), "kn_r": 10.0, "th_l": Vector3(-2, -4, 6), "kn_l": 4.0},
+	# 팔짱
+	"arms": {"chest": Vector3(-4, 0, 0), "head": Vector3(-6, 0, 0),
+		"sh_r": Vector3(46, 50, 14), "el_r": 128.0, "sh_l": Vector3(44, 52, 14), "el_l": 130.0},
+	# 두 손 들기(항복)
+	"hands_up": {"chest": Vector3(-6, 0, 0), "head": Vector3(-4, 0, 0),
+		"sh_r": Vector3(10, 0, 150), "el_r": 50.0, "sh_l": Vector3(10, 0, 150), "el_l": 50.0},
+	# 무릎 꿇음
+	"kneel": {"pelvis": Vector3(10, 0, 0), "chest": Vector3(14, 0, 0), "head": Vector3(10, 0, 0),
+		"th_r": Vector3(10, 0, 6), "kn_r": 120.0, "ft_r": -30.0, "th_l": Vector3(84, 0, 8), "kn_l": 90.0,
+		"sh_r": Vector3(10, 0, 14), "el_r": 20.0, "sh_l": Vector3(20, 0, 12), "el_l": 30.0},
+	# 누운 채 위를 봄(쓰러진 뒤 말할 때)
+	"lie_up": {"head": Vector3(-30, 0, 0), "sh_r": Vector3(10, 0, 64), "el_r": 24.0, "sh_l": Vector3(10, 0, 58),
+		"el_l": 30.0, "th_r": Vector3(8, 0, 10), "kn_r": 16.0, "th_l": Vector3(30, 0, 8), "kn_l": 60.0, "fall": 80.0},
+}
+
 ## 공격 자세를 크고 길게 읽히게(2026-11-10 폰 리뷰 "공격 모션이 다 비슷하다") — 인형(src/view/puppet3d.gd _shape_set)이 모양마다
 ## W · S · F 에 더해 A(예비 동작: 준비 앞에 타격 반대쪽으로 더 감고 가라앉음) · O(지나침: 타격 뒤 같은 쪽으로 더) 를 만든다.
 ## AMP_TORSO: 가드에서 벗어난 몸통 각도 배율 · AMP_STEP: 내딛기(root_fwd) 배율 · ANTICIPATE · OVERSHOOT: W↔S 차이의 몇 배를 더 감고 · 지나가나 ·

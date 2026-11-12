@@ -266,7 +266,7 @@ FLOW_EVENTS = "400:back,500:press,700:hide,760:show,800:press,900:back,960:back"
 MENU_EVENTS = "30:press,120:menu,150:menupick_ch11,180:menupick_room4,400:menu,430:menupick_resume"   # 11장 다섯째 방 = 71층 회장실 앞(hotel.gd ROOMS)
 MENU_WANT = ["STAGE ch0 room=0", "MODE title", "STAGE ch0 room=0", "MODE fight", "MENU on", "MENU off", "STAGE ch11 room=4",
              "MODE fight", "MENU on", "MENU off"]
-CHAIN_EVENTS = "1:autowin," + ",".join(f"{i * 150}:press" for i in range(1, 360))   # 900초(2026-11-10 — 7 · 9장 관전 · 대화 방이 늘어 600초를 넘었다)
+CHAIN_EVENTS = "1:autowin," + ",".join(f"{i * 150}:press" for i in range(1, 480))   # 1200초(2026-11-12 — 장면 연출 · 주점 방이 늘어 900초를 넘었다)
 MID_EVENTS = "30:press,120:menu,150:menupick_room2,200:autowin,1000:press,1300:press"
 FLOW_WANT = ["MODE title", "MODE demo", "MODE title", "MODE fight", "PAUSE on", "PAUSE off", "PAUSE on", "PAUSE off", "MODE title"]
 
@@ -317,7 +317,7 @@ def step_flow(g):
     # 장 차례(rc.4 폰 "8장 깨도 9장으로 안넘어가"): 새 세이브 → 이어하기로 0 ~ 13장을 깬다(autowin — 적을 바로 쓰러뜨림, 방 넘기 · 깸 · 세이브는 그대로)
     ids = playable_ids()
     chain = save_file("save_chain.json", [])
-    ok &= grab("장 차례", ["--seconds", "900", "--trace", "--save", chain, "--events", CHAIN_EVENTS])
+    ok &= grab("장 차례", ["--seconds", "1200", "--trace", "--save", chain, "--events", CHAIN_EVENTS])
     # 중간 스테이지부터(싸움 중 메뉴로 고름 · 난이도 바꿔 다시) 깨도 다음 장이 열린다
     i8 = ids.index("ch8")
     mid = save_file("save_mid.json", ids[:i8], ids[i8 - 1])

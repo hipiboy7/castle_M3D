@@ -62,6 +62,9 @@ const ROLES := {
 		"moveset": {"combo": "dk_jab", "dash": "dk_dash", "finisher": "dk_finisher"}},
 	"gangmanjae": {"hp": 420.0, "posture": 200.0, "walk": 1.7, "run": 3.7, "stagger": 75, "poise": 24.0, "finisher_cap": 0.2, "ai": "manjae",
 		"look": "gangmanjae", "dmg_k": 0.8},
+	# 윤덕수가 나설 때 함께(2026-11-12 사용자 8번 — '강창석(악귀)와 DS 시큐리티 5명' · 다른 캐릭터들 근처에): 서진태 · 김대건이 맡는다
+	"gangchangseok": {"hp": 420.0, "posture": 160.0, "walk": 1.9, "run": 4.1, "stagger": 75, "poise": 18.0, "finisher_cap": 0.2, "ai": "changseok",
+		"look": "gangchangseok", "dmg_k": 0.8},
 	"yundeoksu": {"hp": 900.0, "posture": 380.0, "walk": 1.85, "run": 4.0, "stagger": 80, "poise": 28.0, "finisher_cap": 0.1, "ai": "deoksu",
 		"look": "yundeoksu", "phase2_at": 0.5, "dmg_k": 0.85},
 }
@@ -85,15 +88,24 @@ const ROOMS := [
 			{"when": "down:kimdaegeon", "recruit": "kimdaegeon", "say": "persuade", "hold": true},
 			{"when": "after:0:0", "say": "join", "clear": true}]},
 	# 회암시 거리: 강만재가 먼저(무리와) → 강만재가 쓰러지면 윤덕수가 나선다(마지막 보스) → 윤덕수를 쓰러뜨리면 끝
-	{"id": "street", "theme": "hoeam_street", "bounds": Rect2(-7.0, -3.0, 14.0, 6.0), "cast": ["kimshin"],
-		"heroes": [Vector2(-5.0, 0.3)],
-		"allies": [["jintae", Vector2(-5.6, -1.4)], ["kimdaegeon", Vector2(-5.6, 1.6), {"role": "kimdaegeon_ally"}]],
-		"enemies": [["ds_member", Vector2(0.8, -1.8)], ["ds_member", Vector2(1.6, 1.4)], ["ds_member", Vector2(2.8, -0.2)],
-			["ds_member", Vector2(3.6, 2.0)], ["ds_member", Vector2(4.8, -2.2)], ["gangmanjae", Vector2(4.4, 0.6)]],
+	# 회암시 거리(2026-11-12 사용자 8번 — 맵을 키우고 18 × 7m, 윤덕수가 나설 때 강창석(악귀) · DS 시큐리티 5명을 더: 윤덕수는 김신 곁에,
+	# 강창석 · DS 는 서진태 · 김대건 곁에 — 둘이 그쪽과 싸우고 김신은 윤덕수에게. spawn 덧붙임 near · off — stage._spawn_at)
+	{"id": "street", "theme": "hoeam_street", "bounds": Rect2(-9.0, -3.5, 18.0, 7.0), "cast": ["kimshin"],
+		"heroes": [Vector2(-6.6, 0.3)],
+		"allies": [["jintae", Vector2(-7.2, -1.6)], ["kimdaegeon", Vector2(-7.2, 1.8), {"role": "kimdaegeon_ally"}]],
+		"enemies": [["ds_member", Vector2(-0.4, -2.2)], ["ds_member", Vector2(0.6, 1.8)], ["ds_member", Vector2(2.0, -0.4)],
+			["ds_member", Vector2(3.2, 2.4)], ["ds_member", Vector2(4.4, -2.6)], ["ds_member", Vector2(5.6, 1.0)],
+			["ds_member", Vector2(6.6, -1.2)], ["gangmanjae", Vector2(4.8, 0.4)]],
 		"boss": "gangmanjae",
 		"triggers": [
 			{"when": "down:gangmanjae", "boss": "yundeoksu", "say": "deoksu",
-				"spawn": [["yundeoksu", Vector2(6.4, -0.6)]]}]},
+				"spawn": [["yundeoksu", Vector2(6.4, -0.6), {"near": "kimshin", "off": Vector2(2.2, 0.0)}],
+					["gangchangseok", Vector2(5.0, -2.0), {"near": "jintae", "off": Vector2(1.8, 0.2), "name": "강창석(악귀)"}],
+					["ds_member", Vector2(5.0, 2.0), {"near": "jintae", "off": Vector2(1.6, -1.2), "name": "DS 시큐리티"}],
+					["ds_member", Vector2(5.0, 2.0), {"near": "jintae", "off": Vector2(-1.4, 1.2), "name": "DS 시큐리티"}],
+					["ds_member", Vector2(5.0, 2.0), {"near": "kimdaegeon", "off": Vector2(1.6, 0.8), "name": "DS 시큐리티"}],
+					["ds_member", Vector2(5.0, 2.0), {"near": "kimdaegeon", "off": Vector2(1.4, -1.0), "name": "DS 시큐리티"}],
+					["ds_member", Vector2(5.0, 2.0), {"near": "kimdaegeon", "off": Vector2(-1.6, 0.6), "name": "DS 시큐리티"}]]}]},
 	{"id": "street_end", "theme": "hoeam_street", "bounds": Rect2(-5.0, -2.4, 10.0, 4.8), "cast": ["kimshin"],
 		"heroes": [Vector2(-1.6, 0.4)], "allies": [], "enemies": [], "boss": "", "end": true},
 ]

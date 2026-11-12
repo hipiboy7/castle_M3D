@@ -114,6 +114,10 @@
 | `models/haseong_suit_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-11 — 외형 `src/view/looks.gd` LOOKS, 관절 인형이던 무리를 GLB 로 · 성능) | 그림 A 하성 정장(2 · 12 · 13장 엑스트라) |
 | `models/haseong_guard_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-11 — 외형 `src/view/looks.gd` LOOKS, 관절 인형이던 무리를 GLB 로 · 성능) | 그림 A 하성 경비 · 칼잡이(2 · 3 ~ 10장 엑스트라) |
 | `models/namgu_youth_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-11 — 외형 `src/view/looks.gd` LOOKS, 관절 인형이던 무리를 GLB 로 · 성능) | 그림 A 남구 청년(2장 엑스트라) |
+| `models/kimshin_coat_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-12 — 외형 `src/view/looks.gd` LOOKS) | 그림 A 김신 롱코트(프롤로그 주점) |
+| `models/client_woman_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-12 — 외형 `src/view/looks.gd` LOOKS) | 그림 A 후드 쓴 의뢰인 여자(프롤로그 주점) |
+| `models/hahoe_mask_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-12 — 외형 `src/view/looks.gd` LOOKS) | 그림 A 하회탈 가면(3장 부산 밤 시장 골목) |
+| `models/redspot_mask_a.glb` | 직접(스크립트 생성) — `tools/make_models.gd` (2026-11-12 — 외형 `src/view/looks.gd` LOOKS) | 그림 A 붉은 점 가면(3장 부산 밤 시장 골목) |
 | `sprites/baekdochan_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/baekdochan_a.glb`) | 그림 B 백도찬(6장) |
 | `sprites/baekdochan_b.json` | 〃 | 그림 B 백도찬(6장) |
 | `sprites/woojin_b.png` | 직접(스크립트 생성) — `tools/make_sprites.gd` (`models/woojin_a.glb`) | 그림 B 피우진(11장) |

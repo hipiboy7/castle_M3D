@@ -289,9 +289,9 @@ func test_ch2_ceo_one_hit() -> void:
 	var d := Stage.make(1, {"chapter": "ch2", "room": _room_of("ceo_office")})
 	for e in d["enemies"]:
 		check(not e.oneshot_immune, "%s 는 한 방을 받는다(방 보스 없음)" % e.name)
-	var r := Stage.simulate(1, 60 * 60, {"chapter": "ch2", "room": _room_of("ceo_office")})
+	var r := Stage.simulate(1, 60 * 150, {"chapter": "ch2", "room": _room_of("ceo_office")})
 	var t := float(r["times"].get("ceo_office", -1)) / 60.0
-	check(t > 0.0 and t < 25.0, "봇이 짧게 넘는다 (%.1f초)" % t)
+	check(t > 0.0 and t < 120.0, "봇이 넘는다 — 김재훈 창문 장면까지 (%.1f초)" % t)     # 장면 대사 약 1분(2026-11-12 사용자 12번)
 
 
 ## 봇이 2장 보스 방을 넘는다 — 몇 초 만에 녹지 않지만 1분 안(2장 보스는 모두 조작 인물보다 아랫급 — 사용자 2026-11-10). 수치 조정 회귀 막기

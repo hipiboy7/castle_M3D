@@ -10,6 +10,25 @@ const Common = preload("res://src/data/common.gd")
 const RankPower = preload("res://src/data/rank_power.gd")   # 등급 능력(3D 덧붙임 — 빠르기 · 체력 · 회피 · 방어)
 
 const ROLL_T := 20
+# 피하기 · 점프 · 벽 밟기 · 앉기(2026-11-12 사용자 "'쳐내기' 기능이 없는 캐릭터들은 해당 버튼을 '피하기'로 … '점프'와 '앉기' 버튼과 기능 …
+# 점프해서 벽에 붙으면 벽을 밟는 기능") — 3층 잠정값(이 판 소유)
+const EVADE_T := 16              # 피하기(쳐내기가 없는 사람의 쳐내기 버튼): 짧은 비켜서기
+const EVADE_IFRAMES := Vector2i(1, 11)
+const EVADE_DIST := 1.25
+const EVADE_CD := 18             # 피하기를 마친 뒤 이 안에는 다시 못 한다(연타 무적 막기)
+const JUMP_T := 40               # 점프 — 떠 있는 프레임
+const JUMP_H := 0.95             # 가장 높이(m)
+const JUMP_IFRAMES := Vector2i(6, 30)   # 공중 가운데는 바닥 기술을 넘는다(무적)
+const JUMP_CD := 12
+const JUMP_STEER := 0.08         # 공중에서 막대로 방향을 트는 정도(프레임마다)
+const WALL_KICK := 3.6           # 벽 밟고 튀는 빠르기(m/초)
+const CROUCH_DUCK_T := 26        # 앉은 뒤 이 프레임 안에는 높은 공격이 머리 위로 지나간다(오래 앉아 있으면 맞춰 친다)
+const CROUCH_SPEED_K := 0.4
+const CROUCH_MOVE := "c_sweep"   # 앉아 치기 — 낮은 발 쓸기
+const AIR_MOVE := "air_kick"     # 공중 치기 — 날아차기
+## 앉으면 피하는 높은 동작 모양(poses.gd SHAPES — 낮은 발 · 쓸기 · 태클 · 내려찍기 · 총 · 엇박은 앉아도 맞는다)
+const DUCKABLE := ["slash", "thrust", "sidekick", "spin", "punch", "cross", "jab", "straight", "hook", "elbow", "flying_knee", "headbutt",
+	"palm", "round_kick", "spin_back_kick", "flying_kick", "backfist", "reverse_stab", "guard_counter", "front_kick"]
 const ROLL_IFRAMES := Vector2i(2, 14)
 const ROLL_DIST := 2.2
 const PARRY_WINDOW := 7          # 누른 뒤 이 프레임 안에 칼을 받으면 '칼날 쳐내기' (늦게 누른 것은 world.gd LATE_PARRY)
@@ -77,6 +96,7 @@ var flick_t := 0                 # 쳐내기 성공 동작(그림용)
 var roll_dir := Vector2.ZERO
 var running_t := 0
 var buf_dash := 0
+var buf_jump := 0
 var dash_t := 0
 var dash_grace := 0
 var dash_dir := Vector2.ZERO
@@ -101,6 +121,17 @@ var finisher_cap := 0.0          # 제압 피해 상한(최대 체력 비율, 0 
 var phase := 1
 var phase2_at := 0.0             # 체력이 이 비율이 되면 2차(0 = 2차 없음)
 var inert := false               # 싸움에서 빠졌다(신겐이 길을 내줌) — 치지도 맞지도 않는다
+var evade_btn := false           # 쳐내기 버튼이 피하기(조작 인물 중 칼날 쳐내기가 없는 사람 — stage · duel 이 정한다)
+var evade_dir := Vector2.ZERO
+var last_evade_end := -999
+var air := 0.0                   # 땅에서 뜬 높이(m — 점프)
+var jump_vel := Vector2.ZERO     # 점프 중 바닥 빠르기(m/초)
+var wall_used := false           # 이번 점프에 벽을 밟았다
+var last_jump_end := -999
+var crouching := false           # 앉아 있다(앉기 버튼을 누르는 동안 — 서 있기 · 걷기 중)
+var crouch_t := 0                # 앉은 지 몇 프레임
+var scripted := false            # 장면 연출 중(src/combat/scene.gd) — 동작은 해도 맞히지 않는다
+var pose := ""                   # 장면 자세(그림만 — 앉기 sit · 팔짱 arms · 손들기 hands_up …, poses.gd SCENE). 빈 글 = 보통
 var rank_power := true           # 등급 능력을 쓴다(false = 동작 · 체력 · 회피 · 방어를 등급과 상관없이 — 쳐내기 · 판정 시험)
 var no_evade := false            # 등급 회피를 안 한다(맞기만 하는 적 — 11장 천일도)
 var base_hp := -1.0              # 등급 능력을 곱하기 앞 최대 체력 · 걷기 · 달리기(apply_rank_power 가 처음 부를 때 잡는다)
@@ -145,6 +176,12 @@ func alive() -> bool:
 
 
 func set_state(s: String) -> void:
+	if state == "jump" and s != "jump":
+		air = 0.0                                    # 공중에서 다른 상태(맞음 · 공중 치기)가 되면 땅으로 — 날아차기 높이는 자세가 그린다
+		last_jump_end = clock
+	if s != "idle" and s != "move":
+		crouching = false
+		crouch_t = 0
 	state = s
 	t = 0
 
@@ -174,7 +211,16 @@ func in_recovery() -> bool:
 func iframes() -> bool:
 	if state == "attack" and move.get("iframes", false):
 		return t <= int(move["startup"]) + int(move["active"])        # 무적 기술(위빙 · 사라지는 스텝) — 판정이 끝날 때까지
+	if state == "evade":
+		return t >= EVADE_IFRAMES.x and t <= EVADE_IFRAMES.y
+	if state == "jump":
+		return t >= JUMP_IFRAMES.x and t <= JUMP_IFRAMES.y
 	return state == "roll" and t >= ROLL_IFRAMES.x and t <= ROLL_IFRAMES.y
+
+
+## 앉아서 이 동작을 피하나(앉은 지 CROUCH_DUCK_T 안 · 높은 동작)
+func ducks(mv: Dictionary) -> bool:
+	return crouching and crouch_t <= CROUCH_DUCK_T and DUCKABLE.has(str(mv.get("shape", "")))
 
 
 ## 카운터 자세(move.stance): 준비 앞 stance 프레임 동안 마주 본 공격을 받아 넘긴다(world.gd 가 보고 stance_hit 로 맞받는다)

@@ -14,6 +14,13 @@ const SETS := {
 		"floor": [Color(0.42, 0.43, 0.42), 0.8, true], "wall": [Color(0.5, 0.52, 0.5), 3.0],
 		"omni": [[0, 2.4, 1.0, Color(0.85, 0.95, 1.0), 1.4, 7.0]],
 		"props": [["bars", 0, -0.5, {"w": 12.0}], ["bunk", -4.5, -0.3], ["bunk", 4.5, -0.3], ["shower", 0, -0.35], ["puddle", -1.0, 2.0], ["puddle", 2.4, 3.0]]},
+	# ---- 프롤로그 주점(p1:002/002-011 — 블라디보스토크, 영업 전 · 어두운 구석의 김신 · 바의 리사) — 2026-11-12 사용자 5번
+	"vlad_bar": {"env": [Color(0.22, 0.16, 0.12), 0.55, Color(0.02, 0.015, 0.01)], "top": [Color(1.0, 0.82, 0.6), 0.35],
+		"floor": [Color(0.2, 0.13, 0.09), 0.5, false], "wall": [Color(0.18, 0.12, 0.09), 3.2],
+		"omni": [[1.6, 2.4, 0.4, Color(1.0, 0.72, 0.42), 2.2, 6.5], [-1.0, 2.6, 2.6, Color(0.9, 0.6, 0.35), 0.9, 4.5]],
+		"props": [["bar", 1.6, -0.6, {"w": 6.0}], ["stool", -0.4, 0.15], ["stool", 0.8, 0.15], ["stool", 2.0, 0.15], ["stool", 3.2, 0.15],
+			["round_table", -2.0, 2.2], ["round_table", 4.6, 2.6], ["sofa", -5.0, -0.2], ["plant", -3.6, -0.4], ["neon", 3.8, -0.75, {"text": "BAR", "col": Color(1.0, 0.45, 0.3)}],
+			["door", -6.4, 1.6]]},
 	"club_cage": {"env": [Color(0.3, 0.2, 0.26), 0.6, Color(0.02, 0.01, 0.02)], "top": [Color(1.0, 0.8, 0.85), 0.6],
 		"floor": [Color(0.12, 0.1, 0.12), 0.5, false], "wall": [Color(0.16, 0.1, 0.14), 3.2],
 		"omni": [[-3, 2.6, 0.5, Color(1.0, 0.3, 0.55), 2.0, 7.0], [3, 2.6, 0.5, Color(0.4, 0.5, 1.0), 2.0, 7.0]],
@@ -22,7 +29,11 @@ const SETS := {
 	"busan_arcade": {"env": [Color(0.24, 0.2, 0.32), 0.65, Color(0.02, 0.01, 0.03)], "top": [Color(0.9, 0.8, 1.0), 0.5],
 		"floor": [Color(0.2, 0.12, 0.24), 0.45, true], "wall": [Color(0.12, 0.08, 0.16), 3.0],
 		"omni": [[-3, 1.8, 0.2, Color(1.0, 0.4, 0.9), 1.8, 6.0], [3, 1.8, 0.2, Color(0.3, 0.9, 1.0), 1.8, 6.0]],
-		"props": [["slots", 0, -0.45, {"n": 9}], ["neon", -3.5, -0.75, {"text": "GAME LAND", "col": Color(1.0, 0.85, 0.2)}], ["stool", -2.0, -0.05], ["stool", 1.5, -0.05]]},
+		# 게임기: 뒷벽 줄 + 걸을 곳 양옆 · 가운데 섬(2026-11-12 사용자 "게임기들이 싸우면서 캐릭터들에 부딪히거나 거기로 캐릭이 넘어지면 부서지고 깨지도록")
+		"props": [["slots", 0, -0.45, {"n": 11}], ["neon", -3.5, -0.75, {"text": "GAME LAND", "col": Color(1.0, 0.85, 0.2)}], ["stool", -2.0, -0.05], ["stool", 1.5, -0.05],
+			["slots", -7.0, 1.6, {"n": 2}], ["slots", 7.0, 1.6, {"n": 2}], ["slots", -7.0, 4.4, {"n": 2}], ["slots", 7.0, 4.4, {"n": 2}],
+			["slots", -1.8, 3.0, {"n": 2}], ["slots", 2.4, 3.0, {"n": 2}],
+			["stool", -4.0, 1.4], ["stool", 4.4, 1.6], ["stool", -3.0, 4.6], ["stool", 0.4, 5.0], ["stool", 3.6, 4.4]]},
 	"busan_rain": {"env": [Color(0.22, 0.26, 0.32), 0.6, Color(0.02, 0.03, 0.05)], "sun": [Color(0.6, 0.7, 0.9), 0.5, Vector3(-55, 30, 0)],
 		"ground": [Color(0.1, 0.11, 0.12), Color(0.18, 0.19, 0.2), 0.25], "fog": [Color(0.2, 0.24, 0.3), 0.025], "rain": 360,
 		"omni": [[-4, 3.2, -0.6, Color(1.0, 0.7, 0.4), 1.6, 7.0], [4, 3.2, -0.6, Color(0.5, 0.8, 1.0), 1.4, 7.0]],
@@ -257,14 +268,44 @@ func build(th: String, b: Rect2, detail := true) -> void:
 	var bz := b.position.y
 	for p in s.get("props", []):
 		_prop(str(p[0]), Vector3(cx + float(p[1]), 0, bz + float(p[2])), p[3] if p.size() > 3 else {}, b)
+	if not s.get("no_clutter", false):
+		_clutter(b, s.has("floor"), th.hash())
 	if s.has("rain") or s.get("rain_view", false):
 		_rain(Vector3(cx, 4.0, b.get_center().y), Vector3(b.size.x * 0.6, 0.5, b.size.y * 0.7), int(s.get("rain", 200)))
 	if s.get("snow_out", false):
 		_snow(Vector3(cx, 4.0, bz - 2.0), Vector3(b.size.x * 0.6, 0.5, 1.0), 120)
 
 
+## 걸을 곳 양옆 가장자리의 부서지는 잡동사니(2026-11-12 사용자 "싸우면서 주변 물건들도 박살나는 연출") — 실내는 의자 · 상자,
+## 바깥은 드럼통 · 상자. 낮은 것만(카메라를 가리지 않게), 무대 표 no_clutter 면 안 둔다(물 위 · 배 갑판처럼 놓을 데가 없는 곳)
+func _clutter(b: Rect2, indoor: bool, seed_v: int) -> void:
+	var r := RandomNumberGenerator.new()
+	r.seed = seed_v
+	var kinds := ["stool", "small_crate", "stool"] if indoor else ["barrel", "small_crate", "barrel"]
+	for sx in [-1.0, 1.0]:
+		for k in 2:
+			var x: float = b.get_center().x + sx * (b.size.x * 0.5 - 0.45 - r.randf_range(0.0, 0.5))
+			var z: float = b.position.y + b.size.y * (0.3 + 0.45 * k) + r.randf_range(-0.3, 0.3)
+			_prop(kinds[(k + (1 if sx > 0 else 0)) % kinds.size()], Vector3(x, 0, z), {"col": Color(0.42, 0.3, 0.2)}, b)
+
+
+## 부서지는 소품 종류 → [부딪힘 반지름, 줄이면 하나씩(split)] — 사람이 날아와 부딪히면 부서진다(src/view/breakables.gd · 2026-11-12)
+const BREAK_KINDS := {"slots": [0.5, true], "stool": [0.3, false], "small_crate": [0.32, false], "barrel": [0.36, false], "crate": [0.5, true], "sofa": [0.8, false],
+	"plant": [0.45, false], "desk": [1.0, false], "round_table": [0.8, false], "trophy": [0.4, true], "bed": [1.0, false],
+	"shelf": [0.6, true], "long_table": [1.2, false], "stall": [0.9, true], "speaker": [0.45, true], "lantern": [0.3, true],
+	"books": [0.5, true], "pews": [1.0, true], "cubicle": [0.9, true], "blocks": [0.5, true], "tub": [0.6, false],
+	"console": [0.7, true], "bunk": [1.0, false], "wreath": [0.5, true], "altar": [0.9, false], "lamp": [0.3, true]}
+
+
 ## 소품 하나 — at 은 바닥 자리(y 0). o 는 덧붙임(색 col · 너비 w · 깊이 d · 글 text · 높이 h · y)
 func _prop(kind: String, at: Vector3, o: Dictionary, b: Rect2) -> void:
+	var mk := _brk_mark()
+	_prop_build(kind, at, o, b)
+	if BREAK_KINDS.has(kind) and not o.get("solid", false):
+		_brk_wrap(mk, float(BREAK_KINDS[kind][0]), "prop", bool(BREAK_KINDS[kind][1]))
+
+
+func _prop_build(kind: String, at: Vector3, o: Dictionary, b: Rect2) -> void:
 	var col: Color = o.get("col", Color(0.4, 0.3, 0.2))
 	match kind:
 		"bars":                                          # 교도소 창살(뒷벽 앞)
@@ -348,6 +389,10 @@ func _prop(kind: String, at: Vector3, o: Dictionary, b: Rect2) -> void:
 				_mesh(self, _box(Vector3(2.6, 0.02, 0.1)), _shared(Color(0.36, 0.37, 0.4), 0.5, 0.0, 0.6), at + Vector3(0, y * 0.2, 0))
 		"barrel":
 			_barrel(at, Color(0.3, 0.32, 0.36))
+		"small_crate":                                   # 걸을 곳 가장자리 잡동사니(낮은 상자 둘 — _clutter)
+			var m := _shared(Color(0.5, 0.36, 0.2), 0.85)
+			_mesh(self, _box(Vector3(0.55, 0.45, 0.5)), m, at + Vector3(0, 0.225, 0))
+			_mesh(self, _box(Vector3(0.42, 0.34, 0.4)), m, at + Vector3(0.05, 0.62, 0.02))
 		"crate":
 			var m := _shared(Color(0.5, 0.36, 0.2), 0.85)
 			_mesh(self, _box(Vector3(1.0, 1.0, 1.0)), m, at + Vector3(0, 0.5, 0))

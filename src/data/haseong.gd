@@ -99,9 +99,18 @@ const ROLES := {
 ## heroes 자리도 이 차례) · kit(조작 인물 id → ROLES 의 다른 줄 — 동작 · 외형만 바꿔 낀다) · escape(따돌리기: secs 안에 exit 안에 들어서면
 ## 방을 넘는다 — 적은 쓰러뜨리지 않아도 된다, 못 들어서면 진다)
 const ROOMS := [
+	# 이슬과 대가리 정하기(2026-11-12 사용자 9번): 싸움 앞 장면(김신 + 김대건 대 이슬 + 인수 — 둘은 지켜보기만: standing) →
+	# 김신 대 이슬 한 합 → 이슬이 쓰러지면 김신 · 김대건 퇴장, 이슬 · 인수 대사(lines.json ch2.scenes)
 	{"id": "site_night", "theme": "site_alley", "bounds": Rect2(-5.6, -2.4, 11.2, 4.8), "cast": ["kimshin"], "kit": {"kimshin": "kimshin_bare"},
 		"heroes": [Vector2(-3.0, 0.2)], "allies": [],
-		"enemies": [["iseul", Vector2(2.0, 0.0), {"hp_k": 0.5}]], "boss": "iseul"},
+		"standing": [["kimdaegeon", Vector2(-4.4, -1.4), 0], ["insu", Vector2(3.6, -1.5), 1]],
+		"enemies": [["iseul", Vector2(2.0, 0.0), {"hp_k": 0.5}]], "boss": "iseul",
+		"scene": "iseul_deal",
+		"triggers": [
+			{"when": "hp:iseul:0.75", "say": [["", "이슬: 크... 이게 얼마 만인지.", ["p1:022/059"]],
+				["", "이슬: 아무리 윗대가리 꼰대가 되어가도... 너 같은 놈을 보면 피가 끓는 걸 참을 수가 없단 말이야.", ["p1:022/061"]]]},
+			{"when": "hp:iseul:0.4", "say": [["", "이슬: 모든 걸 내려놓고 치고 받고 싶어서!", ["p1:022/062"]], ["", "이슬: 살아있음을 실감하고 싶어서!", ["p1:022/063"]]]},
+			{"when": "down:iseul", "scene": "iseul_after", "scene_end": "clear"}]},
 	# 1층: 하성 인력 30명 = 12(w1) → 10(w2) → 8(w3) + 황보민철(2026-11-12 사용자 '2배로') — 앞 무리가 다 쓰러지면 오른쪽에서 다음 무리
 	{"id": "lobby", "theme": "haseong_lobby", "bounds": Rect2(-7.2, -3.2, 14.4, 6.4), "cast": ["jintae"],
 		"heroes": [Vector2(-5.0, 0.2)],
@@ -152,10 +161,11 @@ const ROOMS := [
 			["haseong_guard", Vector2(6.8, -0.6), {"tag": "w2"}], ["haseong_guard", Vector2(6.8, 0.2), {"tag": "w2"}], ["haseong_guard", Vector2(6.8, 0.9), {"tag": "w2"}],
 			["haseong_guard", Vector2(6.8, 1.7), {"tag": "w2"}]]}]},
 	# 대표실: 방 보스가 없다 — 강창석 · 김재훈 모두 김신의 등급 차 한 방. 둘 다 쓰러지면 김신의 멘트 뒤에 방을 넘는다
-	{"id": "ceo_office", "theme": "haseong_office", "bounds": Rect2(-5.6, -2.6, 11.2, 5.2), "cast": ["kimshin"],
+	{"id": "ceo_office", "fixed": true, "theme": "haseong_office", "bounds": Rect2(-5.6, -2.6, 11.2, 5.2), "cast": ["kimshin"],
 		"heroes": [Vector2(-3.8, 0.4)], "allies": [],
 		"enemies": [["gangchangseok", Vector2(1.6, -1.2)], ["kimjaehoon", Vector2(3.0, 0.8)]], "boss": "",
-		"triggers": [{"when": "clear", "say": "done", "clear": true}]},
+		# 김재훈이 쓰러지면 장면(2026-11-12 사용자 12번 — 강창석은 원작처럼 달아나고 029/039-043, 창을 쏴 깨고 끌고 가 '달게 받아라' → 창 밖으로)
+		"triggers": [{"when": "down:kimjaehoon", "scene": "jaehoon_window", "scene_end": "clear"}]},
 	# 위층 복도(긴 맵 22m) — 남궁혁을 피해 10초 안에 오른쪽 끝 문으로
 	{"id": "upper_corridor", "theme": "haseong_upper", "bounds": Rect2(-11.0, -2.0, 22.0, 4.0), "cast": ["kimshin"],
 		"heroes": [Vector2(-10.2, 0.0)], "allies": [],

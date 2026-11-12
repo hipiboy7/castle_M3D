@@ -40,7 +40,7 @@ func test_chapter_list() -> void:
 		check(t is Array and t.size() == 2 and str(t[0]) != "", "장 이름 · 한 줄(lines.json chapters.%s)" % id)
 	check(Campaign.playable_ids() == PLAYABLE, "지금 할 수 있는 장 %s" % [Campaign.playable_ids()])
 	check(Campaign.playable("ch0") and Campaign.playable("ch11") and not Campaign.playable("nope"), "만든 장은 할 수 있고 없는 장은 못 한다")
-	check(Campaign.view("ch0") == "town" and Campaign.view("ch1") == "town" and Campaign.view("ch2") == "haseong" and Campaign.view("ch11") == "hotel",
+	check(Campaign.view("ch0") == "world" and Campaign.view("ch1") == "town" and Campaign.view("ch2") == "haseong" and Campaign.view("ch11") == "hotel",
 		"무대 그림 이름")
 	check(Campaign.from_mode("duel") == "ch6" and Campaign.from_mode("stage") == "ch11" and Campaign.from_mode("ch11") == "ch11",
 		"옛 실행 인자 --mode duel|stage 도 장 id 로")

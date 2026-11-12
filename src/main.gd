@@ -52,6 +52,7 @@ const Nav = preload("res://src/ui/nav.gd")
 const TitleMenu = preload("res://src/ui/title_menu.gd")
 const StageMenu = preload("res://src/ui/stage_menu.gd")
 const SafeArea = preload("res://src/ui/safe_area.gd")
+const Bubbles = preload("res://src/ui/bubbles.gd")
 
 const DEMO_AFTER := 360
 const SHOT_WARMUP := 3          # --shots: 찍을 프레임 바로 앞 몇 프레임만 그린다
@@ -114,6 +115,10 @@ var arena: Node3D
 var fx: Node3D
 var cam: Camera3D
 var hud: CanvasLayer
+var bubbles: Control                       # 말풍선(src/ui/bubbles.gd — HUD 밑 칸, 터치 버튼 아래)
+var _tossed: Array = []                    # 장면에서 날아가는 인형 [인형, 처음, 끝, 지난 초, 초](scene.gd toss)
+var _in_scene := false
+var _cam_last := Vector3.ZERO
 var touch: Control
 var snd: Node
 var evfx
@@ -141,6 +146,10 @@ func _ready() -> void:
 	hud.setup()
 	if not headless:
 		add_child(Ink.grade_layer())                # 3D 위 · HUD 밑 화면 마무리(채도 · 대비 · 비네트)
+	bubbles = Bubbles.new()
+	hud.root.add_child(bubbles)
+	hud.root.move_child(bubbles, 2)                 # 덮개 · 작은 막대 위, 글자 · 메뉴 · 터치 아래
+	bubbles.anchor_fn = _bubble_anchor
 	menu = TitleMenu.new()
 	hud.hint_y_fn = func() -> float: return menu.hint_y()
 	hud.root.add_child(menu)
@@ -158,6 +167,7 @@ func _ready() -> void:
 	evfx.fx = fx
 	evfx.cam = cam
 	evfx.hud = hud
+	evfx.bubbles = bubbles
 	evfx.snd = snd
 	evfx.pup = pup
 	seed_now = int(args["seed"])
@@ -182,17 +192,76 @@ func _new_run(ch: String, room := -1) -> void:
 	_trace("STAGE %s room=%d frame=%d" % [ch, run_room, frames])
 	var opts := {"difficulty": str(save["difficulty"])}         # 난이도는 판 · 리플레이 기록에 같이(src/data/difficulty.gd)
 	if kind == "stage":
-		opts.merge({"chapter": ch, "room": run_room, "crowd": int(args["crowd"])})
+		opts.merge({"chapter": ch, "room": run_room, "crowd": int(args["crowd"]), "talk": not headless})   # 원작 대사 장면(창 없는 점검은 건너뜀)
 		d = Stage.make(seed_now, opts)
 	else:
 		d = Duel.make(seed_now, opts)
 	rec = Replay.start(kind, seed_now, opts)
 	hud.clear_messages()
+	bubbles.clear()
+	_set_scene(false)
 	_undim()
 	evfx.later_msg = []
 	evfx.later_t = 0.0
 	_build_stage_view()
 	d["world"].events = d["world"].events.filter(func(e): return e[0] != "room")   # 첫 방은 위에서 이미 그렸다
+
+
+## 부서지는 소품(2026-11-12 사용자 "싸우면서 주변 물건들도 박살나는 연출"): 맞고 날아가는 · 넘어지는 사람이 소품에 닿으면 무대가 부순다
+## (src/view/breakables.gd — 그림만)
+const SMASH_SPEED := 1.1          # 넉백 빠르기(m/초) 이상일 때만
+func _smash_props(w) -> void:
+	if arena == null or not arena.has_method("break_hit"):
+		return
+	for f in w.fighters:
+		var flying: bool = f.vel.length() > SMASH_SPEED and f.state in ["hitstun", "recoil", "stagger", "down", "dead", "stun"]
+		var fell: bool = (f.state == "down" or f.state == "dead") and f.t < 4
+		if not (flying or fell):
+			continue
+		var dir: Vector2 = f.vel.normalized() if f.vel.length() > 0.01 else -f.facing
+		if arena.break_hit(f.pos, dir):
+			snd.play("hit_heavy", -3.0, randf_range(0.7, 0.9))
+			cam.punch_zoom(0.97)
+
+
+## 말풍선 자리: 그 사람 인형 머리 위(화면 좌표) — 인형이 없거나 카메라 뒤 · 화면 밖이면 [false, ..](띠로 그린다)
+func _bubble_anchor(who) -> Array:
+	if who == null or not pup.has(who) or cam == null:
+		return [false, Vector2.ZERO]
+	var p: Node3D = pup[who]
+	var head: Vector3 = p.global_position + Vector3(0, float(p.tele_y) - 0.15, 0)
+	if cam.is_position_behind(head):
+		return [false, Vector2.ZERO]
+	var sp: Vector2 = cam.unproject_position(head)
+	var vr := get_viewport().get_visible_rect()
+	if not vr.grow(-8.0).has_point(sp):
+		return [false, Vector2.ZERO]
+	return [true, sp]
+
+
+## 장면 연출 중: 싸움 버튼을 숨기고(누르면 말풍선 넘기기 — 공격 버튼 · 화면 아무 곳) 안내 한 줄
+func _set_scene(on: bool) -> void:
+	if on == _in_scene:
+		return
+	_in_scene = on
+	if mode == "fight" or mode == "demo":
+		touch.show_fight = not on
+	hud.set_hint("누르면 넘기기" if on else "")
+
+
+## 창 밖으로 날아가는 인형: 포물선으로 날며 돌고, 끝에 닿으면 사라진다
+func _tick_tossed(dt: float) -> void:
+	for it in _tossed.duplicate():
+		var n: Node3D = it[0]
+		it[3] = float(it[3]) + dt
+		var u: float = clampf(float(it[3]) / maxf(0.05, float(it[4])), 0.0, 1.0)
+		var at: Vector3 = (it[1] as Vector3).lerp(it[2], u)
+		at.y = 1.6 * sin(u * PI) + 0.3 * u
+		n.position = at
+		n.rotation.x = -u * 2.4
+		if u >= 1.0:
+			n.queue_free()
+			_tossed.erase(it)
 
 
 ## 여유 자세(2026-11-12 사용자 "본인보다 레벨이 낮은 캐릭터들만 있으면 여유있는 포즈 … 동급 캐릭터가 나오면 가드를 올려서"):
@@ -205,6 +274,9 @@ func _mark_calm() -> void:
 		if f.alive() and not f.inert:
 			top[f.team] = maxi(int(top.get(f.team, -1)), ladder.find(str(f.rank)))
 	for f in pup:
+		if _in_scene or f.inert:
+			pup[f].calm = true                         # 장면 연출 · 지켜보는 사람(standing)은 편한 자세(사용자 9번 '둘다 편한 자세로')
+			continue
 		var foe := -1
 		for t in top:
 			if t != f.team:
@@ -238,12 +310,14 @@ func _build_arena() -> void:
 		add_child(arena)
 		arena.build(str(d.get("theme", d["room"]["theme"])), d["world"].bounds, not headless)
 		Ink.stylize(arena, not headless)
+		evfx.arena = arena
 	else:
 		arena = Arena.new()
 		arena.process_mode = Node.PROCESS_MODE_PAUSABLE
 		add_child(arena)
 		arena.build(not headless)
 		Ink.stylize(arena, not headless)
+		evfx.arena = arena
 
 
 ## 사람 하나의 인형 — 방에 들어설 때 · 방 안에서 새로 선 사람(stage 신호 spawn — triggers)
@@ -855,12 +929,17 @@ func _player_intent() -> Dictionary:
 	var tg = h.target()
 	var swap := Input.is_action_just_pressed("swap") or e.has("swap") or _fake_swap
 	_fake_swap = false
+	var skip := _in_scene and (e.has("tap") or _fake_press)       # 장면 넘기기(화면 누름 · 시험 --events press)
+	if skip:
+		_fake_press = false
 	return {
 		"move": mv, "face": h.dir_to(tg) if tg != null else Vector2.ZERO,
-		"attack": Input.is_action_just_pressed("attack") or e.has("attack"),
+		"attack": Input.is_action_just_pressed("attack") or e.has("attack") or skip,   # 장면 중 화면 누름 = 넘기기
 		"parry": Input.is_action_just_pressed("parry") or e.has("parry"),
 		"parry_held": Input.is_action_pressed("parry") or touch.held("parry"),
 		"roll": Input.is_action_just_pressed("roll") or e.has("roll"),
+		"jump": Input.is_action_just_pressed("jump") or e.has("jump"),
+		"crouch": Input.is_action_pressed("crouch") or touch.held("crouch"),
 		"dash": Input.is_action_just_pressed("dash") or e.has("dash"),
 		"skill": Input.is_action_just_pressed("skill") or e.has("skill"),
 		"skill_next": Input.is_action_just_pressed("skill_next") or e.has("skill_next"),
@@ -882,7 +961,13 @@ func _after_tick() -> void:
 			_add_puppet(e[1])
 		elif e[0] == "recruit" and pup.has(e[1]):
 			pup[e[1]].victory = false                       # 우리 편이 되어 다시 싸운다
-		elif e[0] == "leave" and pup.has(e[1]):            # 조작 인물 묶음에서 빠짐(triggers cast)
+		elif e[0] == "toss" and pup.has(e[1]):             # 장면: 날아가 사라진다(대표실 창 밖 — scene.gd toss)
+			var tp: Node3D = pup[e[1]]
+			pup.erase(e[1])
+			_tossed.append([tp, Vector3(e[2].x, 0, e[2].y), Vector3(e[3].x, 0, e[3].y), 0.0, float(e[4])])
+		elif e[0] == "scene":
+			_set_scene(bool(e[1]))
+		elif e[0] == "leave" and pup.has(e[1]):            # 조작 인물 묶음에서 빠짐(triggers cast) · 장면 퇴장
 			pup[e[1]].queue_free()
 			pup.erase(e[1])
 		elif e[0] == "stage_view":
@@ -893,6 +978,7 @@ func _after_tick() -> void:
 			hud.set_dim(true)
 			hud.message(str(e[1]), str(e[2]), float(e[3]))
 			_faded = true
+	_smash_props(w)
 	var swapped: bool = w.events.any(func(e): return e[0] in ["swap", "ko", "spawn", "recruit", "cast"])
 	evfx.apply(d)
 	w.events.clear()
@@ -989,16 +1075,19 @@ func _process(dt: float) -> void:
 			continue
 		_lod_dt.erase(f)
 		pup[f].update_from(f, dt, frozen)
+	_tick_tossed(dt)
 	touch.set_label("attack", _attack_label(d["hero"]))
-	var hp: Vector3 = pup[d["hero"]].position
+	touch.set_label("parry", "피하기" if d["hero"].evade_btn else "쳐내기")   # 칼날 쳐내기가 없는 사람은 피하기(2026-11-12)
+	var hp: Vector3 = pup[d["hero"]].position if pup.has(d["hero"]) else _cam_last     # 장면에서 퇴장한 조작 인물(2장 이슬 한 합 뒤)
+	_cam_last = hp
 	if kind == "stage":
 		var pts: Array = []
 		for f in pup:
-			if f.alive() and not f.inert:
+			if (f.alive() and not f.inert) or (_in_scene and d["world"].fighters.has(f)):   # 장면 중에는 지켜보는 사람 · 말하는 사람도 화면에
 				pts.append(pup[f].position)
 		cam.follow_group(hp, pts, dt, d["world"].shake)
 	else:
-		cam.follow(hp, pup[d["boss"]].position, dt, d["world"].shake)
+		cam.follow(hp, pup[d["boss"]].position if pup.has(d["boss"]) else hp, dt, d["world"].shake)
 	hud.update_bars(d["hero"], d["boss"], phase, dt, partner)
 	_escape_hint()
 	var minis: Array = []

@@ -12,6 +12,7 @@ const P = preload("res://src/view/poses.gd")
 const Looks = preload("res://src/view/looks.gd")
 const Ink = preload("res://src/view/ink.gd")                 # 붓칠 · 먹선 화풍(재질 · 번쩍임)
 const Fighter = preload("res://src/combat/fighter.gd")
+const MoveStyle = preload("res://src/view/move_style.gd")      # 사람마다 다른 공격 버릇(2026-11-12 '하나도 동일한 동작이 없도록')
 const FONT = preload("res://assets/fonts/Galmuri11-Bold.ttf")
 
 const PELVIS_H := 0.97
@@ -164,7 +165,7 @@ func set_marker(col) -> void:
 
 
 func update_from(f, dt: float, frozen: bool) -> void:
-	position = Vector3(f.pos.x, 0, f.pos.y)
+	position = Vector3(f.pos.x, float(f.air), f.pos.y)          # 점프 높이(fighter air)
 	_update_flash(f)
 	_update_telegraph(f)
 	if frozen:
@@ -203,7 +204,15 @@ func _target_pose(f, dt: float) -> Dictionary:
 	if victory:
 		return _merge(guard_pose, P.VICTORY)
 	match f.state:
+		"evade":
+			return _merge(guard_pose, P.EVADE)
+		"jump":
+			return _merge(guard_pose, P.WALL_STEP if f.wall_used and f.t < 8 else P.JUMP)
 		"idle", "move":
+			if f.crouching:
+				return _merge(_locomotion(f, dt), P.CROUCH)
+			if str(f.pose) != "" and P.SCENE.has(str(f.pose)) and f.speed_now < 0.2:
+				return _merge(_merge(P.NEUTRAL, {}), P.SCENE[str(f.pose)])   # 장면 자세(앉기 · 기대기 · 팔짱 …)
 			return _locomotion(f, dt)
 		"attack":
 			return _attack_pose(f)
@@ -309,7 +318,31 @@ func shape_key(mv: Dictionary) -> String:
 	return shape
 
 
+## 공격 자세 = 동작 모양(W · S · F) + 그 사람의 버릇(move_style — 감기 · 타격 무게를 동작 프레임에서)
 func _attack_pose(f) -> Dictionary:
+	var p := _attack_pose_base(f)
+	var mv: Dictionary = f.move
+	var su := maxi(1, int(mv["startup"]))
+	var ac := maxi(1, int(mv["active"]))
+	var rc := maxi(1, int(mv["recovery"]) + int(f.whiff_t))
+	var t: int = f.t
+	var ww := 0.0
+	var ws := 0.0
+	if t <= su:
+		ww = _ease_out(float(t) / su)
+	elif t <= su + ac:
+		var u := float(t - su) / ac
+		ww = 1.0 - u
+		ws = _ease_out(u)
+	else:
+		ws = 1.0 - _ease_in_out(clampf(float(t - su - ac) / rc, 0.0, 1.0))
+	var id := str(f.char_id)
+	var side := -1.0 if str(mv.get("hand", "R")) == "L" else 1.0
+	return MoveStyle.apply(p, MoveStyle.style_for(id), ww, ws, side, id + "/" + str(mv.get("name", "")), str(get_instance_id()),
+		not MoveStyle.STYLES.has(id))
+
+
+func _attack_pose_base(f) -> Dictionary:
 	var mv: Dictionary = f.move
 	var shape := shape_key(mv)
 	var keys: Array = shape_keys.get(shape, shape_keys["slash"])

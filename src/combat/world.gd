@@ -84,8 +84,14 @@ func tick() -> void:
 		f.events.clear()
 	_separate()
 	for f in fighters:
+		var want: Vector2 = f.pos
 		f.pos.x = clampf(f.pos.x, bounds.position.x, bounds.end.x)
 		f.pos.y = clampf(f.pos.y, bounds.position.y, bounds.end.y)
+		if f.state == "jump" and not f.wall_used and f.t >= 3 and f.t <= f.JUMP_T - 10 and want != f.pos:
+			var n: Vector2 = (f.pos - want).normalized()                 # 벽에서 안쪽
+			var mv: Vector2 = f.intent.get("move", Vector2.ZERO)
+			if mv.dot(-n) > 0.3:
+				f.wall_step(n)                               # 벽에 붙어 그쪽으로 밀면 벽을 밟고 반대로 뛴다
 	_tick_pending()
 	_hits()
 
@@ -154,7 +160,7 @@ func _faces(d, a) -> bool:
 
 func _hits() -> void:
 	for a in fighters:
-		if not a.is_active() or a.inert:
+		if not a.is_active() or a.inert or a.scripted:
 			continue
 		for d in fighters:
 			if d == a or d.team == a.team or not d.alive() or d.inert:
@@ -163,6 +169,8 @@ func _hits() -> void:
 				continue
 			if not _in_hit(a, d):
 				continue
+			if d.ducks(_hit_move(a)):
+				continue                                 # 앉아서 머리 위로 지나간다(높은 동작 — fighter_body DUCKABLE)
 			a.hit_ids[d.get_instance_id()] = true
 			_resolve(a, d)
 

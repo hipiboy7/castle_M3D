@@ -3,8 +3,79 @@ extends Node3D
 ## 빛 · 바닥 · 벽 · 소품 · 재질. 그림마다 build(theme, bounds, detail) 와 const THEMES(그리는 무대 이름)를 둔다(main.gd VIEWS — LSP).
 ## 폰 성능: 점광 3개 이하 · 그림자는 위에서 오는 빛 하나 · 같은 재질은 나눠 쓴다.
 
+const Breakables = preload("res://src/view/breakables.gd")
+
 var theme := ""
 var _detail := true
+var brk: Node3D = null              # 부서지는 소품(src/view/breakables.gd — 처음 묶을 때 만든다)
+
+
+# ---- 부서지는 소품(2026-11-12 사용자 "싸우면서 주변 물건들도 박살나는 연출") ----
+## 소품을 짓기 전 자리표(지은 뒤 _brk_wrap 이 그 사이에 생긴 메시를 묶는다)
+func _brk_mark() -> int:
+	return get_child_count()
+
+
+## from 뒤로 생긴 메시를 묶음으로 옮겨 부서지는 소품 하나(split — x 로 떨어진 무리마다 따로: 슬롯머신 줄 · 의자 줄)
+func _brk_wrap(from: int, r := 0.5, kind := "prop", split := false, gap := 0.25) -> void:
+	var made: Array = []
+	for i in range(from, get_child_count()):
+		var c := get_child(i)
+		if c is MeshInstance3D and c != brk:
+			made.append(c)
+	if made.is_empty():
+		return
+	if brk == null:
+		brk = Breakables.new()
+		add_child(brk)
+	var groups: Array = [made]
+	if split:
+		made.sort_custom(func(a, b): return a.position.x < b.position.x)
+		groups = [[made[0]]]
+		for k in range(1, made.size()):
+			var prev: MeshInstance3D = groups[-1][-1]
+			var m: MeshInstance3D = made[k]
+			if m.position.x - prev.position.x > gap + _half_w(prev) + _half_w(m):
+				groups.append([m])
+			else:
+				groups[-1].append(m)
+	for g in groups:
+		var cx := 0.0
+		var cz := 0.0
+		for m in g:
+			cx += m.position.x
+			cz += m.position.z
+		cx /= g.size()
+		cz /= g.size()
+		var node := Node3D.new()
+		add_child(node)
+		node.position = Vector3(cx, 0, cz)
+		for m in g:
+			var gt: Transform3D = m.global_transform if m.is_inside_tree() else m.transform
+			m.reparent(node, false)
+			m.transform = node.transform.affine_inverse() * gt
+		brk.register(node, Vector2(cx, cz), r, kind)
+
+
+func _half_w(m: MeshInstance3D) -> float:
+	return m.get_aabb().size.x * 0.5 if m.mesh != null else 0.0
+
+
+## 사람이 부딪힘(main.gd) · 장면 연출(event_fx prop_fx)
+func break_hit(pos: Vector2, dir: Vector2) -> bool:
+	return brk != null and brk.break_hit(pos, dir)
+
+
+func break_at(at: Vector2, r: float, dir: Vector2, kind := "") -> bool:
+	return brk != null and brk.break_at(at, r, dir, kind)
+
+
+## 유리 한 장(깨지는 창) — whole 은 성한 유리, broken 은 깨진 테(처음엔 숨김)
+func _brk_glass(whole: Node3D, broken: Node3D, at: Vector2, r := 0.9) -> void:
+	if brk == null:
+		brk = Breakables.new()
+		add_child(brk)
+	brk.register(whole, at, r, "glass", broken)
 
 
 func _env(amb: Color, energy: float, bg: Color) -> void:
@@ -151,21 +222,27 @@ func _pillar(at: Vector3, col: Color) -> void:
 
 
 func _sofa(at: Vector3) -> void:
+	var mk := _brk_mark()
 	var m := _mat(Color(0.35, 0.22, 0.14), 0.8)
 	_mesh(self, _box(Vector3(1.6, 0.42, 0.7)), m, at + Vector3(0, 0.21, 0))
 	_mesh(self, _box(Vector3(1.6, 0.5, 0.18)), m, at + Vector3(0, 0.6, 0.28))
+	_brk_wrap(mk, 0.80)
 
 
 func _plant(at: Vector3) -> void:
+	var mk := _brk_mark()
 	_mesh(self, _cyl(0.22, 0.18, 0.5), _mat(Color(0.3, 0.28, 0.26), 0.6), at + Vector3(0, 0.25, 0))
 	_mesh(self, _sphere(0.45), _mat(Color(0.12, 0.28, 0.12), 0.9), at + Vector3(0, 0.9, 0))
+	_brk_wrap(mk, 0.45)
 
 
 func _round_table(at: Vector3) -> void:
+	var mk := _brk_mark()
 	var wood := _mat(Color(0.3, 0.18, 0.1), 0.4)
 	_mesh(self, _cyl(0.85, 0.85, 0.06), wood, at + Vector3(0, 0.76, 0))
 	_mesh(self, _cyl(0.1, 0.25, 0.74), wood, at + Vector3(0, 0.37, 0))
 	_mesh(self, _cyl(0.2, 0.12, 0.14), _mat(Color(0.85, 0.7, 0.3), 0.3, 0.0, 0.8), at + Vector3(0, 0.86, 0))     # 장식 그릇
+	_brk_wrap(mk, 0.85)
 
 
 func _sconce(at: Vector3) -> void:
@@ -192,12 +269,14 @@ func _double_door(at: Vector3) -> void:
 
 
 func _desk(at: Vector3) -> void:
+	var mk := _brk_mark()
 	var wood := _mat(Color(0.22, 0.13, 0.08), 0.35)
 	_mesh(self, _box(Vector3(2.4, 0.08, 1.0)), wood, at + Vector3(0, 0.78, 0))
 	_mesh(self, _box(Vector3(2.3, 0.74, 0.9)), wood, at + Vector3(0, 0.37, 0))
 	var leather := _mat(Color(0.08, 0.06, 0.06), 0.5)
 	_mesh(self, _box(Vector3(0.7, 0.12, 0.7)), leather, at + Vector3(0, 0.5, -0.9))          # 빈 의자
 	_mesh(self, _box(Vector3(0.7, 0.9, 0.14)), leather, at + Vector3(0, 0.95, -1.22))
+	_brk_wrap(mk, 1.10)
 
 
 # ---- 바깥 · 거리 도구(town3d.gd 가 처음 쓴다 — 위 도구들은 그대로) ----
@@ -400,10 +479,12 @@ func _lamp_post(at: Vector3, lamp: Color, h := 4.2, arm := 0.9, lit := true) -> 
 
 ## 드럼통
 func _barrel(at: Vector3, col: Color) -> void:
+	var mk := _brk_mark()
 	_mesh(self, _cyl(0.3, 0.3, 0.88), _shared(col, 0.8, 0.0, 0.3), at + Vector3(0, 0.44, 0))
 	var band := _shared(col.darkened(0.3), 0.7, 0.0, 0.3)
 	for y in [0.3, 0.6]:
 		_mesh(self, _cyl(0.31, 0.31, 0.04), band, at + Vector3(0, y, 0))
+	_brk_wrap(mk, 0.36)
 
 
 ## 쌓인 타이어 n 개

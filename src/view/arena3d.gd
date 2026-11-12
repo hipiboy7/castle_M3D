@@ -6,7 +6,33 @@ extends Node3D
 const HALF_W := 7.4
 const HALF_D := 4.4
 
+const Breakables = preload("res://src/view/breakables.gd")
+
 var lamps: Array = []
+var brk: Node3D = null              # 부서지는 드럼통 · 상자(2026-11-12 사용자 "싸우면서 주변 물건들도 박살나는 연출")
+
+
+func break_hit(pos: Vector2, dir: Vector2) -> bool:
+	return brk != null and brk.break_hit(pos, dir)
+
+
+func break_at(at: Vector2, r: float, dir: Vector2, kind := "") -> bool:
+	return brk != null and brk.break_at(at, r, dir, kind)
+
+
+## 메시 몇 개를 묶어 부서지는 소품 하나로
+func _breakable(meshes: Array, at: Vector3, r: float) -> void:
+	if brk == null:
+		brk = Breakables.new()
+		add_child(brk)
+	var g := Node3D.new()
+	add_child(g)
+	g.position = Vector3(at.x, 0, at.z)
+	for m in meshes:
+		var gt: Transform3D = (m as Node3D).transform
+		(m as Node3D).reparent(g, false)
+		(m as Node3D).transform = g.transform.affine_inverse() * gt
+	brk.register(g, Vector2(at.x, at.z), r)
 
 
 func build(shadows_detail := true) -> void:
@@ -136,10 +162,15 @@ func _props() -> void:
 	var drums := [Vector3(-7.2, 0, 3.4), Vector3(-6.6, 0, 3.8), Vector3(-7.0, 0, 4.3), Vector3(7.4, 0, -2.9)]
 	for i in drums.size():
 		var d: Vector3 = drums[i]
-		_mesh(self, _cyl(0.29, 0.29, 0.88), _mat(drum_cols[i % 3], 0.5, 0.3, 0.3), d + Vector3(0, 0.44, 0))
+		_breakable([_mesh(self, _cyl(0.29, 0.29, 0.88), _mat(drum_cols[i % 3], 0.5, 0.3, 0.3), d + Vector3(0, 0.44, 0))], d, 0.32)
 	var wood := _mat(Color(0.42, 0.31, 0.2), 0.9)
-	_mesh(self, _box(Vector3(1.2, 0.11, 1.0)), wood, Vector3(6.4, 0.055, 4.0))
-	_mesh(self, _box(Vector3(0.9, 0.8, 0.9)), _mat(Color(0.36, 0.3, 0.22), 0.9), Vector3(6.4, 0.55, 4.0))
+	_breakable([_mesh(self, _box(Vector3(1.2, 0.11, 1.0)), wood, Vector3(6.4, 0.055, 4.0)),
+		_mesh(self, _box(Vector3(0.9, 0.8, 0.9)), _mat(Color(0.36, 0.3, 0.22), 0.9), Vector3(6.4, 0.55, 4.0))], Vector3(6.4, 0, 4.0), 0.6)
+	# 부두 가장자리 나무 상자 더미(부서지는 소품)
+	for c in [Vector3(-3.2, 0, 4.6), Vector3(2.4, 0, 4.7), Vector3(-6.8, 0, -3.9), Vector3(3.4, 0, -3.9)]:
+		var bm := _mat(Color(0.45, 0.33, 0.2), 0.9)
+		_breakable([_mesh(self, _box(Vector3(0.8, 0.7, 0.8)), bm, c + Vector3(0, 0.35, 0)),
+			_mesh(self, _box(Vector3(0.6, 0.5, 0.6)), bm, c + Vector3(0.1, 0.95, 0.05))], c, 0.5)
 	# 크레인 다리 (노란 철골, 부두 끝 오른쪽)
 	var crane := _mat(Color(0.75, 0.55, 0.1), 0.5, 0.3, 0.4)
 	for x in [7.2, 9.6]:

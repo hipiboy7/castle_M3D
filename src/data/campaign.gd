@@ -31,7 +31,7 @@ const Lines = preload("res://src/data/lines.gd")
 const OPEN_ALL := false
 
 const CHAPTERS := [
-	{"id": "ch0", "no": 0, "kind": "stage", "event": "", "table": "prologue", "view": "town", "song": "street"},
+	{"id": "ch0", "no": 0, "kind": "stage", "event": "", "table": "prologue", "view": "world", "song": "street"},
 	{"id": "ch1", "no": 1, "kind": "stage", "event": "beat:yundeoksu", "table": "hoeam", "view": "town", "song": "street"},
 	{"id": "ch2", "no": 2, "kind": "stage", "event": "", "table": "haseong", "view": "haseong", "song": "battle"},
 	{"id": "ch3", "no": 3, "kind": "stage", "event": "", "table": "ch3", "view": "world", "song": "dungeon"},

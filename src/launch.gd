@@ -9,7 +9,7 @@ const KEYS := {
 	"attack": [KEY_J, KEY_Z], "parry": [KEY_K, KEY_X], "roll": [KEY_SPACE, KEY_C], "dash": [KEY_L, KEY_SHIFT],
 	"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B], "pause": [KEY_ESCAPE, KEY_P], "swap": [KEY_TAB, KEY_Q],
 	"pick_1": [KEY_1], "pick_2": [KEY_2], "art": [KEY_3], "bench": [KEY_4], "difficulty": [KEY_5], "accept": [KEY_ENTER, KEY_KP_ENTER],
-	"speed": [KEY_F], "menu": [KEY_M],
+	"speed": [KEY_F], "menu": [KEY_M], "jump": [KEY_E, KEY_R], "crouch": [KEY_G, KEY_CTRL],
 }
 
 

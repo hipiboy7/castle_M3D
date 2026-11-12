@@ -16,6 +16,8 @@ func buffer_inputs() -> void:
 		buf_skill = ATTACK_BUFFER
 	if intent.get("dash", false):
 		buf_dash = DASH_BUFFER
+	if intent.get("jump", false):
+		buf_jump = ROLL_BUFFER
 	_pick_skill_input()
 
 
@@ -35,6 +37,7 @@ func _decay_buffers() -> void:
 	buf_parry = PARRY_BUFFER if intent.get("parry", false) else maxi(0, buf_parry - 1)
 	buf_roll = ROLL_BUFFER if intent.get("roll", false) else maxi(0, buf_roll - 1)
 	buf_dash = DASH_BUFFER if intent.get("dash", false) else maxi(0, buf_dash - 1)
+	buf_jump = ROLL_BUFFER if intent.get("jump", false) else maxi(0, buf_jump - 1)
 	if dash_grace > 0:
 		dash_grace -= 1
 
@@ -71,6 +74,10 @@ func tick() -> void:
 				set_state("idle")
 		"roll":
 			_tick_roll()
+		"evade":
+			_tick_evade()
+		"jump":
+			_tick_jump()
 		"hitstun", "recoil", "stun":
 			if t >= hold_t:
 				set_state("idle")
@@ -108,8 +115,22 @@ func _tick_free() -> void:
 	if buf_roll > 0:
 		_start_roll(mv.normalized() if mv.length() > 0.2 else -facing)
 		return
+	if buf_jump > 0 and clock - last_jump_end >= JUMP_CD:
+		_start_jump(mv)
+		return
+	if buf_parry > 0 and evade_btn:
+		if clock - last_evade_end >= EVADE_CD:
+			_start_evade(mv)
+		buf_parry = 0
+		return
 	if buf_parry > 0:
 		_start_parry()
+		return
+	var crouch_now: bool = intent.get("crouch", false)
+	crouch_t = crouch_t + 1 if crouch_now else 0
+	crouching = crouch_now
+	if crouching and buf_attack > 0 and Moves.has(CROUCH_MOVE):
+		start_move(CROUCH_MOVE)
 		return
 	if buf_skill > 0 and _try_skill():
 		return
@@ -129,6 +150,8 @@ func _tick_free() -> void:
 		running_t = running_t + 1 if mv.length() > 0.85 else 0
 		var running := running_t >= RUN_AFTER
 		var spd := run_speed if running else walk_speed * clampf(mv.length() * 1.3, 0.35, 1.0)
+		if crouching:
+			spd = walk_speed * CROUCH_SPEED_K
 		pos += mv.normalized() * spd / 60.0
 		if running or face == Vector2.ZERO:
 			facing = mv.normalized()
@@ -261,6 +284,57 @@ func _start_parry() -> void:
 		parry_side = Moves.parry_side(tg.move)      # 상대가 내는 공격 쪽 팔을 세운다
 	parry_bonus = -3 if clock - last_parry_end < PARRY_SPAM else 0
 	set_state("parry")
+
+
+## 피하기: 막대 쪽(없으면 상대 반대쪽 — 뒤)으로 짧게 비켜선다. 처음이 빠르고 끝이 느리다(합하면 EVADE_DIST)
+func _start_evade(mv: Vector2) -> void:
+	evade_dir = mv.normalized() if mv.length() > 0.2 else -facing
+	running_t = 0
+	set_state("evade")
+	events.append(["evade", self])
+
+
+func _tick_evade() -> void:
+	pos += evade_dir * EVADE_DIST * (1.0 - float(t) / EVADE_T) * 2.0 / EVADE_T
+	if t >= EVADE_T:
+		last_evade_end = clock
+		set_state("idle")
+
+
+## 점프: 지금 빠르기를 안고 뛴다. 공중에서 막대로 조금 튼다 · 치면 날아차기 · 벽에 닿아 그쪽으로 밀면 벽 밟기(world.gd)
+func _start_jump(mv: Vector2) -> void:
+	buf_jump = 0
+	jump_vel = (mv.normalized() * (run_speed if running_t >= RUN_AFTER else walk_speed)) if mv.length() > 0.2 else Vector2.ZERO
+	wall_used = false
+	running_t = 0
+	set_state("jump")
+	events.append(["jump", self])
+
+
+func _tick_jump() -> void:
+	var u := float(t) / JUMP_T
+	air = 4.0 * JUMP_H * u * (1.0 - u)
+	var mv: Vector2 = intent.get("move", Vector2.ZERO)
+	if mv.length() > 0.2:
+		jump_vel = jump_vel.lerp(mv.normalized() * walk_speed * 1.15, JUMP_STEER)
+		facing = mv.normalized() if jump_vel.length() < 0.3 else facing
+	pos += jump_vel / 60.0
+	if buf_attack > 0 and t >= 4 and t <= JUMP_T - 8 and Moves.has(AIR_MOVE):
+		start_move(AIR_MOVE)
+		return
+	if t >= JUMP_T:
+		air = 0.0
+		set_state("idle")
+
+
+## 벽 밟기(world.gd 가 점프 중 맵 끝에 닿아 그쪽으로 미는 것을 보면 부른다): 벽 반대쪽(n)으로 다시 높이 뛴다 — 점프 한 번에 한 번
+func wall_step(n: Vector2) -> void:
+	wall_used = true
+	var along := jump_vel - n * jump_vel.dot(n)
+	jump_vel = n * WALL_KICK + along * 0.5
+	facing = n
+	t = mini(t, JUMP_T / 4)                            # 높이를 이어 다시 오른다(땅으로 떨어지지 않게)
+	events.append(["wall_step", self])
 
 
 func _start_roll(d: Vector2) -> void:

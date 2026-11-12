@@ -10,6 +10,9 @@ var cam
 var hud
 var snd
 var pup := {}
+var bubbles                              # 말풍선(src/ui/bubbles.gd — main.gd 가 붙인다)
+var arena                                # 무대(부서지는 소품 break_at — main.gd 가 방마다 바꿔 준다)
+var _quote := RegEx.create_from_string("^([^:—]{1,12}): (.+?)(?: — (.+))?$")
 var later_msg: Array = []                # 조금 뒤에 띄울 가운데 알림 [제목, 부제, 초]
 var later_t := 0.0
 
@@ -171,7 +174,23 @@ func apply(d: Dictionary) -> void:
 				# 엇박 % · 기절 글자와 같은 순간이면 조금 뒤에(rc.2 리뷰 5 와 같은 까닭)
 				var busy: bool = w.events.any(func(x): return x[0] == "lethal" or x[0] == "stun")
 				var late: float = float(e[4]) if e.size() > 4 else 0.0     # 장 첫 글 뒤의 첫 방 글(stage.gd _enter)
-				hud.message(str(e[1]), str(e[2]), float(e[3]), maxf(late, 1.2 if busy else 0.0))
+				_line(w, str(e[1]), str(e[2]), float(e[3]), maxf(late, 1.2 if busy else 0.0))
+			"bubble":
+				if bubbles != null:
+					bubbles.say(e[1], str(e[2]), float(e[3]), "" if e[1] != null else _speaker_name(w, str(e[4]) if e.size() > 4 else ""))
+			"jump", "evade":
+				snd.play("step" if e[0] == "jump" else "wind", -8.0, 1.2)
+			"wall_step":
+				snd.play("kick", -6.0, 1.3)
+				fx.pop(Vector3(e[1].pos.x, 1.0 + e[1].air, e[1].pos.y), "탁", Color(0.95, 0.9, 0.8), 40, 0.4)
+			"bubble_later":
+				if bubbles != null:
+					bubbles.say_later(e[1], str(e[2]), float(e[3]), float(e[4]))
+			"bubble_cut":
+				if bubbles != null:
+					bubbles.cut_oldest()
+			"prop_fx":
+				_prop_fx(str(e[1]), e[2])
 			"swap":
 				fx.pop(Vector3(e[1].pos.x, 2.5, e[1].pos.y), "%s · %s" % [str(Lines.at("ch11.swap")), e[1].name],
 					Color(0.6, 0.9, 1.0), 48, 0.9)
@@ -183,3 +202,67 @@ func apply(d: Dictionary) -> void:
 				cam.punch_zoom(0.9)
 
 
+## 알림 글 — 작은 글이 '이름: 말 — 덧말' 이고 그 이름의 사람이 판에 있으면 말은 그 사람 머리 위 말풍선으로(2026-11-12 사용자
+## "캐릭터들의 말과 대화는 … 말풍선으로"), 제목과 덧말은 가운데 알림. 아니면 예전처럼 가운데 알림 하나
+func _line(w, title: String, small: String, secs: float, delay: float) -> void:
+	var m := _quote.search(small)
+	if m != null and bubbles != null:
+		var who = _by_name(w, m.get_string(1).strip_edges())
+		if who != null:
+			hud.message(title, m.get_string(3), secs, delay)
+			if delay > 0.0:
+				bubbles.say_later(who, m.get_string(2), secs, delay)
+			else:
+				bubbles.say(who, m.get_string(2), secs)
+			return
+	# 제목이 사람 이름이고 작은 글이 그 사람 말이면([김신, "윤덕수, 넌 여기까지다."]) — 말풍선만
+	if bubbles != null and title != "" and small != "" and not small.contains(" — "):
+		var sp = _by_name(w, title)
+		if sp != null:
+			if delay > 0.0:
+				bubbles.say_later(sp, small, secs, delay)
+			else:
+				bubbles.say(sp, small, secs)
+			return
+	hud.message(title, small, secs, delay)
+
+
+func _by_name(w, nm: String):
+	for f in w.fighters:
+		if f.name == nm and f.alive():
+			return f
+	for f in w.fighters:
+		if f.name == nm or (nm.length() >= 2 and f.name.ends_with(nm)):
+			return f
+	return null
+
+
+## 내레이션 · 화면 밖 사람의 이름(말풍선 대신 띠에 적는다)
+func _speaker_name(w, id: String) -> String:
+	if id == "" or id == "@":
+		return ""
+	if id.begins_with("?:"):
+		return id.substr(2).split("(")[0].strip_edges()
+	for f in w.fighters:
+		if f.char_id == id:
+			return f.name
+	return ""
+
+
+## 장면 연출의 무대 일(scene.gd fx): glass — 창 · 유리 깨짐, shot — 총소리 · 섬광, smash — 소품 부서짐
+func _prop_fx(kind: String, at: Vector2) -> void:
+	var p := Vector3(at.x, 1.3, at.y)
+	match kind:
+		"shot":
+			snd.play("shot", 0.0)
+			fx.pop(p, "탕!", Color(1.0, 0.9, 0.5), 64, 0.5)
+			cam.punch_zoom(0.96)
+		"glass":
+			snd.play("hit_heavy", -2.0, 1.6)
+			if arena != null and arena.has_method("break_at"):
+				arena.break_at(at, 1.6, Vector2(0, -1), "glass")
+			fx.pop(p, "쨍그랑", Color(0.8, 0.95, 1.0), 56, 0.8)
+		"smash":
+			snd.play("hit_heavy", 0.0, 0.8)
+			if arena != null and arena.has_method("break_at"):
+				arena.break_at(at, 1.2, Vector2.ZERO, "")

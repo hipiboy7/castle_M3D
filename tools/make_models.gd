@@ -185,7 +185,10 @@ func _body(lk: Dictionary) -> void:
 		arm = skin
 	var g := gpos
 	paint_k = 1.0
-	var shw: float = lk.get("shoulder", wide)
+	# 근육(Looks.look muscle — 2026-11-12 사용자 "근육질인 것 같은 모형으로"): 0 = 보통, 1 = 큰 인물. 역삼각(어깨 ↑ 허리 ↓) · 가슴 ·
+	# 승모 · 어깨세모근 · 이두 · 아래팔 · 허벅지를 키운다(통처럼 넓히는 대신 — 넓이는 Looks BIG_TAME 이 줄였다)
+	var mus: float = 0.0 if fem else float(lk.get("muscle", 0.0))
+	var shw: float = float(lk.get("shoulder", wide)) * (1.0 + 0.07 * mus)
 	crev = [
 		[g["hips"] + Vector3(0, -0.15, 0), 0.12, 0.32],                 # 사타구니
 		[g["neck"] + Vector3(0, 0.05, -0.05), 0.09, 0.34],              # 목 밑(턱 그늘)
@@ -204,7 +207,7 @@ func _body(lk: Dictionary) -> void:
 	# 몸통은 한 겹 관(_loft) 두 벌 — 바지(골반) + 겉옷(밑단 ~ 목). 전에는 골반 · 허리 · 가슴 덩어리 셋이 겹쳐 허리에 턱이 지고
 	# 외곽선이 마디마다 그어졌다(폰 리뷰 2026-11-07 '울퉁불퉁'). 단면 너비 표 _torso_prof — 가슴 앞 겉면은 그대로 bz(셔츠 앞판 · 넥타이 자리)
 	var hz := 0.13 * depth * maxf(1.0, wide * 0.95)
-	var prof := _torso_prof(wide, float(lk.get("shoulder", wide)), hip_k, 0.84 if fem else 0.95, 0.92 if fem else 1.0, hz, bz)   # 남성 허리 조금 조임(V 자 — Hades 실루엣)
+	var prof := _torso_prof(wide, shw, hip_k, 0.84 if fem else 0.95 - 0.08 * mus, 0.92 if fem else 1.0 + 0.05 * mus, hz, bz)   # 남성 허리 조금 조임(V 자 — Hades 실루엣)
 	var hem := -0.09                                                # 겉옷 밑단(골반 뼈 기준 높이) — 정장 · 코트는 엉덩이를 덮는다
 	if jacket:
 		hem = -0.005                                                # 봄버 · 트랙: 허리 밴드
@@ -226,6 +229,13 @@ func _body(lk: Dictionary) -> void:
 	if fem:                                                         # 가슴
 		for sx in [-1.0, 1.0]:
 			_blob(g["chest"] + Vector3(0.068 * sx * wide, 0.06, -bz * 0.68), Vector3(0.07 * wide, 0.065, 0.07 * depth), top, "chest")
+	elif mus > 0.2 and not robe:
+		# 큰가슴근(옷 위로 드러나는 두 판 — 아래 가장자리가 또렷하게) · 승모근(목 옆 비탈을 더 높게)
+		var pk := 0.7 + 0.45 * mus
+		for sx in [-1.0, 1.0]:
+			_sq_blob(g["chest"] + Vector3(0.088 * sx * wide, 0.105, -bz * 0.74), Vector3(0.082 * wide, 0.06, 0.055 * depth) * pk, 2.6, top, "chest", 12, 6)
+			if mus > 0.45:
+				_blob(g["chest"] + Vector3(0.085 * sx * wide, 0.225, 0.012), Vector3(0.07 * wide, 0.035 + 0.03 * mus, 0.065), top, "chest")
 	if skirt:                                                       # 스커트(골반 ~ 무릎)
 		_blob(g["hips"] + Vector3(0, -0.24, 0), Vector3(0.19 * wide, 0.28, 0.14 * depth), pants, "hips")
 	if long_coat:                                                   # 옷자락 뒤판 — 앞 두 자락은 허벅지(아래)
@@ -289,7 +299,7 @@ func _body(lk: Dictionary) -> void:
 		_line(g["chest"] + Vector3(0.08, 0.22, -bz * 0.67), g["chest"] + Vector3(0, 0.15, -bz * 1.0), 0.011, lk["chain"], "chest")
 	# 목 · 머리(SD — 크게). 터틀넥은 목까지 옷
 	var neck_col: Color = shirt if collar == "turtle" and not shirt_only and not robe else skin
-	_tube(g["neck"] + Vector3(0, -0.04, 0), g["head"], 0.06 * wide, 0.06 * wide, neck_col, "neck", "chest", "head")
+	_tube(g["neck"] + Vector3(0, -0.04, 0), g["head"], 0.06 * wide * (1.0 + 0.18 * mus), 0.058 * wide * (1.0 + 0.1 * mus), neck_col, "neck", "chest", "head")
 	if lk.get("neck_tattoo") != null:
 		_blob(g["neck"] + Vector3(0.055 * wide, 0.04, -0.01), Vector3(0.012, 0.045, 0.025), lk["neck_tattoo"], "neck")
 	paint_k = 0.0                                                   # 머리 · 얼굴 · 머리털 · 소품은 칠하지 않는다(얼굴 조각 색 그대로)
@@ -333,11 +343,12 @@ func _body(lk: Dictionary) -> void:
 		# 몸통 속(승모근 밑)에서 시작해 어깨세모근으로 불룩해졌다가 위팔로 이어진다
 		var ap: Array = [
 			[sh + Vector3(-0.055 * sx, 0.05, 0), 0.046 * limb, ["chest", sb], [0.75, 0.25], arm],
-			[sh + Vector3(-0.018 * sx, 0.038, 0), 0.062 * limb, [sb, "chest"], [0.5, 0.5], arm],
-			[sh + Vector3(0.004 * sx, 0.008, 0), 0.071 * limb, [sb, "chest"], [0.75, 0.25], arm],
-			[sh + Vector3(0.004 * sx, -0.04, 0), 0.07 * limb, [sb], [1.0], arm],
-			[sh.lerp(el, 0.34), 0.066 * limb, [sb], [1.0], arm],
-			[sh.lerp(el, 0.72), 0.06 * limb, [sb], [1.0], arm],
+			[sh + Vector3(-0.018 * sx, 0.038, 0), 0.062 * limb * (1.0 + 0.1 * mus), [sb, "chest"], [0.5, 0.5], arm],
+			[sh + Vector3(0.004 * sx, 0.008, 0), 0.071 * limb * (1.0 + 0.14 * mus), [sb, "chest"], [0.75, 0.25], arm],   # 어깨세모근
+			[sh + Vector3(0.004 * sx, -0.04, 0), 0.07 * limb * (1.0 + 0.1 * mus), [sb], [1.0], arm],
+			[sh.lerp(el, 0.34), 0.066 * limb * (1.0 + 0.04 * mus), [sb], [1.0], arm],
+			[sh.lerp(el, 0.5) + Vector3(0, 0, -0.008 * mus), 0.064 * limb * (1.0 + 0.16 * mus), [sb], [1.0], arm],          # 이두(앞으로 조금)
+			[sh.lerp(el, 0.72), 0.06 * limb * (1.0 + 0.05 * mus), [sb], [1.0], arm],
 			[el + up * 0.04, 0.056 * limb, [sb, eb], [0.8, 0.2], arm],
 			[el, 0.054 * limb, [sb, eb], [0.5, 0.5], arm],
 		]
@@ -345,7 +356,7 @@ func _body(lk: Dictionary) -> void:
 			ap.append([el, 0.054 * limb, [sb, eb], [0.5, 0.5], fore])
 		ap.append_array([
 			[el - up * 0.04, 0.055 * limb, [eb, sb], [0.8, 0.2], fore],
-			[el.lerp(ha, 0.3), 0.059 * limb, [eb], [1.0], fore],                       # 아래팔 — 팔꿈치 밑이 굵고 손목으로 좁게
+			[el.lerp(ha, 0.3), 0.059 * limb * (1.0 + 0.13 * mus), [eb], [1.0], fore],                       # 아래팔 — 팔꿈치 밑이 굵고 손목으로 좁게
 			[el.lerp(ha, 0.75), 0.047 * limb, [eb], [1.0], fore],
 		])
 		if cuff != null:
@@ -363,12 +374,23 @@ func _body(lk: Dictionary) -> void:
 				for k in 3:
 					var p: Vector3 = el.lerp(ha, 0.35 + 0.18 * k)
 					_tube(p + Vector3(0, 0.012, 0), p - Vector3(0, 0.012, 0), 0.053 * limb - 0.003 * k, 0.053 * limb - 0.003 * k, tc, "el_" + side)
-		# 주먹: 각이 조금 진 둥근 상자 + 엄지(손바닥이 몸 쪽 -x·sx 을 본다)
+		# 주먹(2026-11-12 사용자 "손이 구형인데, 이것부터 시작해서 조금씩 더 다듬었으면" — 공 하나 → 손등 · 말아 쥔 네 손가락 · 엄지):
+		# 손등은 납작한 모난 판(손바닥이 몸 쪽 -x·sx), 네 손가락은 첫 마디(주먹 아래 바깥) → 손바닥 쪽으로 감기는 짧은 관 넷을 앞뒤(z)로
+		# 늘어놓고, 엄지는 손바닥 쪽에서 둘째 마디 위를 가로질러 덮는다 — 마디 사이 먹선이 손가락으로 읽힌다
 		var hand_col: Color = lk.get("gloves", skin)                # 장갑(명부)
-		_sq_blob(ha + Vector3(0, -0.06, -0.004) * limb, Vector3(0.045, 0.06, 0.057) * limb, 3.4, hand_col, hb)        # 주먹 — 조금 크고 모나게(Hades 손)
-		_sq_blob(ha + Vector3(sx * 0.028, -0.103, -0.004) * limb, Vector3(0.02, 0.017, 0.052) * limb, 2.6, hand_col, hb, 10, 6)   # 손가락 마디 줄(주먹 아래 바깥)
-		_limb([[ha + Vector3(-sx * 0.03, -0.035, -0.036) * limb, 0.016 * limb, [hb], [1.0], hand_col],
-			[ha + Vector3(-sx * 0.022, -0.075, -0.05) * limb, 0.014 * limb, [hb], [1.0], hand_col]], 0.012, 0.012, 8)
+		var hl: float = limb * (1.0 + 0.08 * mus)
+		_sq_blob(ha + Vector3(sx * 0.004, -0.052, -0.002) * hl, Vector3(0.036, 0.05, 0.052) * hl, 4.2, hand_col, hb, 12, 6)   # 손등 · 손바닥
+		for k in 4:
+			var fz: float = (-0.039 + 0.026 * k) * hl                 # 검지(앞 -z) → 새끼(뒤)
+			var fr: float = (0.0145 - 0.0012 * k) * hl
+			var drop: float = 0.006 * k * hl                          # 새끼 쪽이 조금 짧다
+			_limb([[ha + Vector3(sx * 0.03 * hl, -0.088 * hl + drop, fz), fr, [hb], [1.0], hand_col],      # 첫 마디(주먹 바깥 · 아래)
+				[ha + Vector3(sx * 0.016 * hl, -0.113 * hl + drop, fz), fr * 0.98, [hb], [1.0], hand_col],
+				[ha + Vector3(-sx * 0.012 * hl, -0.112 * hl + drop, fz), fr * 0.92, [hb], [1.0], hand_col],  # 둘째 마디(손바닥 쪽으로 감김)
+				[ha + Vector3(-sx * 0.026 * hl, -0.092 * hl + drop, fz), fr * 0.85, [hb], [1.0], hand_col]], fr * 0.7, fr * 0.7, 8)
+		_limb([[ha + Vector3(-sx * 0.022, -0.03, -0.042) * hl, 0.017 * hl, [hb], [1.0], hand_col],          # 엄지 — 손바닥 쪽 앞에서
+			[ha + Vector3(-sx * 0.036, -0.066, -0.048) * hl, 0.015 * hl, [hb], [1.0], hand_col],
+			[ha + Vector3(-sx * 0.03, -0.097, -0.03) * hl, 0.013 * hl, [hb], [1.0], hand_col]], 0.011 * hl, 0.011 * hl, 8)   # 검지 · 중지 둘째 마디를 덮는다
 		var wrist = lk.get("bracelet_" + side, lk.get("bracelet"))  # 손목 금 팔찌 · 검은 밴드
 		if wrist != null:
 			_tube(ha + Vector3(0, 0.035, 0), ha + Vector3(0, 0.005, 0), 0.052 * limb, 0.05 * limb, wrist, "el_" + side)
@@ -387,7 +409,7 @@ func _body(lk: Dictionary) -> void:
 		var lp: Array = [
 			[th + up * 0.06, lr * 0.86, ["hips", tb], [0.5, 0.5], pants],
 			[th, lr * 0.93, [tb, "hips"], [0.65, 0.35], pants],
-			[th.lerp(kn, 0.25), lr * 0.97, [tb], [1.0], pants],
+			[th.lerp(kn, 0.25), lr * 0.97 * (1.0 + 0.08 * mus), [tb], [1.0], pants],
 			[th.lerp(kn, 0.62), 0.08 * limb * lerpf(1.0, wide, 0.5), [tb], [1.0], pants],
 		]
 		if bare:

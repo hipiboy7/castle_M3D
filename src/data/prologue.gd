@@ -19,6 +19,7 @@ const PERIOD := "p1"
 ## 원작 근거(castle_common canon — 장 데이터 검사 tests/unit/test_campaign.gd 가 id 가 canon 에 있는지 본다): 방 id →
 ## fight(canon fights.json 대결 id, 싸움 없는 방은 "") · place(canon locations.json 장소 id)
 const CANON := {
+	"vlad_bar": {"fight": "", "place": "vladivostok"},          # 주점 — 의뢰(p1:002/002-011, 2026-11-12 사용자 5번)
 	"vlad_hotel": {"fight": "fight:gunter", "place": "vladivostok"},
 	"vlad_night": {"fight": "", "place": "vladivostok"},
 }
@@ -31,6 +32,11 @@ const CROWD_ID := "gunter_guard"
 const ROLES := {
 	"kimshin": {"hp": 200.0, "posture": 60.0, "walk": 2.1, "run": 4.6, "stagger": 50, "look": "kim_bare",
 		"moveset": {"combo": "kf_jab", "dash": "kf_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
+	# 주점 장면(싸움 없음): 롱코트 김신(방 표 kit) · 리사 · 의뢰인
+	"kimshin_coat": {"look": "kim_coat",
+		"moveset": {"combo": "kf_jab", "dash": "kf_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
+	"risa": {"hp": 200.0, "posture": 60.0, "walk": 1.9, "run": 4.0, "stagger": 60, "look": "risa"},
+	"client_woman": {"hp": 100.0, "posture": 40.0, "walk": 1.5, "run": 3.0, "stagger": 60, "look": "client_woman"},
 	"gunter_guard": {"hp": 420.0, "posture": 100.0, "walk": 1.8, "run": 3.8, "stagger": 70, "poise": 0.0, "ai": "thug",
 		"look": "gunter_suit"},
 	"gunter": {"hp": 520.0, "posture": 260.0, "walk": 1.6, "run": 3.4, "stagger": 70, "poise": 24.0, "ai": "gunter",
@@ -41,7 +47,14 @@ const ROLES := {
 ## 호텔(한 맵): x -7 ~ 7 복도 · 7 ~ 8.2 문틀 · 8.2 ~ 19 군터의 방(무대 town3d HOTEL_CORRIDOR · HOTEL_GAP 과 같은 자리) —
 ## 문틀을 지나 x 8.6 에 들어서면 군터가 일어선다
 const ROOMS := [
-	{"id": "vlad_hotel", "theme": "vlad_hotel", "bounds": Rect2(-7.0, -1.9, 26.0, 3.8),
+	# 주점(2026-11-12 사용자 5번 "주점에서 리사 캐릭터가 앉아있고(구석에는 김신이 롱코트를 입고 어두움 속에 앉아있음), 막 당한 여성이
+	# 갑작스럽게 바로 들어와서 리사에게 청부를 하는 스테이지" — 원작 그대로 p1:002/002-011): 싸움 없는 장면 방(scene → clear)
+	{"id": "vlad_bar", "fixed": true, "theme": "vlad_bar", "bounds": Rect2(-6.0, -2.2, 12.0, 4.4), "kit": {"kimshin": "kimshin_coat"},
+		"heroes": [Vector2(-5.0, -1.7)], "allies": [], "enemies": [], "boss": "",
+		"standing": [["risa", Vector2(0.9, -1.6), 0], ["client_woman", Vector2(-6.0, 1.6), 0]],
+		"poses": {"kimshin": "sit", "risa": "lean"},
+		"scene": "bar_request"},
+	{"id": "vlad_hotel", "fixed": true, "theme": "vlad_hotel", "bounds": Rect2(-7.0, -1.9, 26.0, 3.8),
 		"heroes": [Vector2(-5.4, 0.2)], "allies": [],
 		"enemies": [
 			["gunter_guard", Vector2(-1.2, -0.9), {"name": "정장 경호원"}],

@@ -27,17 +27,17 @@ func test_p1_deterministic() -> void:
 
 
 func test_bot_clears_ch0() -> void:
-	var r := Stage.simulate(1, 60 * 150, {"chapter": "ch0"})
-	check(r["over"] == "win" and int(r["cleared"]) == 1, "봇이 0장(복도 → 군터의 방 — 스테이지 하나)을 끝낸다 %s" % r)
+	var r := Stage.simulate(1, 60 * 220, {"chapter": "ch0"})
+	check(r["over"] == "win" and int(r["cleared"]) == 2, "봇이 0장(주점 장면 → 복도 → 군터의 방)을 끝낸다 %s" % r)
 	var secs := float(r["frames"]) / 60.0
-	check(secs >= 30.0 and secs <= 100.0, "0장 판 길이 %.0f초 (봇 기준 30 ~ 100)" % secs)
+	check(secs >= 60.0 and secs <= 170.0, "0장 판 길이 %.0f초 (봇 기준 60 ~ 170 — 주점 장면 약 1분)" % secs)
 
 
 ## 0장 한 맵: 경호원이 다 쓰러지고 문틀 너머(x 8.6)에 들어서야 군터가 일어선다 — 그 전에는 방을 넘지 않는다
 func test_ch0_gunter_after_corridor() -> void:
-	var d := Stage.make(1, {"chapter": "ch0"})
+	var d := Stage.make(1, {"chapter": "ch0", "room": 1})
 	_past_intro(d, Prologue.INTRO_T)
-	check(Prologue.ROOMS.size() == 2 and d["enemies"].all(func(e): return e.char_id == "gunter_guard"), "스테이지 하나 + 끝 방 · 처음엔 경호원만")
+	check(Prologue.ROOMS.size() == 3 and d["enemies"].all(func(e): return e.char_id == "gunter_guard"), "주점 + 스테이지 하나 + 끝 방 · 처음엔 경호원만")
 	for e in d["enemies"]:
 		e.hp = 0.0
 		e.die()
@@ -64,7 +64,7 @@ func test_ch1_start() -> void:
 
 ## 총잡이(kite): 서 있는 김신에게 다가붙지 않고 떨어져서 쏜다 — 군터 · 대머리 · 장발. 주먹잡이는 다가온다
 func test_gunmen_keep_distance_and_shoot() -> void:
-	var d := Stage.make(2, {"chapter": "ch0"})
+	var d := Stage.make(2, {"chapter": "ch0", "room": 1})
 	var kim = d["heroes"][0]
 	_past_intro(d, Prologue.INTRO_T)
 	for e in d["enemies"]:
@@ -91,7 +91,7 @@ func test_gunmen_keep_distance_and_shoot() -> void:
 	check(shot and kim.hp < hp0, "탁자 밑 리볼버를 쏘고 서 있으면 맞는다 (hp %.1f → %.1f)" % [hp0, kim.hp])
 	check(closest > 3.0, "다가붙지 않는다 (가장 가까이 %.2f m)" % closest)
 	# 정장(주먹잡이)은 다가온다
-	var d2 := Stage.make(2, {"chapter": "ch0"})
+	var d2 := Stage.make(2, {"chapter": "ch0", "room": 1})
 	_past_intro(d2, Prologue.INTRO_T)
 	var k2 = d2["heroes"][0]
 	var near := INF
@@ -168,8 +168,8 @@ func test_manjae_high_guard() -> void:
 ## 보스는 몇 초 만에 녹지 않지만 1분 안에 쓰러진다(봇 판 — 1장 보스는 모두 김신보다 아랫급, 사용자 2026-11-10 "보스가 김신보다 약한대도
 ## 강하게 표현될 때가 있음"). 김대건은 10초가 지나도 서 있고 김신을 맞힌다 · 그래도 1분 안. 수치 조정 회귀 막기
 func test_bosses_last() -> void:
-	var r := Stage.simulate(1, 60 * 10 + Hoeam.INTRO_T, {"chapter": "ch1", "room": 2})
-	check(int(r["cleared"]) == 0 and r["over"] == "", "김대건은 10초 안에 안 쓰러진다 %s" % r)
+	var r := Stage.simulate(1, 60 * 14 + Hoeam.INTRO_T, {"chapter": "ch1", "room": 2})      # 맵이 넓어져(2026-11-12) 다가가는 데 몇 초 더
+	check(int(r["cleared"]) == 0 and r["over"] == "", "김대건은 14초 안에 안 쓰러진다 %s" % r)
 	var full: float = Stage.make(1, {"chapter": "ch1", "room": 2})["heroes"][0].hp_max
 	check(float(r["heroes_hp"][0]) < full - 1.0, "김대건이 김신을 맞힌다 (hp %s / %.0f)" % [r["heroes_hp"], full])
 	for c in [[2, "junkyard_dusk"], [3, "street"]]:
