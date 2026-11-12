@@ -136,9 +136,10 @@ const LOOKS := {
 	#        큰 진주 드롭 귀걸이'): 2026-11-12 사용자 "리사는 의자에 앉아있어야해. 그것도 고고하게 여성들이 입는 그 비싼 코트 걸치고" —
 	#        코트는 소매에 팔을 넣지 않고 어깨에 걸친다(make_models _drape). 몸 · 얼굴은 리사(looks_common) 그대로
 	"risa_p1": {"outfit": "shirt", "female": true, "suit": Color(0.07, 0.07, 0.08), "shirt": Color(0.07, 0.07, 0.08), "sleeveless": true, "collar": "crew",
-		"skin": Color(0.93, 0.86, 0.8), "pants": Color(0.93, 0.86, 0.8), "skirt": true, "skirt_col": Color(0.07, 0.07, 0.08), "skirt_len": 0.6,
-		"belt": Color(0.07, 0.07, 0.08), "drape": Color(0.8, 0.75, 0.67), "fur": Color(0.92, 0.88, 0.8),
-		"hair": Color(0.85, 0.82, 0.7), "hair_style": "wavy", "hair_long": true, "piercing": true, "lips": Color(0.62, 0.17, 0.2),
+		# rc.16 사용자 "모피 코트도 더 크고 우와하게, 머리카락은 금발에 백인(러시아여자)임": 흰 살결 · 짙은 금발 · 푸른 눈 · 짙은 밍크 갈색(크림 모피 깃 — 바 불빛에 하얗게 날지 않게)
+		"skin": Color(0.98, 0.9, 0.86), "pants": Color(0.98, 0.9, 0.86), "skirt": true, "skirt_col": Color(0.07, 0.07, 0.08), "skirt_len": 0.6,
+		"belt": Color(0.07, 0.07, 0.08), "drape": Color(0.46, 0.3, 0.19), "fur": Color(0.94, 0.86, 0.72), "eye_col": Color(0.2, 0.42, 0.68),
+		"hair": Color(0.9, 0.7, 0.34), "hair_style": "wavy", "hair_long": true, "piercing": true, "lips": Color(0.66, 0.12, 0.18),
 		"shoe": Color(0.06, 0.05, 0.05), "big": false, "scale": 0.9, "wide": 0.8, "shoulder": 0.78, "depth": 0.82, "limb": 0.74, "head": 0.95,
 		"eye_h": 0.008, "brow_k": 0.7, "weapon_r": "", "weapon_l": "", "guard": "box"},
 	#  불휘 가면 둘(fight:bulhwi p1:044/012-042 — '하회탈 가면(흰 셔츠)' · '붉은 점 가면(민소매)', 김신 양옆 협공 — 2026-11-12 사용자

@@ -233,17 +233,18 @@ func test_ch2_ojiin_yields() -> void:
 	oj.hp = oj.hp_max * 0.3
 	d["world"]._check_hp(oj)
 	var yielded := false
-	for i in 60 * 15:                                         # 둘째 무리 대사(wave2) · 문으로 걷기(ceo_door)가 지나가면 대표실
+	for i in 60 * 6:                                          # 둘째 무리 대사(wave2) · 길이 열림(ceo_open)
 		Stage.step(d, {})
 		yielded = yielded or d["world"].events.any(func(e): return e[0] == "yield")
 		d["world"].events.clear()
-		if d.get("theme", "") == "haseong_office" or d["stage"] != "fight":
-			break
 	check(yielded and oj.inert, "오지인이 비켜선다")
-	# 복도 → 대표실은 한 방(2026-11-12 사용자 "스테이지로 나누지말고"): 방을 넘지 않고 무대만 바뀐다
-	check(d["stage"] == "fight" and d["room"]["id"] == "guard_corridor" and d["theme"] == "haseong_office", "같은 방에서 대표실로 %s %s" % [d["stage"], d.get("theme", "")])
-	check(d["enemies"].any(func(e): return e.char_id == "kimjaehoon") and not d["world"].fighters.any(func(f): return f.char_id == "haseong_guard"),
-		"대표실: 김재훈이 있고 복도의 쓰러진 경호원은 치웠다")
+	check(d["stage"] == "fight" and not d["enemies"].any(func(e): return e.char_id == "kimjaehoon"), "대표실 사람은 문틀을 넘기 전에는 없다")
+	# 복도 → 대표실은 한 맵(rc.16 6번 "프롤로그 군터처럼"): 오른쪽 끝 문틀을 넘어 걸어 들어가면 대표실 사람이 선다 — 방 · 무대는 그대로
+	d["hero"].pos = Vector2(12.0, 0.0)
+	for i in 30:
+		Stage.step(d, {})
+	check(d["stage"] == "fight" and d["room"]["id"] == "guard_corridor" and d["theme"] == "haseong_ceo", "같은 방 · 같은 무대에서 대표실로 %s %s" % [d["stage"], d.get("theme", "")])
+	check(d["enemies"].any(func(e): return e.char_id == "kimjaehoon" and e.pos.x > 18.0), "대표실(오른쪽): 김재훈이 섰다")
 
 
 ## 1층: 하성 인력 30명이 세 무리(12 · 10 · 8 — 2026-11-12 사용자 '2배로')로 — 셋째 무리와 함께 황보민철. 서진태 쪽 아군은 이슬 · 청년회 3명 · 부진파 2명

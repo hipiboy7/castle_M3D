@@ -28,6 +28,7 @@ const Launch = preload("res://src/launch.gd")
 const Campaign = preload("res://src/data/campaign.gd")
 const Save = preload("res://src/data/save.gd")
 const Lines = preload("res://src/data/lines.gd")
+const PuppetPose = preload("res://src/view/puppet_pose.gd")
 const Puppet = preload("res://src/view/puppet3d.gd")
 const PuppetGlb = preload("res://src/view/puppet_glb.gd")
 const PuppetDot = preload("res://src/view/puppet_dot.gd")
@@ -247,6 +248,7 @@ func _set_scene(on: bool) -> void:
 	if on == _in_scene:
 		return
 	_in_scene = on
+	PuppetPose.in_scene = on
 	if mode == "fight" or mode == "demo":
 		touch.show_fight = not on
 	touch.show_ff = on and mode == "fight"

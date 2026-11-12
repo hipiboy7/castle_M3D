@@ -18,6 +18,14 @@ var sheen_hair = null            # 머리 윤기 — 이 색의 큰 머리 껍�
 var sheen_col := Color.WHITE
 var gpos := {}                   # 이름 → 쉬는 자세 위치(뼈대 공간)
 const FEM_HEAD := Vector3(0.112, 0.13, 0.117)   # 여성 머리 타원체(갸름하게 — 남성 0.12 · 0.13 · 0.12)
+## 여성 글래머 몸(2026-11-12 rc.16 "막대기 같아. 좀더 날씬한 글래머로"): 골반 · 허리 · 가슴 · 엉덩이 · 허벅지 위쪽 배율, 입술 채도
+const FEM_HIP := 1.26
+const FEM_WAIST := 0.72
+const FEM_CHEST := 0.94
+const FEM_BUST := 1.22
+const FEM_SEAT := 0.82
+const FEM_THIGH := 1.22
+const FEM_LIP_SAT := 1.35
 const FACE_LIFT := 0.0007                       # 얼굴 조각(_patch)이 머리 겉면에서 뜨는 기본 높이(머리 단위 — 살과 겹쳐 깜빡이지 않게)
 const MALE_HEAD := Vector3(0.12, 0.13, 0.12)    # 남성 머리 타원체(머리 단위 — 머리털 · 모자 껍질이 이 크기에 맞춰져 있다)
 ## 남성 머리 다듬기(_head_male · 얼굴 조각이 같은 겉면을 따른다): 아래쪽 x 를 (1 - x · low^y) 로 좁히고 z 를 (1 - z · low²) 로,
@@ -200,14 +208,16 @@ func _body(lk: Dictionary) -> void:
 		crev.append([g["kn_" + side] + Vector3(0, 0.0, 0.075), 0.075, 0.28])          # 무릎 뒤
 		crev.append([g["el_" + side] + Vector3(0, -0.005, -0.055), 0.055, 0.22])      # 팔꿈치 안
 	# 골반 · 허리 · 가슴(하나로 이어진 몸통) — 여성은 골반을 넓히고 허리를 조인다
-	var hip_k := 1.14 if fem else 1.0
+	# 여성 글래머(2026-11-12 rc.16 사용자 "여자 애들 너무 막대기 같아. 좀더 날씬한 글래머로"): 골반 더 넓게 · 허리 더 조이고 · 가슴 · 엉덩이 ·
+	# 허벅지 위쪽을 채운다(팔다리 굵기 limb 는 그대로 — 날씬하게). 수치는 FEM_* (파일 머리)
+	var hip_k := FEM_HIP if fem else 1.0
 	# 몸통 관의 앞뒤 두께(dz)는 골반 · 가슴 타원체와 겉면이 맞게 — 관이 더 두꺼우면 가슴 아래 턱 · 검은 띠(외곽선)가 생기고
 	# 셔츠 앞판이 관 속에 묻혔다(전인물 외형 검토 2026-11-06). bz = 가슴 앞 겉면(머리 · 셔츠 앞판 자리)
 	var bz := 0.15 * depth * maxf(1.0, wide)
 	# 몸통은 한 겹 관(_loft) 두 벌 — 바지(골반) + 겉옷(밑단 ~ 목). 전에는 골반 · 허리 · 가슴 덩어리 셋이 겹쳐 허리에 턱이 지고
 	# 외곽선이 마디마다 그어졌다(폰 리뷰 2026-11-07 '울퉁불퉁'). 단면 너비 표 _torso_prof — 가슴 앞 겉면은 그대로 bz(셔츠 앞판 · 넥타이 자리)
 	var hz := 0.13 * depth * maxf(1.0, wide * 0.95)
-	var prof := _torso_prof(wide, shw, hip_k, 0.84 if fem else 0.95 - 0.08 * mus, 0.92 if fem else 1.0 + 0.05 * mus, hz, bz)   # 남성 허리 조금 조임(V 자 — Hades 실루엣)
+	var prof := _torso_prof(wide, shw, hip_k, FEM_WAIST if fem else 0.95 - 0.08 * mus, FEM_CHEST if fem else 1.0 + 0.05 * mus, hz, bz)   # 남성 허리 조금 조임(V 자 — Hades 실루엣)
 	var hem := -0.09                                                # 겉옷 밑단(골반 뼈 기준 높이) — 정장 · 코트는 엉덩이를 덮는다
 	if jacket:
 		hem = -0.005                                                # 봄버 · 트랙: 허리 밴드
@@ -227,9 +237,11 @@ func _body(lk: Dictionary) -> void:
 		_torso_loft(prof, [hem - 0.002, hem + 0.045], 0.016, top.darkened(0.25), thigh_out + 0.018, 0.128, -1.0, -1.0)   # 허리 밴드(골지)
 	elif shirt_only or vest:
 		_torso_loft(prof, [0.0, 0.045], 0.014, lk.get("belt", pants.darkened(0.55)), -1.0, -1.0, -1.0, -1.0)            # 허리띠
-	if fem:                                                         # 가슴
+	if fem:                                                         # 가슴 · 엉덩이(뒤 = +z)
 		for sx in [-1.0, 1.0]:
-			_blob(g["chest"] + Vector3(0.068 * sx * wide, 0.06, -bz * 0.68), Vector3(0.07 * wide, 0.065, 0.07 * depth), top, "chest")
+			_blob(g["chest"] + Vector3(0.072 * sx * wide, 0.06, -bz * 0.66), Vector3(0.078, 0.074, 0.08 * depth) * FEM_BUST, top, "chest")
+			if not skirt:                                           # 엉덩이 곡선(바지 — 스커트는 자락이 덮는다). 골반 속으로 묻어 두 덩이로 안 보이게
+				_blob(g["hips"] + Vector3(0.06 * sx * wide * hip_k, -0.07, hz * 0.42), Vector3(0.09 * wide * hip_k, 0.085, 0.07 * depth) * FEM_SEAT, pants, "hips")
 	elif mus > 0.2 and not robe:
 		# 큰가슴근(옷 위로 드러나는 두 판 — 아래 가장자리가 또렷하게) · 승모근(목 옆 비탈을 더 높게)
 		var pk := 0.7 + 0.45 * mus
@@ -427,11 +439,12 @@ func _body(lk: Dictionary) -> void:
 		var bare := skirt or shorts                                 # 정강이 맨살
 		var shin: Color = skin if bare else pants
 		var lr := 0.095 * limb * wide
+		var tk := FEM_THIGH if fem else 1.0                         # 여성 허벅지 위쪽(골반에서 이어지는 곡선 — 무릎으로 가늘게)
 		# 다리: 엉덩이 속 ~ 발목 한 줄 관(허벅지 · 무릎 · 종아리) + 무릎 속 채움 공. 맨살 정강이는 무릎 위 반바지 단에서 색이 바뀐다
 		var lp: Array = [
-			[th + up * 0.06, lr * 0.86, ["hips", tb], [0.5, 0.5], pants],
-			[th, lr * 0.93, [tb, "hips"], [0.65, 0.35], pants],
-			[th.lerp(kn, 0.25), lr * 0.97 * (1.0 + 0.08 * mus), [tb], [1.0], pants],
+			[th + up * 0.06, lr * 0.86 * tk, ["hips", tb], [0.5, 0.5], pants],
+			[th, lr * 0.93 * tk, [tb, "hips"], [0.65, 0.35], pants],
+			[th.lerp(kn, 0.25), lr * 0.97 * (1.0 + 0.08 * mus) * lerpf(1.0, tk, 0.7), [tb], [1.0], pants],
 			[th.lerp(kn, 0.62), 0.08 * limb * lerpf(1.0, wide, 0.5), [tb], [1.0], pants],
 		]
 		if bare:
@@ -463,22 +476,27 @@ func _body(lk: Dictionary) -> void:
 ## 소매에 팔을 넣지 않고 어깨에 얹은 망토 모양 — 어깨 덮개 · 뒤판(등 → 무릎 뒤) · 앞이 열린 두 자락(팔 바깥을 덮는다) · 두툼한 모피 깃.
 ## 위는 가슴 뼈, 아래는 골반 뼈에 건다(팔을 들어도 코트는 그대로 — 걸친 옷이라)
 func _drape(lk: Dictionary, g: Dictionary, shw: float, depth: float) -> void:
+	# rc.16 사용자 "모피 코트도 더 크고 우와하게": 어깨를 크게 덮고(어깨 밖으로 부풀게) · 뒤판 · 자락은 무릎 아래까지 · 두툼한 모피 깃(목을 감싸는
+	# 큰 고리) · 앞 두 자락 가장자리 모피 띠(밑단까지) · 밑단 모피
 	var dc: Color = lk["drape"]
 	var fur: Color = lk.get("fur", dc.lightened(0.3))
-	_blob(g["chest"] + Vector3(0, 0.16, 0.025), Vector3(0.29 * shw, 0.13, 0.185 * depth), dc, "chest")               # 어깨 덮개
-	_sq_blob(g["chest"] + Vector3(0, -0.02, 0.135 * depth), Vector3(0.27 * shw, 0.25, 0.055), 2.6, dc, "chest", 12, 6)   # 등판
-	_sq_blob(g["hips"] + Vector3(0, -0.22, 0.155 * depth), Vector3(0.25 * shw, 0.36, 0.055), 2.6, dc, "hips", 12, 6)     # 엉덩이 → 무릎 뒤
+	_blob(g["chest"] + Vector3(0, 0.15, 0.03), Vector3(0.36 * shw, 0.16, 0.22 * depth), dc, "chest")                # 어깨 덮개(크게)
+	_sq_blob(g["chest"] + Vector3(0, -0.03, 0.15 * depth), Vector3(0.33 * shw, 0.27, 0.07), 2.6, dc, "chest", 12, 6)   # 등판
+	_sq_blob(g["hips"] + Vector3(0, -0.28, 0.17 * depth), Vector3(0.29 * shw, 0.42, 0.07), 2.6, dc, "hips", 12, 6)      # 엉덩이 → 무릎 아래 뒤
 	for side in ["r", "l"]:
 		var sx := 1.0 if side == "r" else -1.0
 		var sh: Vector3 = g["sh_" + side]
-		_sq_blob(Vector3(sh.x + 0.03 * sx, g["chest"].y - 0.06, -0.01), Vector3(0.085, 0.3, 0.15 * depth), 2.4, dc, "chest", 12, 6)
-		_sq_blob(Vector3(sh.x + 0.02 * sx, g["hips"].y - 0.24, 0.02), Vector3(0.08, 0.3, 0.14 * depth), 2.4, dc, "hips", 12, 6)
-	for k in 8:                                                     # 모피 깃: 목 둘레 고리 + 앞으로 내려오는 두 줄
-		var a := TAU * k / 8.0
-		_blob(g["chest"] + Vector3(0.155 * cos(a) * shw, 0.255 + 0.012 * sin(2.0 * a), 0.115 * sin(a) * depth + 0.015),
-			Vector3(0.075, 0.055, 0.07), fur, "chest")
-	for sx in [-1.0, 1.0]:
-		_line(g["chest"] + Vector3(0.12 * sx * shw, 0.22, -0.1 * depth), g["chest"] + Vector3(0.15 * sx * shw, -0.2, -0.14 * depth), 0.042, fur, "chest")
+		_sq_blob(Vector3(sh.x + 0.05 * sx, g["chest"].y - 0.05, -0.01), Vector3(0.11, 0.32, 0.18 * depth), 2.4, dc, "chest", 12, 6)
+		_sq_blob(Vector3(sh.x + 0.04 * sx, g["hips"].y - 0.3, 0.02), Vector3(0.1, 0.38, 0.17 * depth), 2.4, dc, "hips", 12, 6)
+		_blob(Vector3(sh.x + 0.04 * sx, g["hips"].y - 0.66, 0.02), Vector3(0.075, 0.045, 0.1), fur, "hips")   # 밑단 모피(옆 자락)
+	for k in 9:                                                     # 모피 깃: 목을 감싸는 두툼한 고리
+		var a := TAU * k / 9.0
+		_blob(g["chest"] + Vector3(0.15 * cos(a) * shw, 0.27 + 0.015 * sin(2.0 * a), 0.115 * sin(a) * depth + 0.015),
+			Vector3(0.075, 0.06, 0.07), fur, "chest")                 # 위에서 보는 카메라에 어깨(코트 색)가 보이게 — 깃이 어깨를 다 덮으면 하얗게만 보였다
+	for sx in [-1.0, 1.0]:                                          # 앞 두 자락 가장자리 모피 띠(가슴 → 밑단)
+		_line(g["chest"] + Vector3(0.13 * sx * shw, 0.22, -0.11 * depth), g["chest"] + Vector3(0.18 * sx * shw, -0.2, -0.15 * depth), 0.05, fur, "chest")
+		_line(g["hips"] + Vector3(0.2 * sx * shw, 0.05, -0.12 * depth), g["hips"] + Vector3(0.22 * sx * shw, -0.64, -0.08 * depth), 0.055, fur, "hips")
+	_blob(g["hips"] + Vector3(0, -0.68, 0.18 * depth), Vector3(0.26 * shw, 0.05, 0.06), fur, "hips")              # 밑단 모피(뒤)
 
 
 ## 찢긴 옷(의뢰인 — 2026-11-12 사용자 "의뢰를 부탁하는 여자는 옷이 찢어져있고"): 겉감 위로 살빛이 비치는 들쭉날쭉한 구멍
@@ -514,32 +532,34 @@ func _face_fem(lk: Dictionary, hc: Vector3, hk: float) -> void:
 	var sk: Color = lk["skin"]
 	var R := FEM_HEAD * hk
 	var sharp: bool = float(lk.get("eye_h", 0.011)) <= 0.008
-	var eh := 0.0066 if sharp else 0.008                            # 눈 반높이(2026-11-12 "여자는 다 이쁘게" — 조금 크게)
+	var eh := 0.0076 if sharp else 0.009                            # 눈 반높이(2026-11-12 "여자는 다 이쁘게" · rc.16 "더 이쁘고 조금 더 찐하게" — 더 크게)
 	var eye: Color = lk.get("eye_col", Color(0.1, 0.06, 0.05))
 	var lash := Color(0.04, 0.03, 0.035)
 	var brow: Color = Looks.hair_lift(lk["hair"]).darkened(0.2)
 	for sx in [-1.0, 1.0]:
 		var e := Vector3(0.042 * sx, 0.004, -0.11)
-		_patch(hc, R, e + Vector3(0.002 * sx, eh * 1.7, 0), 0.02, 0.0062, 0.0006, 6.0 * sx, sk.lerp(lk.get("shadow", Color(0.55, 0.38, 0.4)), 0.32), hk)   # 눈두덩(옅은 화장)
-		_patch(hc, R, e, 0.0185, eh, 0.0012, 4.0 * sx, Color(0.97, 0.96, 0.94), hk)                       # 흰자
+		_patch(hc, R, e + Vector3(0.003 * sx, eh * 1.65, 0), 0.023, 0.0078, 0.0006, 6.0 * sx, sk.lerp(lk.get("shadow", Color(0.55, 0.36, 0.42)), 0.55), hk)   # 눈두덩(화장 — 찐하게)
+		_patch(hc, R, e, 0.0198, eh, 0.0012, 4.0 * sx, Color(0.97, 0.96, 0.94), hk)                       # 흰자
 		for k in 3:                                                                                        # 속눈썹 — 눈꼬리 쪽 위로 휜 세 가닥
-			_patch(hc, R, e + Vector3((0.011 + 0.0048 * k) * sx, eh * (1.15 + 0.22 * k), 0), 0.0046, 0.0011, 0.0034,
+			_patch(hc, R, e + Vector3((0.011 + 0.0052 * k) * sx, eh * (1.15 + 0.24 * k), 0), 0.0058, 0.0016, 0.0034,
 				(38.0 + 14.0 * k) * sx, lash, hk)
-		_patch(hc, R, e + Vector3(-0.002 * sx, -0.0008, 0), 0.0078, eh * 1.02, 0.0022, 0.0, eye, hk)        # 눈동자
-		_patch(hc, R, e + Vector3(0.0015 * sx, 0.0025, 0), 0.0024, 0.0024, 0.0032, 0.0, Color.WHITE, hk)   # 눈빛
-		_patch(hc, R, e + Vector3(0.0015 * sx, eh * 0.95, 0), 0.0205, 0.0032, 0.003, 8.0 * sx, lash, hk)   # 윗눈꺼풀 선
-		_patch(hc, R, e + Vector3(0.0215 * sx, eh * 1.5, 0), 0.0075, 0.0022, 0.003, 30.0 * sx, lash, hk)   # 올라간 눈꼬리
-		_patch(hc, R, e + Vector3(0.003 * sx, -eh * 1.05, 0), 0.011, 0.0012, 0.0008, -4.0 * sx, sk.darkened(0.28), hk)   # 아랫눈꺼풀(옅게)
+		_patch(hc, R, e + Vector3(-0.002 * sx, -0.0008, 0), 0.0088, eh * 1.02, 0.0022, 0.0, eye, hk)        # 눈동자
+		_patch(hc, R, e + Vector3(-0.002 * sx, -0.0008, 0), 0.0042, eh * 0.55, 0.0026, 0.0, eye.darkened(0.6), hk)   # 동공
+		_patch(hc, R, e + Vector3(0.0018 * sx, 0.0028, 0), 0.0027, 0.0027, 0.0032, 0.0, Color.WHITE, hk)   # 눈빛
+		_patch(hc, R, e + Vector3(0.0015 * sx, eh * 0.95, 0), 0.0215, 0.0046, 0.003, 8.0 * sx, lash, hk)   # 윗눈꺼풀 선(아이라인 — 굵게)
+		_patch(hc, R, e + Vector3(0.0235 * sx, eh * 1.45, 0), 0.0105, 0.0029, 0.003, 26.0 * sx, lash, hk)  # 올라간 눈꼬리(길게)
+		_patch(hc, R, e + Vector3(0.003 * sx, -eh * 1.05, 0), 0.012, 0.0016, 0.0008, -4.0 * sx, sk.darkened(0.4), hk)   # 아랫눈꺼풀
 		var b := Vector3(0.044 * sx, 0.035 if sharp else 0.038, -0.11)                                    # 눈썹: 안쪽은 오르고 바깥 끝이 내려오는 아치
 		_patch(hc, R, b + Vector3(-0.006 * sx, 0, 0), 0.014, 0.0026, 0.002, 8.0 * sx, brow, hk)
 		_patch(hc, R, b + Vector3(0.0145 * sx, -0.0016, 0), 0.0095, 0.002, 0.002, -18.0 * sx, brow, hk)
-		_patch(hc, R, Vector3(0.058 * sx, -0.028, -0.1), 0.016, 0.009, 0.0008, 0.0, sk.lerp(Color(0.95, 0.5, 0.52), 0.2), hk)   # 옅은 볼
+		_patch(hc, R, Vector3(0.058 * sx, -0.028, -0.1), 0.017, 0.01, 0.0008, 0.0, sk.lerp(Color(0.95, 0.45, 0.5), 0.36), hk)   # 볼 터치
 		if lk.get("piercing", false):                               # 금 고리 귀걸이(looks.json piercing ring #c8a040 — 오지인 · 차수민)
 			var ear := _on_ell(hc, R, Vector3(sx, -0.32, 0.05))
 			_line(ear + Vector3(0, -0.004, 0) * hk, ear + Vector3(0.004 * sx, -0.03, -0.004) * hk, 0.0035 * hk, Color(0.86, 0.68, 0.3), "head")
 	_patch(hc, R, Vector3(0, -0.02, -0.12), 0.0055, 0.0075, 0.0035, 0.0, sk.darkened(0.04), hk)           # 작은 코(콧등 끝)
 	_patch(hc, R, Vector3(0, -0.031, -0.12), 0.0065, 0.0014, 0.0012, 0.0, sk.darkened(0.3), hk)          # 콧망울 그늘
-	var lips: Color = lk.get("lips", sk.lerp(Color(0.8, 0.36, 0.4), 0.45))
+	var lips0: Color = lk.get("lips", sk.lerp(Color(0.8, 0.36, 0.4), 0.45))
+	var lips := Color.from_hsv(lips0.h, minf(1.0, lips0.s * FEM_LIP_SAT), lips0.v * 0.97)   # 입술 — 더 진하게(rc.16)
 	_patch(hc, R, Vector3(0, -0.0515, -0.12), 0.0145, 0.0038, 0.0026, 0.0, lips.darkened(0.12), hk)       # 윗입술
 	_patch(hc, R, Vector3(0, -0.0595, -0.12), 0.0125, 0.0048, 0.0034, 0.0, lips, hk)                      # 아랫입술(도톰하게)
 	_patch(hc, R, Vector3(0, -0.0552, -0.12), 0.0125, 0.0009, 0.0036, 0.0, lips.darkened(0.55), hk)      # 입술 사이 선
@@ -1599,7 +1619,7 @@ func _clothes_ink(lk: Dictionary, prof: Array, hem: float, bz: float, thigh_out:
 		var kb: String = "kn_" + side
 		if long_coat or lk.get("skirt", false):
 			continue
-		var lr := 0.095 * limb * wide
+		var lr := 0.095 * limb * wide * (FEM_THIGH if lk.get("female", false) else 1.0)
 		# 사타구니에서 허벅지 앞으로 비스듬히 내려가는 주름(안쪽 → 앞)
 		_ink_arc(th + Vector3(0, -0.02, 0), lr * 0.95, -62.0 * sx, -14.0 * sx, [tb], [1.0], INK_W * 0.85, 0.1)
 		if not bare:

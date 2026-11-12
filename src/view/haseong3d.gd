@@ -24,13 +24,22 @@ extends "res://src/view/town3d.gd"
 ##   상세(detail — 헤드리스는 끔)일 때만 그림자 · 바닥 결 · 작은 소품(종이 · 칼 · 유리 조각 · 모니터 · 책상 위 물건)
 
 ## 이 그림이 그리는 무대 이름(시험 test_campaign 이 장 표의 theme 이 여기 있는지 본다)
-const HASEONG_THEMES := ["haseong_lobby", "haseong_corridor", "haseong_stairs", "haseong_office", "haseong_upper", "junkyard_office"]
+const HASEONG_THEMES := ["haseong_lobby", "haseong_corridor", "haseong_stairs", "haseong_office", "haseong_upper", "junkyard_office", "haseong_ceo"]
+## haseong_ceo: 대표실 앞 복도 → 대표실을 한 맵으로(2026-11-12 사용자 rc.16 6번 "프롤로그 군터처럼 방으로 자연스럽게 이어지도록") — 걸을 곳 왼쪽
+## CEO_CORRIDOR m 는 복도(장 표 haseong.gd guard_corridor 의 복도 자리 그대로), 오른쪽 CEO_OFFICE m 는 대표실(대표실 자리는 옛 대표실 + CEO_OX),
+## 그 사이는 대표실 왼쪽 띠(책상) — 복도 끝 문틀로 걸어 들어간다
+const CEO_CORRIDOR := 19.6
+const CEO_OFFICE := 11.2
+const CEO_OX := 19.4
 
 const SIGN := "HASUNG"                 # 회사 간판 글(원작 표기 — 머리 주석)
 const FLOOR_NO := "33"                 # 최상층 아래 층 번호(원작에 없음 — 그림만)
 
 ## 이 무대에서 만든 결(대리석 · 카펫 · 지도) — 같은 결은 한 번만(static 으로 두면 끝날 때 자원이 남는다 — 방마다 새로)
 var _tex := {}
+
+## haseong_ceo 를 그리는 중(복도 · 대표실이 빛 · 끝 벽을 겹쳐 그리지 않게)
+var _hs_joined := false
 
 ## 비상등(위층 복도) — 천천히 깜빡이는 재질(나눠 쓰지 않는 것)
 var _blink: Array = []
@@ -60,6 +69,9 @@ func build(th: String, b: Rect2, detail := true) -> void:
 		"junkyard_office":
 			_hs_begin(th, detail)
 			_hs_junk_office(b)
+		"haseong_ceo":
+			_hs_begin(th, detail)
+			_hs_ceo(b)
 		_:
 			super.build(th, b, detail)
 
@@ -325,7 +337,7 @@ func _hs_top_floor(b: Rect2, dark: bool) -> void:
 		_hs_exit(b, ex1)
 	else:
 		_hs_ceo_door(b, wz, wood_x, ex1, hh)
-	for sx in [-1.0, 1.0]:                                                                   # 양 끝 벽(높게)
+	for sx in ([-1.0] if _hs_joined else [-1.0, 1.0]):                                       # 양 끝 벽(높게 — 이어 그릴 때 오른쪽은 문틀)
 		var exx: float = ex0 if sx < 0.0 else ex1
 		_mesh(self, _box(Vector3(0.2, hh, b.size.y + 2.4)), _shared(Color(0.46, 0.44, 0.42) if not dark else Color(0.3, 0.3, 0.32), 0.7),
 			Vector3(exx + sx * 0.1, hh * 0.5, (wz + b.end.y + 1.0) * 0.5))
@@ -366,6 +378,16 @@ func _hs_top_floor(b: Rect2, dark: bool) -> void:
 		_console(Vector3(wood_x + 0.9, 0, wz))                                                   # 벽 탁자 · 꽃병(town3d)
 
 
+## 복도 → 대표실 한 맵(haseong_ceo)
+func _hs_ceo(b: Rect2) -> void:
+	_hs_joined = true
+	var c := Rect2(b.position.x, b.position.y + 0.1, CEO_CORRIDOR, b.size.y - 0.2)
+	_hs_top_floor(c, false)
+	_hs_office(Rect2(b.end.x - CEO_OFFICE, b.position.y, CEO_OFFICE, b.size.y))
+	_open_doorway(c.end.x + 0.6, c)                                       # 열린 문틀 — 대표실로 걸어 들어간다
+	_hs_joined = false
+
+
 ## 대표실 문 — 나무 판벽 · 큰 두 짝 문(금 손잡이 · 위 띠) · 문패 '대표이사실' · 벽등 둘
 func _hs_ceo_door(b: Rect2, wz: float, x0: float, x1: float, hh: float) -> void:
 	var wd := Color(0.24, 0.14, 0.08)
@@ -375,6 +397,11 @@ func _hs_ceo_door(b: Rect2, wz: float, x0: float, x1: float, hh: float) -> void:
 	if _detail:
 		_panel(Vector3((x0 + x1) * 0.5, hh * 0.5, wz + 0.004), Vector2(w, hh), wood, Vector2(w / 0.8, 1), Color.WHITE, 0.45)
 	var dx := b.end.x - 1.6
+	if _hs_joined:                                                        # 문은 오른쪽 끝 문틀(열림) — 판벽에는 문패 · 벽등만
+		_mesh(self, _box(Vector3(0.7, 0.2, 0.02)), _shared(Color(0.86, 0.7, 0.32), 0.3, 0.0, 0.85), Vector3(x1 - 0.7, 1.6, wz + 0.01))
+		_label(Vector3(x1 - 0.7, 1.6, wz + 0.025), "대표이사실 ▶", Color(0.2, 0.12, 0.05), 28, 0.0042)
+		_mesh(self, _box(Vector3(0.14, 0.3, 0.06)), _glow(Color(1.0, 0.78, 0.5), 1.8), Vector3(x0 + 0.5, 2.0, wz + 0.03))
+		return
 	var trim := _shared(Color(0.14, 0.08, 0.04), 0.4)
 	var leaf := _shared(Color(0.2, 0.11, 0.06), 0.35)
 	var gold := _shared(Color(0.86, 0.7, 0.32), 0.3, 0.0, 0.85)
@@ -488,8 +515,9 @@ func _hs_office(b: Rect2) -> void:
 	var wz := b.position.y - 0.65
 	var half := b.size.x * 0.5 + 3.4
 	var hh := 3.6
-	_env(Color(0.09, 0.11, 0.2), 0.6, Color(0.01, 0.015, 0.035))
-	_top(Color(0.6, 0.7, 1.0), 0.35)
+	if not _hs_joined:                                                    # 이어 그릴 때는 복도의 환경 · 위 빛 하나(둘이면 겹친다)
+		_env(Color(0.09, 0.11, 0.2), 0.6, Color(0.01, 0.015, 0.035))
+		_top(Color(0.6, 0.7, 1.0), 0.35)
 	# 바닥 — 짙은 나무 판 · 양탄자 · 방 밖 어둠
 	var fw := Color(0.16, 0.1, 0.07)
 	var fm := _mat(fw, 0.35)
@@ -530,17 +558,18 @@ func _hs_office(b: Rect2) -> void:
 	var cur := _mesh(self, _box(Vector3(0.6, hh - 0.3, 0.02)), _hs_glass(Color(0.6, 0.62, 0.7, 0.16)), Vector3(bx0 + bay * 0.5 + 0.2, (hh - 0.3) * 0.5, wz + 0.35))
 	cur.rotation_degrees = Vector3(0, -35, 4)                                                   # 바람에 날리는 얇은 커튼
 	_hs_city(wz - 1.0, half * 2.0 + 30.0)
-	for sx in [-1.0, 1.0]:                                                                    # 옆벽(낮게)
+	for sx in ([1.0] if _hs_joined else [-1.0, 1.0]):                                         # 옆벽(낮게 — 이어 그릴 때 왼쪽은 문틀)
 		_mesh(self, _box(Vector3(0.3, 1.2, b.size.y + 2.4)), wall, Vector3(cx + sx * half, 0.6, cz - 0.3))
-	# 왼쪽 밖: 넓은 책상(앞 = +x) · 의자
-	var dk := Vector3(b.position.x - 1.25, 0, cz - 0.6)
+	# 왼쪽 밖: 넓은 책상(앞 = +x) · 의자 — 이어 그릴 때는 왼쪽 띠가 복도에서 들어오는 길이라 책상을 뒤 창가로 돌려 놓는다(앞 = +z)
+	var dg := _group(Vector3(b.position.x - 1.25, 0, cz - 0.6) if not _hs_joined else Vector3(b.position.x - 1.8, 0, wz + 1.35), 0.0 if not _hs_joined else -90.0)
+	var dk := Vector3.ZERO
 	var dw := _shared(Color(0.2, 0.11, 0.06), 0.3)
-	_mesh(self, _box(Vector3(1.1, 0.07, 2.8)), dw, dk + Vector3(0, 0.77, 0))
-	_mesh(self, _box(Vector3(0.95, 0.72, 2.6)), dw, dk + Vector3(-0.05, 0.36, 0))
-	_mesh(self, _box(Vector3(0.03, 0.04, 2.5)), _shared(Color(0.8, 0.65, 0.3), 0.3, 0.0, 0.8), dk + Vector3(0.48, 0.74, 0))
+	_mesh(dg, _box(Vector3(1.1, 0.07, 2.8)), dw, dk + Vector3(0, 0.77, 0))
+	_mesh(dg, _box(Vector3(0.95, 0.72, 2.6)), dw, dk + Vector3(-0.05, 0.36, 0))
+	_mesh(dg, _box(Vector3(0.03, 0.04, 2.5)), _shared(Color(0.8, 0.65, 0.3), 0.3, 0.0, 0.8), dk + Vector3(0.48, 0.74, 0))
 	var lea := _shared(Color(0.06, 0.05, 0.05), 0.45)
-	_mesh(self, _box(Vector3(0.7, 0.14, 0.7)), lea, dk + Vector3(-1.0, 0.5, 0.1))
-	_mesh(self, _box(Vector3(0.16, 1.05, 0.72)), lea, dk + Vector3(-1.32, 1.05, 0.1))
+	_mesh(dg, _box(Vector3(0.7, 0.14, 0.7)), lea, dk + Vector3(-1.0, 0.5, 0.1))
+	_mesh(dg, _box(Vector3(0.16, 1.05, 0.72)), lea, dk + Vector3(-1.32, 1.05, 0.1))
 	# 오른쪽 밖: 소파 · 낮은 탁자 · 조각상
 	_hs_sofa(Vector3(b.end.x + 1.35, 0, cz - 0.2), -90.0, Color(0.32, 0.3, 0.28), 2.4)
 	_mesh(self, _box(Vector3(0.7, 0.4, 1.3)), _shared(Color(0.1, 0.1, 0.1), 0.2, 0.0, 0.3), Vector3(b.end.x + 0.45, 0.2, cz - 0.2))
@@ -552,7 +581,8 @@ func _hs_office(b: Rect2) -> void:
 	# 빛: 지도 화면(파랑) · 깨진 창으로 드는 도시빛 · 오른쪽 낮은 채움
 	_omni(Vector3(cx - 5.3, 1.8, wz + 1.0), Color(0.35, 0.6, 1.0), 1.5, 6.5)
 	_omni(Vector3(bx0, 2.2, wz + 0.8), Color(0.6, 0.7, 1.0), 1.1, 7.0)
-	_omni(Vector3(b.end.x + 0.4, 2.2, cz + 0.6), Color(0.85, 0.75, 0.65), 0.5, 5.5)
+	if not _hs_joined:                                                    # 이어 그릴 때는 복도 점광 셋 + 둘(폰 — 점광 다섯)
+		_omni(Vector3(b.end.x + 0.4, 2.2, cz + 0.6), Color(0.85, 0.75, 0.65), 0.5, 5.5)
 	if not _detail:
 		return
 	# 작은 소품 — 바닥 유리 조각(깨진 창 앞) · 깨진 와인잔 · 책상 위(리볼버 · 탄 · 문패 · 끈 등)
@@ -561,14 +591,14 @@ func _hs_office(b: Rect2) -> void:
 	_mesh(self, _hs_shards(Rect2(b.position.x + 0.5, cz - 1.3, 0.7, 0.6), 6, 7), _hs_glass(Color(0.9, 0.92, 1.0, 0.6)), Vector3.ZERO)
 	var y := 0.81
 	var gun := _shared(Color(0.7, 0.72, 0.75), 0.25, 0.0, 0.9)
-	_mesh(self, _box(Vector3(0.05, 0.04, 0.24)), gun, dk + Vector3(0.1, y + 0.02, -0.4))
-	var q3 := _mesh(self, _box(Vector3(0.05, 0.12, 0.05)), _shared(Color(0.3, 0.18, 0.1), 0.5), dk + Vector3(0.1, y + 0.03, -0.25))
+	_mesh(dg, _box(Vector3(0.05, 0.04, 0.24)), gun, dk + Vector3(0.1, y + 0.02, -0.4))
+	var q3 := _mesh(dg, _box(Vector3(0.05, 0.12, 0.05)), _shared(Color(0.3, 0.18, 0.1), 0.5), dk + Vector3(0.1, y + 0.03, -0.25))
 	q3.rotation_degrees.x = 70
 	var brass := _shared(Color(0.85, 0.66, 0.3), 0.3, 0.0, 0.85)
 	for i in 4:
-		_mesh(self, _cyl(0.008, 0.008, 0.03), brass, dk + Vector3(0.2 + 0.04 * i, y + 0.015, -0.1 + 0.03 * (i % 2)))
-	_mesh(self, _box(Vector3(0.42, 0.08, 0.06)), _shared(Color(0.05, 0.04, 0.03), 0.3), dk + Vector3(0.2, y + 0.04, 1.0))
-	_label(dk + Vector3(0.2, y + 0.045, 1.035), "대표이사", Color(0.85, 0.7, 0.35), 22, 0.004)
+		_mesh(dg, _cyl(0.008, 0.008, 0.03), brass, dk + Vector3(0.2 + 0.04 * i, y + 0.015, -0.1 + 0.03 * (i % 2)))
+	_mesh(dg, _box(Vector3(0.42, 0.08, 0.06)), _shared(Color(0.05, 0.04, 0.03), 0.3), dk + Vector3(0.2, y + 0.04, 1.0))
+	_label_in(dg, dk + Vector3(0.2, y + 0.045, 1.035), "대표이사", Color(0.85, 0.7, 0.35), 22, 0.004)
 
 
 ## 부진폐차장 사무실(2장 끝 — 2026-11-12 사용자 "사무실로 가서 김신, 김대건, 서진태, 차수민, 이슬이 차수민 폐차장 내부 쇼파에 다 같이
@@ -750,6 +780,15 @@ func _hs_marble_tex(base: Color, vein: Color, seed_v: int) -> ImageTexture:
 			img.set_pixel(x, y, base.darkened(r.randf() * 0.05).lerp(vein, v * 0.7))
 	img.generate_mipmaps()
 	return ImageTexture.create_from_image(img)
+
+
+## 무리(group) 안 글 — 무리가 돌아 있어도 글은 카메라 쪽(+z)을 본다
+func _label_in(g: Node3D, at: Vector3, txt: String, col: Color, size := 48, px := 0.005) -> void:
+	var l := _label(at, txt, col, size, px)
+	remove_child(l)
+	g.add_child(l)
+	l.position = at
+	l.rotation_degrees.y = -g.rotation_degrees.y
 
 
 ## 결 나눠 쓰기(이 무대 안)

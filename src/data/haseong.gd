@@ -148,10 +148,10 @@ const ROOMS := [
 				["haseong_guard", Vector2(7.6, -0.2), {"tag": "g2"}], ["haseong_guard", Vector2(8.6, 1.4), {"tag": "g2"}], ["haseong_guard", Vector2(9.2, -1.2), {"tag": "g2"}]]}]},
 	# 대표실 앞 복도: 특별 경호대 20명 = 10(w1) → 10(w2) + 오지인(비켜선다 — 2026-11-12 사용자 '하성 조직원 숫자 2배로')
 	# 대표실 앞 복도 → 대표실(한 방 — 2026-11-12 사용자 "'대표실 앞 복도 불 꺼짐'와 '대표실 불꺼짐'은 하나로 합치고, 대표실 앞 복도에서
-	# 문을 열고 방 안으로 들어가면 대표실 불꺼짐이 이어지도록해. 스테이지로 나누지말고"): 복도 경호팀 20 · 오지인을 넘기면 김신이 오른쪽
-	# 대표실 문으로 걸어가(장면 ceo_door) 그 자리에서 무대가 대표실로 바뀐다(triggers bounds · theme · purge — 쓰러진 경호원은 치운다).
+	# 문을 열고 방 안으로 들어가면 대표실 불꺼짐이 이어지도록해. 스테이지로 나누지말고"): 복도 경호팀 20 · 오지인을 넘기면 길이 열리고,
+	# 복도 오른쪽 끝 문틀로 걸어 들어가면 대표실(한 맵 haseong_ceo — rc.16 6번 "프롤로그 군터처럼", 옛 무대 바꿈 · ceo_door 장면은 뺐다).
 	# 대표실: 강창석 · 김재훈 — 김재훈이 쓰러지면 창 장면 → 방을 깬다. 복도 자리는 맵 넓히기(MAP_K 1.4 × 1.25)를 미리 곱한 값(fixed — 대표실 넓이가 그대로이게)
-	{"id": "guard_corridor", "fixed": true, "theme": "haseong_corridor", "bounds": Rect2(-9.8, -2.5, 19.6, 5.0), "cast": ["kimshin"],
+	{"id": "guard_corridor", "fixed": true, "theme": "haseong_ceo", "bounds": Rect2(-9.8, -2.6, 34.8, 5.2), "cast": ["kimshin"],
 		"heroes": [Vector2(-7.28, 0.0)], "allies": [],
 		"enemies": [
 			["haseong_guard", Vector2(0.56, -2.0), {"tag": "w1"}], ["haseong_guard", Vector2(0.56, 0.0), {"tag": "w1"}], ["haseong_guard", Vector2(0.56, 2.0), {"tag": "w1"}],
@@ -165,12 +165,14 @@ const ROOMS := [
 			["haseong_guard", Vector2(8.4, 1.0), {"tag": "w2"}], ["haseong_guard", Vector2(8.4, 2.125), {"tag": "w2"}], ["haseong_guard", Vector2(9.52, -1.625), {"tag": "w2"}],
 			["haseong_guard", Vector2(9.52, -0.75), {"tag": "w2"}], ["haseong_guard", Vector2(9.52, 0.25), {"tag": "w2"}], ["haseong_guard", Vector2(9.52, 1.125), {"tag": "w2"}],
 			["haseong_guard", Vector2(9.52, 2.125), {"tag": "w2"}]]},
-			# 1: 복도를 다 넘기면 대표실 문으로(문 = 복도 뒷벽 오른쪽 haseong3d _hs_ceo_door — b.end.x - 1.6)
-			{"when": "clear", "scene": "ceo_door"},
-			# 2: 문을 열고 들어서면 — 무대가 대표실로(같은 방 · 스테이지 넘김 없음)
-			{"when": "after:1:0.05", "purge": true, "bounds": Rect2(-5.6, -2.6, 11.2, 5.2), "theme": "haseong_office", "boss": "", "say": "office",
-				"spawn": [["gangchangseok", Vector2(1.6, -1.2)], ["kimjaehoon", Vector2(3.0, 0.8)]], "scene": "ceo_enter"},
-			# 3: 김재훈이 쓰러지면 장면(2026-11-12 사용자 12번 — 강창석은 원작처럼 달아나고 029/039-043, 창을 쏴 깨고 끌고 가 '달게 받아라' → 창 밖으로)
+			# 복도 → 대표실 한 맵(2026-11-12 사용자 rc.16 6번 "프롤로그 군터처럼 방으로 자연스럽게" — haseong3d haseong_ceo · 대표실 자리 = 옛 대표실 + CEO_OX 19.4)
+			# 1 · 2: 둘째 무리 · 오지인을 다 넘기면 길이 열린다 — 오른쪽 끝 문틀로
+			{"when": "down:w2", "requires": [0]},
+			{"when": "down:ojiin", "requires": [1], "say": "ceo_open"},
+			# 3: 문틀을 넘어 대표실로 걸어 들어서면(스테이지 넘김 · 무대 바꿈 없음)
+			{"when": "x:11.6", "requires": [2], "boss": "", "say": "office",
+				"spawn": [["gangchangseok", Vector2(21.0, -1.2)], ["kimjaehoon", Vector2(22.4, 0.8)]], "scene": "ceo_enter"},
+			# 4: 김재훈이 쓰러지면 장면(2026-11-12 사용자 12번 — 강창석은 원작처럼 달아나고 029/039-043, 창을 쏴 깨고 끌고 가 '달게 받아라' → 창 밖으로)
 			{"when": "down:kimjaehoon", "scene": "jaehoon_window", "scene_end": "clear"}]},
 	# 위층 복도(긴 맵 22m) — 남궁혁을 피해 10초 안에 오른쪽 끝 문으로
 	{"id": "upper_corridor", "theme": "haseong_upper", "bounds": Rect2(-11.0, -2.0, 22.0, 4.0), "cast": ["kimshin"],

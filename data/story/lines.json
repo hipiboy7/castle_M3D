@@ -43,7 +43,9 @@
         {"say": ["risa", "아무르 티그로의 은퇴식에 어울릴 만한."]},
         {"pose": "kimshin", "name": ""},
         {"wait": 0.6},
-        {"walk": "kimshin", "to": [5.6, 0.6]},
+        {"walk": "kimshin", "to": [-3.6, -1.25]},
+        {"walk": "kimshin", "to": [3.8, -1.25]},
+        {"walk": "kimshin", "to": [5.6, -0.9]},
         {"end": "clear"}
       ]
     },
@@ -200,8 +202,8 @@
         {"wait": 0.5}
       ],
       "ceo_enter": [
-        {"place": "kimshin", "at": [-3.8, 0.4]},
-        {"face": "kimshin", "at": [3.0, 0.8]},
+        {"walk": "kimshin", "to": [15.4, 0.4]},
+        {"face": "kimshin", "at": [22.4, 0.8]},
         {"wait": 0.4},
         {"say": ["kimshin", "정확히 10년 만이군."]},
         {"end": "fight"}
@@ -214,10 +216,10 @@
         {"say": ["kimjaehoon", "자자 자 잠깐...!"]},
         {"say": ["kimjaehoon", "기... 기억하지? 옛날에 너 이랬다가 무슨 짓을 당했는지."]},
         {"say": ["kimjaehoon", "날 건들면... 캐슬이랑 싸워야 되는데!?"]},
-        {"face": "kimshin", "at": [2.05, -3.2]},
+        {"face": "kimshin", "at": [21.45, -3.2]},
         {"use": "kimshin", "move": "t_shot"},
-        {"fx": "shot", "at": [2.05, -2.6]},
-        {"fx": "glass", "at": [2.05, -3.1]},
+        {"fx": "shot", "at": [21.45, -2.6]},
+        {"fx": "glass", "at": [21.45, -3.1]},
         {"pose": "kimjaehoon", "name": "kneel"},
         {"say": ["kimjaehoon", "그.. 그래! 원하는 게 그거랬지? 회암시 자치권."]},
         {"say": ["kimjaehoon", "좋다. 회암시 건들지 않을게. 너나 나나 다 컸는데 이게 뭐 하는 짓이냐."]},
@@ -228,8 +230,8 @@
         {"say": ["kimshin", "걸어."]},
         {"pose": "kimjaehoon", "name": ""},
         {"walk": "kimshin", "to_who": "kimjaehoon", "gap": 0.6},
-        {"carry": "kimshin", "target": "kimjaehoon", "to": [2.05, -2.3], "push_to": [2.05, -3.3]},
-        {"face": "kimshin", "at": [2.05, -3.2]},
+        {"carry": "kimshin", "target": "kimjaehoon", "to": [21.45, -2.3], "push_to": [21.45, -3.3]},
+        {"face": "kimshin", "at": [21.45, -3.2]},
         {"say": ["kimjaehoon", "시..신아... 내가 잘못 했다..."]},
         {"say": ["kimjaehoon", "근데...이건 좀 아니지 않냐?"]},
         {"say": ["kimjaehoon", "솔직히 네 아빠 죽은 게 내 탓은 아니잖아...?"]},
@@ -244,8 +246,8 @@
         {"say": ["kimshin", "입 닫고,"]},
         {"say": ["kimshin", "달게 받아라."], "secs": 1.4},
         {"use": "kimshin", "move": "cj_3"},
-        {"toss": "kimjaehoon", "to": [2.3, -6.5], "secs": 0.9},
-        {"fx": "smash", "at": [2.05, -3.1]},
+        {"toss": "kimjaehoon", "to": [21.7, -6.5], "secs": 0.9},
+        {"fx": "smash", "at": [21.45, -3.1]},
         {"wait": 1.2},
         {"end": "clear"}
       ]
@@ -267,6 +269,7 @@
       "guard_corridor": {"enter": ["대표실 앞 복도 → 대표실 · 불 꺼짐", "김신: 이제 들어간다. 불꺼. — 특별 경호팀 20인 · 오지인, 그 너머 대표실", ["p1:025/068-069"]],
         "wave2": [["경호팀이 더 나온다", "남은 다섯 — 오지인이 지켜본다"]],
         "yield": ["오지인이 비켜선다", "오지인: 열에 아홉은 진다. — 칼을 내려놓는다", ["p1:026/051"]],
+        "ceo_open": [["복도를 넘었다", "오른쪽 끝 — 대표이사실 문틀로"]],
         "office": [["대표실 · 불 꺼짐", "김신: 정확히 10년 만이군. — 김재훈 · 강창석", ["p1:026/062"]]],
         "clear": ["김재훈 — 창 밖으로", "김신: 입 닫고, 달게 받아라.", ["p1:029/093-096"]]},
       "upper_corridor": {"enter": ["위층 복도 · 남궁혁 다시", "남궁혁이 피우진을 꺾고 올라왔다 — 자... 들어와라!", ["p1:029/136-137"]],

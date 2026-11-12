@@ -540,7 +540,14 @@ func _update_flash(f) -> void:
 		Ink.set_flash(m, col)
 
 
+## 장면 연출 중(main._set_scene)에는 머리 위 글(빈틈 · 기절 · 빨간 !)을 안 띄운다 — 2026-11-12 rc.16 7번 "'기절'이라는 단어는 없애줘"(대표실 창 장면)
+static var in_scene := false
+
+
 func _update_telegraph(f) -> void:
+	if in_scene:
+		tele.visible = false
+		return
 	if f.state == "stagger" or f.state == "stun":
 		tele.visible = true
 		tele.text = "빈틈" if f.state == "stagger" else "기절"
