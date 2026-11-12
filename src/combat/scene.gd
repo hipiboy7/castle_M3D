@@ -24,7 +24,7 @@ extends RefCounted
 ##   {"toss": who, "to": Vector2, "secs": 초}        날아가 사라진다(창 밖 — 맵 밖도 된다. 판에서 빠진다)
 ##   {"fx": 종류, "at": Vector2}          무대 연출(glass — 유리 깨짐 · shot — 총소리 · 섬광 · smash — 부서짐)
 ##   {"place": who, "at": Vector2}       바로 그 자리에(장면 시작 전 세우기)
-##   {"pose": who, "name": "sit"}         장면 자세(그림만 — poses.gd SCENE: sit · lean · arms · hands_up · kneel · lie_up, "" = 보통)
+##   {"pose": who, "name": "sit"}         장면 자세(그림만 — poses.gd SCENE: sit · lean · arms · hands_up · kneel · lie_up · lie_bed, "" = 보통)
 ##   {"end": "fight" | "clear" | "win"}  장면을 끝낸다 — fight 싸움 계속(기본), clear 방을 깸, win 판을 이김(끝 방이 아니어도)
 
 const SAY_MIN := 1.6

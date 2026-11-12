@@ -22,6 +22,10 @@ var show_pause := false:
 	set(v):
 		show_pause = v
 		queue_redraw()
+var show_ff := false:            # 장면 빨리 감기 버튼(장면 연출 중만 — main._set_scene)
+	set(v):
+		show_ff = v
+		queue_redraw()
 var show_swap := false:
 	set(v):
 		show_swap = v
@@ -49,6 +53,8 @@ var buttons := [
 	{"id": "pause", "label": "멈춤", "r": 34.0, "off": Vector2(-56, 92), "at": "tr"},
 	{"id": "speed", "label": "×1", "r": 34.0, "off": Vector2(-56, 180), "at": "tr"},
 	{"id": "menu", "label": "메뉴", "r": 34.0, "off": Vector2(-144, 92), "at": "tr"},
+	# 장면 빨리 감기(2026-11-12 사용자 "멘트 나오는거, 빨리 감기 버튼이 있었으면 좋겠어. 우측 상단쪽에") — 누르면 ×3 켜고 끔, 켜지면 밝게(lit)
+	{"id": "ff", "label": "×1", "sub": "빨리 감기", "r": 40.0, "off": Vector2(-154, 186), "at": "tr"},
 	{"id": "swap", "label": "교대", "r": 44.0, "off": Vector2(-450, -190)},
 	{"id": "art", "label": "그림", "r": 44.0, "off": Vector2(70, 200), "at": "tl"},
 	{"id": "bench", "label": "성능", "r": 44.0, "off": Vector2(70, 310), "at": "tl"},
@@ -83,6 +89,8 @@ func _active(b: Dictionary) -> bool:
 			return show_pause
 		"swap":
 			return show_swap
+		"ff":
+			return show_ff
 		"art", "bench", "difficulty":
 			return show_art
 	return show_fight
@@ -100,6 +108,7 @@ func _input(e: InputEvent) -> void:
 				if _active(b) and e.position.distance_to(_btn_pos(b)) <= b["r"] * 1.3:
 					_pressed[b["id"]] = e.index
 					_edges[b["id"]] = true
+					_edges["btn_tap"] = true            # 버튼을 누른 것(장면 넘기기 '화면 누름'으로 안 센다)
 					hit = true
 			var sa := SafeArea.rect(get_viewport())
 			if not hit and e.position.x < sa.position.x + sa.size.x * 0.5 and _stick_idx == -1:
@@ -147,6 +156,13 @@ func set_speed_label(t: String) -> void:
 
 
 ## 버튼 글 바꾸기(속도 · 공격 — 칼이면 '베기', 맨손이면 '치기': main.gd 가 조작하는 사람이 바뀔 때)
+func set_lit(id: String, on: bool) -> void:
+	for b in buttons:
+		if b["id"] == id and b.get("lit", false) != on:
+			b["lit"] = on
+			queue_redraw()
+
+
 func set_label(id: String, t: String) -> void:
 	for b in buttons:
 		if b["id"] == id and b["label"] != t:
@@ -178,7 +194,7 @@ func _draw() -> void:
 		if not _active(b):
 			continue
 		var p := _btn_pos(b)
-		var on := _pressed.has(b["id"])
+		var on: bool = _pressed.has(b["id"]) or b.get("lit", false)
 		draw_circle(p, b["r"], COL_BTN_ON if on else COL_BTN)
 		draw_arc(p, b["r"], 0, TAU, 48, Color(1, 1, 1, 0.35), 3.0)
 		var w: float = b["r"] * 2.0

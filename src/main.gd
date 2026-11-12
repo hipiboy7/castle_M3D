@@ -14,7 +14,7 @@ extends Node3D
 ##   --safe L,T,R,B 안전 영역 여백(기준 화면 단위 — 노치 · 제스처 바 흉내) · --trace 흐름 줄(MODE · PAUSE)을 창 없이도 찍는다
 ##   --save-replay 경로 --seconds 로 끝날 때 마지막 판의 입력 기록을 저장 · --replay 경로 기록을 창 없이 다시 돌려 해시를 견주고 끝
 ##     (combat/replay.gd — 판이 끝날 때마다 user://replay_last.json 에도 남긴다: 폰에서 생긴 버그를 그대로 재현)
-##   --events 프레임:동작,… 그 프레임에 동작을 흉내 — back(뒤로 버튼) · press(아무 버튼) · pause · resume(일시정지 버튼) ·
+##   --events 프레임:동작,… 그 프레임에 동작을 흉내 — back(뒤로 버튼) · press(아무 버튼) · ff(장면 빨리 감기) · pause · resume(일시정지 버튼) ·
 ##            hide · show(앱이 내려감 · 돌아옴) · swap(교대) · art(처음 화면 그림 버튼). scripts/verify.py '흐름' · '세이브' 단계가 쓴다
 ## 창 없이 점검: <godot> --headless --fixed-fps 60 --path . -- --autoplay --seconds 90 [--mode stage]
 ## 첫 화면에서 6초 동안 아무것도 안 누르면 데모(봇) — 6장 · 11장을 번갈아. 에뮬레이터 스크린샷도 이것을 찍는다.
@@ -61,6 +61,7 @@ const MINI_Y := 2.45            # 적 머리 위 작은 막대 높이(m, 몸 크
 const REPLAY_LAST := "user://replay_last.json"
 const SAVE_PATH := "user://save.json"
 const BASE_TICKS := 60          # project.godot physics_ticks_per_second — 로직 한 칸 = 1/60 초(게임 속도 ×1)
+const FF_SPEED := 3.0           # 장면 빨리 감기 속도(오른쪽 위 버튼 — _set_ff)
 
 var args := Launch.defaults()
 var paused := false
@@ -119,6 +120,7 @@ var hud: CanvasLayer
 var bubbles: Control                       # 말풍선(src/ui/bubbles.gd — HUD 밑 칸, 터치 버튼 아래)
 var _tossed: Array = []                    # 장면에서 날아가는 인형 [인형, 처음, 끝, 지난 초, 초](scene.gd toss)
 var _in_scene := false
+var _ff := false                 # 장면 빨리 감기 켜짐(_set_ff)
 var _cam_last := Vector3.ZERO
 var touch: Control
 var snd: Node
@@ -247,7 +249,18 @@ func _set_scene(on: bool) -> void:
 	_in_scene = on
 	if mode == "fight" or mode == "demo":
 		touch.show_fight = not on
+	touch.show_ff = on and mode == "fight"
+	if not on and _ff:                              # 장면이 끝나면 빨리 감기도 끈다(다음 장면은 ×1 부터)
+		_set_ff(false)
 	hud.set_hint("누르면 넘기기" if on else "")
+
+
+## 장면 빨리 감기(오른쪽 위 버튼): 장면 동안 게임 속도를 FF_SPEED 로 — 말풍선 · 걷기가 모두 빨라진다(판정 · 리플레이는 그대로 — _apply_speed)
+func _set_ff(on: bool) -> void:
+	_ff = on
+	touch.set_lit("ff", on)
+	touch.set_label("ff", "×%d" % int(FF_SPEED) if on else "×1")
+	_apply_speed()
 
 
 ## 창 밖으로 날아가는 인형: 포물선으로 날며 돌고, 끝에 닿으면 사라진다
@@ -559,6 +572,9 @@ func _scripted() -> void:
 			_app_hidden(false)
 		"swap":
 			_fake_swap = true
+		"ff":                                      # 장면 빨리 감기 버튼
+			if _in_scene:
+				_set_ff(not _ff)
 		"art":
 			_fake_art = true
 		"difficulty":
@@ -802,6 +818,8 @@ func _menu_input() -> void:
 func _apply_speed() -> void:
 	var on := mode == "fight" or mode == "demo"
 	var k: float = float(save["speed"]) if on else 1.0
+	if on and _ff and _in_scene:
+		k = maxf(k, FF_SPEED)
 	Engine.physics_ticks_per_second = roundi(BASE_TICKS * k)
 	Engine.time_scale = k
 	touch.set_speed_label(Save.speed_label(float(save["speed"])))
@@ -841,6 +859,8 @@ func _physics_process(_dt: float) -> void:
 	if mode == "fight" and (Input.is_action_just_pressed("menu") or touch.take_edge("menu")):
 		_set_menu(true)
 		return
+	if mode == "fight" and _in_scene and touch.take_edge("ff"):
+		_set_ff(not _ff)
 	if mode == "fight" and (Input.is_action_just_pressed("speed") or touch.take_edge("speed")):
 		save["speed"] = Save.next_speed(float(save["speed"]))
 		_write_save()
@@ -930,7 +950,7 @@ func _player_intent() -> Dictionary:
 	var tg = h.target()
 	var swap := Input.is_action_just_pressed("swap") or e.has("swap") or _fake_swap
 	_fake_swap = false
-	var skip := _in_scene and (e.has("tap") or _fake_press)       # 장면 넘기기(화면 누름 · 시험 --events press)
+	var skip := _in_scene and ((e.has("tap") and not e.has("btn_tap")) or _fake_press)   # 장면 넘기기(화면 누름 — 버튼 말고 · 시험 --events press)
 	if skip:
 		_fake_press = false
 	return {

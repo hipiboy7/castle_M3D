@@ -164,8 +164,13 @@ func set_marker(col) -> void:
 	marker.material_override.albedo_color = col
 
 
+var _lift := 0.0
+
+
 func update_from(f, dt: float, frozen: bool) -> void:
-	position = Vector3(f.pos.x, float(f.air), f.pos.y)          # 점프 높이(fighter air)
+	var lift_to: float = P.SCENE_LIFT.get(str(f.pose), 0.0) if f.speed_now < 0.2 else 0.0   # 장면 자세 높이(침대 위)
+	_lift = lerpf(_lift, lift_to, 1.0 - exp(-10.0 * dt)) if absf(_lift - lift_to) > 0.002 else lift_to
+	position = Vector3(f.pos.x, float(f.air) + _lift, f.pos.y)  # 점프 높이(fighter air)
 	_update_flash(f)
 	_update_telegraph(f)
 	if frozen:

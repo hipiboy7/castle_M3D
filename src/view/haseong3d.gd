@@ -609,6 +609,16 @@ func _hs_junk_office(b: Rect2) -> void:
 	for k in 3:
 		_mesh(self, _cyl(0.035, 0.035, 0.12), _shared([Color(0.75, 0.1, 0.1), Color(0.2, 0.45, 0.8), Color(0.85, 0.8, 0.2)][k], 0.3, 0.0, 0.6),
 			tb + Vector3(0.2 + 0.12 * k, 0.51, -0.12 + 0.1 * (k % 2)))
+	# 간이침대(탁자 앞 — 신태진이 눕는다, 방 표 junkyard_end lie_bed · 2026-11-12 사용자 "침대에 좀 눕혀줘"): 쇠 다리 · 매트 · 베개 · 담요
+	var cot := Vector3(cx + 0.3, 0, cz + 1.35)
+	var steel := _shared(Color(0.3, 0.32, 0.33), 0.4, 0.0, 0.7)
+	_mesh(self, _box(Vector3(2.1, 0.06, 0.86)), steel, cot + Vector3(0, 0.36, 0))
+	for sx in [-1.0, 1.0]:
+		for sz in [-1.0, 1.0]:
+			_mesh(self, _box(Vector3(0.05, 0.36, 0.05)), steel, cot + Vector3(1.0 * sx, 0.18, 0.39 * sz))
+	_mesh(self, _box(Vector3(2.0, 0.12, 0.8)), _shared(Color(0.62, 0.6, 0.52), 0.9), cot + Vector3(0, 0.45, 0))
+	_mesh(self, _box(Vector3(0.42, 0.1, 0.6)), _shared(Color(0.85, 0.84, 0.78), 0.9), cot + Vector3(-0.76, 0.55, 0))
+	_mesh(self, _box(Vector3(1.0, 0.05, 0.84)), _shared(Color(0.3, 0.34, 0.26), 0.95), cot + Vector3(0.45, 0.52, 0))
 	# 차수민 책상 · 의자 · 서류장(오른쪽 뒤)
 	var dk := Vector3(b.end.x + 0.6, 0, b.position.y + 0.3)
 	_mesh(self, _box(Vector3(1.6, 0.06, 0.8)), _shared(Color(0.4, 0.32, 0.22), 0.5), dk + Vector3(0, 0.76, 0))

@@ -181,13 +181,14 @@ const ROOMS := [
 		"heroes": [Vector2(-3.6, 0.2)], "allies": [],
 		"enemies": [["sintaejin", Vector2(2.4, 0.0)]], "boss": "sintaejin"},
 	# 2장 끝 — 차수민의 부진폐차장 사무실(2026-11-12 사용자 "'부진폐차장'은 필요 없고, 사무실로 가서 김신, 김대건, 서진태, 차수민, 이슬이
-	# 차수민 폐차장 내부 쇼파에 다 같이 앉아서 멘트하는걸로 해"): ㄷ 자 소파에 다섯이 앉고, 묶인 신태진은 바닥(원작 p1:034 — 대화 상대).
+	# 차수민 폐차장 내부 쇼파에 다 같이 앉아서 멘트하는걸로 해"): ㄷ 자 소파에 다섯이 앉고, 신태진은 간이침대에 눕는다(원작 p1:034 — 대화 상대).
 	# 싸움 없는 장면 방 — 장면이 끝나면 2장을 깬다(scene end win)
 	{"id": "junkyard_end", "fixed": true, "theme": "junkyard_office", "bounds": Rect2(-4.0, -2.0, 8.0, 4.0), "cast": ["kimshin"],
 		"heroes": [Vector2(-0.6, -1.3)], "allies": [], "enemies": [], "boss": "",
 		"standing": [["jintae", Vector2(2.2, 0.15), 0], ["chasumin", Vector2(0.6, -1.3), 0], ["iseul", Vector2(-2.2, -0.3), 0], ["kimdaegeon", Vector2(-2.2, 0.6), 0],
-			["sintaejin", Vector2(0.5, 1.35), 0]],
-		"poses": {"kimshin": "sit", "jintae": "sit", "chasumin": "sit", "iseul": "sit", "kimdaegeon": "sit", "sintaejin": "lie_up"},
+			["sintaejin", Vector2(1.2, 1.35), 0]],
+		# 신태진은 탁자 앞 간이침대에 눕는다(2026-11-12 사용자 "바닥에 말고, 침대에 좀 눕혀줘" — 침대는 haseong3d _hs_junk_office, 발은 오른쪽 · 장면 첫 단계 face)
+		"poses": {"kimshin": "sit", "jintae": "sit", "chasumin": "sit", "iseul": "sit", "kimdaegeon": "sit", "sintaejin": "lie_bed"},
 		"scene": "office_talk"},
 ]
 
