@@ -225,7 +225,7 @@ func test_ch2_ojiin_yields() -> void:
 	Stage.step(d, {})
 	d["world"].events.clear()
 	var guards: Array = d["enemies"].filter(func(e): return e.char_id == "haseong_guard")
-	check(guards.size() == 10 and guards.filter(func(e): return e.alive()).size() == 5, "첫 다섯이 쓰러지면 다섯이 더 — 경호팀 10인 (%d)" % guards.size())
+	check(guards.size() == 20 and guards.filter(func(e): return e.alive()).size() == 10, "첫 열이 쓰러지면 열이 더 — 경호팀 20인(2026-11-12 '2배로') (%d)" % guards.size())
 	for e in guards:
 		if e.alive():
 			e.hp = 0.0
@@ -242,7 +242,7 @@ func test_ch2_ojiin_yields() -> void:
 	check(yielded and oj.alive() and oj.inert and d["stage"] == "clear", "오지인이 비켜서고 방을 넘는다 %s" % d["stage"])
 
 
-## 1층: 하성 인력 15명이 세 무리(6 · 5 · 4)로 — 셋째 무리와 함께 황보민철. 서진태 쪽 아군은 이슬 · 청년회 3명 · 부진파 2명
+## 1층: 하성 인력 30명이 세 무리(12 · 10 · 8 — 2026-11-12 사용자 '2배로')로 — 셋째 무리와 함께 황보민철. 서진태 쪽 아군은 이슬 · 청년회 3명 · 부진파 2명
 func test_ch2_lobby_waves() -> void:
 	var d := Stage.make(1, {"chapter": "ch2", "room": _room_of("lobby")})
 	_past_intro(d)
@@ -259,7 +259,7 @@ func test_ch2_lobby_waves() -> void:
 	for e in d["enemies"]:
 		seen[e] = true
 	var suits: int = seen.keys().filter(func(e): return e.char_id == "haseong_suit").size()
-	check(suits == 15 and d["enemies"].any(func(e): return e.char_id == "hwangbomincheol" and e.alive()), "하성 인력 15명 + 황보민철 (%d)" % suits)
+	check(suits == 30 and d["enemies"].any(func(e): return e.char_id == "hwangbomincheol" and e.alive()), "하성 인력 30명 + 황보민철 (%d)" % suits)
 
 
 ## 위층 복도(남궁혁 + 경호대 · 피우진 · 김대건 아군): 둘 중 하나가 쓰러지면 진다 · 김신이 오른쪽 끝에 닿으면 넘는다
@@ -297,6 +297,7 @@ func test_ch2_ceo_one_hit() -> void:
 ## 봇이 2장 보스 방을 넘는다 — 몇 초 만에 녹지 않지만 1분 안(2장 보스는 모두 조작 인물보다 아랫급 — 사용자 2026-11-10). 수치 조정 회귀 막기
 func test_ch2_bot_beats_bosses() -> void:
 	for c in [["lobby", 2], ["junkyard_night", 2]]:
-		var r := Stage.simulate(int(c[1]), 60 * 90 + Haseong.INTRO_T, {"chapter": "ch2", "room": _room_of(c[0])})
+		var r := Stage.simulate(int(c[1]), 60 * 120 + Haseong.INTRO_T, {"chapter": "ch2", "room": _room_of(c[0])})
 		var t := float(r["times"].get(c[0], -1)) / 60.0
-		check(t > 8.0 and t < 60.0, "%s 봇이 넘는다 · 8 ~ 60초 (%.0f초) %s" % [c[0], t, r])
+		var top := 100.0 if c[0] == "lobby" else 60.0      # 1층은 무리가 30명(2026-11-12 '2배로') — 100초 안
+		check(t > 8.0 and t < top, "%s 봇이 넘는다 · 8 ~ %.0f초 (%.0f초) %s" % [c[0], top, t, r])

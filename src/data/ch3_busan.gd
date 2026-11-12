@@ -44,6 +44,10 @@ const CROWD_ID := "street_thug"
 ## 그 장 시점의 등급(강함표의 조건 줄 — 1층 기본값이 다른 시기일 때)
 const NPCS := {
 	"odohwa": {"rank": "내성 하위"},       # (현 시점) 오도화 — (전성기) 내성 상위는 회상
+	# 부산 밤 시장 골목(2026-11-12 사용자 "남일호는 평이스크라급이고 나머지 2명 캐릭터는 전국구급")
+	"namilho": {"rank": "이스크라 평 킬러급"},
+	"hahoe_mask": {"rank": "전국구", "name": "하회탈 가면"},
+	"redspot_mask": {"rank": "전국구", "name": "붉은 점 가면"},
 	"pyoyoung": {"rank": "전국구"},        # (1부) 표영
 	"guilhwa": {"rank": "전국구"},         # (화진 전) 구일화
 }
@@ -70,6 +74,11 @@ const ROLES := {
 		"look": "vasily", "phase2_at": 0.5, "dmg_k": 1.0},
 	"namilho": {"hp": 1100.0, "posture": 300.0, "walk": 2.1, "run": 4.6, "stagger": 75, "poise": 28.0, "finisher_cap": 0.08, "ai": "x_blade",
 		"look": "namilho", "yield_at": 0.35, "dmg_k": 1.8},
+	# 불휘 가면 둘(fight:bulhwi p1:044 — 김신 양옆 협공: 흰 셔츠 가면 주먹 연타 · 민소매 가면 높은 발차기)
+	"hahoe_mask": {"hp": 520.0, "posture": 180.0, "walk": 2.1, "run": 4.6, "stagger": 75, "poise": 20.0, "finisher_cap": 0.12, "ai": "x_boxer",
+		"look": "hahoe_mask", "dmg_k": 1.2},
+	"redspot_mask": {"hp": 500.0, "posture": 170.0, "walk": 2.2, "run": 4.8, "stagger": 75, "poise": 18.0, "finisher_cap": 0.12, "ai": "x_kicker",
+		"look": "redspot_mask", "dmg_k": 1.2},
 	"bulgom": {"hp": 1500.0, "posture": 460.0, "walk": 1.8, "run": 3.9, "stagger": 80, "poise": 34.0, "finisher_cap": 0.06, "ai": "x_grappler",
 		"look": "bulgom", "phase2_at": 0.5, "dmg_k": 2.2},
 	"moseunggyu": {"hp": 360.0, "posture": 300.0, "walk": 1.8, "run": 3.9, "stagger": 80, "poise": 32.0, "finisher_cap": 0.06, "ai": "x_brawler",
@@ -83,26 +92,39 @@ const ROLES := {
 }
 
 const ROOMS := [
-	{"id": "cheongju_cell", "theme": "prison_cell", "bounds": Rect2(-5.6, -2.4, 11.2, 4.8), "cast": ["iseul"],
+	# 회상 두 방: 그때의 이슬 · 구일화는 둘 다 전국구 아래급(경호대급 — 2026-11-12 사용자 "이슬 전국구 아래급, 구일화 전국구 아래급")
+	{"id": "cheongju_cell", "theme": "prison_cell", "bounds": Rect2(-5.6, -2.4, 11.2, 4.8), "cast": ["iseul"], "ranks": {"iseul": "경호대급", "guilhwa": "경호대급"},
 		"heroes": [Vector2(-3.0, 0.2)], "allies": [],
 		"enemies": [["guilhwa", Vector2(2.2, 0.0)]], "boss": "guilhwa"},
-	{"id": "cheongju_shower", "theme": "prison_cell", "bounds": Rect2(-6.0, -2.4, 12.0, 4.8), "cast": ["iseul", "guilhwa"],
+	{"id": "cheongju_shower", "theme": "prison_cell", "bounds": Rect2(-6.0, -2.4, 12.0, 4.8), "cast": ["iseul", "guilhwa"], "ranks": {"iseul": "경호대급", "guilhwa": "경호대급"},
 		"heroes": [Vector2(-4.0, 0.2), Vector2(-1.6, -0.8)], "allies": [],
-		"enemies": [["street_thug", Vector2(0.6, -1.4), {"name": "습격 무리"}], ["gang_blade", Vector2(1.2, 1.4), {"name": "칫솔 칼잡이"}],
-			["street_thug", Vector2(2.4, -0.2), {"name": "습격 무리"}], ["gang_blade", Vector2(3.4, 1.2), {"name": "칫솔 칼잡이"}],
-			["gang_brute", Vector2(4.2, -1.0), {"name": "턱수염 재소자"}]]},
+		"enemies": [
+			["street_thug", Vector2(0.6, -1.4), {"name": "습격 무리", "tag": "w1"}], ["gang_blade", Vector2(0.6, 1.4), {"name": "칫솔 칼잡이", "tag": "w1"}], ["street_thug", Vector2(2.0, -1.4), {"name": "습격 무리", "tag": "w1"}],
+			["gang_blade", Vector2(2.0, 1.4), {"name": "칫솔 칼잡이", "tag": "w1"}], ["gang_brute", Vector2(3.4, -1.4), {"name": "턱수염 재소자", "tag": "w1"}], ["street_thug", Vector2(3.4, 1.4), {"name": "습격 무리", "tag": "w1"}],
+			["gang_blade", Vector2(4.8, -1.4), {"name": "칫솔 칼잡이", "tag": "w1"}], ["street_thug", Vector2(4.8, 1.4), {"name": "습격 무리", "tag": "w1"}]],
+		# 습격 무리 15명(2026-11-12 사용자 '적 숫자를 3배로') = 8(w1) → 7(w2 — 문 쪽에서 더 몰려온다)
+		"triggers": [{"when": "down:w1", "spawn": [
+			["gang_blade", Vector2(4.8, -2.0), {"name": "칫솔 칼잡이", "tag": "w2"}], ["gang_brute", Vector2(4.8, -0.6), {"name": "턱수염 재소자", "tag": "w2"}], ["street_thug", Vector2(4.8, 0.8), {"name": "습격 무리", "tag": "w2"}],
+			["gang_blade", Vector2(4.8, 2.0), {"name": "칫솔 칼잡이", "tag": "w2"}], ["street_thug", Vector2(5.6, -2.0), {"name": "습격 무리", "tag": "w2"}], ["gang_blade", Vector2(5.6, -0.6), {"name": "칫솔 칼잡이", "tag": "w2"}],
+			["gang_brute", Vector2(5.6, 0.8), {"name": "턱수염 재소자", "tag": "w2"}]]}]},
 	{"id": "ballerino_cage", "theme": "club_cage", "bounds": Rect2(-5.0, -2.2, 10.0, 4.4), "cast": ["woojin"],
 		"heroes": [Vector2(-3.0, 0.2)], "allies": [],
 		"enemies": [["vasily", Vector2(2.2, 0.0)]], "boss": "vasily"},
 	{"id": "busan_arcade", "theme": "busan_arcade", "bounds": Rect2(-6.0, -2.4, 12.0, 4.8), "cast": ["jintae"],
 		"heroes": [Vector2(-4.0, 0.2)], "allies": [],
-		"enemies": [["street_thug", Vector2(0.4, -1.4), {"name": "표영 패거리"}], ["street_thug", Vector2(1.0, 1.4), {"name": "표영 패거리"}],
+		# 서진태 대 표영 + 핀아웃 10명(2026-11-12 사용자 "표영 쪽 일반 캐릭터 숫자를 10명으로") — 오락실 게임기는 부딪히면 부서진다(무대 breakable)
+		"enemies": [
+			["street_thug", Vector2(0.2, -1.8), {"name": "핀아웃"}], ["street_thug", Vector2(0.4, 1.8), {"name": "핀아웃"}], ["street_thug", Vector2(1.0, -0.6), {"name": "핀아웃"}],
+			["street_thug", Vector2(1.4, 0.9), {"name": "핀아웃"}], ["street_thug", Vector2(2.0, -2.0), {"name": "핀아웃"}], ["street_thug", Vector2(2.2, 2.0), {"name": "핀아웃"}],
+			["street_thug", Vector2(3.4, -1.2), {"name": "핀아웃"}], ["street_thug", Vector2(3.6, 1.4), {"name": "핀아웃"}], ["street_thug", Vector2(4.4, -2.0), {"name": "핀아웃"}],
+			["street_thug", Vector2(4.6, 0.4), {"name": "핀아웃"}],
 			["pyoyoung", Vector2(2.8, 0.0), {"hp_k": 3.0}]], "boss": "pyoyoung"},
 	{"id": "busan_night", "theme": "busan_rain", "bounds": Rect2(-7.0, -2.6, 14.0, 5.2), "cast": ["kimshin", "jintae"],
 		"heroes": [Vector2(-5.0, -0.6), Vector2(-5.2, 0.8)], "allies": [],
 		"enemies": [["street_thug", Vector2(-0.4, -1.8), {"name": "붉은 점 가면"}], ["street_thug", Vector2(0.4, 1.6), {"name": "붉은 점 가면"}],
 			["gang_blade", Vector2(1.6, -0.6), {"name": "붉은 점 가면"}], ["street_thug", Vector2(2.8, 1.8), {"name": "붉은 점 가면"}],
-			["gang_blade", Vector2(3.4, -1.6), {"name": "붉은 점 가면"}], ["namilho", Vector2(4.6, 0.2)]], "boss": "namilho"},
+			["gang_blade", Vector2(3.4, -1.6), {"name": "붉은 점 가면"}], ["namilho", Vector2(4.6, 0.2)],
+			["hahoe_mask", Vector2(3.8, 1.4)], ["redspot_mask", Vector2(3.8, -2.2)]], "boss": "namilho"},
 	{"id": "rolling_ball", "theme": "busan_lobby", "bounds": Rect2(-6.0, -2.4, 12.0, 4.8), "cast": ["kimshin"],
 		"heroes": [Vector2(-4.0, 0.2)], "allies": [],
 		"enemies": [["gang_brute", Vector2(0.8, -1.4)], ["gang_brute", Vector2(1.2, 1.4)], ["bulgom", Vector2(3.0, 0.0)]], "boss": "bulgom"},

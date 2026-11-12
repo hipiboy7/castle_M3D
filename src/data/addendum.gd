@@ -18,7 +18,7 @@ const PERIOD_CH11 := "hwajin"
 
 ## 이름 없는 엑스트라(인물 표 · canon 에 없다 — 장 데이터 검사가 canon 인물 id 를 보지 않는 것)
 const EXTRAS := ["castle_guard", "gunter_guard", "ds_member", "ds_raider", "haseong_suit", "haseong_guard", "namgu_youth",
-	"street_thug", "gang_blade", "gang_brute", "pro_fighter", "elite_guard"]
+	"street_thug", "gang_blade", "gang_brute", "pro_fighter", "elite_guard", "hahoe_mask", "redspot_mask"]
 
 const CHARACTERS := {
 	"shingen": {"id": "shingen", "name": "사사키 신겐", "rank": "내성 상위", "weapons": ["맨손", "칼", "대도"],
@@ -126,6 +126,11 @@ const CHARACTERS := {
 		"stats": {"힘": 50, "속도": 52, "기술": 44, "맷집": 48}, "skills": [], "src": "3D 덧붙임 엑스트라(3 ~ 13장 무리)", "provisional": ["rank", "stats"]},
 	"gang_brute": {"id": "gang_brute", "name": "거구", "rank": "조장급", "weapons": ["맨손"],
 		"stats": {"힘": 60, "속도": 40, "기술": 36, "맷집": 60}, "skills": [], "src": "3D 덧붙임 엑스트라(3 ~ 13장 무리)", "provisional": ["rank", "stats"]},
+	# 불휘 가면 둘(fight:bulhwi p1:044 others '하회탈 가면(흰 셔츠)' · '붉은 점 가면(민소매)' — 이름 없는 불휘 단원, 2026-11-12 사용자 "전국구급")
+	"hahoe_mask": {"id": "hahoe_mask", "name": "하회탈 가면", "rank": "전국구", "weapons": ["맨손"],
+		"stats": {"힘": 62, "속도": 64, "기술": 60, "맷집": 60}, "skills": [], "src": "3D 덧붙임(원작 fight:bulhwi others)", "provisional": ["rank", "stats"]},
+	"redspot_mask": {"id": "redspot_mask", "name": "붉은 점 가면", "rank": "전국구", "weapons": ["맨손"],
+		"stats": {"힘": 60, "속도": 68, "기술": 58, "맷집": 58}, "skills": [], "src": "3D 덧붙임(원작 fight:bulhwi others)", "provisional": ["rank", "stats"]},
 	"pro_fighter": {"id": "pro_fighter", "name": "격투가", "rank": "네임드", "weapons": ["맨손"],
 		"stats": {"힘": 58, "속도": 60, "기술": 56, "맷집": 58}, "skills": [], "src": "3D 덧붙임 엑스트라(3 ~ 13장 — 케이지 · 이스크라 · 사천왕 부하)", "provisional": ["rank", "stats"]},
 	"elite_guard": {"id": "elite_guard", "name": "경호대", "rank": "경호대급", "weapons": ["맨손", "칼", "총"],

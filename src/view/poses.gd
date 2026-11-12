@@ -42,6 +42,15 @@ const GUARD_LONG := {
 	"th_r": Vector3(24, -4, 6), "kn_r": 28.0, "ft_r": -6.0, "th_l": Vector3(-18, 4, 10), "kn_l": 24.0, "ft_l": 12.0,
 }
 
+# 여유 자세(2026-11-12 사용자 "본인보다 레벨이 낮은 캐릭터들만 있으면 굉장히 여유있는 포즈 — 느긋하게 팔을 내리고 있다가 싸울때만"):
+# 반쯤 비스듬히 서서 팔을 늘어뜨리고 턱을 조금 든다. 동급 · 윗급 적이 있으면 가드(GUARD_*) — 인형이 둘 사이를 섞는다(puppet_pose calm)
+const RELAX := {
+	"pelvis": Vector3(0, 12, 0), "spine": Vector3(-2, 2, 0), "chest": Vector3(-4, 4, 0), "head": Vector3(-8, -14, 0),
+	"sh_r": Vector3(6, 4, 9), "el_r": 16.0, "sh_l": Vector3(2, -2, 8), "el_l": 12.0,
+	"wr_r": Vector3(8, 0, 0), "wr_l": Vector3(6, 0, 0),
+	"th_r": Vector3(6, -4, 6), "kn_r": 8.0, "ft_r": -2.0, "th_l": Vector3(-6, 6, 8), "kn_l": 4.0, "ft_l": 2.0,
+}
+
 ## 공격 자세를 크고 길게 읽히게(2026-11-10 폰 리뷰 "공격 모션이 다 비슷하다") — 인형(src/view/puppet3d.gd _shape_set)이 모양마다
 ## W · S · F 에 더해 A(예비 동작: 준비 앞에 타격 반대쪽으로 더 감고 가라앉음) · O(지나침: 타격 뒤 같은 쪽으로 더) 를 만든다.
 ## AMP_TORSO: 가드에서 벗어난 몸통 각도 배율 · AMP_STEP: 내딛기(root_fwd) 배율 · ANTICIPATE · OVERSHOOT: W↔S 차이의 몇 배를 더 감고 · 지나가나 ·

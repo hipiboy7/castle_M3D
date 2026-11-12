@@ -118,6 +118,14 @@ const LOOKS := {
 	"ds_raider": {"suit": Color(0.1, 0.1, 0.11), "pants": Color(0.38, 0.28, 0.19), "shirt": Color(0.1, 0.1, 0.11), "collar": "turtle",
 		"skin": Color(0.88, 0.74, 0.62), "hair": Color(0.1, 0.1, 0.1), "hair_style": "bald", "mask": Color(0.05, 0.05, 0.06),
 		"big": false, "scale": 1.02, "limb": 1.12, "weapon_r": "pipe", "weapon_l": "", "guard": "long"},
+	#  불휘 가면 둘(fight:bulhwi p1:044/012-042 — '하회탈 가면(흰 셔츠)' · '붉은 점 가면(민소매)', 김신 양옆 협공 — 2026-11-12 사용자
+	#        "남일호급 캐릭터들 2명 더 … 나머지 2명은 전국구급"): 얼굴을 다 덮는 가면 · 맨주먹 / 높은 발차기
+	"hahoe_mask": {"outfit": "shirt", "suit": Color(0.9, 0.9, 0.88), "pants": Color(0.16, 0.15, 0.16), "shirt": Color(0.9, 0.9, 0.88),
+		"collar": "open", "skin": Color(0.88, 0.74, 0.62), "hair": Color(0.1, 0.1, 0.1), "hair_style": "short", "mask": Color(0.86, 0.76, 0.56),
+		"big": false, "scale": 1.03, "limb": 1.14, "weapon_r": "", "weapon_l": "", "guard": "box"},
+	"redspot_mask": {"outfit": "shirt", "suit": Color(0.2, 0.2, 0.22), "pants": Color(0.2, 0.2, 0.22), "shirt": Color(0.2, 0.2, 0.22),
+		"collar": "crew", "skin": Color(0.86, 0.72, 0.6), "hair": Color(0.1, 0.1, 0.1), "hair_style": "short", "mask": Color(0.92, 0.9, 0.86),
+		"big": false, "scale": 1.03, "limb": 1.16, "weapon_r": "", "weapon_l": "", "guard": "box"},
 	#  서진태(p1:003 첫 등장): 짧게 친 옆머리(검은 투블럭) 위 금발 웨이브 · 검은 뿔테 노란 렌즈 안경 · 양귀 검은 고리 귀걸이 ·
 	#        연분홍 · 베이지 재킷 + 검은 티 · 흰 줄 검은 트랙 바지 · 흰 · 회색 운동화 · 군용 나이프. 근육질
 	"jintae": {"suit": Color(0.92, 0.62, 0.74), "pants": Color(0.1, 0.1, 0.12), "shirt": Color(0.07, 0.07, 0.08),

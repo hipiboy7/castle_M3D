@@ -33,6 +33,9 @@ const GRIP_REV := Vector3(0, 0.55, 0.83)      # 거꾸로 쥔 칼날 (새끼손�
 const ANTIC_MIN := 8              # 준비가 이 프레임 이상인 동작만 예비 동작(A)을 보인다 — 조작 인물의 빠른 연타(4 ~ 7)는 바로 W 로(손맛)
 const ANTIC_AT := 0.4             # 준비의 앞 이만큼 가드 → A, 나머지 A → W
 const OVER_AT := 0.4              # 회수 앞부분(hold)의 이만큼 S → O(지나침), 나머지 O → F
+const CALM_HOLD := 1.6            # 여유 자세: 치거나 맞은 뒤 이 초 동안은 가드를 내리지 않는다
+const CALM_IN := 1.1              # 가드 → 여유 섞는 빠르기(1초에) — 느긋하게 내린다
+const CALM_OUT := 5.0             # 여유 → 가드 — 싸움이 붙으면 바로 올린다
 
 var look: Dictionary
 var J := {}
@@ -51,6 +54,10 @@ var weapon_l: Node3D = null
 var victory := false
 var tele_y := 2.22
 var _last_state := ""
+var calm := false                 # 여유 자세를 바란다(main.gd — 화면의 적이 모두 이 사람보다 아랫급일 때)
+var _calm := 0.0                  # 지금 여유 정도(0 가드 · 1 여유)
+var _calm_hold := 0.0
+var _relax_pose := {}
 
 
 
@@ -163,6 +170,7 @@ func update_from(f, dt: float, frozen: bool) -> void:
 	if frozen:
 		return                                   # 역경직: 자세를 그대로 멈춘다
 	time += dt
+	_update_calm(f, dt)
 	if f.state != _last_state:
 		# 돌기 · 구르기 각도를 짧은 쪽으로 감아 둔다 (세 바퀴 돈 뒤 거꾸로 풀리지 않게)
 		cur["spin"] = wrapf(float(cur["spin"]), -180.0, 180.0)
@@ -235,8 +243,27 @@ func _target_pose(f, dt: float) -> Dictionary:
 	return guard_pose
 
 
+## 여유 정도: 서 있거나 걷는 동안만 내리고, 치기 · 맞기 · 막기 · 구르기가 있으면 CALM_HOLD 초 가드
+func _update_calm(f, dt: float) -> void:
+	if f.state != "idle" and f.state != "move":
+		_calm_hold = CALM_HOLD
+	else:
+		_calm_hold = maxf(0.0, _calm_hold - dt)
+	var want := 1.0 if calm and _calm_hold <= 0.0 else 0.0
+	_calm = move_toward(_calm, want, dt * (CALM_IN if want > _calm else CALM_OUT))
+
+
+## 서 있는 바탕 자세 — 가드와 여유(P.RELAX)를 _calm 만큼 섞는다
+func _stance() -> Dictionary:
+	if _calm <= 0.001:
+		return guard_pose.duplicate()
+	if _relax_pose.is_empty():
+		_relax_pose = _merge(P.NEUTRAL, P.RELAX)
+	return _lerp_pose(guard_pose, _relax_pose, _ease_in_out(_calm))
+
+
 func _locomotion(f, dt: float) -> Dictionary:
-	var p: Dictionary = guard_pose.duplicate()
+	var p: Dictionary = _stance()
 	if f.flick_t > 0:
 		p = _merge(p, P.FLICK if f.parry_side == "R" else _mirror(P.FLICK))   # 들어오는 쪽 팔로 바깥으로 튕긴다
 	p["chest"] = p["chest"] + Vector3(1.4 * sin(time * 2.3), 0, 0)      # 숨
@@ -266,8 +293,9 @@ func _locomotion(f, dt: float) -> Dictionary:
 	p["th_l"] = p["th_l"] + Vector3(-amp * s * fwd, 0, -14.0 * s * side)
 	p["kn_r"] = float(p["kn_r"]) + 24.0 * maxf(0.0, c)
 	p["kn_l"] = float(p["kn_l"]) + 24.0 * maxf(0.0, -c)
-	p["sh_r"] = p["sh_r"] + Vector3(4.0 * s, 0, 0)
-	p["sh_l"] = p["sh_l"] + Vector3(-4.0 * s, 0, 0)
+	var swing := 4.0 + 18.0 * _calm * absf(fwd)         # 여유 걸음은 팔을 앞뒤로 흔든다
+	p["sh_r"] = p["sh_r"] + Vector3(swing * s, 0, 0)
+	p["sh_l"] = p["sh_l"] + Vector3(-swing * s, 0, 0)
 	return p
 
 

@@ -38,6 +38,7 @@ const Town3d = preload("res://src/view/town3d.gd")
 const Haseong3d = preload("res://src/view/haseong3d.gd")
 const World3d = preload("res://src/view/world3d.gd")
 const Moves = preload("res://src/data/moves.gd")
+const Common = preload("res://src/data/common.gd")
 ## 장 무대 그림(campaign.gd CHAPTERS view) → 그림 클래스 — 모두 build(theme, bounds, detail) 를 갖는다(LSP)
 const VIEWS := {"hotel": Hotel3d, "town": Town3d, "haseong": Haseong3d, "world": World3d}
 const Fx = preload("res://src/view/fx3d.gd")
@@ -69,8 +70,11 @@ var _gone_t := {}                          # 쓰러진 적 → 쓰러져 있던 
 const GONE_SECS := 4.0
 var _logic_ticks := 0                      # 로직(Stage · Duel.step)이 돈 수 — 멈춤 지킴이(_watch_stall)
 var _stall_seen := 0
-var _stall_t := 0.0
+var _stall_ms := 0                          # 마지막으로 돈 것을 본 실제 시각(ms)
+var _stall_hits := 0                        # 잇따른 멈춤 수(두 번째면 판을 새로)
+var _stall_last := 0
 const STALL_SECS := 1.5
+const STALL_FORGET_MS := 8000                # 이만큼 잘 돌면 멈춤 수를 잊는다
 var _switch_to: Array = []                 # 메뉴로 고른 [장, 방] — mode "switch" 가 SWITCH_WAIT 프레임 뒤 판을 바꾼다
 const SWITCH_WAIT := 2
 const RESULT_AUTO := 600        # 이긴 결과 화면: 안 눌러도 10초 뒤 처음 화면(rc.2 폰: 2장 끝 화면이 굳은 것처럼 보였다 — 끝 방 글과 결과 글이 같아서)
@@ -189,6 +193,23 @@ func _new_run(ch: String, room := -1) -> void:
 	evfx.later_t = 0.0
 	_build_stage_view()
 	d["world"].events = d["world"].events.filter(func(e): return e[0] != "room")   # 첫 방은 위에서 이미 그렸다
+
+
+## 여유 자세(2026-11-12 사용자 "본인보다 레벨이 낮은 캐릭터들만 있으면 여유있는 포즈 … 동급 캐릭터가 나오면 가드를 올려서"):
+## 판에 서 있는(쓰러지지 않고 싸움에서 빠지지 않은) 다른 편 사람이 모두 이 사람보다 아랫급이면 calm — 인형이 가드를 내린다(puppet_pose).
+## 등급을 모르는 사람(빈 등급)은 가장 아래로 친다. 그림만 바뀐다(판정 · 리플레이와 상관없음)
+func _mark_calm() -> void:
+	var ladder: Array = Common.ranks()
+	var top := {}                                  # 편 → 그 편에 서 있는 사람의 가장 높은 등급 번호
+	for f in pup:
+		if f.alive() and not f.inert:
+			top[f.team] = maxi(int(top.get(f.team, -1)), ladder.find(str(f.rank)))
+	for f in pup:
+		var foe := -1
+		for t in top:
+			if t != f.team:
+				foe = maxi(foe, int(top[t]))
+		pup[f].calm = ladder.find(str(f.rank)) > foe
 
 
 ## 무대 + 인형을 지금 판(방)에 맞게 다시 만든다 — 11장은 방을 넘을 때마다(신호 "room")
@@ -353,25 +374,39 @@ func _music() -> void:
 ## 멈춤 지킴이(사용자 2026-11-10 rc.8 폰 "다른 장에서 6장 넘어갈 때 멈춤. 소리도 안남. FPS 120" — v0.5.0-rc.1 에도 같은 말, 서버 ·
 ## 에뮬레이터에서 재현 안 됨): 싸우는 중(멈춤 · 메뉴 아님)인데 로직이 STALL_SECS 동안 한 칸도 안 돌면 그때 상태를 logcat 에 남기고
 ## 멈춤 · 속도 · 소리를 다시 건다(그림은 돌고 로직 · 소리만 선 상태 — 장면 트리 멈춤 · 물리 틱 · 소리 버스 중 하나로 본다)
-func _watch_stall(dt: float) -> void:
-	if (mode != "fight" and mode != "demo") or paused or menu_open:
-		_stall_t = 0.0
-		_stall_seen = _logic_ticks
+func _watch_stall(_dt: float) -> void:
+	# 실제 시계로 잰다(Engine.time_scale 이 0 이 되면 dt 도 0 — 2026-11-12 rc.14 "6장 … 계속 멈추네 · 앱을 다시 켜야")
+	var now := Time.get_ticks_msec()
+	var logic_mode := mode == "fight" or mode == "demo"
+	var tick := _logic_ticks if logic_mode else frames      # 싸움 밖(처음 화면 · 결과 · 바꿈)은 물리 프레임이 도는지만
+	if paused or menu_open or tick != _stall_seen or _stall_ms == 0:
+		if now - _stall_last > STALL_FORGET_MS:
+			_stall_hits = 0
+		_stall_seen = tick
+		_stall_ms = now
 		return
-	if _logic_ticks != _stall_seen:
-		_stall_seen = _logic_ticks
-		_stall_t = 0.0
+	if now - _stall_ms < int(STALL_SECS * 1000.0):
 		return
-	_stall_t += dt
-	if _stall_t < STALL_SECS:
-		return
-	print("STALL mode=%s kind=%s chapter=%s tree_paused=%s ticks=%d time_scale=%.2f mute=%s slowmo=%d over=%s frames=%d" % [mode, kind,
-		chapter, get_tree().paused, Engine.physics_ticks_per_second, Engine.time_scale, AudioServer.is_bus_mute(0),
+	_stall_hits += 1
+	_stall_last = now
+	print("STALL #%d mode=%s kind=%s chapter=%s tree_paused=%s ticks=%d time_scale=%.2f mute=%s slowmo=%d over=%s frames=%d" % [_stall_hits,
+		mode, kind, chapter, get_tree().paused, Engine.physics_ticks_per_second, Engine.time_scale, AudioServer.is_bus_mute(0),
 		int(d["world"].slowmo), str(d["world"].over), frames])
-	_stall_t = 0.0
+	_stall_ms = now
 	get_tree().paused = false
 	AudioServer.set_bus_mute(0, false)
+	Engine.time_scale = maxf(Engine.time_scale, 1.0)
 	_apply_speed()
+	# 다시 걸어도 또 서면(두 번째) 지금 장 · 방을 새로 짓고 이어 싸운다 — 화면에 짧은 표시(폰 리뷰에서 알려 달라고 docs/폰확인.md)
+	if _stall_hits >= 2:
+		_stall_hits = 0
+		hud.message("멈춤을 풀었습니다", "멈춤 코드 %s-%s-%d" % [mode, chapter, int(d.get("room_i", 0))], 3.0)
+		if logic_mode:
+			_new_run(chapter, int(d.get("room_i", 0)) if kind == "stage" else 0)
+			_start("fight" if mode == "fight" else "demo")
+		else:
+			_new_run(Save.next_chapter(save))
+			_enter_title()
 
 
 func _trace(line: String) -> void:
@@ -933,6 +968,7 @@ func _process(dt: float) -> void:
 	var frozen: bool = d["world"].hitstop > 0 and (mode == "fight" or mode == "demo")
 	var lod := pup.size() > LOD_CROWD and cam != null
 	_lod_tick += 1
+	_mark_calm()
 	for f in pup:
 		if not f.alive() and kind == "stage" and f != d["boss"] and d["enemies"].has(f):
 			_gone_t[f] = float(_gone_t.get(f, 0.0)) + dt    # 쓰러진 적은 몇 초 뒤 치운다(12장 개전 경호대 100 · 13장 공터 50 — 폰 성능)

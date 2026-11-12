@@ -5,10 +5,10 @@ extends RefCounted
 ## 스테이지(2026-11-10 사용자 — 부제 '김신과 하성'):
 ##   1 공사장 밤(fight:iseul p1:022/055-066) — 남구청년회 이슬과 한 합. 끝 = 김신의 한 방 → 청년회 19명 합류
 ##   2 하성 본사 1층(fight:haseong_lobby · fight:jintae_hwangbomincheol p1:024-028) — 서진태(조작) · 이슬 · 청년회 3명(인수 + 둘) · 부진파 2명 대
-##     하성 인력 15명(세 무리 6 · 5 · 4 — 폰 성능 · triggers down) + 황보민철(셋째 무리와 함께, 단검 둘)
+##     하성 인력 30명(세 무리 12 · 10 · 8 — 2026-11-12 사용자 '하성 캐릭터 숫자 2배로' · triggers down) + 황보민철(셋째 무리와 함께, 단검 둘)
 ##   3 위층 복도(fight:namgunghyuk p1:024/105-156) — 김신 · 피우진 · 김대건 대 남궁혁 + 하성 특별 경호대 10명(5 + 앞쪽 5). 피우진 · 김대건이
 ##     쓰러지기 전에(protect) 남궁혁을 지나 긴 복도 끝 계단으로(escape — '김신, 먼저 올라가라' 024/126)
-##   4 대표실 앞 복도(fight:gyeonghotim p1:025-026 · 029) — 김신 대 오지인 + 특별 경호대 10명(5 + 5). 오지인은 yield_at 에서 비켜선다
+##   4 대표실 앞 복도(fight:gyeonghotim p1:025-026 · 029) — 김신 대 오지인 + 특별 경호대 20명(10 + 10). 오지인은 yield_at 에서 비켜선다
 ##   5 대표실 · 불 꺼짐(fight:kimjaehoon_daepyosil p1:029) — 강창석 · 김재훈을 한 방씩(등급 차 한 방 — 방 보스 없음) → 김신 '입 닫고, 달게 받아라'
 ##   6 위층 복도(fight:kimshin_namgunghyuk p1:029-030) — 남궁혁. 정면 승부 없이 피해서 10초 안에 긴 복도 끝으로(escape — 030/013-024)
 ##   7 부진폐차장 밤(fight:kimshin_sintaejin p1:031-033) — 신태진(쌍칼)을 때려눕히고 멘트 → 2장 끝(끝 방)
@@ -102,21 +102,28 @@ const ROOMS := [
 	{"id": "site_night", "theme": "site_alley", "bounds": Rect2(-5.6, -2.4, 11.2, 4.8), "cast": ["kimshin"], "kit": {"kimshin": "kimshin_bare"},
 		"heroes": [Vector2(-3.0, 0.2)], "allies": [],
 		"enemies": [["iseul", Vector2(2.0, 0.0), {"hp_k": 0.5}]], "boss": "iseul"},
-	# 1층: 하성 인력 15명 = 6(w1) → 5(w2) → 4(w3) + 황보민철 — 앞 무리가 다 쓰러지면 오른쪽에서 다음 무리
+	# 1층: 하성 인력 30명 = 12(w1) → 10(w2) → 8(w3) + 황보민철(2026-11-12 사용자 '2배로') — 앞 무리가 다 쓰러지면 오른쪽에서 다음 무리
 	{"id": "lobby", "theme": "haseong_lobby", "bounds": Rect2(-7.2, -3.2, 14.4, 6.4), "cast": ["jintae"],
 		"heroes": [Vector2(-5.0, 0.2)],
 		"allies": [["iseul", Vector2(-4.4, -1.4)], ["insu", Vector2(-5.6, -0.6)], ["namgu_youth", Vector2(-5.4, 1.6)], ["namgu_youth", Vector2(-4.0, 2.0)],
 			["ds_member", Vector2(-6.2, -2.2), {"name": "부진파"}], ["ds_member", Vector2(-6.4, 2.4), {"name": "부진파"}]],
-		"enemies": [["haseong_suit", Vector2(0.6, -2.0), {"tag": "w1"}], ["haseong_suit", Vector2(1.4, 1.6), {"tag": "w1"}],
-			["haseong_suit", Vector2(2.6, -0.4), {"tag": "w1"}], ["haseong_suit", Vector2(3.6, 2.2), {"tag": "w1"}],
-			["haseong_suit", Vector2(4.6, -1.8), {"tag": "w1"}], ["haseong_suit", Vector2(5.2, 0.6), {"tag": "w1"}]],
+		"enemies": [
+			["haseong_suit", Vector2(0.4, -2.6), {"tag": "w1"}], ["haseong_suit", Vector2(0.4, 0.0), {"tag": "w1"}], ["haseong_suit", Vector2(0.4, 2.6), {"tag": "w1"}],
+			["haseong_suit", Vector2(2.2, -1.6), {"tag": "w1"}], ["haseong_suit", Vector2(2.2, 0.5), {"tag": "w1"}], ["haseong_suit", Vector2(2.2, 2.6), {"tag": "w1"}],
+			["haseong_suit", Vector2(4.0, -2.6), {"tag": "w1"}], ["haseong_suit", Vector2(4.0, 0.0), {"tag": "w1"}], ["haseong_suit", Vector2(4.0, 2.6), {"tag": "w1"}],
+			["haseong_suit", Vector2(5.6, -1.6), {"tag": "w1"}], ["haseong_suit", Vector2(5.6, 0.5), {"tag": "w1"}], ["haseong_suit", Vector2(5.6, 2.6), {"tag": "w1"}]],
 		"boss": "hwangbomincheol",                      # 황보민철은 셋째 무리와 함께 들어온다(trigger spawn)
 		"triggers": [
-			{"when": "down:w1", "say": "wave2", "spawn": [["haseong_suit", Vector2(6.8, -2.4), {"tag": "w2"}], ["haseong_suit", Vector2(7.0, -0.8), {"tag": "w2"}],
-				["haseong_suit", Vector2(7.2, 0.6), {"tag": "w2"}], ["haseong_suit", Vector2(6.8, 2.0), {"tag": "w2"}], ["haseong_suit", Vector2(7.2, 2.8), {"tag": "w2"}]]},
+			{"when": "down:w1", "say": "wave2", "spawn": [
+			["haseong_suit", Vector2(6.2, -2.8), {"tag": "w2"}], ["haseong_suit", Vector2(6.2, -1.4), {"tag": "w2"}], ["haseong_suit", Vector2(6.2, 0.0), {"tag": "w2"}],
+			["haseong_suit", Vector2(6.2, 1.4), {"tag": "w2"}], ["haseong_suit", Vector2(6.2, 2.8), {"tag": "w2"}], ["haseong_suit", Vector2(7.0, -2.2), {"tag": "w2"}],
+			["haseong_suit", Vector2(7.0, -0.9), {"tag": "w2"}], ["haseong_suit", Vector2(7.0, 0.3), {"tag": "w2"}], ["haseong_suit", Vector2(7.0, 1.6), {"tag": "w2"}],
+			["haseong_suit", Vector2(7.0, 2.8), {"tag": "w2"}]]},
 			{"when": "down:w2", "say": "mincheol", "boss": "hwangbomincheol",
-				"spawn": [["hwangbomincheol", Vector2(6.4, 0.0)], ["haseong_suit", Vector2(7.0, -2.2), {"tag": "w3"}], ["haseong_suit", Vector2(7.2, -1.0), {"tag": "w3"}],
-					["haseong_suit", Vector2(7.2, 1.2), {"tag": "w3"}], ["haseong_suit", Vector2(7.0, 2.4), {"tag": "w3"}]]}]},
+				"spawn": [["hwangbomincheol", Vector2(6.4, 0.0)],
+			["haseong_suit", Vector2(6.2, -2.8), {"tag": "w3"}], ["haseong_suit", Vector2(6.2, -0.9), {"tag": "w3"}], ["haseong_suit", Vector2(6.2, 0.9), {"tag": "w3"}],
+			["haseong_suit", Vector2(6.2, 2.8), {"tag": "w3"}], ["haseong_suit", Vector2(7.0, -2.0), {"tag": "w3"}], ["haseong_suit", Vector2(7.0, -0.4), {"tag": "w3"}],
+			["haseong_suit", Vector2(7.0, 1.2), {"tag": "w3"}], ["haseong_suit", Vector2(7.0, 2.8), {"tag": "w3"}]]}]},
 	# 위층 복도(긴 맵 24m): 남궁혁이 복도를 막고, 피우진 · 김대건이 붙잡는 동안 김신은 오른쪽 끝 계단으로. 둘 중 하나가 쓰러지면 진다.
 	# 특별 경호대 10명 = 앞 5(g1) + 김신이 복도 가운데를 넘으면 끝 쪽 5(g2)
 	{"id": "upper_hall", "theme": "haseong_upper", "bounds": Rect2(-12.0, -2.0, 24.0, 4.0), "cast": ["kimshin"],
@@ -129,14 +136,21 @@ const ROOMS := [
 		"triggers": [
 			{"when": "x:2", "spawn": [["haseong_guard", Vector2(6.0, -1.4), {"tag": "g2"}], ["haseong_guard", Vector2(6.6, 1.2), {"tag": "g2"}],
 				["haseong_guard", Vector2(7.6, -0.2), {"tag": "g2"}], ["haseong_guard", Vector2(8.6, 1.4), {"tag": "g2"}], ["haseong_guard", Vector2(9.2, -1.2), {"tag": "g2"}]]}]},
-	# 대표실 앞 복도: 특별 경호대 10명 = 5(w1) → 5(w2) + 오지인(비켜선다)
+	# 대표실 앞 복도: 특별 경호대 20명 = 10(w1) → 10(w2) + 오지인(비켜선다 — 2026-11-12 사용자 '하성 조직원 숫자 2배로')
 	{"id": "guard_corridor", "theme": "haseong_corridor", "bounds": Rect2(-7.0, -2.0, 14.0, 4.0), "cast": ["kimshin"],
 		"heroes": [Vector2(-5.2, 0.0)], "allies": [],
-		"enemies": [["haseong_guard", Vector2(0.4, -1.2), {"tag": "w1"}], ["haseong_guard", Vector2(1.2, 1.0), {"tag": "w1"}], ["haseong_guard", Vector2(2.4, -0.4), {"tag": "w1"}],
-			["haseong_guard", Vector2(3.4, 1.2), {"tag": "w1"}], ["haseong_guard", Vector2(4.2, -1.2), {"tag": "w1"}], ["ojiin", Vector2(5.2, 0.2)]], "boss": "ojiin",
+		"enemies": [
+			["haseong_guard", Vector2(0.4, -1.6), {"tag": "w1"}], ["haseong_guard", Vector2(0.4, 0.0), {"tag": "w1"}], ["haseong_guard", Vector2(0.4, 1.6), {"tag": "w1"}],
+			["haseong_guard", Vector2(1.8, -1.0), {"tag": "w1"}], ["haseong_guard", Vector2(1.8, 0.3), {"tag": "w1"}], ["haseong_guard", Vector2(1.8, 1.6), {"tag": "w1"}],
+			["haseong_guard", Vector2(3.2, -1.6), {"tag": "w1"}], ["haseong_guard", Vector2(3.2, 0.0), {"tag": "w1"}], ["haseong_guard", Vector2(3.2, 1.6), {"tag": "w1"}],
+			["haseong_guard", Vector2(4.4, 0.0), {"tag": "w1"}],
+			["ojiin", Vector2(5.2, 0.2)]], "boss": "ojiin",
 		"triggers": [
-			{"when": "down:w1", "say": "wave2", "spawn": [["haseong_guard", Vector2(6.4, -1.6), {"tag": "w2"}], ["haseong_guard", Vector2(6.8, -0.4), {"tag": "w2"}],
-				["haseong_guard", Vector2(6.8, 0.8), {"tag": "w2"}], ["haseong_guard", Vector2(6.4, 1.8), {"tag": "w2"}], ["haseong_guard", Vector2(7.0, 0.2), {"tag": "w2"}]]}]},
+			{"when": "down:w1", "say": "wave2", "spawn": [
+			["haseong_guard", Vector2(6.0, -1.7), {"tag": "w2"}], ["haseong_guard", Vector2(6.0, -0.8), {"tag": "w2"}], ["haseong_guard", Vector2(6.0, 0.0), {"tag": "w2"}],
+			["haseong_guard", Vector2(6.0, 0.8), {"tag": "w2"}], ["haseong_guard", Vector2(6.0, 1.7), {"tag": "w2"}], ["haseong_guard", Vector2(6.8, -1.3), {"tag": "w2"}],
+			["haseong_guard", Vector2(6.8, -0.6), {"tag": "w2"}], ["haseong_guard", Vector2(6.8, 0.2), {"tag": "w2"}], ["haseong_guard", Vector2(6.8, 0.9), {"tag": "w2"}],
+			["haseong_guard", Vector2(6.8, 1.7), {"tag": "w2"}]]}]},
 	# 대표실: 방 보스가 없다 — 강창석 · 김재훈 모두 김신의 등급 차 한 방. 둘 다 쓰러지면 김신의 멘트 뒤에 방을 넘는다
 	{"id": "ceo_office", "theme": "haseong_office", "bounds": Rect2(-5.6, -2.6, 11.2, 5.2), "cast": ["kimshin"],
 		"heroes": [Vector2(-3.8, 0.4)], "allies": [],
