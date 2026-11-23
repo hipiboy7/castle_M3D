@@ -58,7 +58,7 @@ const Bubbles = preload("res://src/ui/bubbles.gd")
 
 const DEMO_AFTER := 360
 const SHOT_WARMUP := 3          # --shots: 찍을 프레임 바로 앞 몇 프레임만 그린다
-const MINI_Y := 2.45            # 적 머리 위 작은 막대 높이(m, 몸 크기만큼 더)
+const MINI_Y := 2.24            # 적 머리 위 작은 막대 높이(m) — tele_y(2.68+)와 겹치지 않게 아래에 배치
 const REPLAY_LAST := "user://replay_last.json"
 const SAVE_PATH := "user://save.json"
 const BASE_TICKS := 60          # project.godot physics_ticks_per_second — 로직 한 칸 = 1/60 초(게임 속도 ×1)
@@ -126,6 +126,7 @@ var _cam_last := Vector3.ZERO
 var touch: Control
 var snd: Node
 var evfx
+var _grade_layer: CanvasLayer = null
 
 
 func _ready() -> void:
@@ -149,7 +150,8 @@ func _ready() -> void:
 	add_child(hud)
 	hud.setup()
 	if not headless:
-		add_child(Ink.grade_layer())                # 3D 위 · HUD 밑 화면 마무리(채도 · 대비 · 비네트)
+		_grade_layer = Ink.grade_layer()
+		add_child(_grade_layer)                     # 3D 위 · HUD 밑 화면 마무리(장별 색보정 · 임팩트 프레임 · 비네트)
 	bubbles = Bubbles.new()
 	hud.root.add_child(bubbles)
 	hud.root.move_child(bubbles, 2)                 # 덮개 · 작은 막대 위, 글자 · 메뉴 · 터치 아래
@@ -174,6 +176,7 @@ func _ready() -> void:
 	evfx.bubbles = bubbles
 	evfx.snd = snd
 	evfx.pup = pup
+	evfx.grade_layer = _grade_layer
 	seed_now = int(args["seed"])
 	fps_log_ms = Time.get_ticks_msec()
 	_load_save()
@@ -233,7 +236,7 @@ func _bubble_anchor(who) -> Array:
 	if who == null or not pup.has(who) or cam == null:
 		return [false, Vector2.ZERO]
 	var p: Node3D = pup[who]
-	var head: Vector3 = p.global_position + Vector3(0, float(p.tele_y) - 0.15, 0)
+	var head: Vector3 = p.global_position + Vector3(0, float(p.tele_y) - 0.56, 0)
 	if cam.is_position_behind(head):
 		return [false, Vector2.ZERO]
 	var sp: Vector2 = cam.unproject_position(head)
@@ -243,12 +246,14 @@ func _bubble_anchor(who) -> Array:
 	return [true, sp]
 
 
-## 장면 연출 중: 싸움 버튼을 숨기고(누르면 말풍선 넘기기 — 공격 버튼 · 화면 아무 곳) 안내 한 줄
+## 장면 연출 중: 싸움 버튼을 숨기고(누르면 말풍선 넘기기 — 공격 버튼 · 화면 아무 곳) 안내 한 줄 + 낮은 시네마틱 카메라
 func _set_scene(on: bool) -> void:
 	if on == _in_scene:
 		return
 	_in_scene = on
 	PuppetPose.in_scene = on
+	if cam != null:
+		cam.scene_mode = on
 	if mode == "fight" or mode == "demo":
 		touch.show_fight = not on
 	touch.show_ff = on and mode == "fight"
@@ -321,11 +326,13 @@ func _build_arena() -> void:
 	if arena != null:
 		arena.queue_free()
 	if kind == "stage":
+		var th := str(d.get("theme", d["room"]["theme"]))
 		arena = VIEWS[Campaign.view(chapter)].new()
 		arena.process_mode = Node.PROCESS_MODE_PAUSABLE
 		add_child(arena)
-		arena.build(str(d.get("theme", d["room"]["theme"])), d["world"].bounds, not headless)
+		arena.build(th, d["world"].bounds, not headless)
 		Ink.stylize(arena, not headless)
+		Ink.apply_grade(_grade_layer, th)
 		evfx.arena = arena
 	else:
 		arena = Arena.new()
@@ -333,6 +340,7 @@ func _build_arena() -> void:
 		add_child(arena)
 		arena.build(not headless)
 		Ink.stylize(arena, not headless)
+		Ink.apply_grade(_grade_layer, "dock")
 		evfx.arena = arena
 
 
@@ -416,6 +424,7 @@ func _enter_title() -> void:
 	touch.show_swap = false
 	touch.show_art = true
 	touch.show_fight = false
+	hud.center_msg = true
 	var t = Lines.at("title")
 	hud.message(str(t["text"]), str(t["sub"]), 9999.0)
 	_fill_menu()
@@ -431,6 +440,7 @@ func _start(m: String) -> void:
 	mode = m
 	mode_t = 0
 	fights += 1
+	hud.center_msg = false
 	touch.show_pause = m == "fight"
 	touch.show_swap = m == "fight" and _can_swap()
 	touch.show_art = false
@@ -512,6 +522,7 @@ func _set_paused(on: bool) -> void:
 	get_tree().paused = on
 	_trace("PAUSE %s frame=%d" % ["on" if on else "off", frames])
 	hud.set_dim(on)
+	hud.center_msg = on
 	if on:
 		hud.message("일시정지", "누르면 계속 · 뒤로 버튼 = 처음 화면", 9999.0)
 	else:
@@ -999,6 +1010,7 @@ func _after_tick() -> void:
 			touch.show_swap = mode == "fight" and _can_swap()
 		elif e[0] == "fade":                               # 방 끝 연출 — 어둡게 하며 글(11장 만인지상)
 			hud.set_dim(true)
+			hud.center_msg = true
 			hud.message(str(e[1]), str(e[2]), float(e[3]))
 			_faded = true
 	_smash_props(w)
@@ -1015,6 +1027,7 @@ func _after_tick() -> void:
 func _undim() -> void:
 	if _faded:
 		hud.set_dim(false)
+		hud.center_msg = false
 		_faded = false
 
 
@@ -1022,6 +1035,7 @@ func _end_fight(result: String) -> void:
 	var played := mode == "fight"                       # 데모(봇)가 이긴 판은 세이브에 안 넣는다
 	mode = "result"
 	mode_t = 0
+	hud.center_msg = true
 	_apply_speed()
 	_save_replay(REPLAY_LAST)
 	touch.show_swap = false
@@ -1101,6 +1115,14 @@ func _process(dt: float) -> void:
 	_tick_tossed(dt)
 	touch.set_label("attack", _attack_label(d["hero"]))
 	touch.set_label("parry", "피하기" if d["hero"].evade_btn else "쳐내기")   # 칼날 쳐내기가 없는 사람은 피하기(2026-11-12)
+	var h_sk: Dictionary = d["hero"].current_skill()
+	if not h_sk.is_empty():
+		var cost_b: float = float(h_sk["cost"])
+		var need_b: float = float(Common.all_min_bars()) if cost_b < 0.0 else maxf(1.0, cost_b)
+		var cur_b: float = float(d["hero"].gauge) / maxf(1.0, float(Common.bar_points()))
+		touch.set_skill_state(cur_b / need_b, d["hero"].can_pay(h_sk))
+	else:
+		touch.set_skill_state(0.0, false)
 	var hp: Vector3 = pup[d["hero"]].position if pup.has(d["hero"]) else _cam_last     # 장면에서 퇴장한 조작 인물(2장 이슬 한 합 뒤)
 	# 장면 중에는 말하는 사람을 따라간다 — 걸어 나가는 사람(leave nowait)은 화면에서 뺀다(2026-11-12 사용자 "멘트를 할 때는 이슬쪽에
 	# 포커싱이 맞춰져야하는데 뛰어나간 김신쪽에 포커싱이 맞춰져 있어서 멘트하는게 하나도 안보여")

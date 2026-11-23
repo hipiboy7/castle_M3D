@@ -255,9 +255,9 @@ func _build() -> void:
 	tele.pixel_size = 0.0045
 	tele.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	tele.no_depth_test = true
-	tele.position = Vector3(0, 2.22, 0)
+	tele.position = Vector3(0, 2.66, 0)
 	tele.visible = false
-	tele_y = 2.22 + (body_k - 1.0) * 1.9                         # 큰 몸은 머리가 높다 — 예고 · 빈틈 글자를 그만큼 위로
+	tele_y = 2.66 + (body_k - 1.0) * 1.9                         # 미니 체력 막대(MINI_Y=2.24) 위로 깔끔히 분리
 	add_child(tele)
 
 

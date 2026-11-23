@@ -1,29 +1,28 @@
 extends Control
-## 처음 화면 장 고르기 — 위에 큰 '이어하기'(세이브의 다음 장), 아래 줄에 장 카드(할 수 있는 장 · 준비 중 · 잠김 · 깬 횟수).
-## main.gd 가 items · cont 를 채우고, 누른 자리를 hit() 로 묻는다. 자리는 안전 영역 기준 · 매 프레임 다시 읽는다(접는 폰 —
-## layout() 은 순수 함수라 시험 tests/unit/test_ui_logic.gd). 글은 main.gd 가 lines.json 에서 넣는다.
+## 처음 화면 장 고르기 — 느와르 그래픽 노블 카드 v2.
+## layout() · hint_y_of() 순수 함수 계약은 tests/unit/test_ui_logic.gd 와 100% 동일하게 보존.
 
 const SafeArea = preload("res://src/ui/safe_area.gd")
+const FONT_HEAD = preload("res://assets/fonts/BlackHanSans-Regular.ttf")
+const FONT_BODY = preload("res://assets/fonts/Pretendard-Bold.otf")
 
 const CARD_H := 120.0
 const CARD_W_MAX := 300.0
 const GAP := 20.0
 const CONT := Vector2(540, 96)
-const COL_CARD := Color(0.06, 0.07, 0.1, 0.78)
-const COL_CONT := Color(0.55, 0.12, 0.1, 0.85)
-const COL_EDGE := Color(1, 1, 1, 0.35)
-const COL_TEXT := Color(1, 1, 1, 0.95)
-const COL_DIM := Color(1, 1, 1, 0.45)
-const COL_MARK := Color(0.95, 0.8, 0.35, 0.95)
+const COL_CARD := Color(0.05, 0.055, 0.082, 0.86)
+const COL_CARD_LOCK := Color(0.04, 0.045, 0.065, 0.56)
+const COL_CONT := Color(0.56, 0.10, 0.11, 0.92)
+const COL_CRIMSON := Color(0.88, 0.16, 0.18, 0.96)
+const COL_EDGE := Color(1, 1, 1, 0.28)
+const COL_TEXT := Color(0.97, 0.97, 0.99, 0.96)
+const COL_DIM := Color(0.74, 0.78, 0.84, 0.62)
+const COL_MARK := Color(0.98, 0.80, 0.30, 0.98)
 
 var cont := {}                  # {"id": "continue", "title": 이어하기, "sub": 다음 장 이름}
 var items: Array = []           # [{"id": 장 id, "title", "sub", "state": open | soon | locked, "mark": 깬 횟수 글}]
 var _last_safe := Rect2()
 
-
-## 안전 영역 · 카드 수 → {"cont": 이어하기 자리, "cards": [카드 자리]} — 화면 가운데 아래쪽.
-## 카드가 ROW_MAX 보다 많으면(3 ~ 13장 — 2026-11-08 장 15개) 여러 줄로 낮게(ROWS_H): 카드 덩어리는 안전 영역 아래 끝에 붙이고
-## 이어하기는 그 위에
 const ROW_MAX := 6
 const PER_ROW := 5
 const ROWS_H := 64.0
@@ -57,7 +56,6 @@ static func layout(sa: Rect2, n: int) -> Dictionary:
 	return {"cont": cont_r, "cards": cards}
 
 
-## 안내 글(hud hint) 높이 — 이어하기 위(카드 · 이어하기와 안 겹치게). 보이지 않으면 -1
 func hint_y() -> float:
 	if not visible:
 		return -1.0
@@ -68,7 +66,6 @@ static func hint_y_of(sa: Rect2, n: int) -> float:
 	return float(layout(sa, n)["cont"].position.y) - 36.0
 
 
-## 누른 자리 → "continue" · 장 id · ""(빈 곳)
 func hit(p: Vector2) -> String:
 	if not visible:
 		return ""
@@ -98,29 +95,37 @@ func refresh() -> void:
 
 
 func _draw() -> void:
-	var font := get_theme_default_font()
 	var L := layout(SafeArea.rect(get_viewport()), items.size())
 	if not cont.is_empty():
 		var r: Rect2 = L["cont"]
+		draw_rect(Rect2(r.position + Vector2(4, 6), r.size), Color(0, 0, 0, 0.48))
 		draw_rect(r, COL_CONT)
-		draw_rect(r, COL_EDGE, false, 3.0)
-		draw_string(font, r.position + Vector2(0, 44), str(cont["title"]) + " ▶", HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 36, COL_TEXT)
-		draw_string(font, r.position + Vector2(0, 80), str(cont["sub"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 22, COL_DIM)
+		draw_rect(Rect2(r.position, Vector2(6, r.size.y)), Color(1.0, 0.85, 0.35, 0.95))
+		draw_rect(Rect2(r.position, Vector2(r.size.x, 2)), Color(1, 1, 1, 0.25))
+		draw_rect(r, Color(1, 1, 1, 0.45), false, 2.0)
+		draw_string(FONT_HEAD, r.position + Vector2(0, 48), str(cont["title"]) + "  ▶", HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 34, COL_TEXT)
+		draw_string(FONT_BODY, r.position + Vector2(0, 80), str(cont["sub"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 18, Color(0.98, 0.92, 0.85, 0.88))
+
 	for i in items.size():
 		var it: Dictionary = items[i]
 		var r: Rect2 = L["cards"][i]
 		var open: bool = it["state"] == "open"
-		draw_rect(r, COL_CARD if open else Color(COL_CARD, 0.45))
-		draw_rect(r, COL_EDGE if open else Color(COL_EDGE, 0.15), false, 2.0)
+		var has_mark := str(it.get("mark", "")) != ""
+		draw_rect(Rect2(r.position + Vector2(3, 4), r.size), Color(0, 0, 0, 0.40 if open else 0.20))
+		draw_rect(r, COL_CARD if open else COL_CARD_LOCK)
+		if open:
+			draw_rect(Rect2(r.position, Vector2(4, r.size.y)), COL_MARK if has_mark else COL_CRIMSON)
+			draw_rect(Rect2(r.position, Vector2(r.size.x, 1.5)), Color(1, 1, 1, 0.18))
+		draw_rect(r, COL_EDGE if open else Color(COL_EDGE, 0.14), false, 1.5)
 		var tc := COL_TEXT if open else COL_DIM
-		if r.size.y < CARD_H:                          # 여러 줄(낮은 카드): 이름 한 줄 + 깬 횟수(작은 글)
-			draw_string(font, r.position + Vector2(8, 30), str(it["title"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 20, tc)
-			var small := str(it.get("mark", "")) if str(it.get("mark", "")) != "" else str(it["sub"])
-			draw_string(font, r.position + Vector2(8, 54), small, HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 15,
-				COL_MARK if open and str(it.get("mark", "")) != "" else COL_DIM)
+		if r.size.y < CARD_H:
+			draw_string(FONT_BODY, r.position + Vector2(10, 29), str(it["title"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 18, tc)
+			var small := ("★ " + str(it["mark"])) if (open and has_mark) else (str(it["mark"]) if has_mark else str(it["sub"]))
+			draw_string(FONT_BODY, r.position + Vector2(10, 52), small, HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 13,
+				COL_MARK if open and has_mark else COL_DIM)
 			continue
-		draw_string(font, r.position + Vector2(8, 40), str(it["title"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 24, tc)
-		draw_string(font, r.position + Vector2(8, 72), str(it["sub"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 18, COL_DIM)
-		if str(it.get("mark", "")) != "":
-			draw_string(font, r.position + Vector2(8, 104), str(it["mark"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 18,
-				COL_MARK if open else COL_DIM)
+		draw_string(FONT_HEAD, r.position + Vector2(10, 42), str(it["title"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 22, tc)
+		draw_string(FONT_BODY, r.position + Vector2(10, 72), str(it["sub"]), HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 16, COL_DIM)
+		if has_mark:
+			draw_string(FONT_BODY, r.position + Vector2(10, 102), ("★ " + str(it["mark"])) if open else str(it["mark"]),
+				HORIZONTAL_ALIGNMENT_CENTER, r.size.x - 16, 15, COL_MARK if open else COL_DIM)

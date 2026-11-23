@@ -228,7 +228,7 @@ const SETS := {
 			["rug", 0, 2.2, {"w": 6.0, "d": 3.0, "col": Color(0.35, 0.1, 0.1)}]]},
 }
 
-const FONT_W = preload("res://assets/fonts/Galmuri11-Bold.ttf")
+const FONT_W = preload("res://assets/fonts/BlackHanSans-Regular.ttf")
 
 
 static func themes() -> Array:
@@ -419,16 +419,22 @@ func _prop_build(kind: String, at: Vector3, o: Dictionary, b: Rect2) -> void:
 			_pillar(at, o.get("col", Color(0.75, 0.7, 0.6)))
 		"sofa":
 			_sofa(at)
-		"armchair":                                      # 1인 안락의자(가죽 · 등받이 · 팔걸이) — face: 앉은 사람이 보는 쪽(-1 = -x, 1 = +x)
+		"armchair":                                      # 1인 안락의자 v2(기운 등받이 · 쿠션 · 둥근 팔걸이 · 놋쇠 다리)
 			var fx: float = o.get("face", -1.0)
-			var lea := _shared(o.get("col", Color(0.55, 0.12, 0.14)), 0.45)   # 어두운 주점 바닥과 갈리게 밝은 버건디(처음 짙은 가죽은 안 보였다)
-			_mesh(self, _box(Vector3(0.66, 0.42, 0.66)), lea, at + Vector3(0, 0.21, 0))
-			_mesh(self, _box(Vector3(0.16, 0.62, 0.7)), lea, at + Vector3(-0.3 * fx, 0.62, 0))
+			var col_a: Color = o.get("col", Color(0.55, 0.12, 0.14))
+			var lea := _shared(col_a, 0.45)
+			var lea2 := _shared(col_a.lightened(0.10), 0.52)
+			_mesh(self, _box(Vector3(0.68, 0.24, 0.68)), lea, at + Vector3(0, 0.20, 0))
+			_mesh(self, _box(Vector3(0.60, 0.14, 0.58)), lea2, at + Vector3(0.02 * fx, 0.38, 0))
+			var back_a := _mesh(self, _box(Vector3(0.16, 0.58, 0.68)), lea2, at + Vector3(-0.30 * fx, 0.62, 0))
+			back_a.rotation_degrees.z = -10.0 * fx
 			for sz in [-1.0, 1.0]:
-				_mesh(self, _box(Vector3(0.62, 0.2, 0.12)), lea, at + Vector3(0.02 * fx, 0.52, 0.31 * sz))
+				_mesh(self, _box(Vector3(0.64, 0.24, 0.13)), lea, at + Vector3(0.02 * fx, 0.46, 0.31 * sz))
+				var roll_a := _mesh(self, _cyl(0.068, 0.068, 0.64), lea2, at + Vector3(0.02 * fx, 0.58, 0.31 * sz))
+				roll_a.rotation_degrees.z = 90.0
 			for sx in [-1.0, 1.0]:
 				for sz in [-1.0, 1.0]:
-					_mesh(self, _cyl(0.03, 0.03, 0.08), _shared(Color(0.75, 0.6, 0.3), 0.3, 0.0, 0.8), at + Vector3(0.28 * sx, 0.04, 0.28 * sz))
+					_mesh(self, _cyl(0.032, 0.024, 0.10), _shared(Color(0.75, 0.6, 0.3), 0.3, 0.0, 0.8), at + Vector3(0.28 * sx, 0.05, 0.28 * sz))
 		"plant":
 			_plant(at)
 		"desk":
@@ -440,10 +446,32 @@ func _prop_build(kind: String, at: Vector3, o: Dictionary, b: Rect2) -> void:
 			for y in [0.9, 1.5]:
 				for x in [-0.4, 0.0, 0.4]:
 					_mesh(self, _cyl(0.06, 0.1, 0.3), _shared(Color(0.9, 0.75, 0.3), 0.25, 0.0, 0.9), at + Vector3(x, y, 0.15))
-		"pool":
-			_mesh(self, _box(Vector3(2.6, 0.12, 1.4)), _shared(Color(0.1, 0.45, 0.25), 0.9), at + Vector3(0, 0.82, 0))
-			_mesh(self, _box(Vector3(2.8, 0.76, 1.6)), _shared(Color(0.3, 0.18, 0.1), 0.4), at + Vector3(0, 0.38, 0))
-			_mesh(self, _box(Vector3(1.2, 0.08, 0.6)), _glow(Color(0.9, 1.0, 0.8), 1.4), at + Vector3(0, 2.4, 0))
+		"pool":                                          # 당구대 v2(쿠션 나무 틀 · 6포켓 · 삼각 정렬 공 · 녹색 갓 펜던트 + 빛기둥)
+			var felt := _shared(Color(0.09, 0.44, 0.24), 0.88)
+			var wood_p := _shared(Color(0.28, 0.15, 0.08), 0.36)
+			var pock := _shared(Color(0.04, 0.04, 0.05), 0.9)
+			_mesh(self, _box(Vector3(2.6, 0.08, 1.4)), felt, at + Vector3(0, 0.80, 0))
+			_mesh(self, _box(Vector3(2.68, 0.20, 1.48)), wood_p, at + Vector3(0, 0.68, 0))
+			for sz in [-0.74, 0.74]:
+				_mesh(self, _box(Vector3(2.84, 0.12, 0.10)), wood_p, at + Vector3(0, 0.84, sz))
+			for sx in [-1.37, 1.37]:
+				_mesh(self, _box(Vector3(0.10, 0.12, 1.56)), wood_p, at + Vector3(sx, 0.84, 0))
+			for sx in [-1.22, 1.22]:
+				for sz in [-0.60, 0.60]:
+					_mesh(self, _cyl(0.08, 0.06, 0.62), wood_p, at + Vector3(sx, 0.31, sz))
+			for sx in [-1.28, 0.0, 1.28]:
+				for sz in [-0.67, 0.67]:
+					_mesh(self, _cyl(0.055, 0.055, 0.02), pock, at + Vector3(sx, 0.85, sz))
+			var bcols := [Color(0.95, 0.95, 0.92), Color(0.92, 0.18, 0.16), Color(0.96, 0.78, 0.15), Color(0.18, 0.42, 0.88)]
+			var bpos := [Vector3(-0.6, 0.87, 0.0), Vector3(0.45, 0.87, 0.0), Vector3(0.58, 0.87, 0.08), Vector3(0.58, 0.87, -0.08)]
+			for bi in bpos.size():
+				_mesh(self, _sphere(0.042), _shared(bcols[bi], 0.18, 0.0, 0.2), at + bpos[bi])
+			var shade := _shared(Color(0.08, 0.36, 0.16), 0.35, 0.0, 0.2)
+			for sx in [-0.45, 0.45]:
+				_mesh(self, _cyl(0.10, 0.28, 0.18), shade, at + Vector3(sx, 2.38, 0))
+				_mesh(self, _cyl(0.08, 0.08, 0.06), _glow(Color(1.0, 0.96, 0.78), 2.2), at + Vector3(sx, 2.28, 0))
+			if _detail:
+				_light_cone(at + Vector3(0, 2.26, 0), 1.44, 0.32, 1.35, Color(1.0, 0.95, 0.72), 0.06)
 		"bed":
 			_mesh(self, _box(Vector3(2.0, 0.6, 0.9)), _shared(Color(0.7, 0.74, 0.72), 0.6), at + Vector3(0, 0.3, 0))
 			_mesh(self, _box(Vector3(1.9, 0.1, 0.8)), _shared(Color(0.85, 0.9, 0.88), 0.9), at + Vector3(0, 0.65, 0))
@@ -518,13 +546,22 @@ func _prop_build(kind: String, at: Vector3, o: Dictionary, b: Rect2) -> void:
 			_mesh(self, _box(Vector3(2.8, 0.8, 1.2)), _shared(Color(0.45, 0.35, 0.25), 0.85), at + Vector3(0, 0.4, 0))
 			for x in [-1.4, 1.4]:
 				_mesh(self, _box(Vector3(0.06, 2.3, 0.06)), _shared(Color(0.4, 0.4, 0.4), 0.5), at + Vector3(x, 1.15, 0.8))
-		"bar":
+		"bar":                                           # 바 카운터 v2(상판 돌출 · 놋쇠 발걸이 · 다양한 병/잔)
 			var w: float = o.get("w", 6.0)
-			_mesh(self, _box(Vector3(w, 1.05, 0.7)), _shared(Color(0.3, 0.18, 0.1), 0.35), at + Vector3(0, 0.52, 0))
-			_mesh(self, _box(Vector3(w, 1.8, 0.4)), _shared(Color(0.2, 0.12, 0.08), 0.5), at + Vector3(0, 1.4, -0.6))
-			for i in int(w / 0.5):
-				_mesh(self, _cyl(0.05, 0.05, 0.28), _shared(Color(0.3, 0.6, 0.3) if i % 3 == 0 else Color(0.6, 0.4, 0.15), 0.1, 0.0, 0.2),
-					at + Vector3(-w * 0.5 + 0.25 + i * 0.5, 1.4, -0.38))
+			var wd_b := _shared(Color(0.28, 0.16, 0.09), 0.36)
+			var wd_top := _shared(Color(0.18, 0.10, 0.06), 0.26)
+			var brass_b := _shared(Color(0.84, 0.66, 0.26), 0.28, 0.0, 0.85)
+			_mesh(self, _box(Vector3(w, 1.02, 0.66)), wd_b, at + Vector3(0, 0.51, 0))
+			_mesh(self, _box(Vector3(w + 0.16, 0.07, 0.82)), wd_top, at + Vector3(0, 1.05, 0.04))
+			var rail := _mesh(self, _cyl(0.025, 0.025, w - 0.2), brass_b, at + Vector3(0, 0.20, 0.42))
+			rail.rotation_degrees.z = 90.0
+			_mesh(self, _box(Vector3(w, 1.9, 0.4)), _shared(Color(0.18, 0.11, 0.07), 0.5), at + Vector3(0, 1.42, -0.6))
+			for i in int(w / 0.42):
+				var bx := -w * 0.5 + 0.25 + i * 0.42
+				var bh := 0.26 + 0.07 * (i % 3)
+				var bcol: Color = [Color(0.24, 0.58, 0.28), Color(0.68, 0.42, 0.14), Color(0.55, 0.16, 0.14)][i % 3]
+				_mesh(self, _cyl(0.042, 0.048, bh), _shared(bcol, 0.12, 0.0, 0.2), at + Vector3(bx, 1.32 + bh * 0.5, -0.38))
+				_mesh(self, _cyl(0.018, 0.024, 0.09), _shared(bcol, 0.12, 0.0, 0.2), at + Vector3(bx, 1.32 + bh + 0.04, -0.38))
 		"shelf":
 			_mesh(self, _box(Vector3(3.0, 3.2, 1.0)), _shared(Color(0.3, 0.45, 0.65), 0.5, 0.0, 0.5), at + Vector3(0, 1.6, 0))
 			for y in [0.6, 1.6, 2.6]:
@@ -539,10 +576,18 @@ func _prop_build(kind: String, at: Vector3, o: Dictionary, b: Rect2) -> void:
 			for y in [0.6, 1.4]:
 				var c := _mesh(self, _cyl(0.3, 0.3, 0.04), _shared(Color(0.15, 0.15, 0.16), 0.4), at + Vector3(0, y, 0.41))
 				c.rotation_degrees.x = 90
-		"dots":                                          # 무대 바닥 빛 점(클럽)
-			for i in 14:
-				var p := Vector3(at.x - 5.0 + (i * 2.3) - floor(i * 2.3 / 10.0) * 10.0, 0.006, at.z - 1.0 + float(i % 3))
-				_mesh(self, _cyl(0.3, 0.3, 0.004), _glow(Color(0.8, 0.3, 1.0) if i % 2 == 0 else Color(0.2, 0.9, 1.0), 1.4), p)
+		"dots":                                          # 무대 바닥 은은한 클럽 스포트라이트 디스크(과포화 없는 반투명 글로우)
+			for i in 12:
+				var p := Vector3(at.x - 5.0 + (i * 2.5) - floor(i * 2.5 / 10.0) * 10.0, 0.008, at.z - 1.0 + float(i % 3))
+				var dc := Color(0.68, 0.24, 0.92, 0.22) if i % 2 == 0 else Color(0.18, 0.78, 0.92, 0.22)
+				var dm := StandardMaterial3D.new()
+				dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				dm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+				dm.albedo_color = dc
+				var r_d := 0.36 + 0.14 * float(i % 3)
+				var dmi := _mesh(self, _cyl(r_d, r_d, 0.004), dm, p)
+				dmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		"red_pillar":
 			_mesh(self, _cyl(0.3, 0.3, 3.4), _shared(Color(0.7, 0.1, 0.06), 0.4), at + Vector3(0, 1.7, 0))
 			_mesh(self, _box(Vector3(0.8, 0.2, 0.8)), _shared(Color(0.85, 0.65, 0.2), 0.3, 0.0, 0.8), at + Vector3(0, 3.4, 0))

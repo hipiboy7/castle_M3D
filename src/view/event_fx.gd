@@ -3,6 +3,7 @@ extends RefCounted
 ## world.events 를 읽기만 한다 — 결투(duel)와 11장 판(stage)이 같은 신호를 쓴다. 그림은 pup(Fighter → 인형)으로 찾는다.
 
 const Lines = preload("res://src/data/lines.gd")
+const Ink = preload("res://src/view/ink.gd")
 const SLAMS := ["stomp", "two_hand_slam", "overhead_chop", "throw_slam", "hammer_fist"]   # 위에서 내려찍는 모양(2026-11-10 각법 axe 에서 갈라 나온 것)
 
 var fx
@@ -12,6 +13,10 @@ var snd
 var pup := {}
 var bubbles                              # 말풍선(src/ui/bubbles.gd — main.gd 가 붙인다)
 var arena                                # 무대(부서지는 소품 break_at — main.gd 가 방마다 바꿔 준다)
+var grade_layer: CanvasLayer = null      # 화면 마무리 레이어 — 웹툰 임팩트 프레임(흑백+크림슨) 제어
+var _impact_t := 0.0
+var _impact_max := 0.12
+var _impact_col := Color(0.92, 0.14, 0.14)
 var _quote := RegEx.create_from_string("^([^:—]{1,12}): (.+?)(?: — (.+))?$")
 var later_msg: Array = []                # 조금 뒤에 띄울 가운데 알림 [제목, 부제, 초]
 var later_t := 0.0
@@ -35,7 +40,20 @@ func _attacker(w, victim):
 	return best
 
 
+func trigger_impact(secs: float, col: Color) -> void:
+	if grade_layer == null:
+		return
+	_impact_max = maxf(secs, 0.04)
+	_impact_t = _impact_max
+	_impact_col = col
+	Ink.set_impact(grade_layer, 1.0, _impact_col)
+
+
 func tick_later(dt: float) -> void:
+	if _impact_t > 0.0:
+		_impact_t = maxf(0.0, _impact_t - dt)
+		var k := _impact_t / maxf(_impact_max, 0.01)
+		Ink.set_impact(grade_layer, k * k, _impact_col)
 	if later_t > 0.0:
 		later_t -= dt
 		if later_t <= 0.0 and not later_msg.is_empty():
@@ -102,7 +120,7 @@ func apply(d: Dictionary) -> void:
 						cam.punch_zoom(0.9)
 			"skill":
 				var sk: Dictionary = e[2]
-				fx.pop(Vector3(e[1].pos.x, 2.95, e[1].pos.y), str(sk["name"]), Color(0.75, 0.9, 1.0), 48, 0.8)     # 머리 위 기절 · 빈틈 글자(2.22)보다 위
+				fx.pop(Vector3(e[1].pos.x, 2.38, e[1].pos.y), str(sk["name"]), Color(0.75, 0.92, 1.0), 46, 0.78)     # 상단 리본과 겹치지 않는 높이
 				snd.play("shine", -6.0, 1.0)
 			"no_gauge":
 				fx.pop(Vector3(e[1].pos.x, 2.35, e[1].pos.y), "게이지 부족", Color(0.75, 0.78, 0.85), 44, 0.7)
@@ -111,6 +129,7 @@ func apply(d: Dictionary) -> void:
 				fx.pop(e[2] + Vector3(0, 0.3, 0) - cam.global_basis.x * 1.4, "%s — %d%%" % [kind_name, roundi(float(e[3]) * 100.0)],   # 머리 위 '기절'(2.22)과 겹치지 않게 옆으로(rc.2 리뷰 5)
 					Color(0.75, 0.9, 1.0), 72, 1.2)
 				cam.punch_zoom(0.8 if str(e[4]) == "offbeat2" else 0.85)
+				trigger_impact(0.11, Color(0.92, 0.12, 0.14))
 			"brake":
 				fx.strain(e[1])
 				snd.play("wind", -2.0, 0.55)
@@ -141,6 +160,7 @@ func apply(d: Dictionary) -> void:
 				fx.pop(e[2] + Vector3(0, 0.5, 0), "카운터!", Color(1.0, 0.7, 0.4), 64, 0.9)
 				snd.play("counter", -2.0, 0.9)
 				cam.punch_zoom(0.9)
+				trigger_impact(0.09, Color(1.0, 0.42, 0.14))
 			"dash":
 				snd.play("wind", -10.0, 1.5)
 			"pierce":
@@ -152,6 +172,7 @@ func apply(d: Dictionary) -> void:
 				snd.play("guard", 0.0, 1.15)
 				snd.play("counter", -6.0, 1.4)
 				cam.punch_zoom(0.94)
+				trigger_impact(0.08, Color(0.32, 0.72, 1.0))
 			"block":
 				fx.block(e[2])
 				snd.play("guard", -4.0, 0.9)
@@ -160,6 +181,7 @@ func apply(d: Dictionary) -> void:
 				snd.play("hit_heavy", 2.0, 0.8)
 				snd.play("slash", -2.0)
 				cam.punch_zoom(0.8)
+				trigger_impact(0.15, Color(0.95, 0.14, 0.12))
 				hud.message("제압", "", 1.0)
 			"stagger":
 				snd.play("fall", -4.0, 1.2)

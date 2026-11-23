@@ -3,7 +3,9 @@ extends Node3D
 ## main.gd 가 combat/world.gd 신호(hit · parry · block · finish · dodge · feint)와 공격 시작을 보고 부른다.
 ## 연출은 판정과 따로라(전용 난수) 결투 결과에 영향이 없다.
 
-const FONT = preload("res://assets/fonts/Galmuri11-Bold.ttf")
+const FONT = preload("res://assets/fonts/BlackHanSans-Regular.ttf")
+const SLASH_SHADER = preload("res://src/view/shaders/slash_vfx.gdshader")
+const Ink = preload("res://src/view/ink.gd")
 
 var _items: Array = []            # [노드, 남은 시간, 처음 시간, 재질 · 빛 · 글자, 처음 밝기 · 색]
 var rng := RandomNumberGenerator.new()
@@ -22,17 +24,33 @@ func _process(dt: float) -> void:
 		if thing is OmniLight3D:
 			thing.light_energy = float(it[4]) * k * k
 		elif thing is Label3D:
-			thing.position.y += dt * 0.5
+			thing.position.y += dt * 0.36
 			var c: Color = it[4]
 			thing.modulate = Color(c.r, c.g, c.b, minf(1.0, k * 2.5))
-			thing.outline_modulate = Color(0, 0, 0, 0.85 * minf(1.0, k * 2.5))
+			thing.outline_modulate = Color(0, 0, 0, 0.88 * minf(1.0, k * 2.5))
+		elif thing is ShaderMaterial:
+			thing.set_shader_parameter("fade", k * k)
 		elif thing is StandardMaterial3D:
-			thing.albedo_color = it[4] * k               # 처음 색에서 어둡게 — 더하기 섞기라 검정이 투명이다
+			var base_c: Color = it[4]
+			if thing.blend_mode == BaseMaterial3D.BLEND_MODE_ADD:
+				thing.albedo_color = base_c * k          # 더하기 섞기: 검정이 투명
+			else:
+				thing.albedo_color = Color(base_c.r, base_c.g, base_c.b, base_c.a * k)
 		if it.size() > 6:
 			it[0].scale = Vector3.ONE * lerpf(float(it[6]), float(it[5]), k * k)   # 퍼지는 고리: 처음 크기 → 끝 크기
 		if it[1] <= 0.0:
 			it[0].queue_free()
 			_items.remove_at(i)
+
+
+func _slash_mat(col: Color) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = SLASH_SHADER
+	m.set_shader_parameter("blade_col", Color(col.r, col.g, col.b, 1.0))
+	m.set_shader_parameter("ink_col", Color(col.r * 0.10, col.g * 0.08, col.b * 0.14, 1.0))
+	m.set_shader_parameter("fade", 1.0)
+	m.set_shader_parameter("ink_lut", Ink.LUT)
+	return m
 
 
 func _add_mat(col: Color) -> StandardMaterial3D:
@@ -85,42 +103,38 @@ func flash(at: Vector3, col: Color, energy: float, life := 0.14, reach := 4.0) -
 	_items.append([l, life, life, l, energy])
 
 
-## 칼 궤적: 공격하는 사람 발 위치 · 방향(yaw) 기준으로 a0 → a1(도, 0 = 정면, + 왼쪽) 초승달. 끝으로 갈수록 밝다
-func arc(at: Vector3, yaw: float, a0: float, a1: float, r_in: float, r_out: float, h: float, col: Color, life := 0.16) -> void:
-	var m := _add_mat(col)
+## 칼 궤적 v2: Hades/캐슬 웹툰 붓칠 먹선 리본(slash_vfx.gdshader + ink_lut 드라이 브러시)
+func arc(at: Vector3, yaw: float, a0: float, a1: float, r_in: float, r_out: float, h: float, col: Color, life := 0.18) -> void:
+	var m := _slash_mat(col)
+	var im := ImmediateMesh.new()
+	im.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, m)
+	var n := 20
+	for i in n + 1:
+		var u := float(i) / n
+		var a := deg_to_rad(lerpf(a0, a1, u))
+		var d := Vector3(-sin(a), 0, -cos(a))
+		var w := 0.34 + 0.32 * sin(u * PI)
+		im.surface_set_uv(Vector2(u, 0.0))
+		im.surface_add_vertex(d * lerpf(r_out, r_in, w) + Vector3(0, h - 0.05 * u, 0))
+		im.surface_set_uv(Vector2(u, 1.0))
+		im.surface_add_vertex(d * r_out + Vector3(0, h, 0))
+	im.surface_end()
+	_place(im, m, at, yaw, life)
+
+
+## 세로 궤적 v2 (각법 내려찍기 · 어퍼컷): 붓칠 먹선 리본
+func arc_v(at: Vector3, yaw: float, a0: float, a1: float, r_in: float, r_out: float, h: float, col: Color, life := 0.22) -> void:
+	var m := _slash_mat(col)
 	var im := ImmediateMesh.new()
 	im.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, m)
 	var n := 18
 	for i in n + 1:
 		var u := float(i) / n
 		var a := deg_to_rad(lerpf(a0, a1, u))
-		var d := Vector3(-sin(a), 0, -cos(a))
-		var w := 0.28 + 0.22 * sin(u * PI)               # 띠 폭: 바깥 가장자리에서 안쪽 반지름까지의 28 ~ 50 %
-		var v := u * u * 0.55                            # 더하기 섞기: 투명도에 기대지 않고 색을 어둡게 한다(run #4 · #5 에서 투명도만으로는 흰 판, T-5)
-		var c := Color(v, v, v, v)
-		im.surface_set_color(c)
-		im.surface_add_vertex(d * lerpf(r_out, r_in, w) + Vector3(0, h - 0.04 * u, 0))
-		im.surface_set_color(c)
-		im.surface_add_vertex(d * r_out + Vector3(0, h, 0))
-	im.surface_end()
-	_place(im, m, at, yaw, life)
-
-
-## 세로 궤적 (각법 내려찍기): 정면 세로면에서 a0 → a1(도, 0 = 정면 수평, 90 = 머리 위), 가운데 높이 h
-func arc_v(at: Vector3, yaw: float, a0: float, a1: float, r_in: float, r_out: float, h: float, col: Color, life := 0.2) -> void:
-	var m := _add_mat(col)
-	var im := ImmediateMesh.new()
-	im.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP, m)
-	var n := 16
-	for i in n + 1:
-		var u := float(i) / n
-		var a := deg_to_rad(lerpf(a0, a1, u))
 		var d := Vector3(0, sin(a), -cos(a))
-		var v := u * u * 0.55
-		var c := Color(v, v, v, v)
-		im.surface_set_color(c)
+		im.surface_set_uv(Vector2(u, 0.0))
 		im.surface_add_vertex(d * r_in + Vector3(0, h, -0.2))
-		im.surface_set_color(c)
+		im.surface_set_uv(Vector2(u, 1.0))
 		im.surface_add_vertex(d * r_out + Vector3(0, h, -0.2))
 	im.surface_end()
 	_place(im, m, at, yaw, life)
@@ -162,14 +176,16 @@ func spike(at: Vector3, yaw: float, r0: float, r1: float, h: float, w: float, co
 	_place(im, m, at, yaw, life)
 
 
-func _place(mesh: Mesh, m: StandardMaterial3D, at: Vector3, yaw: float, life: float) -> void:
+func _place(mesh: Mesh, m: Material, at: Vector3, yaw: float, life: float) -> void:
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
+	mi.material_override = m
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.position = at
 	mi.rotation.y = yaw
 	add_child(mi)
-	_items.append([mi, life, life, m, m.albedo_color])
+	var init_val = m.albedo_color if m is StandardMaterial3D else 1.0
+	_items.append([mi, life, life, m, init_val])
 
 
 ## 퍼지는 고리 (바닥 충격파 · 주먹 충격): 반지름 r 의 띠를 s0 → s1 배로 키우며 흐려진다. up = 세운 고리(정면을 본다)
@@ -196,18 +212,32 @@ func ring(at: Vector3, yaw: float, r: float, width: float, col: Color, life: flo
 	_items.append([mi, life, life, m, m.albedo_color, s0, s1])
 
 
-## 잔상(좌우로 사라지는 스텝 — 2026-11-12 사용자 "필수 기술인데 가끔 기술이 안보임"): 사람 키만 한 흐린 푸른 몸 그림자가
-## 그 자리에 남았다가 사라진다(더하기 섞기 — 어두운 바닥에서 또렷하다)
-func ghost(at: Vector3, yaw: float, life := 0.28) -> void:
-	var m := _add_mat(Color(0.45, 0.62, 1.0, 0.55))
+## 잔상 v2(좌우로 사라지는 스텝): 파란 알약 1개 대신 전경으로 숙인 인체 실루엣(머리 · 상체 · 양팔 · 양다리) 잔상
+func ghost(at: Vector3, yaw: float, life := 0.30) -> void:
+	var m := _add_mat(Color(0.38, 0.68, 1.0, 0.58))
 	m.vertex_color_use_as_albedo = false
-	var cap := CapsuleMesh.new()
-	cap.radius = 0.2
-	cap.height = 1.55
-	cap.radial_segments = 10
-	cap.rings = 3
-	cap.material = m
-	_place(cap, m, at + Vector3(0, 0.8, 0), yaw, life)
+	var g := Node3D.new()
+	g.position = at
+	g.rotation.y = yaw
+	var parts := [
+		[SphereMesh.new(), Vector3(0.18, 0.21, 0.18), Vector3(0, 1.48, -0.18), Vector3.ZERO],
+		[BoxMesh.new(), Vector3(0.42, 0.56, 0.24), Vector3(0, 1.08, -0.10), Vector3(-18, 0, 0)],
+		[CapsuleMesh.new(), Vector3(0.14, 0.34, 0.14), Vector3(0.26, 1.10, -0.24), Vector3(45, 0, -18)],
+		[CapsuleMesh.new(), Vector3(0.14, 0.34, 0.14), Vector3(-0.26, 1.04, -0.18), Vector3(32, 0, 22)],
+		[CapsuleMesh.new(), Vector3(0.17, 0.44, 0.17), Vector3(0.14, 0.46, -0.18), Vector3(24, 0, 0)],
+		[CapsuleMesh.new(), Vector3(0.17, 0.44, 0.17), Vector3(-0.14, 0.44, 0.20), Vector3(-28, 0, 0)],
+	]
+	for p in parts:
+		var mi := MeshInstance3D.new()
+		mi.mesh = p[0]
+		mi.scale = p[1]
+		mi.position = p[2]
+		mi.rotation_degrees = p[3]
+		mi.material_override = m
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		g.add_child(mi)
+	add_child(g)
+	_items.append([g, life, life, m, m.albedo_color])
 
 
 ## 몸 둘레에서 솟는 입자 (엇엇박 부하) — 몸통 크기 상자에서 위로

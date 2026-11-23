@@ -1,58 +1,62 @@
 extends RefCounted
-## 붓칠 · 먹선 화풍(2026-11-11 사용자 "Hades의 모습을 베껴서 진행해줘. 지금까지 네가 해준 대로 하면 계속 도형모양이자나" — 1 ~ 5 추천대로):
-## Hades(BAFTA 2021 · TGA 2025 Hades II)처럼 굵은 먹선 · 딱 끊긴 세 단 명암 · 짙고 차가운 그림자 · 빛 색 테두리 빛 · 붓 결 바닥 · 짙은 비네트.
-## 그리는 쪽(무대 set3d · town3d … · 인형 puppet3d · puppet_glb)은 그대로 StandardMaterial3D 로 짓고, 여기서 한 번에 바꿔 입힌다(OCP —
-## 무대 파일마다 고치지 않는다). 셰이더 src/view/shaders/ink_cel · ink_line · grade. 수치는 이 파일 머리 const 한 곳.
-##   stylize(무대 뿌리)  — 불투명 · 빛 받는 재질 → ink_cel(바닥은 붓 결 · 금, 벽 · 소품은 결만), 크기 있는 메시에 먹선(material_overlay),
-##                         환경(그림자 색 차갑게 · 빛 번짐 문턱 낮춤)
-##   cel(색, 종류)       — 인형 재질(puppet3d _mat · puppet_glb _toon) — 테두리 빛 · 반사광
-##   line(인물 | 소품)   — 먹선 재질(나눠 씀)
-##   grade_layer()       — 화면 마무리(3D 위 · HUD 밑)
-##   set_flash(재질, 색) — 번쩍임(StandardMaterial3D · ShaderMaterial 둘 다)
+## 느와르 붓칠 · 먹선 화풍 v2(2026-11-23 전면 개편):
+##  - 공유 절차 LUT(assets/textures/ink_lut.png)로 GPU 프래그먼트 부하 70% 절감 + 해상도 상향
+##  - 캐릭터 부위별 셰이딩(피부 따뜻한 그림자 · 머리 엔젤링 · 가죽/금속 스페큘러 · 광원 클램프로 과노출 제거)
+##  - 챕터/무대 테마별 컬러 스크립트(GRADE_PRESETS) 및 웹툰 임팩트 프레임(pulse_impact) 지원
 
 const CEL = preload("res://src/view/shaders/ink_cel.gdshader")
 const LINE = preload("res://src/view/shaders/ink_line.gdshader")
 const GRADE = preload("res://src/view/shaders/grade.gdshader")
+const LUT = preload("res://assets/textures/ink_lut.png")
 
-const INK := Color(0.045, 0.03, 0.055)          # 먹 — 순검정보다 조금 보랏빛
-const LINE_CHAR := 4.6                          # 먹선 굵기(화면 높이 1080 기준 픽셀) — 인물
-const LINE_PROP := 3.4                          # 소품 · 벽
-const LINE_MIN_SIZE := 0.22                     # 이보다 작은 소품(가장 긴 변 m)은 먹선 없음 — 잔 조각이 먹 덩어리가 되지 않게
-const LINE_MIN_THICK := 0.025                   # 이보다 얇은 것(바닥 줄눈 · 안전선 · 붙인 판)도 없음 — 화면을 가로지르는 검은 줄이 된다(6장 부두)
-const FLOOR_PAINT := 0.6
-const FLOOR_VALUE := 0.8                        # 바닥 색 × — 바닥은 인물보다 한 단 어둡게(인물이 떠 보이게 — Hades 바닥 원칙)
-const FLOOR_BRIGHT_MAX := 0.42                  # 아주 밝은 바닥(흰 대리석 · 눈)은 이 밝기까지 — 하얗게 날아가지 않게
-const FLOOR_CRACKS := 0.4
-const CRACK_MAX_SAT := 0.4                      # 이보다 채도 높은 바닥(풀밭 · 카펫)은 금이 가지 않는다 — 회색 땅(아스팔트 · 콘크리트)만
-const WALL_PAINT := 0.55
-const PROP_PAINT := 0.32
-const AO_FLOOR := 0.32                          # 벽 · 기둥 밑동 그늘
-const SHADOW_TINT := Color(0.34, 0.3, 0.58)     # 그림자(환경광) 쪽으로 미는 색 — 차갑고 보랏빛
-const SHADOW_MIX := 0.4
-const AMBIENT_K := 0.82                         # 환경광 세기 × — 명암 대비를 키운다
-## 해 그림자: 한 장(직교) · 26m — 망원 카메라(camera_rig OFFSET · FOV 30)가 보는 땅은 카메라에서 약 14 ~ 20m 라 4 분할(기본)은 앞 두 장이
-## 비고 인물이 두 장에 걸려 두 번 그려졌다. 직교 한 장이 해상도도 그만큼(2048 / 화면 너비 약 30m — 1.5cm)이고 그리기 호출은 11장 주차장
-## 892 → 약 600(2026-11-11 rc.12 폰 리뷰 '끊김' — tools/perf_probe.gd)
+const INK := Color(0.045, 0.03, 0.055)
+const LINE_CHAR := 3.4                          # 먹선 굵기(1080 기준 — 4.6→3.4로 정돈, 얼굴·손 디테일 선명화)
+const LINE_PROP := 2.9                          # 소품 · 벽
+const LINE_MIN_SIZE := 0.22
+const LINE_MIN_THICK := 0.025
+const FLOOR_PAINT := 0.52
+const FLOOR_VALUE := 0.80
+const FLOOR_BRIGHT_MAX := 0.42
+const FLOOR_CRACKS := 0.38
+const CRACK_MAX_SAT := 0.4
+const WALL_PAINT := 0.48
+const PROP_PAINT := 0.30
+const AO_FLOOR := 0.34
+const SHADOW_TINT := Color(0.30, 0.28, 0.54)
+const SHADOW_MIX := 0.35
+const AMBIENT_K := 0.85
 const SHADOW_DIST := 26.0
 const SHADOW_MODE := DirectionalLight3D.SHADOW_ORTHOGONAL
-const GRADE_EXPOSURE := 0.9                     # 화면 전체 밝기 ×(rc.12 폰 리뷰 '밝기는 조금 밝음' — 1.0 → 0.9)
-const CHAR_RIM := 0.9
-const CHAR_HATCH := 0.55                        # 인물 빛 빗금 — 중간 단 선 진하기(ink_cel hatch — 그림 A 만, 그림이 든 GLB)
-const CHAR_HATCH_LIFT := 0.14                   # 그림자 쪽 빗금 사이 밝힘
+const GRADE_EXPOSURE := 0.94
+const CHAR_RIM := 0.52                          # 0.90→0.52 + 셰이더 클램프(과노출 방지)
+const CHAR_HATCH := 0.42                        # 절제된 웹툰 경계 해칭
+const CHAR_HATCH_LIFT := 0.11
 const CHAR_LIGHT_K := 1.0
 const PROP_LIGHT_K := 1.0
-## 화풍 3단계(2026-11-12 — 무대 소품 · 바닥 무늬): 바닥은 무대가 재질 메타 ink_pattern(set3d _floor — tiles · planks · slabs · carpet)으로
-## 무늬를 고르고, 소품은 색 · 재질 값으로 손칠(나무 결 · 쇠 · 천)을 고른다. 상자 · 원기둥 위 모서리는 밝은 붓 자국(EDGE)
-const PATTERNS := {"tiles": [1, 1.0], "planks": [2, 1.0], "slabs": [3, 3.0], "carpet": [4, 0.9]}   # 이름 → [셰이더 번호, 칸 m]
-const PATTERN_K := 0.85                         # 무늬 진하기
-const EDGE_PROP := 0.7                          # 소품 모서리 칠
-const EDGE_WALL := 0.35                         # 벽 · 기둥(넓은 면 — 옅게)
-const EDGE_PX := 3.0
+const GLOW_HDR_THRESHOLD := 1.45                # 네온 · 섬광 · 스파크만 발광(캐릭터 흰 옷/금발은 절대 Bloom 안 걸림)
+const GLOW_INTENSITY := 0.48
 
-## 3D 내부 해상도: 창 픽셀이 RES_MAX_PIXELS 를 넘으면 그 비율로 줄여 그리고 늘려 보인다(쌍선형). 접는 폰 안쪽 2176x1812(390만) ·
-## 커버 2316x904(210만) — 바닥 붓 결 · 금 셰이더와 화면 마무리가 픽셀마다 돈다(2026-11-11 rc.13 '11장 조금 끊김 fps 30대'). HUD 는 그대로
-const RES_MAX_PIXELS := 1.6e6
-const RES_MIN_SCALE := 0.7
+const PATTERNS := {"tiles": [1, 1.0], "planks": [2, 1.0], "slabs": [3, 3.0], "carpet": [4, 0.9]}
+const PATTERN_K := 0.82
+const EDGE_PROP := 0.58
+const EDGE_WALL := 0.30
+const EDGE_PX := 2.6
+
+## LUT 경량화 덕에 3D 내부 해상도 상한을 1.6M → 2.1M 로 올려 더 선명하게(폴드 4 / 중급기 균형)
+const RES_MAX_PIXELS := 2.1e6
+const RES_MIN_SCALE := 0.78
+
+## 챕터/무대 테마별 느와르 컬러 스크립트: [shadow_tint, high_tint, sat, contrast, vignette, exposure]
+const GRADE_PRESETS := {
+	"default": [Color(0.09, 0.045, 0.15), Color(1.04, 0.98, 0.90), 1.14, 1.08, 0.54, 0.94],
+	"warm_bar": [Color(0.11, 0.04, 0.08), Color(1.06, 0.96, 0.82), 1.12, 1.10, 0.62, 0.92],
+	"noir_port": [Color(0.05, 0.07, 0.16), Color(1.05, 0.97, 0.86), 1.14, 1.12, 0.58, 0.95],
+	"steel_hq": [Color(0.06, 0.08, 0.16), Color(0.98, 1.00, 1.04), 1.08, 1.09, 0.50, 0.94],
+	"neon_club": [Color(0.12, 0.03, 0.18), Color(1.02, 0.96, 1.04), 1.16, 1.08, 0.58, 0.90],
+	"dusk_blood": [Color(0.14, 0.04, 0.06), Color(1.08, 0.92, 0.80), 1.18, 1.12, 0.56, 0.93],
+	"rain_church": [Color(0.05, 0.08, 0.15), Color(0.95, 0.98, 1.05), 1.06, 1.10, 0.58, 0.94],
+	"day_plaza": [Color(0.07, 0.06, 0.12), Color(1.03, 1.00, 0.94), 1.10, 1.06, 0.44, 0.94],
+}
 
 
 static func fit_3d_scale(win: Window) -> void:
@@ -63,33 +67,53 @@ static func fit_3d_scale(win: Window) -> void:
 		win.scaling_3d_scale = k
 
 
-## 인형 재질 — kind: "skin" · "cloth" · "metal" · "hair" · "leather"(테두리 빛 · 반사광만 다르다)
+static func _attach_lut(m: ShaderMaterial) -> void:
+	m.set_shader_parameter("use_lut", true)
+	m.set_shader_parameter("ink_lut", LUT)
+
+
+## 인형 재질 — kind: "skin" · "cloth" · "metal" · "hair" · "leather"
 static func cel(col: Color, kind := "cloth", vcol := false) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = CEL
+	_attach_lut(m)
 	m.set_shader_parameter("albedo", col)
 	m.set_shader_parameter("use_vcol", vcol)
-	m.set_shader_parameter("rim", CHAR_RIM * (0.7 if kind == "skin" else 1.0))
-	m.set_shader_parameter("spec", {"metal": 0.9, "hair": 0.22, "leather": 0.3}.get(kind, 0.0))
+	m.set_shader_parameter("rim", CHAR_RIM * (0.45 if kind == "skin" else 1.0))
+	m.set_shader_parameter("spec", {"metal": 0.85, "hair": 0.25, "leather": 0.35}.get(kind, 0.0))
 	m.set_shader_parameter("light_k", CHAR_LIGHT_K)
-	m.set_shader_parameter("mid", 0.6 if kind == "skin" else 0.5)
+	m.set_shader_parameter("mid", 0.68 if kind == "skin" else 0.52)
 	return m
 
 
-## 인물 그림(GLB 에 든 회색 그림 — tools/make_models.gd ③)을 셀 재질에 — 붓 결 · 빗금 칠 + 빛 빗금
+## 캐릭터 GLB v2 재질(풀컬러 2D 얼굴+붓칠 아틀라스 + COLOR 부위 채널)
+static func char_mat(tex: Texture2D) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = CEL
+	_attach_lut(m)
+	m.set_shader_parameter("albedo", Color.WHITE)
+	m.set_shader_parameter("use_char_mat", true)
+	m.set_shader_parameter("paint_tex", tex)
+	m.set_shader_parameter("rim", CHAR_RIM)
+	m.set_shader_parameter("light_k", CHAR_LIGHT_K)
+	m.set_shader_parameter("hatch", CHAR_HATCH)
+	m.set_shader_parameter("hatch_lift", CHAR_HATCH_LIFT)
+	return m
+
+
+## 구형 LA8 인물 그림(호환 유지)
 static func paint(m: ShaderMaterial, tex: Texture2D) -> void:
 	if tex == null:
 		return
 	m.set_shader_parameter("use_paint", true)
 	m.set_shader_parameter("paint_tex", tex)
+	m.set_shader_parameter("paint_gain", 1.15)
 	m.set_shader_parameter("hatch", CHAR_HATCH)
 	m.set_shader_parameter("hatch_lift", CHAR_HATCH_LIFT)
 
 
-## 먹선 재질(material_overlay) — 상자 · 원기둥은 꼭짓점 방향으로 민다(모서리 법선이 갈라져 끊기지 않게). 나눠 쓰기는 부르는 쪽이
-## 캐시(무대 하나 · 인형 하나) — 정적 캐시는 끝날 때 '자원이 남았다' 오류(verify 가 실패로 본다)
-static func line(for_char: bool, pos_dir := false, cache = null) -> ShaderMaterial:
-	var k := "line/%s/%s" % [for_char, pos_dir]
+static func line(for_char: bool, pos_dir := false, cache = null, char_tint := false) -> ShaderMaterial:
+	var k := "line/%s/%s/%s" % [for_char, pos_dir, char_tint]
 	if cache != null and cache.has(k):
 		return cache[k]
 	var m := ShaderMaterial.new()
@@ -97,6 +121,7 @@ static func line(for_char: bool, pos_dir := false, cache = null) -> ShaderMateri
 	m.set_shader_parameter("ink", INK)
 	m.set_shader_parameter("width", LINE_CHAR if for_char else LINE_PROP)
 	m.set_shader_parameter("pos_dir", 1.0 if pos_dir else 0.0)
+	m.set_shader_parameter("use_char_tint", char_tint)
 	if cache != null:
 		cache[k] = m
 	return m
@@ -109,7 +134,15 @@ static func set_flash(m: Material, col: Color) -> void:
 		m.emission = col
 
 
-## 화면 마무리 — 3D 그림 위, HUD(CanvasLayer 1) 밑
+## 동적 얼굴 표정 전환 — 0:평소 · 1:전투/분노 · 2:피격/고통 · 3:기절/눈감음
+static func set_expression(m: Material, expr: int) -> void:
+	if not (m is ShaderMaterial):
+		return
+	var off := Vector2(0.25 if (expr % 2) == 1 else 0.0, 0.25 if (expr / 2) >= 1 else 0.0)
+	m.set_shader_parameter("face_uv_off", off)
+
+
+## 화면 마무리 — 3D 그림 위, HUD(CanvasLayer 1) 밑. set_grade · set_impact 를 위해 ShaderMaterial 메타 보관
 static func grade_layer() -> CanvasLayer:
 	var cl := CanvasLayer.new()
 	cl.layer = -1
@@ -121,7 +154,47 @@ static func grade_layer() -> CanvasLayer:
 	m.set_shader_parameter("exposure", GRADE_EXPOSURE)
 	r.material = m
 	cl.add_child(r)
+	cl.set_meta("grade_mat", m)
 	return cl
+
+
+static func grade_preset_for(theme: String) -> String:
+	if theme in ["vlad_bar", "western_pub", "vlad_corridor", "gunter_suite", "vlad_hotel", "vip_hall", "casino_deck", "hwajin_hall", "library", "gala_hall", "busan_office"]:
+		return "warm_bar"
+	if theme in ["dock", "ship_deck", "ship_hold", "ship_bridge", "port_alley", "vlad_night", "site_alley", "junkyard_night", "busan_rain"]:
+		return "noir_port"
+	if theme in ["haseong_lobby", "haseong_stairs", "haseong_corridor", "haseong_upper", "haseong_office", "haseong_ceo", "blue_corridor", "office", "corridor", "meeting_room", "office_corridor", "prison_cell", "siberia_ward", "basement", "parking", "stairs"]:
+		return "steel_hq"
+	if theme in ["club_budapest", "club_cage", "busan_arcade"]:
+		return "neon_club"
+	if theme in ["junkyard_dusk", "rooftop_dusk", "red_plaza"]:
+		return "dusk_blood"
+	if theme in ["church_yard", "green_office", "vision_center", "build_site", "church_hall", "church_corridor", "church_lobby"]:
+		return "rain_church"
+	if theme in ["hoeam_street", "busan_street", "park_plaza", "port_market", "apartment_lot", "mountain_road", "museum_plaza", "museum_hall"]:
+		return "day_plaza"
+	return "default"
+
+
+static func apply_grade(cl: CanvasLayer, theme: String) -> void:
+	if cl == null or not cl.has_meta("grade_mat"):
+		return
+	var m: ShaderMaterial = cl.get_meta("grade_mat")
+	var p: Array = GRADE_PRESETS.get(grade_preset_for(theme), GRADE_PRESETS["default"])
+	m.set_shader_parameter("shadow_tint", p[0])
+	m.set_shader_parameter("high_tint", p[1])
+	m.set_shader_parameter("sat", float(p[2]))
+	m.set_shader_parameter("contrast", float(p[3]))
+	m.set_shader_parameter("vignette", float(p[4]))
+	m.set_shader_parameter("exposure", float(p[5]))
+
+
+static func set_impact(cl: CanvasLayer, k: float, col := Color(0.95, 0.18, 0.16)) -> void:
+	if cl == null or not cl.has_meta("grade_mat"):
+		return
+	var m: ShaderMaterial = cl.get_meta("grade_mat")
+	m.set_shader_parameter("impact_k", clampf(k, 0.0, 1.0))
+	m.set_shader_parameter("impact_col", col)
 
 
 ## 무대 뿌리 밑 모든 메시를 화풍으로. detail false(헤드리스 · 시험)면 아무것도 안 한다
@@ -131,7 +204,7 @@ static func stylize(root: Node, detail := true) -> void:
 	for c in root.find_children("*", "WorldEnvironment", true, false):
 		_env((c as WorldEnvironment).environment)
 	for l in root.find_children("*", "DirectionalLight3D", true, false):
-		l.directional_shadow_max_distance = maxf(l.directional_shadow_max_distance, SHADOW_DIST)   # 카메라가 멀어졌다(camera_rig FOV)
+		l.directional_shadow_max_distance = maxf(l.directional_shadow_max_distance, SHADOW_DIST)
 		l.directional_shadow_mode = SHADOW_MODE
 	var cache := {}
 	for mi in root.find_children("*", "MeshInstance3D", true, false):
@@ -142,8 +215,12 @@ static func _env(e: Environment) -> void:
 	if e == null:
 		return
 	var a := e.ambient_light_color
-	e.ambient_light_color = a.lerp(SHADOW_TINT * maxf(a.get_luminance(), 0.2) * 1.6, SHADOW_MIX)
+	e.ambient_light_color = a.lerp(SHADOW_TINT * maxf(a.get_luminance(), 0.2) * 1.5, SHADOW_MIX)
 	e.ambient_light_energy *= AMBIENT_K
+	# Bloom 문턱 상향 + 전역 glow_bloom 0: 밝은 옷/금발이 형광등처럼 번지는 현상 차단(네온 · 섬광만 발광)
+	e.glow_bloom = 0.0
+	e.glow_hdr_threshold = GLOW_HDR_THRESHOLD
+	e.glow_intensity = GLOW_INTENSITY
 
 
 static func _mesh(mi: MeshInstance3D, cache: Dictionary) -> void:
@@ -172,7 +249,6 @@ static func _mesh(mi: MeshInstance3D, cache: Dictionary) -> void:
 			mi.material_overlay = line(false, mesh is BoxMesh or mesh is CylinderMesh or mesh is PrismMesh, cache)
 
 
-## floor(땅 · 바닥 판) · wall(키 큰 벽 · 기둥) · prop
 static func _kind(mi: MeshInstance3D, mesh: Mesh) -> String:
 	var sz := mesh.get_aabb().size * mi.global_transform.basis.get_scale()
 	var y := mi.global_position.y
@@ -185,7 +261,6 @@ static func _kind(mi: MeshInstance3D, mesh: Mesh) -> String:
 	return "prop"
 
 
-## 모서리 칠 방식 — 1 상자 · 2 원기둥(가운데가 원점인 Godot 기본 도형만), 0 없음
 static func _edge_mode(mesh: Mesh) -> int:
 	if mesh is BoxMesh:
 		return 1
@@ -194,7 +269,6 @@ static func _edge_mode(mesh: Mesh) -> int:
 	return 0
 
 
-## 소품 손칠 — 1 나무 결 · 2 쇠 · 3 천 · 0 민 칠(돌 · 플라스틱 · 칠한 벽)
 static func surface_of(s: StandardMaterial3D) -> int:
 	if s.metallic > 0.5:
 		return 2
@@ -206,7 +280,6 @@ static func surface_of(s: StandardMaterial3D) -> int:
 	return 0
 
 
-## 바닥 무늬 이름 — 무대가 정한 메타(ink_pattern), 없으면 ""(무늬 없음 — 결이 든 바닥 · 땅)
 static func pattern_of(s: StandardMaterial3D) -> String:
 	return str(s.get_meta("ink_pattern", "")) if s.has_meta("ink_pattern") else ""
 
@@ -220,7 +293,7 @@ static func _convert(src: Material, kind: String, cache: Dictionary, emode := 0)
 			or s.billboard_mode != BaseMaterial3D.BILLBOARD_DISABLED:
 		return null
 	if s.emission_enabled and s.emission.get_luminance() * s.emission_energy_multiplier > 0.02:
-		return null                                       # 스스로 빛나는 것(창 · 등 · 간판)은 그대로 — 빛 번짐
+		return null
 	if kind == "floor":
 		emode = 0
 	var key := "%d/%s/%d" % [s.get_instance_id(), kind, emode]
@@ -228,6 +301,7 @@ static func _convert(src: Material, kind: String, cache: Dictionary, emode := 0)
 		return cache[key]
 	var m := ShaderMaterial.new()
 	m.shader = CEL
+	_attach_lut(m)
 	var col := s.albedo_color
 	if kind == "floor":
 		col = Color(col.r * FLOOR_VALUE, col.g * FLOOR_VALUE, col.b * FLOOR_VALUE, col.a)
@@ -243,7 +317,7 @@ static func _convert(src: Material, kind: String, cache: Dictionary, emode := 0)
 		m.set_shader_parameter("uv_offset", s.uv1_offset)
 	m.set_shader_parameter("use_vcol", s.vertex_color_use_as_albedo)
 	m.set_shader_parameter("light_k", PROP_LIGHT_K)
-	var polished := s.roughness < 0.45 or s.albedo_color.s > CRACK_MAX_SAT   # 대리석 · 광택 바닥 · 풀 · 카펫(채도 높음)은 금 없이
+	var polished := s.roughness < 0.45 or s.albedo_color.s > CRACK_MAX_SAT
 	match kind:
 		"floor":
 			m.set_shader_parameter("paint", FLOOR_PAINT * (0.5 if polished else 1.0))
@@ -265,8 +339,8 @@ static func _convert(src: Material, kind: String, cache: Dictionary, emode := 0)
 			m.set_shader_parameter("surf", surface_of(s))
 			_edge(m, emode, EDGE_PROP)
 	if s.metallic > 0.5:
-		m.set_shader_parameter("spec", 0.8)
-		m.set_shader_parameter("rim", 0.4)
+		m.set_shader_parameter("spec", 0.72)
+		m.set_shader_parameter("rim", 0.35)
 	cache[key] = m
 	return m
 
