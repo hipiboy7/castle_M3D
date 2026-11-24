@@ -13,7 +13,7 @@ const Looks = preload("res://src/view/looks.gd")
 const Ink = preload("res://src/view/ink.gd")                 # 붓칠 · 먹선 화풍(재질 · 번쩍임)
 const Fighter = preload("res://src/combat/fighter.gd")
 const MoveStyle = preload("res://src/view/move_style.gd")      # 사람마다 다른 공격 버릇(2026-11-12 '하나도 동일한 동작이 없도록')
-const FONT = preload("res://assets/fonts/Galmuri11-Bold.ttf")
+const FONT = preload("res://assets/fonts/BlackHanSans-Regular.ttf")
 
 const PELVIS_H := 0.97
 const HIP_W := 0.095

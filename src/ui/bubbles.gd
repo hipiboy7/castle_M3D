@@ -4,23 +4,24 @@ extends Control
 ## 점 꼬리, 말하는 사람이 화면에 없으면(내레이션) 왼쪽 위 먹빛 띠. 게임 판정과 상관없다(main.gd 가 화면 자리를 준다).
 ## 자리: 머리 위(화면 좌표) — 화면 밖이면 가장자리 안으로, 풍선끼리 겹치면 나중 것을 위로 민다.
 
-const FONT = preload("res://assets/fonts/Galmuri11-Bold.ttf")
-const PAPER := Color(0.965, 0.945, 0.9)
-const PAPER_SHOUT := Color(1.0, 0.97, 0.88)
-const INK := Color(0.07, 0.06, 0.06)
-const INK_W := 3.2
-const TEXT_COL := Color(0.08, 0.07, 0.07)
-const NAME_COL := Color(0.55, 0.16, 0.12)       # 이름 글(풍선 왼쪽 위 작은 붉은 낙관 느낌)
-const CAP_BG := Color(0.06, 0.055, 0.05, 0.86)
-const CAP_TEXT := Color(0.95, 0.92, 0.85)
-const FONT_SIZE := 22
-const NAME_SIZE := 15
-const MAX_W := 330.0
-const PAD := Vector2(16, 12)
+const FONT = preload("res://assets/fonts/Pretendard-Bold.otf")
+const SafeArea = preload("res://src/ui/safe_area.gd")
+const PAPER := Color(0.97, 0.95, 0.91)
+const PAPER_SHOUT := Color(1.0, 0.965, 0.88)
+const INK := Color(0.06, 0.055, 0.06)
+const INK_W := 3.0
+const TEXT_COL := Color(0.07, 0.065, 0.07)
+const NAME_COL := Color(0.72, 0.16, 0.14)       # 이름 글(풍선 왼쪽 위 작은 붉은 낙관 느낌)
+const CAP_BG := Color(0.05, 0.055, 0.07, 0.90)
+const CAP_TEXT := Color(0.95, 0.93, 0.88)
+const FONT_SIZE := 21
+const NAME_SIZE := 14
+const MAX_W := 340.0
+const PAD := Vector2(18, 12)
 const TAIL := 26.0
 const POP_T := 0.14
 const FADE_T := 0.25
-const TOP_PAD := 150.0                           # 위 가장자리(체력 막대 · 메뉴 · 멈춤 단추) 밑으로만
+const TOP_PAD := 162.0                           # 위 가장자리(보스 바 · 상단 느와르 알림 리본 · 메뉴 단추) 밑으로만
 const HEAD_UP := 0.45                            # 머리 위(m) — 자리 함수가 주는 머리 높이 위로 더
 
 var items: Array = []              # {who, text, name, left, total, style, anchor(Vector2), seed}
@@ -86,8 +87,8 @@ func _process(dt: float) -> void:
 
 func _draw() -> void:
 	var used: Array = []                       # 이미 그린 풍선 칸(겹치면 위로)
-	var view := get_viewport_rect().size
-	var cap_y := 150.0
+	var sa := SafeArea.rect(get_viewport())
+	var cap_y := sa.position.y + TOP_PAD
 	for it in items:
 		var lines := _wrap(str(it["text"]), MAX_W)
 		var tw := 0.0
@@ -99,22 +100,22 @@ func _draw() -> void:
 		var pop := clampf(age / POP_T, 0.0, 1.0)
 		var alpha := clampf(float(it["left"]) / FADE_T, 0.0, 1.0)
 		if it["style"] == "caption" or not anchor_fn.is_valid():
-			_draw_caption(lines, size, Vector2(28, cap_y), alpha, lh)
+			_draw_caption(lines, size, Vector2(sa.position.x + 28.0, cap_y), alpha, lh)
 			cap_y += size.y + 8.0
 			continue
 		var a: Array = anchor_fn.call(it["who"])
 		if not a[0]:
-			_draw_caption(lines, size, Vector2(28, cap_y), alpha, lh, str(it["name"]))
+			_draw_caption(lines, size, Vector2(sa.position.x + 28.0, cap_y), alpha, lh, str(it["name"]))
 			cap_y += size.y + 8.0
 			continue
 		var head: Vector2 = a[1]
 		var box := Rect2(head - Vector2(size.x * 0.35, size.y + TAIL + 6.0), size)
-		box.position.x = clampf(box.position.x, 12.0, view.x - size.x - 12.0)
-		box.position.y = clampf(box.position.y, TOP_PAD, view.y - size.y - 12.0)
+		box.position.x = clampf(box.position.x, sa.position.x + 14.0, sa.end.x - size.x - 14.0)
+		box.position.y = clampf(box.position.y, sa.position.y + TOP_PAD, sa.end.y - size.y - 16.0)
 		for r in used:
 			if (r as Rect2).grow(4.0).intersects(box):
 				box.position.y = (r as Rect2).position.y - size.y - 10.0
-		box.position.y = maxf(TOP_PAD * 0.6, box.position.y)
+		box.position.y = maxf(sa.position.y + TOP_PAD * 0.72, box.position.y)
 		used.append(box)
 		var s := lerpf(0.7, 1.0, _ease_out(pop))
 		var c := box.get_center()
@@ -155,6 +156,11 @@ func _draw_bubble(r: Rect2, tip: Vector2, style: String, seed: int, alpha: float
 		pts.append(c + Vector2(sx * rx, sy * ry) * k * wob)
 	var paper := Color(PAPER_SHOUT if style == "shout" else PAPER, alpha * 0.97)
 	var ink := Color(INK, alpha)
+	# 부드러운 먹 그림자(배경이 어둡든 밝든 또렷한 입체감)
+	var sh_pts := PackedVector2Array()
+	for p in pts:
+		sh_pts.append(p + Vector2(4.0, 5.0))
+	draw_colored_polygon(sh_pts, Color(0.02, 0.02, 0.03, alpha * 0.32))
 	# 꼬리(말) — 몸 아래 가장자리에서 머리 쪽으로
 	if style != "think":
 		var base := Vector2(clampf(tip.x, r.position.x + 18.0, r.end.x - 18.0), r.end.y + 2.0)

@@ -9,8 +9,13 @@
 
 | 파일 (`assets/` 기준) | 출처 | 쓰는 곳 |
 |---|---|---|
-| `fonts/Galmuri11-Bold.ttf` | 외부 — Galmuri(Lee Minseo, quiple) · SIL Open Font License 1.1 · https://github.com/quiple/galmuri | 화면 글자 전부(`project.godot` `gui/theme/custom_font`) |
+| `fonts/Galmuri11-Bold.ttf` | 외부 — Galmuri(Lee Minseo, quiple) · SIL Open Font License 1.1 · https://github.com/quiple/galmuri | 예비 도트 글꼴(이전 기본) |
 | `fonts/LICENSE.txt` | 위 글꼴의 라이선스 원문 | — |
+| `fonts/Pretendard-Bold.otf` | 외부 — Pretendard(Kil Hyung-jin) · SIL Open Font License 1.1 · https://github.com/orioncactus/pretendard | 기본 UI · HUD · 말풍선 글꼴(`project.godot` `gui/theme/custom_font`) |
+| `fonts/Pretendard-OFL.txt` | Pretendard 라이선스 원문(SIL OFL 1.1) | — |
+| `fonts/BlackHanSans-Regular.ttf` | 외부 — Black Han Sans(ZESSTYPE) · SIL Open Font License 1.1 · https://github.com/google/fonts/tree/main/ofl/blackhansans | 제목 · 챕터 배너 · 기술 · 예고 강조 글꼴 |
+| `fonts/BlackHanSans-OFL.txt` | Black Han Sans 라이선스 원문(SIL OFL 1.1) | — |
+| `textures/ink_lut.png` | 직접(절차 생성) — `tools/gen_ink_lut.py` (256x256 타일 RGBA8: 붓결 · 얼룩 · 균열 · 펜 해칭) | 화풍 셀 셰이더 공유 LUT(`src/view/ink.gd` · `ink_cel.gdshader`) |
 | `sfx/counter.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 반격 베기 (`src/main.gd` `_play`) |
 | `sfx/fall.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 넘어짐 (`src/main.gd` `_play`) |
 | `sfx/guard.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 막기 (`src/main.gd` `_play`) |

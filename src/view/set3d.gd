@@ -238,25 +238,63 @@ func _pillar(at: Vector3, col: Color) -> void:
 
 func _sofa(at: Vector3) -> void:
 	var mk := _brk_mark()
-	var m := _mat(Color(0.35, 0.22, 0.14), 0.8)
-	_mesh(self, _box(Vector3(1.6, 0.42, 0.7)), m, at + Vector3(0, 0.21, 0))
-	_mesh(self, _box(Vector3(1.6, 0.5, 0.18)), m, at + Vector3(0, 0.6, 0.28))
+	var m := _shared(Color(0.32, 0.19, 0.12), 0.72)
+	var m2 := _shared(Color(0.38, 0.24, 0.15), 0.78)
+	var wood := _shared(Color(0.14, 0.08, 0.05), 0.45)
+	_mesh(self, _box(Vector3(1.66, 0.24, 0.74)), m, at + Vector3(0, 0.20, 0))
+	# 분리된 2인 시트 쿠션 + 기운 등받이 쿠션 + 둥근 팔걸이 + 나무 다리
+	for sx in [-0.39, 0.39]:
+		_mesh(self, _box(Vector3(0.74, 0.14, 0.64)), m2, at + Vector3(sx, 0.38, -0.02))
+		var back := _mesh(self, _box(Vector3(0.74, 0.48, 0.16)), m2, at + Vector3(sx, 0.64, 0.26))
+		back.rotation_degrees.x = -12.0
+	for sx in [-0.79, 0.79]:
+		_mesh(self, _box(Vector3(0.16, 0.40, 0.72)), m, at + Vector3(sx, 0.42, 0.0))
+		var arm_top := _mesh(self, _cyl(0.08, 0.08, 0.72), m2, at + Vector3(sx, 0.62, 0.0))
+		arm_top.rotation_degrees.x = 90.0
+	for sx in [-0.74, 0.74]:
+		for sz in [-0.28, 0.28]:
+			_mesh(self, _cyl(0.035, 0.025, 0.10), wood, at + Vector3(sx, 0.05, sz))
 	_brk_wrap(mk, 0.80)
 
 
 func _plant(at: Vector3) -> void:
 	var mk := _brk_mark()
-	_mesh(self, _cyl(0.22, 0.18, 0.5), _mat(Color(0.3, 0.28, 0.26), 0.6), at + Vector3(0, 0.25, 0))
-	_mesh(self, _sphere(0.45), _mat(Color(0.12, 0.28, 0.12), 0.9), at + Vector3(0, 0.9, 0))
+	var pot := _shared(Color(0.32, 0.28, 0.25), 0.58)
+	var rim := _shared(Color(0.40, 0.35, 0.30), 0.52)
+	var soil := _shared(Color(0.12, 0.09, 0.07), 0.95)
+	var trunk := _shared(Color(0.24, 0.16, 0.10), 0.85)
+	var leaf1 := _shared(Color(0.11, 0.27, 0.12), 0.88)
+	var leaf2 := _shared(Color(0.16, 0.34, 0.15), 0.85)
+	_mesh(self, _cyl(0.24, 0.17, 0.48), pot, at + Vector3(0, 0.24, 0))
+	_mesh(self, _cyl(0.27, 0.25, 0.07), rim, at + Vector3(0, 0.49, 0))
+	_mesh(self, _cyl(0.22, 0.22, 0.02), soil, at + Vector3(0, 0.50, 0))
+	_mesh(self, _cyl(0.04, 0.06, 0.45), trunk, at + Vector3(0, 0.70, 0))
+	# 층진 잎 뭉치(구 1개 대신 입체 수관)
+	var clusters := [
+		[Vector3(0, 1.05, 0), Vector3(0.34, 0.26, 0.34), leaf1],
+		[Vector3(-0.22, 0.90, 0.14), Vector3(0.24, 0.20, 0.24), leaf2],
+		[Vector3(0.22, 0.88, -0.10), Vector3(0.25, 0.20, 0.24), leaf2],
+		[Vector3(0.04, 1.24, -0.06), Vector3(0.22, 0.18, 0.22), leaf2],
+	]
+	for cl in clusters:
+		var lf := _mesh(self, _sphere(1.0), cl[2], at + (cl[0] as Vector3))
+		lf.scale = cl[1]
 	_brk_wrap(mk, 0.45)
 
 
 func _round_table(at: Vector3) -> void:
 	var mk := _brk_mark()
-	var wood := _mat(Color(0.3, 0.18, 0.1), 0.4)
-	_mesh(self, _cyl(0.85, 0.85, 0.06), wood, at + Vector3(0, 0.76, 0))
-	_mesh(self, _cyl(0.1, 0.25, 0.74), wood, at + Vector3(0, 0.37, 0))
-	_mesh(self, _cyl(0.2, 0.12, 0.14), _mat(Color(0.85, 0.7, 0.3), 0.3, 0.0, 0.8), at + Vector3(0, 0.86, 0))     # 장식 그릇
+	var wood := _shared(Color(0.28, 0.16, 0.09), 0.38)
+	var rim_m := _shared(Color(0.20, 0.11, 0.06), 0.42)
+	var brass := _shared(Color(0.84, 0.68, 0.28), 0.28, 0.0, 0.82)
+	var glass := _shared(Color(0.85, 0.72, 0.42), 0.15, 0.0, 0.2)
+	_mesh(self, _cyl(0.86, 0.86, 0.045), wood, at + Vector3(0, 0.77, 0))
+	_mesh(self, _cyl(0.88, 0.82, 0.035), rim_m, at + Vector3(0, 0.735, 0))
+	_mesh(self, _cyl(0.09, 0.13, 0.68), wood, at + Vector3(0, 0.38, 0))
+	_mesh(self, _cyl(0.36, 0.42, 0.06), brass, at + Vector3(0, 0.03, 0))
+	_mesh(self, _cyl(0.18, 0.11, 0.12), brass, at + Vector3(0, 0.85, 0))                # 중앙 장식 그릇
+	for gx in [-0.34, 0.28]:
+		_mesh(self, _cyl(0.042, 0.036, 0.09), glass, at + Vector3(gx, 0.84, 0.18))      # 위스키 잔
 	_brk_wrap(mk, 0.85)
 
 
@@ -459,23 +497,34 @@ func _snow(center: Vector3, ext: Vector3, amount: int) -> void:
 	add_child(p)
 
 
-## 승용차(앞 = +x). body 차체 색 — 돌려 놓은 묶음을 돌려준다(경광등 · 무늬를 더 붙일 수 있게)
+## 승용차 v2(앞 = +x): 경사진 본넷 · 트렁크 · 캐빈 · 범퍼 · 휠 허브
 func _car(at: Vector3, yaw: float, body: Color, lights := true) -> Node3D:
 	var g := _group(at, yaw)
-	var paint := _shared(body, 0.35, 0.0, 0.25)
-	var glass := _shared(Color(0.16, 0.2, 0.26), 0.1, 0.0, 0.5)
-	var tire := _shared(Color(0.05, 0.05, 0.05), 0.9)
-	_mesh(g, _box(Vector3(4.3, 0.62, 1.76)), paint, Vector3(0, 0.55, 0))
-	_mesh(g, _box(Vector3(2.3, 0.52, 1.56)), glass, Vector3(-0.25, 1.12, 0))
-	_mesh(g, _box(Vector3(2.0, 0.07, 1.48)), paint, Vector3(-0.3, 1.41, 0))
+	var paint := _shared(body, 0.32, 0.0, 0.30)
+	var dark := _shared(body.darkened(0.55), 0.5, 0.0, 0.4)
+	var glass := _shared(Color(0.14, 0.19, 0.26), 0.08, 0.0, 0.55)
+	var tire := _shared(Color(0.05, 0.05, 0.06), 0.9)
+	var hub := _shared(Color(0.72, 0.74, 0.78), 0.25, 0.0, 0.85)
+	_mesh(g, _box(Vector3(4.35, 0.54, 1.76)), paint, Vector3(0, 0.52, 0))
+	_mesh(g, _box(Vector3(4.46, 0.16, 1.80)), dark, Vector3(0, 0.28, 0))                # 앞뒤 범퍼/사이드 스커트
+	# 경사진 캐빈(유리 + 루프)
+	_mesh(g, _box(Vector3(2.20, 0.48, 1.54)), glass, Vector3(-0.22, 1.02, 0))
+	_mesh(g, _box(Vector3(1.88, 0.08, 1.46)), paint, Vector3(-0.26, 1.29, 0))
+	# 앞 유리창 경사(후드 → 루프)
+	var ws := _mesh(g, _box(Vector3(0.62, 0.48, 1.48)), glass, Vector3(0.92, 0.98, 0))
+	ws.rotation_degrees.z = -34.0
+	var rear := _mesh(g, _box(Vector3(0.54, 0.46, 1.48)), glass, Vector3(-1.34, 0.98, 0))
+	rear.rotation_degrees.z = 30.0
 	for wx in [-1.38, 1.38]:
-		for wz in [-0.8, 0.8]:
+		for wz in [-0.82, 0.82]:
 			var w := _mesh(g, _cyl(0.33, 0.33, 0.24), tire, Vector3(wx, 0.33, wz))
 			w.rotation_degrees.x = 90
+			var hb := _mesh(g, _cyl(0.18, 0.18, 0.26), hub, Vector3(wx, 0.33, wz))
+			hb.rotation_degrees.x = 90
 	if lights:
 		for z in [-0.6, 0.6]:
-			_mesh(g, _box(Vector3(0.05, 0.12, 0.34)), _glow(Color(1.0, 0.95, 0.8), 1.6), Vector3(2.15, 0.66, z))
-			_mesh(g, _box(Vector3(0.05, 0.12, 0.3)), _glow(Color(0.9, 0.08, 0.05), 1.2), Vector3(-2.15, 0.68, z))
+			_mesh(g, _box(Vector3(0.05, 0.12, 0.34)), _glow(Color(1.0, 0.95, 0.8), 1.6), Vector3(2.18, 0.62, z))
+			_mesh(g, _box(Vector3(0.05, 0.12, 0.3)), _glow(Color(0.9, 0.08, 0.05), 1.2), Vector3(-2.18, 0.64, z))
 	return g
 
 
@@ -489,12 +538,35 @@ func _wreck(parent: Node3D, at: Vector3, yaw: float, body: Color, roll := 0.0) -
 	_mesh(g, _box(Vector3(2.0, 0.42, 1.5)), _shared(body.darkened(0.35), 0.8), Vector3(-0.2, 0.8, 0))
 
 
-## 가로등(기둥 + 등 — 팔은 +z 로). 빛은 따로(_omni — 점광 3개 이하). lit = false 면 낮(등이 꺼져 있다)
+## 가로등 v2(기둥 + 등 + 은은한 느와르 빛기둥 원뿔 — 추가 광원 비용 0!)
 func _lamp_post(at: Vector3, lamp: Color, h := 4.2, arm := 0.9, lit := true) -> void:
 	var pole := _shared(Color(0.22, 0.23, 0.25), 0.5, 0.0, 0.6)
 	_mesh(self, _cyl(0.07, 0.09, h), pole, at + Vector3(0, h * 0.5, 0))
 	_mesh(self, _box(Vector3(0.08, 0.08, arm)), pole, at + Vector3(0, h - 0.05, arm * 0.5))
 	_mesh(self, _box(Vector3(0.36, 0.1, 0.5)), _glow(lamp, 3.0) if lit else _shared(lamp, 0.4), at + Vector3(0, h - 0.14, arm))
+	if lit and _detail:
+		_light_cone(at + Vector3(0, h - 0.2, arm), h - 0.2, 0.24, 1.9, lamp, 0.065)
+
+
+## 초경량 언셰이드 빛기둥 원뿔(느와르 가로등 · 당구장 펜던트 분위기 — 그림자/광원 0)
+func _light_cone(top_at: Vector3, h: float, r_top: float, r_bot: float, col: Color, alpha := 0.07) -> void:
+	var c := CylinderMesh.new()
+	c.top_radius = r_top
+	c.bottom_radius = r_bot
+	c.height = h
+	c.radial_segments = 14
+	c.rings = 1
+	c.cap_top = false
+	c.cap_bottom = false
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	m.albedo_color = Color(col.r, col.g, col.b, alpha)
+	var mi := _mesh(self, c, m, top_at - Vector3(0, h * 0.5, 0))
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 
 ## 드럼통

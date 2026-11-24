@@ -26,7 +26,7 @@ window/handheld/orientation=4
 
 [gui]
 
-theme/custom_font="res://assets/fonts/Galmuri11-Bold.ttf"
+theme/custom_font="res://assets/fonts/Pretendard-Bold.otf"
 
 [input_devices]
 

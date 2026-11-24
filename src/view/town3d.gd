@@ -25,7 +25,7 @@ extends "res://src/view/set3d.gd"
 ## 이 그림이 그리는 무대 이름(시험 test_campaign 이 장 표의 theme 이 여기 있는지 본다)
 const THEMES := ["vlad_corridor", "gunter_suite", "vlad_hotel", "vlad_night", "site_alley", "junkyard_night", "junkyard_dusk", "hoeam_street"]
 
-const FONT = preload("res://assets/fonts/Galmuri11-Bold.ttf")
+const FONT = preload("res://assets/fonts/Pretendard-Bold.otf")
 
 ## vlad_hotel: 걸을 곳 왼쪽 끝에서 복도 길이(m) · 복도 끝과 군터의 방 사이 문틀 폭(m) — 장 표 prologue.gd 의 자리와 같이 잰다
 const HOTEL_CORRIDOR := 14.0

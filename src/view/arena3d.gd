@@ -91,6 +91,24 @@ func _lamp(at: Vector3, shadow: bool) -> OmniLight3D:
 	head.emission = Color(1.0, 0.72, 0.4)
 	head.emission_energy_multiplier = 4.0
 	_mesh(self, _box(Vector3(0.38, 0.12, 0.26)), head, at + Vector3(0.78, 5.86, 0))
+	# 부두 가로등 느와르 빛기둥 원뿔(추가 광원/그림자 비용 0)
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.26
+	cone.bottom_radius = 2.4
+	cone.height = 5.7
+	cone.radial_segments = 14
+	cone.rings = 1
+	cone.cap_top = false
+	cone.cap_bottom = false
+	var cm := StandardMaterial3D.new()
+	cm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	cm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	cm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	cm.cull_mode = BaseMaterial3D.CULL_DISABLED
+	cm.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	cm.albedo_color = Color(1.0, 0.76, 0.46, 0.055)
+	var cmi := _mesh(self, cone, cm, at + Vector3(0.78, 2.95, 0))
+	cmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var light := OmniLight3D.new()
 	light.position = at + Vector3(0.78, 5.6, 0.0)
 	light.light_color = Color(1.0, 0.72, 0.42)
