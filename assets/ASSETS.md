@@ -5,7 +5,7 @@
 
 - 원작 컷 · 원작 그림을 쓴 자산은 **없다**(인물 · 무대는 코드로 만든 3D 관절 인형 · 도형 — `src/view/`). 그림 A GLB 안의 그림(붓 결 · 펜 빗금 — 2026-11-11 `tools/make_models.gd` ③)도 스크립트가 칠한 것 — 원작 조각(castle_common `work/looks/ref`)은 보고 맞추는 데만 썼고 픽셀은 쓰지 않았다
 - 효과음 · 음악은 castle_M 이 절차 생성한 파일을 그대로 가져왔다(castle_M `tools/gen_sfx.py` · `tools/gen_music.py` + `tools/synth.py` · `tools/music.py`, 처음 출처는 캐슬 취호전 v1.4.1 — castle_M `6da1bb0`). 다시 만들려면 castle_M 에서 그 도구를 돌려 복사한다. 이 판으로 가져온 커밋 `b57db00`(2026-10-26, castle_M `c8fc86c` 무렵)
-- 외부 자산은 글꼴 하나 — 배포 허용(SIL OFL 1.1). 인물 모델은 모두 스크립트 생성(김신은 2026-11-10 ~ 11 CC0 모델을 옮겨 썼다가 2026-11-11 화풍 2단계에서 스크립트로 되돌림 — 그림 B `sprites/kimshin_b.png` 는 그 CC0 모델로 구운 채)
+- 외부 자산은 글꼴(SIL OFL 1.1) 및 실사 파일럿 캐릭터/모션용 CC0 자산(MakeHuman Community MPFB2 CC0 에셋팩: `makehuman_system_assets_cc0` · `skins01/02_cc0` · `eyebrows01_cc0` · `eyelashes01_cc0` · `hair01_cc0` · `suits01/02_cc0` · `shirts01_cc0` · `pants01_cc0` · `skirts01_cc0` · `dress01_cc0` · `shoes01_cc0` · `glasses01_cc0`, `tools/bake_realistic.py` 로 9종 파일럿 GLB 생성: `kimshin_a` · `kimshin_coat_a` · `kimshin_p1_a` · `baekdochan_a` · `risa_p1_a` · `risa_a` · `jintae_a` · `ojiin_a` · `client_woman_a`, 그리고 Quaternius Universal Animation Library CC0 `animations/humanoid_cc0.glb`)이다. 나머지 인물 모델은 스크립트 생성(`tools/make_models.gd`)이다.
 
 | 파일 (`assets/` 기준) | 출처 | 쓰는 곳 |
 |---|---|---|
@@ -16,6 +16,7 @@
 | `fonts/BlackHanSans-Regular.ttf` | 외부 — Black Han Sans(ZESSTYPE) · SIL Open Font License 1.1 · https://github.com/google/fonts/tree/main/ofl/blackhansans | 제목 · 챕터 배너 · 기술 · 예고 강조 글꼴 |
 | `fonts/BlackHanSans-OFL.txt` | Black Han Sans 라이선스 원문(SIL OFL 1.1) | — |
 | `textures/ink_lut.png` | 직접(절차 생성) — `tools/gen_ink_lut.py` (256x256 타일 RGBA8: 붓결 · 얼룩 · 균열 · 펜 해칭) | 화풍 셀 셰이더 공유 LUT(`src/view/ink.gd` · `ink_cel.gdshader`) |
+| `animations/humanoid_cc0.glb` | 외부 — Quaternius Universal Animation Library (CC0 1.0 Public Domain · https://quaternius.com/packs/universalanimationlibrary.html · `tools/bake_anims.py` 17본 리타게팅) | 실사 캐릭터 공용 모션캡처 애니메이션(`src/view/mocap_driver.gd`) |
 | `sfx/counter.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 반격 베기 (`src/main.gd` `_play`) |
 | `sfx/fall.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 넘어짐 (`src/main.gd` `_play`) |
 | `sfx/guard.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 막기 (`src/main.gd` `_play`) |

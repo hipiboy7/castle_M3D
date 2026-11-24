@@ -130,8 +130,12 @@ static func line(for_char: bool, pos_dir := false, cache = null, char_tint := fa
 static func set_flash(m: Material, col: Color) -> void:
 	if m is ShaderMaterial:
 		m.set_shader_parameter("emission", Vector3(col.r, col.g, col.b))
-	else:
-		m.emission = col
+	elif m is BaseMaterial3D:
+		var bm := m as BaseMaterial3D
+		var on := (col.r + col.g + col.b) > 0.001
+		bm.emission_enabled = on
+		bm.emission = col
+		bm.emission_energy_multiplier = 1.0 if on else 0.0
 
 
 ## 동적 얼굴 표정 전환 — 0:평소 · 1:전투/분노 · 2:피격/고통 · 3:기절/눈감음
