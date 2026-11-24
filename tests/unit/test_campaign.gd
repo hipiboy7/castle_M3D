@@ -221,6 +221,37 @@ func test_save_speed() -> void:
 	check(Save.speed_label(1.0) == "×1" and Save.speed_label(1.5) == "×1.5" and Save.speed_label(2.0) == "×2", "버튼 글")
 
 
+## 카메라 줌(사용자 2026-11-24 "게임 장면이 너무 가까워졌어. 줌 조절할 수 있게") — 세이브 · 클램프 · 순환 · 라벨
+func test_save_zoom() -> void:
+	check(is_equal_approx(float(Save.fresh()["zoom"]), 1.0), "새 세이브 줌 기본값 ×1")
+	check(is_equal_approx(Save.next_zoom(1.0), 0.8) and is_equal_approx(Save.next_zoom(0.8), 0.65)
+		and is_equal_approx(Save.next_zoom(0.65), 1.25) and is_equal_approx(Save.next_zoom(1.25), 1.0),
+		"×1 → ×0.8(넓게) → ×0.65(최대) → ×1.25(가깝게) → ×1")
+	check(is_equal_approx(Save.next_zoom(0.92), 0.8) and is_equal_approx(Save.next_zoom(0.72), 0.65)
+		and is_equal_approx(Save.next_zoom(0.58), 1.0), "핀치 중간 값에서도 자연스럽게 다음 단계로")
+	check(is_equal_approx(Save.clamp_zoom(0.1), Save.ZOOM_MIN) and is_equal_approx(Save.clamp_zoom(5.0), Save.ZOOM_MAX),
+		"줌 최소 · 최대 경계")
+	check(is_equal_approx(Save.clamp_zoom(0.734), 0.73), "줌 소수 둘째 자리 반올림")
+	check(is_equal_approx(float(Save.parse('{"v": 1, "cleared": {}}')["save"]["zoom"]), 1.0), "줌 칸 없는 옛 세이브는 ×1")
+	check(is_equal_approx(float(Save.parse('{"v": 1, "zoom": 0.72}')["save"]["zoom"]), 0.72), "핀치로 맞춘 줌 값이 세이브에 남는다")
+	check(is_equal_approx(float(Save.parse('{"v": 1, "zoom": 9.9}')["save"]["zoom"]), 1.0), "범위 밖 줌 값은 기본값 ×1")
+	check(Save.zoom_label(1.0) == "×1" and Save.zoom_label(0.8) == "×0.8" and Save.zoom_label(0.65) == "×0.65"
+		and Save.zoom_label(1.25) == "×1.25", "줌 라벨 형식")
+
+
+## 스테이지 순차 진행(사용자 2026-11-24 "각 스테이지별로 깨면 넘어가게") — 다음 장 id · 완료 수
+func test_next_after_and_clear_count() -> void:
+	check(Save.next_after("ch0") == "ch1" and Save.next_after("ch6a") == "ch6" and Save.next_after("ch12") == "ch13",
+		"각 장을 깨면 바로 다음 장 id")
+	check(Save.next_after("ch13") == "" and Save.next_after("nope") == "", "마지막 장(13장) · 없는 장은 빈칸")
+	var s := Save.fresh()
+	check(Save.clear_count(s) == 0, "새 세이브 완료 장 0")
+	Save.record_clear(s, "ch0", 100)
+	Save.record_clear(s, "ch1", 200)
+	s["cleared"]["zz"] = {"count": 1, "best": 1}
+	check(Save.clear_count(s) == 2, "할 수 있는 장 중 깬 장만 센다")
+
+
 ## 스테이지 고르기(사용자 2026-11-06 "메뉴 · 선택 같은 거 … 스테이지 넘어갈 수 있게") — 장 안의 방 목록
 func test_stages_of_chapter() -> void:
 	var st := Campaign.stages("ch11")

@@ -28,6 +28,11 @@ var _skill_drag_y0 := 0.0
 var _skill_swiped := false
 var _skill_ratio := 0.0
 var _skill_ready := false
+var _free_touches := {}          # 버튼 밖 터치(index → pos) — 두 손가락 핀치 줌 감지
+var _pinching := false
+var _pinch_d := 0.0
+var _pinch_ratio := 1.0
+var _pinch_ended := false
 var show_pause := false:
 	set(v):
 		show_pause = v
@@ -64,6 +69,7 @@ var buttons := [
 	{"id": "swap", "label": "교대", "r": 44.0, "off": Vector2(-372, -172), "tier": 2, "accent": Color(0.38, 0.86, 1.0)},
 	{"id": "pause", "label": "멈춤", "r": 32.0, "off": Vector2(-50, 82), "at": "tr", "tier": 2},
 	{"id": "speed", "label": "×1", "r": 32.0, "off": Vector2(-50, 158), "at": "tr", "tier": 2},
+	{"id": "zoom", "label": "×1", "sub": "줌", "r": 32.0, "off": Vector2(-50, 234), "at": "tr", "tier": 2},
 	{"id": "menu", "label": "메뉴", "r": 32.0, "off": Vector2(-128, 82), "at": "tr", "tier": 2},
 	{"id": "ff", "label": "×1", "sub": "빨리", "r": 38.0, "off": Vector2(-134, 162), "at": "tr", "tier": 1, "accent": Color(0.98, 0.78, 0.28)},
 	{"id": "art", "label": "그림", "r": 40.0, "off": Vector2(64, 188), "at": "tl", "tier": 2},
@@ -106,7 +112,7 @@ func _btn_pos(b: Dictionary) -> Vector2:
 
 func _active(b: Dictionary) -> bool:
 	match str(b["id"]):
-		"pause", "speed", "menu":
+		"pause", "speed", "menu", "zoom":
 			return show_pause
 		"swap":
 			return show_swap
@@ -115,6 +121,20 @@ func _active(b: Dictionary) -> bool:
 		"art", "bench", "difficulty":
 			return show_art
 	return show_fight
+
+
+## 두 손가락 핀치 거리 변화 → 한 틱 확대/축소 배율(벌리면 > 1, 오므리면 < 1 — 순수 함수, test_ui_logic)
+static func pinch_scale(d0: float, d1: float) -> float:
+	if d0 < 24.0 or d1 < 24.0:
+		return 1.0
+	return clampf(d1 / d0, 0.85, 1.18)
+
+
+func _pinch_dist() -> float:
+	var ks := _free_touches.keys()
+	if ks.size() < 2:
+		return 0.0
+	return (_free_touches[ks[0]] as Vector2).distance_to(_free_touches[ks[1]] as Vector2)
 
 
 func set_skill_state(ratio: float, ready: bool) -> void:
@@ -145,13 +165,28 @@ func _input(e: InputEvent) -> void:
 						_skill_drag_idx = e.index
 						_skill_drag_y0 = e.position.y
 						_skill_swiped = false
-			if not hit and e.position.x < sa.position.x + sa.size.x * 0.5 and _stick_idx == -1:
-				_stick_idx = e.index
-				_edges["stick"] = true
-				_center = e.position
-				_knob = e.position
-				stick = Vector2.ZERO
+			if not hit:
+				if show_pause:
+					_free_touches[e.index] = e.position
+				if show_pause and _free_touches.size() >= 2:
+					_pinching = true
+					_pinch_d = _pinch_dist()
+					_stick_idx = -1
+					stick = Vector2.ZERO
+					_edges.erase("tap")                   # 핀치 시작 시 장면 대사 오넘김 방지
+				elif show_fight and e.position.x < sa.position.x + sa.size.x * 0.5 and _stick_idx == -1:
+					_stick_idx = e.index
+					_edges["stick"] = true
+					_center = e.position
+					_knob = e.position
+					stick = Vector2.ZERO
 		else:
+			if _free_touches.has(e.index):
+				_free_touches.erase(e.index)
+				if _pinching and _free_touches.size() < 2:
+					_pinching = false
+					_pinch_d = 0.0
+					_pinch_ended = true
 			if e.index == _stick_idx:
 				_stick_idx = -1
 				stick = Vector2.ZERO
@@ -162,6 +197,14 @@ func _input(e: InputEvent) -> void:
 					_pressed.erase(id)
 		queue_redraw()
 	elif e is InputEventScreenDrag:
+		if _free_touches.has(e.index):
+			_free_touches[e.index] = e.position
+			if _pinching and _free_touches.size() >= 2:
+				var d_now := _pinch_dist()
+				if _pinch_d > 0.0:
+					_pinch_ratio *= pinch_scale(_pinch_d, d_now)
+				_pinch_d = d_now
+				return
 		if e.index == _stick_idx:
 			var sr := STICK_R * sc
 			var d: Vector2 = e.position - _center
@@ -194,6 +237,22 @@ func take_edge(id: String) -> bool:
 
 func set_speed_label(t: String) -> void:
 	set_label("speed", t)
+
+
+func set_zoom_label(t: String) -> void:
+	set_label("zoom", t)
+
+
+func take_pinch() -> float:
+	var r := _pinch_ratio
+	_pinch_ratio = 1.0
+	return r
+
+
+func take_pinch_ended() -> bool:
+	var f := _pinch_ended
+	_pinch_ended = false
+	return f
 
 
 func set_lit(id: String, on: bool) -> void:
@@ -275,8 +334,10 @@ func _draw() -> void:
 		var w := r * 2.0
 		var lbl_a := 0.96 if tier == 1 or pressed or lit else 0.78
 		if b.has("sub"):
-			draw_string(FONT_BODY, p + Vector2(-r, -6.0 * sc), str(b["sub"]), HORIZONTAL_ALIGNMENT_CENTER, w, roundi(12 * sc), Color(COL_LABEL, 0.68))
-			draw_string(FONT_BODY, p + Vector2(-r, 15.0 * sc), str(b["label"]), HORIZONTAL_ALIGNMENT_CENTER, w, roundi(18 * sc), Color(COL_LABEL, lbl_a))
+			var sub_sz := roundi((11 if r < 36.0 * sc else 12) * sc)
+			var main_sz := roundi((14 if r < 36.0 * sc else 18) * sc)
+			draw_string(FONT_BODY, p + Vector2(-r, -5.0 * sc), str(b["sub"]), HORIZONTAL_ALIGNMENT_CENTER, w, sub_sz, Color(COL_LABEL, 0.68))
+			draw_string(FONT_BODY, p + Vector2(-r, 14.0 * sc), str(b["label"]), HORIZONTAL_ALIGNMENT_CENTER, w, main_sz, Color(COL_LABEL, lbl_a))
 		elif id in ["attack", "parry", "roll", "skill"]:
 			draw_string(FONT_BODY, p + Vector2(-r, r * 0.52), str(b["label"]), HORIZONTAL_ALIGNMENT_CENTER, w, roundi((20 if id == "attack" else 16) * sc), Color(COL_LABEL, lbl_a))
 		else:

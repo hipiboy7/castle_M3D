@@ -20,10 +20,10 @@ const COL_TEXT := Color(0.97, 0.97, 0.99, 0.96)
 const COL_DIM := Color(0.70, 0.74, 0.80, 0.45)
 
 var heading := ""
-var chapters: Array = []         # [{"id", "title", "open"}]
+var chapters: Array = []         # [{"id", "title", "open", "cleared"}]
 var stages: Array = []           # [{"room", "title", "now"}] — 고른 장(picked)의 스테이지
 var picked := ""                 # 위 줄에서 고른 장 id
-var buttons := {"resume": "", "title": "", "difficulty": ""}
+var buttons := {"resume": "", "title": "", "difficulty": "", "zoom": ""}
 var _last_safe := Rect2()
 
 
@@ -58,10 +58,14 @@ static func _rows(sa: Rect2, n: int, y: float) -> Array:
 static func layout(sa: Rect2, n_ch: int, n_st: int) -> Dictionary:
 	var c := sa.get_center()
 	var chs: Array = _row(sa, n_ch, c.y - 160.0) if n_ch <= ROW_MAX else _rows(sa, n_ch, c.y - 172.0)
+	var bw := minf(BTN.x, (sa.size.x - 80.0 - GAP * 3.0) / 4.0)
+	var x0 := c.x - (bw * 4.0 + GAP * 3.0) * 0.5
+	var by := c.y + 140.0
 	return {"chapters": chs, "stages": _row(sa, n_st, c.y - 10.0),
-		"resume": Rect2(c.x - BTN.x * 1.5 - GAP, c.y + 140.0, BTN.x, BTN.y),
-		"title": Rect2(c.x - BTN.x * 0.5, c.y + 140.0, BTN.x, BTN.y),
-		"difficulty": Rect2(c.x + BTN.x * 0.5 + GAP, c.y + 140.0, BTN.x, BTN.y)}
+		"resume": Rect2(x0, by, bw, BTN.y),
+		"title": Rect2(x0 + (bw + GAP), by, bw, BTN.y),
+		"difficulty": Rect2(x0 + (bw + GAP) * 2.0, by, bw, BTN.y),
+		"zoom": Rect2(x0 + (bw + GAP) * 3.0, by, bw, BTN.y)}
 
 
 func hit(p: Vector2) -> String:
@@ -74,7 +78,7 @@ func hit(p: Vector2) -> String:
 	for i in stages.size():
 		if L["stages"][i].has_point(p):
 			return "room:%d" % int(stages[i]["room"])
-	for k in ["resume", "title", "difficulty"]:
+	for k in ["resume", "title", "difficulty", "zoom"]:
 		if L[k].has_point(p):
 			return k
 	return ""
@@ -120,7 +124,8 @@ func _draw() -> void:
 	for i in chapters.size():
 		var c: Dictionary = chapters[i]
 		var r: Rect2 = L["chapters"][i]
-		_card(r, str(c["title"]), c["id"] == picked, bool(c["open"]), 20 if r.size.y >= CARD_H else 16)
+		var lbl := str(c["title"]) + (" ★" if bool(c.get("cleared", false)) else "")
+		_card(r, lbl, c["id"] == picked, bool(c["open"]), 20 if r.size.y >= CARD_H else 16, bool(c.get("cleared", false)))
 	for i in stages.size():
 		var st: Dictionary = stages[i]
 		var is_now: bool = bool(st.get("now", false))
@@ -128,3 +133,4 @@ func _draw() -> void:
 	_card(L["resume"], str(buttons["resume"]), true, true, 22)
 	_card(L["title"], str(buttons["title"]), false, true, 22, true)
 	_card(L["difficulty"], str(buttons["difficulty"]), false, true, 20)
+	_card(L["zoom"], str(buttons["zoom"]), false, true, 20)

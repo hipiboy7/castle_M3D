@@ -5,6 +5,7 @@
 **이 폴더에서 Claude Code 를 따로 열어 개발한다** — 3D 일은 이 폴더 세션에서, 2D 본편 일은 castle_M 폴더 세션에서(2026-10-26 사용자).
 이 문서만으로 일할 수 있게 썼다. 여기 없는 규칙은 개발 규격(받은 사본 `data/common/docs/개발규격/` — `캐슬_게임공통.md` · `게임개발규격.md`)의 해당 절을 찾아 읽는다(전체를 읽지 않는다). 우선순위: 사용자 답(기획서 00 결정 10 포함) → 이 문서 → 기획서(castle_common `docs/기획서/03`) → 규격.
 
+> 정정 이력: 2026-11-24 — `impl-graphics-v2` → `impl-draft1` 병합(`--no-ff`) · 카메라 줌 조절(`save.gd` `zoom` · `camera_rig.gd` `user_zoom` · 우측 상단 줌 버튼 · 두 손가락 핀치 · `stage_menu.gd` 줌 버튼 · 컷신 기본 거리 완화) · 순차 스테이지 진행(처음 화면 시작/이어하기 단일화 · 장 클리어 시 바로 다음 장 자동 진입 · 임의 스테이지 이동은 `'메뉴'` 전용).
 > 정정 이력: 2026-11-23 — 그래픽·캐릭터·UI/UX v2(`impl-graphics-v2`): GPU LUT(`assets/textures/ink_lut.png`) · 부위별 셰이딩/광원 클램프 · 2D 웹툰 4표정(`tools/face_painter.gd`, 130 GLB 재베이크) · 벡터 폰트(Pretendard/BlackHanSans) · 느와르 HUD/4+2 터치 아크/저각도 컷신 카메라/붓칠 VFX/임팩트 프레임/장별 컬러 스크립트 · AGY Rule `AGENTS.md`→`CLAUDE.md` 링크 · 로컬 빌드 rc.19(versionCode 90).
 > 정정 이력: 2026-11-13 — 1절 원작 대사 토막 빼기(`stage.canon_keep` — 말하는 사람이 반 넘게 방에 없으면 대목째 안 튼다) · 점검 `tools/canon_audit.gd` · 6장 부두 가로등 그림자 끔(멈춤 용의자).
 > 정정 이력: 2026-11-12 (4) — rc.16 폰 리뷰: 1절 여성 글래머 몸(make_models FEM_*) · 리사 프롤로그 코트 · 장면 빨리 감기(main FF_SPEED) · 장면 중 머리 위 글 끔 · 2장 복도 → 대표실 한 맵(haseong_ceo).

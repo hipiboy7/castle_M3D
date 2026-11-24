@@ -17,10 +17,14 @@ const VERSION := 1
 const ARTS := ["puppet", "a"]    # 2026-11-11 사용자 "3. (가)" — 붓칠 · 먹선 화풍 하나로, 그림 B(도트)는 고르지 않는다(--art b 개발 인자만)
 const DEFAULT_ART := "a"         # #9 결정(2026-11-06) — 본편 그림은 A(GLB 툰 모델)
 const SPEEDS := [1.0, 1.5, 2.0]  # 게임 속도 고르기(사용자 2026-11-06 "싸움이 너무 느린데 게임 속도를 더 빨리 할 수 있는 버튼")
+const ZOOM_MIN := 0.55           # 카메라 줌 최소(가장 넓게 — 1/0.55 ≈ 1.82배 거리)
+const ZOOM_MAX := 1.45           # 카메라 줌 최대(가장 가깝게)
+const DEFAULT_ZOOM := 1.0
+const ZOOMS := [1.0, 0.8, 0.65, 1.25]   # 원탭 줌 순환: 기본 → 넓게 → 아주 넓게 → 가깝게
 
 
 static func fresh() -> Dictionary:
-	return {"v": VERSION, "cleared": {}, "last": "", "art": DEFAULT_ART, "speed": SPEEDS[0], "difficulty": Difficulty.DEFAULT}
+	return {"v": VERSION, "cleared": {}, "last": "", "art": DEFAULT_ART, "speed": SPEEDS[0], "difficulty": Difficulty.DEFAULT, "zoom": DEFAULT_ZOOM}
 
 
 ## 파일 글 → {"save": 세이브, "state": "new" | "ok" | "broken" | "newer"}
@@ -57,6 +61,11 @@ static func _fill(j: Dictionary) -> Dictionary:
 	var sp := float(j.get("speed", SPEEDS[0]))
 	s["speed"] = sp if sp in SPEEDS else SPEEDS[0]
 	s["difficulty"] = Difficulty.valid(j.get("difficulty", Difficulty.DEFAULT))
+	var zm = j.get("zoom", DEFAULT_ZOOM)
+	if (zm is float or zm is int) and float(zm) >= ZOOM_MIN and float(zm) <= ZOOM_MAX:
+		s["zoom"] = clamp_zoom(float(zm))
+	else:
+		s["zoom"] = DEFAULT_ZOOM
 	return s
 
 
@@ -117,4 +126,44 @@ static func next_speed(v: float) -> float:
 static func speed_label(v: float) -> String:
 	var t := str(v)
 	return "×" + (t.left(-2) if t.ends_with(".0") else t)
+
+
+## 카메라 줌: 핀치 · 버튼 공용 경계(소수 둘째 자리 반올림)
+static func clamp_zoom(v: float) -> float:
+	return snappedf(clampf(v, ZOOM_MIN, ZOOM_MAX), 0.01)
+
+
+## 줌 버튼 순환: ×1 → ×0.8(넓게) → ×0.65(최대) → ×1.25(가깝게) → ×1
+static func next_zoom(v: float) -> float:
+	for i in ZOOMS.size():
+		if absf(v - float(ZOOMS[i])) < 0.03:
+			return float(ZOOMS[(i + 1) % ZOOMS.size()])
+	if v > 0.8:
+		return 0.8
+	if v > 0.65:
+		return 0.65
+	return 1.0
+
+
+static func zoom_label(v: float) -> String:
+	var s := "%.2f" % clamp_zoom(v)
+	while s.contains(".") and (s.ends_with("0") or s.ends_with(".")):
+		s = s.left(-1)
+	return "×" + s
+
+
+## 지금 깬 장(id)의 바로 다음 장 id(마지막 장 · 없는 장이면 "") — 깨면 바로 다음 스테이지로 순차 진행
+static func next_after(id: String) -> String:
+	var ids := Campaign.playable_ids()
+	var i := ids.find(id)
+	return ids[i + 1] if i >= 0 and i + 1 < ids.size() else ""
+
+
+## 할 수 있는 장 중 깬 장 수(처음 화면 진행도 표시)
+static func clear_count(s: Dictionary) -> int:
+	var n := 0
+	for id in Campaign.playable_ids():
+		if cleared(s, id):
+			n += 1
+	return n
 

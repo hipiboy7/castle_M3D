@@ -81,7 +81,7 @@ const STALL_SECS := 1.5
 const STALL_FORGET_MS := 8000                # 이만큼 잘 돌면 멈춤 수를 잊는다
 var _switch_to: Array = []                 # 메뉴로 고른 [장, 방] — mode "switch" 가 SWITCH_WAIT 프레임 뒤 판을 바꾼다
 const SWITCH_WAIT := 2
-const RESULT_AUTO := 600        # 이긴 결과 화면: 안 눌러도 10초 뒤 처음 화면(rc.2 폰: 2장 끝 화면이 굳은 것처럼 보였다 — 끝 방 글과 결과 글이 같아서)
+const RESULT_AUTO := 300        # 이긴 결과 화면: 안 눌러도 5초 뒤 다음 스테이지(마지막 장이면 처음 화면)
 var _mouse_was := false
 var _fake_art := false
 var _fake_difficulty := false
@@ -430,6 +430,7 @@ func _enter_title() -> void:
 	_fill_menu()
 	menu.visible = true
 	_apply_speed()
+	_apply_zoom()
 	touch.set_label("difficulty", Difficulty.label(save["difficulty"]))
 	hud.set_hint(_title_hint())
 	_trace("MODE title frame=%d" % frames)
@@ -450,6 +451,7 @@ func _start(m: String) -> void:
 		get_tree().paused = false               # 판을 새로 시작하면 장면 트리 멈춤 · 소리 끔이 남지 않게(멈춤 지킴이 참고)
 		AudioServer.set_bus_mute(0, false)
 	_apply_speed()
+	_apply_zoom()
 	_trace("MODE %s frame=%d" % [m, frames])      # 에뮬레이터 점검(scripts/emu_check.sh)이 logcat 에서 데모 시작을 기다린다
 	if m == "demo":
 		var dm: Array = Lines.at("ch6.demo")
@@ -597,6 +599,9 @@ func _scripted() -> void:
 		"speed":
 			save["speed"] = Save.next_speed(float(save["speed"]))
 			_apply_speed()
+		"zoom":
+			save["zoom"] = Save.next_zoom(float(save["zoom"]))
+			_apply_zoom()
 		"menu":
 			if mode == "fight":
 				_set_menu(true)
@@ -660,10 +665,6 @@ func _title_pick() -> String:
 	if Input.is_action_just_pressed("bench") or touch.peek_edge("bench"):
 		touch.take_edges()
 		return "bench"
-	var ids := Campaign.playable_ids()
-	for k in 2:
-		if Input.is_action_just_pressed("pick_%d" % (k + 1)) and k < ids.size():
-			return str(ids[k])
 	var at := Vector2(-1, -1)
 	var e: Dictionary = touch.take_edges()
 	if e.has("tap"):
@@ -695,20 +696,16 @@ func _menu_choice(id: String) -> String:
 	return ""
 
 
+## 처음 화면 — 순차 진행(시작/이어하기)만 표시. 임의 스테이지 이동은 싸움 중 '메뉴'에서만(2026-11-24 사용자)
 func _fill_menu() -> void:
 	var t = Lines.at("title")
 	var nx := Save.next_chapter(save)
-	menu.cont = {"id": "continue", "title": str(t["continue"]), "sub": str(Campaign.title(nx)[0])}
+	var done := Save.clear_count(save)
+	var tot := Campaign.playable_ids().size()
+	var btn_title := str(t["continue"]) if done > 0 else str(t.get("start", t["continue"]))
+	var sub_txt := (str(t["progress"]) % [Campaign.title(nx)[0], done, tot]) if done > 0 else str(Campaign.title(nx)[0])
+	menu.cont = {"id": "continue", "title": btn_title, "sub": sub_txt}
 	menu.items = []
-	for id in Campaign.ids():
-		var ct = Campaign.title(id)
-		var st := "open" if Save.unlocked(save, id) else ("soon" if not Campaign.playable(id) else "locked")
-		var mark := ""
-		if Save.cleared(save, id):
-			mark = str(t["cleared"]) % int(save["cleared"][id]["count"])
-		elif st != "open":
-			mark = str(t[st])
-		menu.items.append({"id": id, "title": str(ct[0]), "sub": str(ct[1]), "state": st, "mark": mark})
 	menu.refresh()
 
 
@@ -729,7 +726,9 @@ func _load_save() -> void:
 			save_path = ""                                                 # 다음 판이 쓴 세이브는 덮어쓰지 않는다
 	if str(args["art"]) == "":
 		args["art"] = str(save["art"])
-	_trace("SAVE %s art=%s difficulty=%s cleared=%s" % [p["state"], save["art"], save["difficulty"], ",".join(save["cleared"].keys())])
+	_apply_zoom()
+	_trace("SAVE %s art=%s difficulty=%s zoom=%s cleared=%s" % [p["state"], save["art"], save["difficulty"],
+		Save.zoom_label(float(save["zoom"])), ",".join(save["cleared"].keys())])
 
 
 ## 싸움 중 메뉴(스테이지 고르기) 열기 · 닫기 — 열린 동안 판은 멈춘다(무대 · 인형 · 연출 · 소리 PAUSABLE), 싸움 버튼은 숨긴다
@@ -739,8 +738,9 @@ func _set_menu(on: bool) -> void:
 	menu_open = on
 	get_tree().paused = on
 	touch.take_edges()
-	touch.show_fight = not on
+	touch.show_fight = not on and not _in_scene
 	touch.show_pause = not on
+	touch.show_ff = not on and _in_scene and mode == "fight"
 	touch.show_swap = not on and _can_swap()
 	if on:
 		menu_ch = chapter
@@ -754,11 +754,17 @@ func _set_menu(on: bool) -> void:
 func _fill_stage_menu() -> void:
 	var ml = Lines.at("menu")
 	smenu.heading = str(ml["heading"])
-	smenu.buttons = {"resume": str(ml["resume"]), "title": str(ml["title"]), "difficulty": str(ml["difficulty"]) % Difficulty.label(save["difficulty"])}
+	smenu.buttons = {
+		"resume": str(ml["resume"]),
+		"title": str(ml["title"]),
+		"difficulty": str(ml["difficulty"]) % Difficulty.label(save["difficulty"]),
+		"zoom": str(ml["zoom"]) % Save.zoom_label(float(save["zoom"])),
+	}
 	smenu.chapters = []
 	for id in Campaign.ids():
 		var long_t: bool = Campaign.playable_ids().size() <= StageMenu.ROW_MAX     # 장이 많으면 작은 카드 두 줄 — 짧은 이름
-		smenu.chapters.append({"id": id, "title": str(Campaign.title(id)[0]) if long_t else Campaign.short_title(id), "open": Save.unlocked(save, id)})
+		smenu.chapters.append({"id": id, "title": str(Campaign.title(id)[0]) if long_t else Campaign.short_title(id),
+			"open": Campaign.playable(id), "cleared": Save.cleared(save, id)})
 	smenu.picked = menu_ch
 	var now := int(d.get("room_i", 0)) if kind == "stage" else 0
 	smenu.stages = []
@@ -792,7 +798,7 @@ func _menu_input() -> void:
 			pick = smenu.hit(at)
 	if pick.begins_with("ch:"):
 		var id := pick.substr(3)
-		if Save.unlocked(save, id):
+		if Campaign.playable(id):
 			menu_ch = id
 			_fill_stage_menu()
 	elif pick.begins_with("room:"):
@@ -807,6 +813,11 @@ func _menu_input() -> void:
 		save["difficulty"] = Difficulty.next(save["difficulty"])
 		_write_save()
 		_trace("DIFFICULTY %s" % save["difficulty"])
+		_fill_stage_menu()
+	elif pick == "zoom":
+		save["zoom"] = Save.next_zoom(float(save["zoom"]))
+		_write_save()
+		_apply_zoom()
 		_fill_stage_menu()
 	elif pick == "resume" and str(save["difficulty"]) != _menu_diff0:
 		# 난이도를 바꾸고 닫으면 지금 스테이지를 새 난이도로 처음부터(판 중간에 배율을 바꾸지 않는다 — 리플레이 기록은 판 시작 opts)
@@ -836,6 +847,30 @@ func _apply_speed() -> void:
 	Engine.physics_ticks_per_second = roundi(BASE_TICKS * k)
 	Engine.time_scale = k
 	touch.set_speed_label(Save.speed_label(float(save["speed"])))
+
+
+## 카메라 줌 반영 — 그림(camera_rig)만 바뀐다(판정 · 리플레이와 무관)
+func _apply_zoom() -> void:
+	var z := Save.clamp_zoom(float(save.get("zoom", Save.DEFAULT_ZOOM)))
+	save["zoom"] = z
+	if cam != null:
+		cam.set_user_zoom(z)
+	if touch != null:
+		touch.set_zoom_label(Save.zoom_label(z))
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if mode != "fight" or paused or menu_open:
+		return
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			save["zoom"] = Save.clamp_zoom(float(save["zoom"]) * 1.08)
+			_apply_zoom()
+			_write_save()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			save["zoom"] = Save.clamp_zoom(float(save["zoom"]) / 1.08)
+			_apply_zoom()
+			_write_save()
 
 
 func _write_save() -> void:
@@ -879,6 +914,29 @@ func _physics_process(_dt: float) -> void:
 		_write_save()
 		_apply_speed()
 		hud.message(str(Lines.at("speed")) % Save.speed_label(float(save["speed"])), "", 0.8)
+	if mode == "fight":
+		var pinch_r: float = touch.take_pinch()
+		if absf(pinch_r - 1.0) > 0.001:
+			save["zoom"] = Save.clamp_zoom(float(save["zoom"]) * pinch_r)
+			_apply_zoom()
+		if touch.take_pinch_ended():
+			_write_save()
+			hud.message(str(Lines.at("zoom")) % Save.zoom_label(float(save["zoom"])), "", 0.7)
+		if Input.is_action_just_pressed("zoom") or touch.take_edge("zoom"):
+			save["zoom"] = Save.next_zoom(float(save["zoom"]))
+			_write_save()
+			_apply_zoom()
+			hud.message(str(Lines.at("zoom")) % Save.zoom_label(float(save["zoom"])), "", 0.8)
+		elif Input.is_action_just_pressed("zoom_in"):
+			save["zoom"] = Save.clamp_zoom(float(save["zoom"]) + 0.1)
+			_write_save()
+			_apply_zoom()
+			hud.message(str(Lines.at("zoom")) % Save.zoom_label(float(save["zoom"])), "", 0.8)
+		elif Input.is_action_just_pressed("zoom_out"):
+			save["zoom"] = Save.clamp_zoom(float(save["zoom"]) - 0.1)
+			_write_save()
+			_apply_zoom()
+			hud.message(str(Lines.at("zoom")) % Save.zoom_label(float(save["zoom"])), "", 0.8)
 	mode_t += 1
 	match mode:
 		"switch":
@@ -927,8 +985,13 @@ func _physics_process(_dt: float) -> void:
 			elif not args["autoplay"] and mode_t > 60 and (_pressed_anything() or (last_win and mode_t > RESULT_AUTO)):
 				seed_now += 1
 				if last_win:
-					_new_run(Save.next_chapter(save))      # 이겼으면 처음 화면 — 이어하기가 다음 장
-					_enter_title()
+					var nx := Save.next_after(chapter)
+					if nx != "":
+						_new_run(nx)                   # 스테이지를 깨면 바로 다음 장으로 순차 진행(2026-11-24 사용자)
+						_start("fight")
+					else:
+						_new_run(Save.next_chapter(save))
+						_enter_title()
 				else:
 					_new_run(chapter)
 					_start("fight")
@@ -1047,15 +1110,17 @@ func _end_fight(result: String) -> void:
 	if last_win:                                       # 중간 스테이지부터 한 판(난이도 바꿔 다시 · 메뉴로 고름)도 깬 장 — 장은 차례대로만 열려
 		Save.record_clear(save, chapter, int(d["world"].frame) if run_room == 0 else 0)   # 건너뛰기는 없다. 가장 짧은 판은 첫 스테이지부터만(rc.4 폰 "8장 깨도 9장으로 안넘어가")
 		_write_save()
+	var rl = Lines.at("result")
+	var nx := Save.next_after(chapter)
+	var next_line := (str(rl["win_next"]) % str(Campaign.title(nx)[0])) if nx != "" else str(rl["win_end"])
 	if result == "win":
 		if pup.has(d["hero"]):
 			pup[d["hero"]].victory = true
 		var wm = Lines.at("ch6.win")
-		if kind == "stage":                             # 끝 방 글은 끝 방에서 이미 보였다 — 결과는 '깸' + 다음(같은 글이면 굳은 것처럼 보였다, rc.2)
-			wm = [str(Lines.at("result")["win_title"]) % str(Campaign.title(chapter)[0]),
-				str(Lines.at("result")["win_next"]) % str(Campaign.title(Save.next_chapter(save))[0])]
+		if kind == "stage":                             # 끝 방 글은 끝 방에서 이미 보였다 — 결과는 '깸' + 다음 스테이지
+			wm = [str(rl["win_title"]) % str(Campaign.title(chapter)[0]), next_line]
 		hud.message(str(wm[0]), str(wm[1]), 9999.0)
-		var last_ch: bool = Campaign.playable_ids().back() == chapter
+		var last_ch: bool = nx == ""
 		snd.song(Campaign.ENDING_SONG if last_ch else "victory", false)    # 마지막 장(13장)을 깨면 끝 곡
 	else:
 		if d["boss"] != null and pup.has(d["boss"]):
@@ -1063,11 +1128,10 @@ func _end_fight(result: String) -> void:
 		var lm: Array = d["lose_line"] if d.get("lose_line", []).size() >= 2 else Lines.at(key + ".lose")   # 따돌리기 시간 초과는 따로
 		hud.message(lm[0], lm[1], 9999.0)
 		snd.song("gameover", false)
-	var rl = Lines.at("result")
 	if args["autoplay"]:
 		hud.set_hint("")
 	elif last_win:
-		hud.set_hint(str(rl["win_next"]) % str(Campaign.title(Save.next_chapter(save))[0]))
+		hud.set_hint(next_line)
 	else:
 		hud.set_hint(str(rl["lose"]))
 

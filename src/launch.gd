@@ -10,6 +10,7 @@ const KEYS := {
 	"skill": [KEY_U, KEY_V], "skill_next": [KEY_I, KEY_B], "pause": [KEY_ESCAPE, KEY_P], "swap": [KEY_TAB, KEY_Q],
 	"pick_1": [KEY_1], "pick_2": [KEY_2], "art": [KEY_3], "bench": [KEY_4], "difficulty": [KEY_5], "accept": [KEY_ENTER, KEY_KP_ENTER],
 	"speed": [KEY_F], "menu": [KEY_M], "jump": [KEY_E, KEY_R], "crouch": [KEY_G, KEY_CTRL],
+	"zoom": [KEY_O], "zoom_in": [KEY_EQUAL, KEY_KP_ADD], "zoom_out": [KEY_MINUS, KEY_KP_SUBTRACT],
 }
 
 

@@ -5,6 +5,7 @@ const SafeArea = preload("res://src/ui/safe_area.gd")
 const Nav = preload("res://src/ui/nav.gd")
 const TitleMenu = preload("res://src/ui/title_menu.gd")
 const StageMenu = preload("res://src/ui/stage_menu.gd")
+const Touch = preload("res://src/ui/touch_ui.gd")
 
 
 func test_safe_insets_scale_to_view() -> void:
@@ -68,12 +69,19 @@ func test_stage_menu_layout() -> void:
 	for sa in [Rect2(0, 0, 1280, 720), Rect2(44, 0, 1800, 700), Rect2(0, 0, 1280, 1067)]:
 		for nn in [[4, 5], [15, 8]]:                  # 장 15개(3 ~ 13장)면 장 줄이 두 줄 · 방 8개(2장)
 			var L := StageMenu.layout(sa, nn[0], nn[1])
-			var all: Array = L["chapters"] + L["stages"] + [L["resume"], L["title"], L["difficulty"]]
+			var all: Array = L["chapters"] + L["stages"] + [L["resume"], L["title"], L["difficulty"], L["zoom"]]
 			check(L["chapters"].size() == nn[0] and L["stages"].size() == nn[1], "장 %d · 스테이지 %d" % nn)
 			for i in all.size():
 				check(sa.encloses(all[i]), "자리 %d 가 안전 영역 안 %s %s" % [i, sa, all[i]])
 				for k in range(i + 1, all.size()):
 					check(not all[i].intersects(all[k]), "자리 %d · %d 가 안 겹친다 %s" % [i, k, sa])
+
+
+func test_touch_pinch_scale() -> void:
+	check(is_equal_approx(Touch.pinch_scale(100.0, 110.0), 1.1), "두 손가락 벌리면 확대(>1)")
+	check(is_equal_approx(Touch.pinch_scale(100.0, 90.0), 0.9), "두 손가락 오므리면 축소(<1)")
+	check(is_equal_approx(Touch.pinch_scale(10.0, 80.0), 1.0), "너무 가까운 손가락은 무시(1.0)")
+	check(Touch.pinch_scale(100.0, 400.0) <= 1.18 and Touch.pinch_scale(400.0, 100.0) >= 0.85, "급격한 튐 방지 클램프")
 
 
 
@@ -87,4 +95,4 @@ func test_launch_args() -> void:
 	check(a["events"] == {30: "press", 120: "menupick_difficulty"}, "--events 프레임:일")
 	check(a["shot_dir"] == "/tmp/x" and a["shots"] == [60, 120], "--shots 폴더:프레임들")
 	check(a["safe"] == Vector4(90, 0, 0, 40), "--safe 는 safe 칸으로")
-	check(Launch.KEYS.has("difficulty") and Launch.KEYS.has("menu"), "키 표")
+	check(Launch.KEYS.has("difficulty") and Launch.KEYS.has("menu") and Launch.KEYS.has("zoom") and Launch.KEYS.has("zoom_in") and Launch.KEYS.has("zoom_out"), "키 표")
