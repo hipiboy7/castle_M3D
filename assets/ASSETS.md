@@ -17,6 +17,9 @@
 | `fonts/BlackHanSans-OFL.txt` | Black Han Sans 라이선스 원문(SIL OFL 1.1) | — |
 | `textures/ink_lut.png` | 직접(절차 생성) — `tools/gen_ink_lut.py` (256x256 타일 RGBA8: 붓결 · 얼룩 · 균열 · 펜 해칭) | 화풍 셀 셰이더 공유 LUT(`src/view/ink.gd` · `ink_cel.gdshader`) |
 | `animations/humanoid_cc0.glb` | 외부 — Quaternius Universal Animation Library (CC0 1.0 Public Domain · https://quaternius.com/packs/universalanimationlibrary.html · `tools/bake_anims.py` 17본 리타게팅) | 실사 캐릭터 공용 모션캡처 애니메이션(`src/view/mocap_driver.gd`) |
+| `portraits/*_stand.png` | 직접(AI 신규 생성 + `tools/process_portraits.py` 크로마키/후처리 · 2026-11-25, 원작 픽셀 미사용 · 외형 명세 기반 느와르 웹툰 오마주 6인: 김신 · 백도찬 · 리사 · 서진태 · 오지인 · 의뢰인) | 대화/컷신 2D 웹툰 스탠딩 포트레이트(`src/view/portraits.gd` · `src/ui/webtoon_stage.gd`) |
+| `portraits/*_hud.png` | 〃 — 위 스탠딩 일러스트 얼굴 크롭(192×192 RGBA) | 전투 HUD 좌상단 조작 인물 · 상단 보스 초상화(`src/ui/hud.gd`) |
+| `portraits/*_cutin.png` | 직접(AI 신규 생성 + `tools/process_portraits.py` 960×300 파노라마 크롭 · 2026-11-25, 원작 픽셀 미사용 · 4인: 김신 · 백도찬 · 서진태 · 오지인) | 보스 등장 · 2차 페이즈 · 기술 · 엇박 · 쳐내기 사선 만화 컷인(`src/ui/webtoon_stage.gd`) |
 | `sfx/counter.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 반격 베기 (`src/main.gd` `_play`) |
 | `sfx/fall.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 넘어짐 (`src/main.gd` `_play`) |
 | `sfx/guard.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 막기 (`src/main.gd` `_play`) |

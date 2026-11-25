@@ -55,6 +55,7 @@ const TitleMenu = preload("res://src/ui/title_menu.gd")
 const StageMenu = preload("res://src/ui/stage_menu.gd")
 const SafeArea = preload("res://src/ui/safe_area.gd")
 const Bubbles = preload("res://src/ui/bubbles.gd")
+const WebtoonStage = preload("res://src/ui/webtoon_stage.gd")
 
 const DEMO_AFTER := 360
 const SHOT_WARMUP := 3          # --shots: 찍을 프레임 바로 앞 몇 프레임만 그린다
@@ -118,7 +119,8 @@ var arena: Node3D
 var fx: Node3D
 var cam: Camera3D
 var hud: CanvasLayer
-var bubbles: Control                       # 말풍선(src/ui/bubbles.gd — HUD 밑 칸, 터치 버튼 아래)
+var webtoon: Control                         # 2D 웹툰 스탠딩 포트레이트 · 사선 컷인(src/ui/webtoon_stage.gd — 말풍선 바로 아래)
+var bubbles: Control                         # 말풍선(src/ui/bubbles.gd — HUD 밑 칸, 터치 버튼 아래)
 var _tossed: Array = []                    # 장면에서 날아가는 인형 [인형, 처음, 끝, 지난 초, 초](scene.gd toss)
 var _in_scene := false
 var _ff := false                 # 장면 빨리 감기 켜짐(_set_ff)
@@ -152,9 +154,12 @@ func _ready() -> void:
 	if not headless:
 		_grade_layer = Ink.grade_layer()
 		add_child(_grade_layer)                     # 3D 위 · HUD 밑 화면 마무리(장별 색보정 · 임팩트 프레임 · 비네트)
+	webtoon = WebtoonStage.new()
+	hud.root.add_child(webtoon)
+	hud.root.move_child(webtoon, 2)                 # 덮개 · 작은 막대 위, 말풍선 · HUD · 메뉴 · 터치 아래
 	bubbles = Bubbles.new()
 	hud.root.add_child(bubbles)
-	hud.root.move_child(bubbles, 2)                 # 덮개 · 작은 막대 위, 글자 · 메뉴 · 터치 아래
+	hud.root.move_child(bubbles, 3)                 # 웹툰 스탠딩 위, 글자 · 메뉴 · 터치 아래
 	bubbles.anchor_fn = _bubble_anchor
 	menu = TitleMenu.new()
 	hud.hint_y_fn = func() -> float: return menu.hint_y()
@@ -174,6 +179,7 @@ func _ready() -> void:
 	evfx.cam = cam
 	evfx.hud = hud
 	evfx.bubbles = bubbles
+	evfx.webtoon = webtoon
 	evfx.snd = snd
 	evfx.pup = pup
 	evfx.grade_layer = _grade_layer
@@ -206,6 +212,8 @@ func _new_run(ch: String, room := -1) -> void:
 	rec = Replay.start(kind, seed_now, opts)
 	hud.clear_messages()
 	bubbles.clear()
+	if webtoon != null:
+		webtoon.clear_all()
 	_set_scene(false)
 	_undim()
 	evfx.later_msg = []
@@ -259,6 +267,8 @@ func _set_scene(on: bool) -> void:
 	touch.show_ff = on and mode == "fight"
 	if not on and _ff:                              # 장면이 끝나면 빨리 감기도 끈다(다음 장면은 ×1 부터)
 		_set_ff(false)
+	if not on and webtoon != null:
+		webtoon.clear_speakers()
 	hud.set_hint("누르면 넘기기" if on else "")
 
 
@@ -420,6 +430,9 @@ func _look_of(f) -> String:
 func _enter_title() -> void:
 	mode = "title"
 	mode_t = 0
+	if webtoon != null:
+		webtoon.clear_all()
+	hud.set_combat_visible(false)
 	touch.show_pause = false
 	touch.show_swap = false
 	touch.show_art = true
@@ -441,6 +454,7 @@ func _start(m: String) -> void:
 	mode = m
 	mode_t = 0
 	fights += 1
+	hud.set_combat_visible(true)
 	hud.center_msg = false
 	touch.show_pause = m == "fight"
 	touch.show_swap = m == "fight" and _can_swap()
@@ -460,6 +474,8 @@ func _start(m: String) -> void:
 	elif kind == "duel":
 		var fm: Array = Lines.at("ch6.fight")
 		hud.message(fm[0], fm[1], 2.5)
+		if webtoon != null and d.get("boss") != null:
+			webtoon.trigger_cutin(str(d["boss"].char_id), "백도찬", "캐슬 최강 · 인천항 제3부두", 1, 0.72, true)
 		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 K(누르고) · 구르기 Space · 대시 L · 기술 U · 기술 바꾸기 I · 속도 F")
 	else:
 		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 · 막기 K · 구르기 Space · 대시 L · 기술 U · 바꾸기 I · 교대 Tab · 속도 F")
@@ -635,7 +651,7 @@ func _pressed_anything() -> bool:
 
 func _title_hint() -> String:
 	var t = Lines.at("title")
-	return "%s · 그림: %s · %s: %s" % [t["hint"], ART_NAMES[str(args["art"])], t["difficulty"], Difficulty.label(save["difficulty"])]
+	return "%s · %s: %s" % [t["hint"], t["difficulty"], Difficulty.label(save["difficulty"])]
 
 
 ## 처음 화면 고르기 → 장 id · "bench" · ""(아직). 장 카드 · 이어하기를 누름(터치 · 마우스), 1 · 2 키 = 할 수 있는 장 차례,
@@ -681,12 +697,20 @@ func _title_pick() -> String:
 	return ""
 
 
-## 누른 카드 → 시작할 장(준비 중 · 잠김이면 알림만)
+## 누른 타이틀 버튼 → 시작할 장(스테이지 선택 · 끝내기는 여기서 처리)
 func _menu_choice(id: String) -> String:
 	if id == "":
 		return ""
 	if id == "continue":
 		return Save.next_chapter(save)
+	if id == "stages":
+		_set_menu(true)
+		return ""
+	if id == "new_game":
+		return str(Campaign.playable_ids()[0])
+	if id == "quit":
+		get_tree().quit(0)
+		return ""
 	if Save.unlocked(save, id):
 		return id
 	var t = Lines.at("title")
@@ -696,16 +720,21 @@ func _menu_choice(id: String) -> String:
 	return ""
 
 
-## 처음 화면 — 순차 진행(시작/이어하기)만 표시. 임의 스테이지 이동은 싸움 중 '메뉴'에서만(2026-11-24 사용자)
+## 처음 화면 — 4버튼 메뉴(이어서 하기 · 스테이지 선택 · 처음부터 · 끝내기 — 2026-11-25 사용자)
 func _fill_menu() -> void:
 	var t = Lines.at("title")
 	var nx := Save.next_chapter(save)
 	var done := Save.clear_count(save)
 	var tot := Campaign.playable_ids().size()
-	var btn_title := str(t["continue"]) if done > 0 else str(t.get("start", t["continue"]))
 	var sub_txt := (str(t["progress"]) % [Campaign.title(nx)[0], done, tot]) if done > 0 else str(Campaign.title(nx)[0])
-	menu.cont = {"id": "continue", "title": btn_title, "sub": sub_txt}
+	menu.cont = {"id": "continue", "title": str(t["continue"]), "sub": sub_txt}
 	menu.items = []
+	menu.actions = [
+		{"id": "continue", "title": str(t["continue"]), "sub": sub_txt, "style": "primary"},
+		{"id": "stages", "title": str(t["stage_select"]), "sub": str(t["stage_select_sub"]), "style": "normal"},
+		{"id": "new_game", "title": str(t["from_start"]), "sub": str(t["from_start_sub"]), "style": "normal"},
+		{"id": "quit", "title": str(t["quit"]), "sub": "", "style": "quit"},
+	]
 	menu.refresh()
 
 
@@ -731,31 +760,55 @@ func _load_save() -> void:
 		Save.zoom_label(float(save["zoom"])), ",".join(save["cleared"].keys())])
 
 
-## 싸움 중 메뉴(스테이지 고르기) 열기 · 닫기 — 열린 동안 판은 멈춘다(무대 · 인형 · 연출 · 소리 PAUSABLE), 싸움 버튼은 숨긴다
+## 메뉴(스테이지 고르기) 열기 · 닫기 — 싸움 중과 처음 화면('스테이지 선택') 모두 지원. 열린 동안 판은 멈춘다.
 func _set_menu(on: bool) -> void:
 	if on == menu_open:
 		return
 	menu_open = on
-	get_tree().paused = on
+	var from_title := mode == "title"
+	get_tree().paused = on and not from_title
 	touch.take_edges()
-	touch.show_fight = not on and not _in_scene
-	touch.show_pause = not on
-	touch.show_ff = not on and _in_scene and mode == "fight"
-	touch.show_swap = not on and _can_swap()
-	if on:
-		menu_ch = chapter
-		_menu_diff0 = str(save["difficulty"])
-		hud.message("", "", 0.0)                    # 가운데 알림(시작 글 등)이 메뉴 카드 밑으로 비치지 않게
-		_fill_stage_menu()
+	if from_title:
+		touch.show_fight = false
+		touch.show_pause = false
+		touch.show_ff = false
+		touch.show_swap = false
+		touch.show_art = not on
+		menu.visible = not on
+		hud.center_msg = not on
+		if on:
+			menu_ch = Save.next_chapter(save)
+			_menu_diff0 = str(save["difficulty"])
+			hud.message("", "", 0.0)
+			hud.set_hint("")
+			_fill_stage_menu()
+		else:
+			var t = Lines.at("title")
+			_fill_menu()
+			hud.message(str(t["text"]), str(t["sub"]), 9999.0)
+			touch.set_label("difficulty", Difficulty.label(save["difficulty"]))
+			hud.set_hint(_title_hint())
+			mode_t = 0
+	else:
+		touch.show_fight = not on and not _in_scene
+		touch.show_pause = not on
+		touch.show_ff = not on and _in_scene and mode == "fight"
+		touch.show_swap = not on and _can_swap()
+		if on:
+			menu_ch = chapter
+			_menu_diff0 = str(save["difficulty"])
+			hud.message("", "", 0.0)                    # 가운데 알림(시작 글 등)이 메뉴 카드 밑으로 비치지 않게
+			_fill_stage_menu()
 	smenu.visible = on
 	_trace("MENU %s frame=%d" % ["on" if on else "off", frames])
 
 
 func _fill_stage_menu() -> void:
 	var ml = Lines.at("menu")
+	var from_title := mode == "title"
 	smenu.heading = str(ml["heading"])
 	smenu.buttons = {
-		"resume": str(ml["resume"]),
+		"resume": "닫기" if from_title else str(ml["resume"]),
 		"title": str(ml["title"]),
 		"difficulty": str(ml["difficulty"]) % Difficulty.label(save["difficulty"]),
 		"zoom": str(ml["zoom"]) % Save.zoom_label(float(save["zoom"])),
@@ -766,10 +819,10 @@ func _fill_stage_menu() -> void:
 		smenu.chapters.append({"id": id, "title": str(Campaign.title(id)[0]) if long_t else Campaign.short_title(id),
 			"open": Campaign.playable(id), "cleared": Save.cleared(save, id)})
 	smenu.picked = menu_ch
-	var now := int(d.get("room_i", 0)) if kind == "stage" else 0
+	var now := -1 if from_title else (int(d.get("room_i", 0)) if kind == "stage" else 0)
 	smenu.stages = []
 	for st in Campaign.stages(menu_ch):
-		st["now"] = menu_ch == chapter and int(st["room"]) == now
+		st["now"] = (not from_title) and menu_ch == chapter and int(st["room"]) == now
 		smenu.stages.append(st)
 	smenu.refresh()
 
@@ -804,11 +857,15 @@ func _menu_input() -> void:
 	elif pick.begins_with("room:"):
 		# 메뉴를 닫고 판은 두 프레임 뒤에 바꾼다(mode "switch") — 처음 화면 카드처럼 멈춤이 풀린 뒤 무대 · 인형을 다시 만든다.
 		# (v0.5.0-rc.1 폰: 싸움 중 메뉴로 6장 부두에 가면 화면이 굳고 터치도 안 됨 — 사용자 2026-11-06. 여기 서버에서는 재현 안 됨)
-		_set_menu(false)
 		_switch_to = [menu_ch, int(pick.substr(5))]
 		mode = "switch"
 		mode_t = 0
+		_set_menu(false)
+		menu.visible = false
+		touch.show_art = false
 		touch.show_fight = false
+		hud.center_msg = false
+		hud.message("", "", 0.0)
 	elif pick == "difficulty":
 		save["difficulty"] = Difficulty.next(save["difficulty"])
 		_write_save()
@@ -819,6 +876,8 @@ func _menu_input() -> void:
 		_write_save()
 		_apply_zoom()
 		_fill_stage_menu()
+	elif pick == "resume" and mode == "title":
+		_set_menu(false)
 	elif pick == "resume" and str(save["difficulty"]) != _menu_diff0:
 		# 난이도를 바꾸고 닫으면 지금 스테이지를 새 난이도로 처음부터(판 중간에 배율을 바꾸지 않는다 — 리플레이 기록은 판 시작 opts)
 		_set_menu(false)
@@ -831,9 +890,12 @@ func _menu_input() -> void:
 	elif pick == "resume":
 		_set_menu(false)
 	elif pick == "title":
-		_set_menu(false)
-		_new_run(Save.next_chapter(save))
-		_enter_title()
+		if mode == "title":
+			_set_menu(false)
+		else:
+			_set_menu(false)
+			_new_run(Save.next_chapter(save))
+			_enter_title()
 
 
 ## 게임 속도: 싸우는 동안(데모 포함)만 — 물리 틱(= 로직 프레임 한 번, 판정은 60Hz 고정 한 칸)을 1초에 60 · 90 · 120 번으로 하고

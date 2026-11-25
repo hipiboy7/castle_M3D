@@ -1,10 +1,10 @@
 extends Camera3D
-## 3/4 탑뷰 카메라 — 두 사람 사이(김신 쪽으로 조금)를 따라가고, 멀어지면 물러나고, 흔들림 · 결착 줌을 더한다.
-## 높이 · 거리 OFFSET 으로 내려다보는 각이 약 55도. 2026-11-11 Hades 화풍(사용자 1 ~ 5 추천대로 — 4. 카메라 각): 화각을 38 → FOV 로 좁히고
-## 그만큼 멀리 — 원근이 납작해져(망원) 그린 그림처럼 보이고, 인물 크기는 그대로(옛 화각 38 · OFFSET (0, 10, 7) 과 같은 화면 높이).
+## 3/4 액션 쿼터뷰 카메라 — 두 사람 사이(김신 쪽으로 조금)를 따라가고, 멀어지면 물러나고, 흔들림 · 결착 줌을 더한다.
+## 2026-11-25 앵글 하향(57° → ~35° 전투 / ~20° 컷신): 정수리만 보이던 탑뷰에서 벗어나 캐릭터 얼굴 · 상반신 · 무기 · 체격이 뚜렷이 보이게.
+## 망원 화각(FOV 30)을 유지해 원근 왜곡을 줄이고 그래픽 노블 구도를 만든다.
 
-const OFFSET := Vector3(0, 13.0, 8.5)
-const OFFSET_SCENE := Vector3(0, 7.8, 12.8)          # 장면 연출(대화) 시 낮은 ~31° 시네마틱 앵글(거리 ~15m 로 전투와 자연스럽게 맞춤)
+const OFFSET := Vector3(0, 8.8, 12.4)                # 전투 시 ~35.4° 액션 쿼터뷰(거리 15.2m)
+const OFFSET_SCENE := Vector3(0, 4.2, 11.8)          # 장면 연출(대화) 시 ~19.6° 눈높이 시네마틱 앵글(거리 12.5m)
 const FOV := 30.0
 const USER_ZOOM_MIN := 0.55
 const USER_ZOOM_MAX := 1.45
@@ -54,7 +54,7 @@ func _aim(mid: Vector3, sep: float, dt: float, shake: int) -> void:
 	if shake > 0:
 		sh = Vector3(rng.randf_range(-1, 1), rng.randf_range(-1, 1), rng.randf_range(-1, 1)) * 0.03 * shake
 	var off := OFFSET.lerp(OFFSET_SCENE, _scene_k)
-	var look_y := lerpf(0.9, 1.15, _scene_k)
+	var look_y := lerpf(1.05, 1.24, _scene_k)
 	position = focus + off * dist_k + sh
 	look_at(focus + Vector3(0, look_y, 0) + sh * 0.4, Vector3.UP)
 
@@ -62,7 +62,7 @@ func _aim(mid: Vector3, sep: float, dt: float, shake: int) -> void:
 func snap(a: Vector3, b: Vector3) -> void:
 	focus = a.lerp(b, 0.42)
 	var off := OFFSET.lerp(OFFSET_SCENE, _scene_k)
-	var look_y := lerpf(0.9, 1.15, _scene_k)
+	var look_y := lerpf(1.05, 1.24, _scene_k)
 	dist_k = (0.74 if scene_mode else 0.72) / maxf(user_zoom, USER_ZOOM_MIN)
 	position = focus + off * dist_k
 	look_at(focus + Vector3(0, look_y, 0), Vector3.UP)

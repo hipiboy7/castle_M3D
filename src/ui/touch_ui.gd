@@ -74,7 +74,7 @@ var buttons := [
 	{"id": "ff", "label": "×1", "sub": "빨리", "r": 38.0, "off": Vector2(-134, 162), "at": "tr", "tier": 1, "accent": Color(0.98, 0.78, 0.28)},
 	{"id": "art", "label": "그림", "r": 40.0, "off": Vector2(64, 188), "at": "tl", "tier": 2},
 	{"id": "bench", "label": "성능", "r": 40.0, "off": Vector2(64, 286), "at": "tl", "tier": 2},
-	{"id": "difficulty", "label": "보통", "sub": "난이도", "r": 42.0, "off": Vector2(64, 386), "at": "tl", "tier": 2},
+	{"id": "difficulty", "label": "보통", "sub": "난이도", "r": 42.0, "off": Vector2(72, 74), "at": "tl", "tier": 2},
 ]
 
 
@@ -118,8 +118,10 @@ func _active(b: Dictionary) -> bool:
 			return show_swap
 		"ff":
 			return show_ff
-		"art", "bench", "difficulty":
+		"difficulty":
 			return show_art
+		"art", "bench":
+			return false
 	return show_fight
 
 

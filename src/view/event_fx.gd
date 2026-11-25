@@ -12,6 +12,7 @@ var hud
 var snd
 var pup := {}
 var bubbles                              # 말풍선(src/ui/bubbles.gd — main.gd 가 붙인다)
+var webtoon                              # 2D 웹툰 스탠딩 포트레이트 · 사선 컷인(src/ui/webtoon_stage.gd — main.gd 가 붙인다)
 var arena                                # 무대(부서지는 소품 break_at — main.gd 가 방마다 바꿔 준다)
 var grade_layer: CanvasLayer = null      # 화면 마무리 레이어 — 웹툰 임팩트 프레임(흑백+크림슨) 제어
 var _impact_t := 0.0
@@ -122,6 +123,8 @@ func apply(d: Dictionary) -> void:
 				var sk: Dictionary = e[2]
 				fx.pop(Vector3(e[1].pos.x, 2.38, e[1].pos.y), str(sk["name"]), Color(0.75, 0.92, 1.0), 46, 0.78)     # 상단 리본과 겹치지 않는 높이
 				snd.play("shine", -6.0, 1.0)
+				if webtoon != null:
+					webtoon.trigger_cutin(str(e[1].char_id), str(sk["name"]), str(e[1].name), int(e[1].team), 0.56, false)
 			"no_gauge":
 				fx.pop(Vector3(e[1].pos.x, 2.35, e[1].pos.y), "게이지 부족", Color(0.75, 0.78, 0.85), 44, 0.7)
 			"lethal":
@@ -130,6 +133,10 @@ func apply(d: Dictionary) -> void:
 					Color(0.75, 0.9, 1.0), 72, 1.2)
 				cam.punch_zoom(0.8 if str(e[4]) == "offbeat2" else 0.85)
 				trigger_impact(0.11, Color(0.92, 0.12, 0.14))
+				if webtoon != null:
+					var latk = _attacker(w, e[1])
+					if latk != null:
+						webtoon.trigger_cutin(str(latk.char_id), kind_name, "%s · %d%%" % [str(latk.name), roundi(float(e[3]) * 100.0)], int(latk.team), 0.56, true)
 			"brake":
 				fx.strain(e[1])
 				snd.play("wind", -2.0, 0.55)
@@ -161,6 +168,8 @@ func apply(d: Dictionary) -> void:
 				snd.play("counter", -2.0, 0.9)
 				cam.punch_zoom(0.9)
 				trigger_impact(0.09, Color(1.0, 0.42, 0.14))
+				if webtoon != null:
+					webtoon.trigger_cutin(str(e[1].char_id), "카운터!", str(e[1].name), int(e[1].team), 0.48, false)
 			"dash":
 				snd.play("wind", -10.0, 1.5)
 			"pierce":
@@ -173,6 +182,8 @@ func apply(d: Dictionary) -> void:
 				snd.play("counter", -6.0, 1.4)
 				cam.punch_zoom(0.94)
 				trigger_impact(0.08, Color(0.32, 0.72, 1.0))
+				if webtoon != null:
+					webtoon.trigger_cutin(str(e[1].char_id), "쳐내기!", str(e[1].name), int(e[1].team), 0.42, false)
 			"block":
 				fx.block(e[2])
 				snd.play("guard", -4.0, 0.9)
@@ -200,6 +211,8 @@ func apply(d: Dictionary) -> void:
 					pup[e[1]].remove_glasses()
 				snd.play("wind", -2.0, 0.8)
 				cam.punch_zoom(0.85)
+				if webtoon != null:
+					webtoon.trigger_cutin(str(e[1].char_id), "%s · 전력" % str(e[1].name), "2차 페이즈", int(e[1].team), 0.85, true)
 				if d.get("kind", "duel") == "duel":
 					var l2: Array = Lines.at("ch6.phase2")
 					var msg2 := [l2[0], l2[1], 2.4]
@@ -217,8 +230,14 @@ func apply(d: Dictionary) -> void:
 				var late: float = float(e[4]) if e.size() > 4 else 0.0     # 장 첫 글 뒤의 첫 방 글(stage.gd _enter)
 				_line(w, str(e[1]), str(e[2]), float(e[3]), maxf(late, 1.2 if busy else 0.0))
 			"bubble":
+				var raw_sid := str(e[4]) if e.size() > 4 else ""
 				if bubbles != null:
-					bubbles.say(e[1], str(e[2]), float(e[3]), "" if e[1] != null else _speaker_name(w, str(e[4]) if e.size() > 4 else ""))
+					bubbles.say(e[1], str(e[2]), float(e[3]), "" if e[1] != null else _speaker_name(w, raw_sid))
+				if webtoon != null:
+					var sp_id := str(e[1].char_id) if e[1] != null else raw_sid
+					var sp_nm := str(e[1].name) if e[1] != null else _speaker_name(w, raw_sid)
+					var sp_tm := int(e[1].team) if e[1] != null else 0
+					webtoon.show_speaker(sp_id, sp_nm, sp_tm, str(e[2]), float(e[3]))
 			"jump", "evade":
 				snd.play("step" if e[0] == "jump" else "wind", -8.0, 1.2)
 			"wall_step":
@@ -227,6 +246,8 @@ func apply(d: Dictionary) -> void:
 			"bubble_later":
 				if bubbles != null:
 					bubbles.say_later(e[1], str(e[2]), float(e[3]), float(e[4]))
+				if webtoon != null and e[1] != null:
+					webtoon.show_speaker_later(str(e[1].char_id), str(e[1].name), int(e[1].team), str(e[2]), float(e[3]), float(e[4]))
 			"bubble_cut":
 				if bubbles != null:
 					bubbles.cut_oldest()
@@ -253,8 +274,12 @@ func _line(w, title: String, small: String, secs: float, delay: float) -> void:
 			hud.message(title, m.get_string(3), secs, delay)
 			if delay > 0.0:
 				bubbles.say_later(who, m.get_string(2), secs, delay)
+				if webtoon != null:
+					webtoon.show_speaker_later(str(who.char_id), str(who.name), int(who.team), m.get_string(2), secs, delay)
 			else:
 				bubbles.say(who, m.get_string(2), secs)
+				if webtoon != null:
+					webtoon.show_speaker(str(who.char_id), str(who.name), int(who.team), m.get_string(2), secs)
 			return
 	# 제목이 사람 이름이고 작은 글이 그 사람 말이면([김신, "윤덕수, 넌 여기까지다."]) — 말풍선만
 	if bubbles != null and title != "" and small != "" and not small.contains(" — "):
@@ -262,8 +287,12 @@ func _line(w, title: String, small: String, secs: float, delay: float) -> void:
 		if sp != null:
 			if delay > 0.0:
 				bubbles.say_later(sp, small, secs, delay)
+				if webtoon != null:
+					webtoon.show_speaker_later(str(sp.char_id), str(sp.name), int(sp.team), small, secs, delay)
 			else:
 				bubbles.say(sp, small, secs)
+				if webtoon != null:
+					webtoon.show_speaker(str(sp.char_id), str(sp.name), int(sp.team), small, secs)
 			return
 	hud.message(title, small, secs, delay)
 

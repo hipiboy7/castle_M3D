@@ -24,6 +24,7 @@ func test_back_button_flow() -> void:
 	check(Nav.on_back("demo", false) == "title", "데모에서 뒤로 = 처음 화면")
 	check(Nav.on_back("result", false) == "title", "결과에서 뒤로 = 처음 화면")
 	check(Nav.on_back("title", false) == "quit", "처음 화면에서 뒤로 = 끝내기")
+	check(Nav.on_back("title", false, true) == "close_menu", "처음 화면 스테이지 선택 열림 시 뒤로 = 닫기")
 	check(Nav.on_back("fight", true, true) == "close_menu", "메뉴가 열려 있으면 뒤로 = 메뉴 닫고 계속")
 
 
@@ -62,6 +63,19 @@ func test_title_menu_layout() -> void:
 		check(hy >= sa.position.y and not hr.intersects(L["cont"]) and cards.all(func(c): return not hr.intersects(c)),
 			"안내 글이 이어하기 · 카드와 안 겹친다 %s" % sa)
 		check(hy >= sa.get_center().y - 80.0, "안내 글이 제목 아래 %s %.0f" % [sa, hy])
+	# 4버튼 수직 타이틀 메뉴(이어서 하기 · 스테이지 선택 · 처음부터 · 끝내기 — Z Fold 4 커버/펼침 포함)
+	for sa in [Rect2(0, 0, 1280, 720), Rect2(44, 0, 1800, 700), Rect2(0, 0, 1280, 1067)]:
+		var acts := TitleMenu.menu_layout(sa, 4)
+		check(acts.size() == 4, "4버튼 메뉴 %s" % sa)
+		for i in acts.size():
+			var r: Rect2 = acts[i]
+			check(sa.encloses(r), "타이틀 버튼 %d 안전 영역 안 %s %s" % [i, sa, r])
+			check(r.position.y >= sa.get_center().y - 60.0, "타이틀 버튼 %d 제목 아래 %s" % [i, sa])
+			if i > 0:
+				check(r.position.y >= (acts[i - 1] as Rect2).end.y, "타이틀 버튼 %d 앞 버튼과 안 겹침" % i)
+		var mhy := TitleMenu.menu_hint_y(sa, 4)
+		check(mhy >= sa.get_center().y - 82.0 and mhy + 26.0 <= (acts[0] as Rect2).position.y,
+			"4버튼 안내 글이 제목과 첫 버튼 사이 %s %.0f" % [sa, mhy])
 
 
 ## 싸움 중 메뉴(스테이지 고르기): 장 줄 · 스테이지 줄 · 계속 · 처음 화면 — 커버 · 펼친 화면에서 안전 영역 안 · 안 겹침

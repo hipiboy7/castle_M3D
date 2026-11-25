@@ -7,8 +7,15 @@ extends CanvasLayer
 
 const Common = preload("res://src/data/common.gd")
 const SafeArea = preload("res://src/ui/safe_area.gd")
+const Portraits = preload("res://src/view/portraits.gd")
 const FONT_HEAD = preload("res://assets/fonts/BlackHanSans-Regular.ttf")
 const FONT_BODY = preload("res://assets/fonts/Pretendard-Bold.otf")
+
+const HERO_W_PLAIN := 286.0
+const HERO_W_PORT := 228.0
+const HERO_PORT_SHIFT := 80.0
+const HERO_PORT_SIZE := Vector2(74, 94)
+const BOSS_PORT_SIZE := Vector2(66, 66)
 
 const COL_BG := Color(0.03, 0.035, 0.055, 0.84)
 const COL_PANEL := Color(0.025, 0.03, 0.048, 0.62)
@@ -63,11 +70,19 @@ var partner_name: Label
 var partner_hp: ColorRect
 var _partner_bg: ColorRect
 var minis: Control
-var _hero_nodes: Array = []      # [노드, 안전 영역 왼쪽 위에서의 자리]
+var _portraits: PortraitBoxes
+var _hero_panel_nodes: Array = []  # [노드, 안전 영역 왼쪽 위 자리] — 초상화 유무와 무관한 고정 자리
+var _hero_bar_nodes: Array = []    # [노드, 기본 자리] — 초상화가 있으면 오른쪽으로 HERO_PORT_SHIFT 이동
+var _hero_hp_bg: ColorRect
+var _hero_post_bg: ColorRect
+var _has_hero_port := false
+var _combat_visible := true
+var _headless := false
 var _pulse_t := 0.0
 
 
 func setup() -> void:
+	_headless = DisplayServer.get_name() == "headless"
 	root = Control.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -118,10 +133,12 @@ func setup() -> void:
 	var hb := _bar(Vector2(26, 44), Vector2(_hero_w, 14), true)
 	hero_hp = hb[0]
 	hero_hp.color = COL_HP_HERO
+	_hero_hp_bg = hb[1]
 	_hero_trail = hb[2]
 	var hp2 := _bar(Vector2(26, 62), Vector2(_hero_w, 6), false)
 	hero_post = hp2[0]
 	hero_post.color = COL_POSTURE
+	_hero_post_bg = hp2[1]
 	var seg_w := (_hero_w - 3.0 * (_segs - 1)) / _segs
 	for i in _segs:
 		var g := _bar(Vector2(26 + i * (seg_w + 3.0), 73), Vector2(seg_w, 8), false)
@@ -138,10 +155,10 @@ func setup() -> void:
 	skill_name = _label("", 16, COL_TEXT, FONT_BODY)
 	skill_name.position = Vector2(34, 88)
 
-	for n in [_hero_panel, _hero_stripe, hero_name, hb[1], hp2[1], _skill_bg, skill_name]:
-		_hero_nodes.append([n, n.position])
-	for g in _gauge:
-		_hero_nodes.append([g.get_parent(), g.get_parent().position])
+	for n in [_hero_panel, _hero_stripe]:
+		_hero_panel_nodes.append([n, n.position])
+	for n in [hero_name, hb[1], hp2[1], _skill_bg, skill_name]:
+		_hero_bar_nodes.append([n, n.position])
 
 	partner_name = _label("", 14, COL_DIM, FONT_BODY)
 	partner_name.position = Vector2(26, 124)
@@ -150,7 +167,13 @@ func setup() -> void:
 	partner_hp.color = COL_HP_HERO.darkened(0.22)
 	_partner_bg = pb[1]
 	for n in [partner_name, _partner_bg]:
-		_hero_nodes.append([n, n.position])
+		_hero_panel_nodes.append([n, n.position])
+
+	# 2D 웹툰 HUD 초상화 프레임(조작 인물 좌측 · 보스 바 우측 — 반응형)
+	_portraits = PortraitBoxes.new()
+	_portraits.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_portraits.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_portraits)
 
 	# 상단 느와르 리본 배너(전투/장면 중 알림 — 말풍선 위)
 	_banner = ColorRect.new()
@@ -226,8 +249,27 @@ func _layout() -> void:
 		var y: float = hint_y_fn.call()
 		if y >= 0.0:
 			hint.position.y = y
-	for hn in _hero_nodes:
+	var want_hw := HERO_W_PORT if _has_hero_port else HERO_W_PLAIN
+	if absf(_hero_w - want_hw) > 0.5:
+		_hero_w = want_hw
+		_hero_hp_bg.size.x = _hero_w
+		_hero_post_bg.size.x = _hero_w
+		_skill_bg.size.x = _hero_w
+		_seg_w = (_hero_w - 3.0 * (_segs - 1)) / _segs
+		for g in _gauge:
+			(g.get_parent() as ColorRect).size.x = _seg_w
+	_hero_panel.size.x = (_hero_w + HERO_PORT_SHIFT + 26.0) if _has_hero_port else (_hero_w + 26.0)
+	var sx := HERO_PORT_SHIFT if _has_hero_port else 0.0
+	for hn in _hero_panel_nodes:
 		hn[0].position = sa.position + hn[1]
+	for hn in _hero_bar_nodes:
+		hn[0].position = sa.position + hn[1] + Vector2(sx, 0.0)
+	for i in _gauge.size():
+		(_gauge[i].get_parent() as ColorRect).position = sa.position + Vector2(26.0 + sx + i * (_seg_w + 3.0), 73.0)
+	if _portraits != null:
+		_portraits.hero_rect = Rect2(sa.position + Vector2(22.0, 19.0), HERO_PORT_SIZE)
+		_portraits.boss_rect = Rect2(Vector2(cx + _boss_w * 0.5 + 10.0, top + 8.0), BOSS_PORT_SIZE)
+		_portraits.queue_redraw()
 
 
 func _label(text: String, size: int, col: Color, fnt: Font = FONT_BODY) -> Label:
@@ -273,9 +315,24 @@ func _bar(pos: Vector2, size: Vector2, with_trail := false) -> Array:
 	return [fill, bg, trail]
 
 
+func set_combat_visible(on: bool) -> void:
+	_combat_visible = on
+	for hn in _hero_panel_nodes:
+		hn[0].visible = on
+	for hn in _hero_bar_nodes:
+		hn[0].visible = on
+	for g in _gauge:
+		(g.get_parent() as Control).visible = on
+	if not on:
+		for n in [boss_name, _boss_bg[0], _boss_bg[1], partner_name, _partner_bg]:
+			n.visible = false
+	if _portraits != null:
+		_portraits.visible = on
+
+
 func update_bars(hero, boss, phase: int, dt: float, partner = null) -> void:
 	_pulse_t += dt
-	var has_boss: bool = boss != null
+	var has_boss: bool = _combat_visible and boss != null
 	for n in [boss_name, _boss_bg[0], _boss_bg[1]]:
 		n.visible = has_boss
 	if has_boss:
@@ -291,8 +348,8 @@ func update_bars(hero, boss, phase: int, dt: float, partner = null) -> void:
 		var bp_r := clampf(float(boss.posture) / maxf(1.0, float(boss.posture_max)), 0.0, 1.0)
 		_fill(boss_post, bp_r, _boss_w)
 		boss_post.color = COL_POSTURE.lerp(COL_POSTURE_HOT, 0.5 + 0.5 * sin(_pulse_t * 14.0)) if bp_r > 0.72 else COL_POSTURE
-	partner_name.visible = partner != null
-	_partner_bg.visible = partner != null
+	partner_name.visible = _combat_visible and partner != null
+	_partner_bg.visible = _combat_visible and partner != null
 	if partner != null:
 		partner_name.text = "%s%s" % [partner.name, "" if partner.alive() else " — 쓰러짐"]
 		_fill(partner_hp, float(partner.hp) / maxf(1.0, float(partner.hp_max)), _hero_w * 0.62)
@@ -317,7 +374,7 @@ func update_bars(hero, boss, phase: int, dt: float, partner = null) -> void:
 		_gauge[i].color = COL_GAUGE if k >= 1.0 else COL_GAUGE_PART
 	var sk: Dictionary = hero.current_skill()
 	skill_name.text = ""
-	_skill_bg.visible = not sk.is_empty()
+	_skill_bg.visible = _combat_visible and not sk.is_empty()
 	if not sk.is_empty():
 		var ok: bool = hero.can_pay(sk)
 		var cost := float(sk["cost"])
@@ -328,6 +385,18 @@ func update_bars(hero, boss, phase: int, dt: float, partner = null) -> void:
 	if has_boss:
 		boss_name.text = str(boss.name) + ("   [ 2차 · 전력 ]" if phase == 2 else "")
 	hero_name.text = str(hero.name)
+	# 2D 웹툰 HUD 초상화 상태 갱신(헤드리스에서는 텍스처 그리기 생략)
+	var hk := Portraits.key_of(str(hero.char_id)) if not _headless else ""
+	var bk := Portraits.key_of(str(boss.char_id)) if (has_boss and not _headless) else ""
+	_has_hero_port = hk != "" and Portraits.has_hud(hk)
+	if _portraits != null:
+		_portraits.hero_key = hk if _has_hero_port else ""
+		_portraits.hero_hurt = int(hero.flash) > 0
+		_portraits.hero_dead = not hero.alive()
+		_portraits.boss_key = bk if (bk != "" and Portraits.has_hud(bk)) else ""
+		_portraits.boss_hurt = has_boss and int(boss.flash) > 0
+		_portraits.boss_dead = has_boss and not boss.alive()
+		_portraits.boss_phase2 = has_boss and phase == 2
 	fps.text = "%d FPS · %.1fms" % [Engine.get_frames_per_second(), Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0]
 
 	for q in _queue:
@@ -401,3 +470,70 @@ func set_dim(on: bool) -> void:
 
 func set_hint(text: String) -> void:
 	hint.text = text
+
+
+## HUD 초상화 자리 계산(순수 함수 — test_portraits.gd 에서 Z Fold 4 전 비율 겹침 검사)
+static func portrait_boxes(sa: Rect2) -> Dictionary:
+	var cx := sa.position.x + sa.size.x * 0.5
+	var bw := clampf(sa.size.x * 0.42, 400.0, 560.0)
+	var hero_panel := Rect2(sa.position + Vector2(14.0, 12.0), Vector2(HERO_W_PORT + HERO_PORT_SHIFT + 26.0, 108.0))
+	var boss_bar := Rect2(cx - bw * 0.5, sa.position.y + 10.0, bw, 62.0)
+	var boss_port := Rect2(cx + bw * 0.5 + 10.0, sa.position.y + 8.0, BOSS_PORT_SIZE.x, BOSS_PORT_SIZE.y)
+	return {"hero_panel": hero_panel, "boss_bar": boss_bar, "boss_port": boss_port}
+
+
+class PortraitBoxes extends Control:
+	var hero_key := ""
+	var hero_rect := Rect2()
+	var hero_hurt := false
+	var hero_dead := false
+	var boss_key := ""
+	var boss_rect := Rect2()
+	var boss_hurt := false
+	var boss_dead := false
+	var boss_phase2 := false
+
+	func _draw() -> void:
+		if hero_key != "":
+			_draw_box(hero_rect, hero_key, -1, hero_hurt, hero_dead, false)
+		if boss_key != "":
+			_draw_box(boss_rect, boss_key, 1, boss_hurt, boss_dead, boss_phase2)
+
+	func _draw_box(r: Rect2, key: String, side: int, hurt: bool, dead: bool, phase2: bool) -> void:
+		var tex := Portraits.hud_tex(key)
+		if tex == null:
+			return
+		var acc := Portraits.accent_color(key)
+		var bg_col := Color(0.24, 0.04, 0.05, 0.94) if hurt else (Color(0.16, 0.06, 0.04, 0.92) if phase2 else Color(0.04, 0.045, 0.075, 0.92))
+		draw_rect(Rect2(r.position + Vector2(2, 3), r.size), Color(0, 0, 0, 0.50))
+		draw_rect(r, bg_col)
+		# 대각선 느와르 백 스트라이프
+		var tri := PackedVector2Array([
+			r.position + Vector2(0, r.size.y * 0.65),
+			r.position + Vector2(r.size.x, r.size.y * 0.30),
+			r.end,
+			Vector2(r.position.x, r.end.y),
+		])
+		draw_colored_polygon(tri, Color(acc, 0.24 if not phase2 else 0.42))
+		# 얼굴 초상화(화면 중앙을 보게 안전하게 좌우 반전 — draw_set_transform 사용)
+		var inner := r.grow(-2.0)
+		var flip := Portraits.should_flip(key, side)
+		var mod := Color(0.42, 0.42, 0.46, 0.85) if dead else (Color(1.25, 0.72, 0.70, 1.0) if hurt else Color.WHITE)
+		# 종횡비(1:1) 유지해 세로 직사각 박스 안에서 찌그러지지 않게 중앙 크롭(cover)
+		var tw := float(tex.get_width())
+		var th := float(tex.get_height())
+		var box_ar := inner.size.x / maxf(inner.size.y, 1.0)
+		var src_w := minf(tw, th * box_ar)
+		var src_h := minf(th, tw / maxf(box_ar, 0.01))
+		var src_r := Rect2((tw - src_w) * 0.5, (th - src_h) * 0.5, src_w, src_h)
+		if flip:
+			var ic := inner.get_center()
+			draw_set_transform(ic, 0.0, Vector2(-1.0, 1.0))
+			draw_texture_rect_region(tex, Rect2(-inner.size * 0.5, inner.size), src_r, mod)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		else:
+			draw_texture_rect_region(tex, inner, src_r, mod)
+		# 외곽 먹선 + 악센트 테두리(2차 페이즈는 금빛 강조)
+		var edge := Color(1.0, 0.80, 0.24, 0.98) if phase2 else (Color(1.0, 0.28, 0.24, 0.98) if hurt else Color(acc, 0.88))
+		draw_rect(r, edge, false, 2.5 if phase2 else 2.0)
+		draw_rect(Rect2(r.position, Vector2(r.size.x, 3.0)), edge)

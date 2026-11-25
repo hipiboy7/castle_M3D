@@ -1,6 +1,6 @@
 {
   "_about": "화면 대사 · 알림 글 (S2 — main.gd 에서 뺌, CLAUDE.md 2-1절 하드코딩 금지). 원작 인용은 refs(화/컷 — castle_common canon/episodes quote)를 단다. refs 없는 글은 이 판이 쓴 안내 · 요약(원작 인용 아님). 키: ch0 = 프롤로그 블라디보스토크(방 id 는 src/data/prologue.gd ROOMS), ch1 = 1장 범죄도시 회암(src/data/hoeam.gd ROOMS), ch2 = 2장 하성 본사(src/data/haseong.gd ROOMS — escape_hint = 따돌리기 방 남은 초), ch6 = 6장 인천항 결투, ch11 = 11장 호텔 캐슬(방 id 는 src/data/hotel.gd ROOMS). ch0 · ch1 · ch2 refs 는 1부 canon 형식 p1:화/컷(canon episodes p1_NNN quote · fights 장면의 따옴표 말)",
-  "title": {"text": "캐슬 M", "sub": "", "hint": "누르면 시작 · 스테이지 이동은 싸움 중 '메뉴' · 가만히 두면 데모", "start": "게임 시작", "continue": "이어하기", "progress": "%s · %d/%d장 완료", "soon": "준비 중", "locked": "잠김", "cleared": "깸 ×%d", "new_save": "새로 시작", "difficulty": "난이도"},
+  "title": {"text": "캐슬 M", "sub": "", "hint": "메뉴를 골라 시작 · 가만히 두면 데모", "start": "이어서 하기", "continue": "이어서 하기", "stage_select": "스테이지 선택", "stage_select_sub": "15장 · 원하는 방 바로 이동", "from_start": "처음부터", "from_start_sub": "프롤로그부터 순차 진행", "quit": "끝내기", "progress": "%s · %d/%d장 완료", "soon": "준비 중", "locked": "잠김", "cleared": "깸 ×%d", "new_save": "새로 시작", "difficulty": "난이도"},
   "chapters": {
     "ch0": ["프롤로그", "아무르 티그로 은퇴식"],
     "ch1": ["1장 · 범죄도시 회암", "회암시 새 주인"],
