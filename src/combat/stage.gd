@@ -397,6 +397,7 @@ static func _enter(d: Dictionary, i: int) -> void:
 	d["canon_mid"] = 0
 	d["passive"] = {}
 	d["ally_heroes"] = []
+	d["hidden"] = []
 	d["theme"] = str(room.get("theme", ""))
 	w.fighters = []
 	w.pending = []
@@ -429,6 +430,10 @@ static func _enter(d: Dictionary, i: int) -> void:
 	for id in room.get("poses", {}):                 # 방 표 poses: 들어설 때부터 장면 자세(프롤로그 주점 — 앉은 김신 · 바에 기댄 리사)
 		for f in _who(d, str(id)):
 			f.pose = str(room["poses"][id])
+	for id in room.get("hidden", []):                # 방 표 hidden: 리빌 전까지 어둠 속에 숨긴 인물(프롤로그 주점 김신)
+		for f in _who(d, str(id)):
+			if not d["hidden"].has(f):
+				d["hidden"].append(f)
 	if i == 0 and int(d["crowd"]) > 0:
 		for k in int(d["crowd"]):                    # 성능 점검: 경호원을 둥글게 더 세운다
 			var a := TAU * k / float(d["crowd"])

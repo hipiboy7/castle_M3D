@@ -7,6 +7,7 @@ extends "res://src/view/puppet3d.gd"
 ## 바꿔 끼우기(LSP): update_from(f, dt, frozen) · remove_glasses 그대로 호환.
 
 const SHADOW_SHADER = preload("res://src/view/shaders/contact_shadow.gdshader")
+const WEBTOON_SHADER = preload("res://src/view/shaders/webtoon_3d.gdshader")
 const Mocap = preload("res://src/view/mocap_driver.gd")
 const BONES := ["hips", "spine", "chest", "neck", "head", "sh_r", "el_r", "hand_r", "sh_l", "el_l", "hand_l",
 	"th_r", "kn_r", "ft_r", "th_l", "kn_l", "ft_l"]
@@ -18,6 +19,7 @@ var _body_mat: ShaderMaterial = null
 var _last_expr := -1
 var _shadow_disc: MeshInstance3D = null
 var _is_pbr := false
+var _is_webtoon := false
 var _hips_rest_y := PELVIS_H
 var _mocap: Mocap = null
 var _mocap_sample := {}
@@ -32,13 +34,67 @@ func setup(lk: Dictionary) -> void:
 	for n in BONES:
 		bone_of[n] = skel.find_bone(n)
 	var meshes: Array = model.find_children("*", "MeshInstance3D", true, false)
-	_is_pbr = meshes.any(func(mi): return mi.name == "PBR_Body")
-	if _is_pbr:
+	_is_webtoon = meshes.any(func(mi): return mi.name == "Webtoon_Body")
+	_is_pbr = not _is_webtoon and meshes.any(func(mi): return mi.name == "PBR_Body")
+	if _is_webtoon:
+		_setup_webtoon(meshes)
+	elif _is_pbr:
 		_setup_pbr(meshes)
 	else:
 		_setup_toon(meshes)
 	_add_contact_shadow(float(lk.get("wide", 1.0)) * float(lk.get("scale", 1.0)))
 	_drive(true)
+
+
+## 3단계 원작 기반 만화 3D 파일럿("Webtoon_Body") — 원작 얼굴 투영 + 3D 조각 만화 헤어 + 느와르 셀/해칭 셰이더 + 먹선 윤곽 + CC0 모캡
+func _setup_webtoon(meshes: Array) -> void:
+	var hi: int = int(bone_of.get("hips", -1))
+	if hi >= 0:
+		_hips_rest_y = skel.get_bone_rest(hi).origin.y
+	_mocap = Mocap.new()
+	var line_mat := Ink.line(true, false, null, false)
+	line_mat.set_shader_parameter("width", 2.0)
+	for mi in meshes:
+		var m_inst := mi as MeshInstance3D
+		var is_glasses := m_inst.name == "Glasses"
+		if is_glasses:
+			glasses = m_inst
+		var mesh: Mesh = m_inst.mesh
+		if mesh == null:
+			continue
+		for s in mesh.get_surface_count():
+			var src: Material = m_inst.get_active_material(s)
+			var mname := (src.resource_name if src != null else "").to_lower()
+			var kind := 0
+			if is_glasses or mname.contains("wt_glass"):
+				kind = 3
+			elif mname.contains("wt_face") or mname.contains("wt_skin") or mname.contains("skin"):
+				kind = 1
+			elif mname.contains("wt_hair") or mname.contains("hair"):
+				kind = 2
+			elif mname.contains("wt_leather") or mname.contains("holster") or mname.contains("shoe"):
+				kind = 4
+			var sm := ShaderMaterial.new()
+			sm.shader = WEBTOON_SHADER
+			sm.set_shader_parameter("use_lut", true)
+			sm.set_shader_parameter("ink_lut", Ink.LUT)
+			sm.set_shader_parameter("mat_kind", kind)
+			if src is BaseMaterial3D:
+				var bm := src as BaseMaterial3D
+				sm.set_shader_parameter("albedo", bm.albedo_color)
+				if bm.albedo_texture != null:
+					sm.set_shader_parameter("use_tex", true)
+					sm.set_shader_parameter("tex", bm.albedo_texture)
+				else:
+					sm.set_shader_parameter("use_tex", false)
+			else:
+				sm.set_shader_parameter("use_tex", false)
+			m_inst.set_surface_override_material(s, sm)
+			mats.append(sm)
+		if not is_glasses:
+			m_inst.material_overlay = line_mat
+	_reparent_weapon_to_bone(weapon_r, "hand_r", false)
+	_reparent_weapon_to_bone(weapon_l, "hand_l", false)
 
 
 func _setup_pbr(meshes: Array) -> void:
@@ -72,7 +128,7 @@ func _setup_pbr(meshes: Array) -> void:
 	_reparent_weapon_to_bone(weapon_l, "hand_l")
 
 
-func _reparent_weapon_to_bone(w: Node3D, bname: String) -> void:
+func _reparent_weapon_to_bone(w: Node3D, bname: String, strip_ink := true) -> void:
 	if w == null or skel == null or int(bone_of.get(bname, -1)) < 0:
 		return
 	var ba := BoneAttachment3D.new()
@@ -84,9 +140,9 @@ func _reparent_weapon_to_bone(w: Node3D, bname: String) -> void:
 		old_parent.remove_child(w)
 	ba.add_child(w)
 	w.position = Vector3(0, -0.05, 0)
-	# Remove cartoon ink overlay on weapons held by realistic PBR characters
-	for mi in w.find_children("*", "MeshInstance3D", true, false):
-		(mi as MeshInstance3D).material_overlay = null
+	if strip_ink:
+		for mi in w.find_children("*", "MeshInstance3D", true, false):
+			(mi as MeshInstance3D).material_overlay = null
 
 
 func _setup_toon(meshes: Array) -> void:
@@ -177,7 +233,8 @@ func _toon(tex: Texture2D = null) -> ShaderMaterial:
 
 func update_from(f, dt: float, frozen: bool) -> void:
 	super.update_from(f, dt, frozen)
-	if not _is_pbr:
+	var use_mocap := _is_pbr or _is_webtoon
+	if not use_mocap:
 		_update_expression(f)
 	if _shadow_disc != null:
 		var air_k := clampf(1.0 - float(f.air) * 0.45, 0.25, 1.0)
@@ -185,7 +242,7 @@ func update_from(f, dt: float, frozen: bool) -> void:
 		_shadow_disc.scale = Vector3.ONE * air_k
 		_shadow_disc.visible = f.state != "dead"
 	if not frozen:
-		if _is_pbr and _mocap != null:
+		if use_mocap and _mocap != null:
 			var armed := weapon_r != null or weapon_l != null
 			_mocap_sample = _mocap.sample(f, dt, armed, calm or _calm > 0.5)
 		_drive()
@@ -212,7 +269,7 @@ func _update_expression(f) -> void:
 func _drive(all := false) -> void:
 	if skel == null:
 		return
-	if _is_pbr:
+	if _is_pbr or _is_webtoon:
 		var mw := float(_mocap_sample.get("weight", 0.0))
 		var mrot: Dictionary = _mocap_sample.get("rot", {})
 		var mdy := float(_mocap_sample.get("hips_dy", 0.0))

@@ -56,6 +56,7 @@ const StageMenu = preload("res://src/ui/stage_menu.gd")
 const SafeArea = preload("res://src/ui/safe_area.gd")
 const Bubbles = preload("res://src/ui/bubbles.gd")
 const WebtoonStage = preload("res://src/ui/webtoon_stage.gd")
+const Portraits = preload("res://src/view/portraits.gd")
 
 const DEMO_AFTER := 360
 const SHOT_WARMUP := 3          # --shots: 찍을 프레임 바로 앞 몇 프레임만 그린다
@@ -129,6 +130,7 @@ var touch: Control
 var snd: Node
 var evfx
 var _grade_layer: CanvasLayer = null
+var _reveal_spot: SpotLight3D = null            # 장면 리빌 스포트라이트(프롤로그 주점 김신 조명 — _build_stage_view 에서 정리)
 
 
 func _ready() -> void:
@@ -216,6 +218,7 @@ func _new_run(ch: String, room := -1) -> void:
 		webtoon.clear_all()
 	_set_scene(false)
 	_undim()
+	evfx.reset_fight()
 	evfx.later_msg = []
 	evfx.later_t = 0.0
 	_build_stage_view()
@@ -267,9 +270,11 @@ func _set_scene(on: bool) -> void:
 	touch.show_ff = on and mode == "fight"
 	if not on and _ff:                              # 장면이 끝나면 빨리 감기도 끈다(다음 장면은 ×1 부터)
 		_set_ff(false)
-	if not on and webtoon != null:
-		webtoon.clear_speakers()
-	hud.set_hint("누르면 넘기기" if on else "")
+	if webtoon != null:
+		webtoon.in_scene = on or (kind == "stage" and not d.is_empty() and d["room"].has("talk"))
+		if not webtoon.in_scene:
+			webtoon.clear_speakers()
+	hud.set_hint("" if (on and webtoon != null) else ("누르면 넘기기" if on else ""))
 
 
 ## 장면 빨리 감기(오른쪽 위 버튼): 장면 동안 게임 속도를 FF_SPEED 로 — 말풍선 · 걷기가 모두 빨라진다(판정 · 리플레이는 그대로 — _apply_speed)
@@ -318,16 +323,39 @@ func _mark_calm() -> void:
 ## 무대 + 인형을 지금 판(방)에 맞게 다시 만든다 — 11장은 방을 넘을 때마다(신호 "room")
 func _build_stage_view() -> void:
 	_gone_t.clear()
+	if _reveal_spot != null and is_instance_valid(_reveal_spot):
+		_reveal_spot.queue_free()
+		_reveal_spot = null
 	for f in pup:
 		pup[f].queue_free()
 	pup.clear()
 	_lod_dt.clear()
+	if evfx != null:
+		evfx.reset_fight()
 	_build_arena()
 	for f in d["world"].fighters:
 		_add_puppet(f)
+	var hidden_list: Array = Scene.hidden(d) if kind == "stage" else []
+	for hf in hidden_list:
+		if pup.has(hf):
+			pup[hf].visible = false
 	_markers()
+	var is_story_room: bool = kind == "stage" and (d["room"].has("scene") or d["room"].has("talk"))
+	if cam != null:
+		cam.scene_mode = _in_scene or is_story_room
+	if webtoon != null:
+		webtoon.in_scene = _in_scene or (kind == "stage" and d["room"].has("talk"))
 	var hb = d["hero"]
 	var bb = d["boss"] if d["boss"] != null else hb
+	if kind == "stage" and d["room"].has("cam_start"):
+		var cs = Scene.who_of(d, str(d["room"]["cam_start"]), true)
+		if cs != null and pup.has(cs):
+			hb = cs
+			bb = cs
+			for sf in d.get("standing", []):
+				if sf != cs and not hidden_list.has(sf) and pup.has(sf):
+					bb = sf
+					break
 	cam.snap(pup[hb].position, pup[bb].position)
 
 
@@ -470,12 +498,12 @@ func _start(m: String) -> void:
 	if m == "demo":
 		var dm: Array = Lines.at("ch6.demo")
 		hud.message(dm[0], dm[1], 2.5)
-		hud.set_hint(str(Lines.at("ch6.demo")[0]) + " · 누르면 직접 싸우기")
+		hud.set_hint(str(Lines.at("ch6.demo")[0]) + " · 누르면 타이틀 화면으로")
 	elif kind == "duel":
 		var fm: Array = Lines.at("ch6.fight")
 		hud.message(fm[0], fm[1], 2.5)
 		if webtoon != null and d.get("boss") != null:
-			webtoon.trigger_cutin(str(d["boss"].char_id), "백도찬", "캐슬 최강 · 인천항 제3부두", 1, 0.72, true)
+			webtoon.trigger_cutin(str(d["boss"].char_id), "백도찬", "캐슬 최강 · 인천항 제3부두", 1, 1.55, true)
 		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 K(누르고) · 구르기 Space · 대시 L · 기술 U · 기술 바꾸기 I · 속도 F")
 	else:
 		hud.set_hint("" if touch.visible else "이동 WASD · 베기 J · 쳐내기 · 막기 K · 구르기 Space · 대시 L · 기술 U · 바꾸기 I · 교대 Tab · 속도 F")
@@ -1024,8 +1052,11 @@ func _physics_process(_dt: float) -> void:
 				_start("demo")
 		"demo", "fight":
 			if mode == "demo" and not args["autoplay"] and mode_t > 30 and (_pressed_anything() or touch.any_touch()):
-				_new_run(chapter)
-				_start("fight")
+				# 데모 중 터치/키 입력 시 타이틀 4버튼 메뉴 + 좌상단 난이도 화면으로 복귀(2026-11-25 사용자 피드백)
+				touch.take_edges()
+				_mouse_was = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+				_new_run(Save.next_chapter(save))
+				_enter_title()
 				return
 			if _dev_win and mode == "fight":
 				_dev_knockout()
@@ -1126,6 +1157,25 @@ func _after_tick() -> void:
 			_tossed.append([tp, Vector3(e[2].x, 0, e[2].y), Vector3(e[3].x, 0, e[3].y), 0.0, float(e[4])])
 		elif e[0] == "scene":
 			_set_scene(bool(e[1]))
+		elif e[0] == "reveal" and pup.has(e[1]):           # 장면 리빌(프롤로그 주점 김신: 어둠 → 스포트라이트 점등)
+			if webtoon != null:
+				webtoon.clear_speakers()
+			var rp: Node3D = pup[e[1]]
+			rp.visible = true
+			if bool(e[2]) and not headless:
+				if _reveal_spot != null and is_instance_valid(_reveal_spot):
+					_reveal_spot.queue_free()
+				var sp := SpotLight3D.new()
+				sp.light_color = Color(0.95, 0.90, 0.84)
+				sp.light_energy = 5.5
+				sp.spot_range = 8.5
+				sp.spot_angle = 30.0
+				sp.spot_angle_attenuation = 1.6
+				sp.position = rp.position + Vector3(0.35, 3.6, 1.15)
+				add_child(sp)
+				sp.look_at(rp.position + Vector3(0.0, 0.95, 0.0), Vector3.UP)
+				_reveal_spot = sp
+				snd.play("wind", -4.0, 0.65)
 		elif e[0] == "leave" and pup.has(e[1]):            # 조작 인물 묶음에서 빠짐(triggers cast) · 장면 퇴장
 			pup[e[1]].queue_free()
 			pup.erase(e[1])
@@ -1249,25 +1299,29 @@ func _process(dt: float) -> void:
 		touch.set_skill_state(cur_b / need_b, d["hero"].can_pay(h_sk))
 	else:
 		touch.set_skill_state(0.0, false)
+	var hidden_list: Array = Scene.hidden(d) if kind == "stage" else []
 	var hp: Vector3 = pup[d["hero"]].position if pup.has(d["hero"]) else _cam_last     # 장면에서 퇴장한 조작 인물(2장 이슬 한 합 뒤)
-	# 장면 중에는 말하는 사람을 따라간다 — 걸어 나가는 사람(leave nowait)은 화면에서 뺀다(2026-11-12 사용자 "멘트를 할 때는 이슬쪽에
-	# 포커싱이 맞춰져야하는데 뛰어나간 김신쪽에 포커싱이 맞춰져 있어서 멘트하는게 하나도 안보여")
+	# 장면 중에는 걷는 사람 · 지정 포커스 · 말하는 사람을 따라간다 — 숨겨진 인물(프롤로그 김신)과 퇴장 인물은 화면에서 제외
 	var gone_out: Array = Scene.leaving(d) if _in_scene else []
 	if _in_scene:
 		var sp = Scene.speaker(d)
-		if sp != null and pup.has(sp) and d["world"].fighters.has(sp) and not gone_out.has(sp):
+		if sp != null and pup.has(sp) and d["world"].fighters.has(sp) and not gone_out.has(sp) and not hidden_list.has(sp):
 			hp = pup[sp].position
-		elif gone_out.has(d["hero"]) or not d["world"].fighters.has(d["hero"]):
-			var rest: Array = d["world"].fighters.filter(func(x): return pup.has(x) and not gone_out.has(x))
+		elif gone_out.has(d["hero"]) or hidden_list.has(d["hero"]) or not d["world"].fighters.has(d["hero"]):
+			var rest: Array = d["world"].fighters.filter(func(x): return pup.has(x) and not gone_out.has(x) and not hidden_list.has(x))
 			if not rest.is_empty():
 				hp = pup[rest[0]].position
+	elif kind == "stage" and d["room"].has("cam_start") and hidden_list.has(d["hero"]):
+		var cs = Scene.who_of(d, str(d["room"]["cam_start"]), true)
+		if cs != null and pup.has(cs):
+			hp = pup[cs].position
 	_cam_last = hp
 	if kind == "stage":
 		var pts: Array = []
 		for f in pup:
-			if gone_out.has(f):
+			if gone_out.has(f) or hidden_list.has(f):
 				continue
-			if (f.alive() and not f.inert) or (_in_scene and d["world"].fighters.has(f)):   # 장면 중에는 지켜보는 사람 · 말하는 사람도 화면에
+			if (f.alive() and not f.inert) or (_in_scene and d["world"].fighters.has(f)) or (d["room"].has("cam_start") and d["world"].fighters.has(f)):
 				pts.append(pup[f].position)
 		cam.follow_group(hp, pts, dt, d["world"].shake)
 	else:
@@ -1305,6 +1359,10 @@ func _shots() -> void:
 		var path := "%s/shot_%05d.png" % [dir, frames]
 		var err := img.save_png(path)
 		print("SHOT %s %s" % [path, "ok" if err == OK else "error %d" % err])
+
+
+func _exit_tree() -> void:
+	Portraits.clear_cache()
 
 
 func _finish_run() -> void:

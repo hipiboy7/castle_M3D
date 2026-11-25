@@ -4,6 +4,8 @@ extends RefCounted
 
 const Lines = preload("res://src/data/lines.gd")
 const Ink = preload("res://src/view/ink.gd")
+const Portraits = preload("res://src/view/portraits.gd")
+const WebtoonStage = preload("res://src/ui/webtoon_stage.gd")
 const SLAMS := ["stomp", "two_hand_slam", "overhead_chop", "throw_slam", "hammer_fist"]   # 위에서 내려찍는 모양(2026-11-10 각법 axe 에서 갈라 나온 것)
 
 var fx
@@ -11,16 +13,21 @@ var cam
 var hud
 var snd
 var pup := {}
-var bubbles                              # 말풍선(src/ui/bubbles.gd — main.gd 가 붙인다)
-var webtoon                              # 2D 웹툰 스탠딩 포트레이트 · 사선 컷인(src/ui/webtoon_stage.gd — main.gd 가 붙인다)
+var bubbles                              # 예비 말풍선(2026-11-25 — 인물 대사는 webtoon 스탠딩 + 이름표 리본 + 대사창으로 통합)
+var webtoon                              # 2D 원작 웹툰 스탠딩 대사창 · 사선 컷인(src/ui/webtoon_stage.gd — main.gd 가 붙인다)
 var arena                                # 무대(부서지는 소품 break_at — main.gd 가 방마다 바꿔 준다)
 var grade_layer: CanvasLayer = null      # 화면 마무리 레이어 — 웹툰 임팩트 프레임(흑백+크림슨) 제어
 var _impact_t := 0.0
 var _impact_max := 0.12
 var _impact_col := Color(0.92, 0.14, 0.14)
+var _parry_count := 0                    # 판/방별 쳐내기 성공 횟수 — 첫 성공 1회만 사선 컷인(도배 방지)
 var _quote := RegEx.create_from_string("^([^:—]{1,12}): (.+?)(?: — (.+))?$")
 var later_msg: Array = []                # 조금 뒤에 띄울 가운데 알림 [제목, 부제, 초]
 var later_t := 0.0
+
+
+func reset_fight() -> void:
+	_parry_count = 0
 
 
 func _msg(key: String, secs: float, delay := 0.0) -> void:
@@ -124,7 +131,7 @@ func apply(d: Dictionary) -> void:
 				fx.pop(Vector3(e[1].pos.x, 2.38, e[1].pos.y), str(sk["name"]), Color(0.75, 0.92, 1.0), 46, 0.78)     # 상단 리본과 겹치지 않는 높이
 				snd.play("shine", -6.0, 1.0)
 				if webtoon != null:
-					webtoon.trigger_cutin(str(e[1].char_id), str(sk["name"]), str(e[1].name), int(e[1].team), 0.56, false)
+					webtoon.trigger_cutin(str(e[1].char_id), str(sk["name"]), "%s · 기술" % str(e[1].name), int(e[1].team), 0.95, false)
 			"no_gauge":
 				fx.pop(Vector3(e[1].pos.x, 2.35, e[1].pos.y), "게이지 부족", Color(0.75, 0.78, 0.85), 44, 0.7)
 			"lethal":
@@ -136,7 +143,7 @@ func apply(d: Dictionary) -> void:
 				if webtoon != null:
 					var latk = _attacker(w, e[1])
 					if latk != null:
-						webtoon.trigger_cutin(str(latk.char_id), kind_name, "%s · %d%%" % [str(latk.name), roundi(float(e[3]) * 100.0)], int(latk.team), 0.56, true)
+						webtoon.trigger_cutin(str(latk.char_id), kind_name, "%s · 치명 %d%%" % [str(latk.name), roundi(float(e[3]) * 100.0)], int(latk.team), 0.98, true)
 			"brake":
 				fx.strain(e[1])
 				snd.play("wind", -2.0, 0.55)
@@ -169,7 +176,7 @@ func apply(d: Dictionary) -> void:
 				cam.punch_zoom(0.9)
 				trigger_impact(0.09, Color(1.0, 0.42, 0.14))
 				if webtoon != null:
-					webtoon.trigger_cutin(str(e[1].char_id), "카운터!", str(e[1].name), int(e[1].team), 0.48, false)
+					webtoon.trigger_cutin(str(e[1].char_id), "카운터!", "%s · 반격" % str(e[1].name), int(e[1].team), 0.90, false)
 			"dash":
 				snd.play("wind", -10.0, 1.5)
 			"pierce":
@@ -177,13 +184,15 @@ func apply(d: Dictionary) -> void:
 			"stun":
 				fx.pop(e[2] + Vector3(0, -0.35, 0) + cam.global_basis.x * 0.6, "기절!", Color(1.0, 0.9, 0.47), 60, 1.0)   # 삼연타 번호 · 엇박 % 와 겹치지 않게 옆 아래
 			"parry":
+				_parry_count += 1
 				fx.parry(e[2])
+				fx.pop(e[2] + Vector3(0, 0.48, 0), "쳐내기!", Color(0.45, 0.88, 1.0), 58, 0.65)
 				snd.play("guard", 0.0, 1.15)
 				snd.play("counter", -6.0, 1.4)
 				cam.punch_zoom(0.94)
 				trigger_impact(0.08, Color(0.32, 0.72, 1.0))
-				if webtoon != null:
-					webtoon.trigger_cutin(str(e[1].char_id), "쳐내기!", str(e[1].name), int(e[1].team), 0.42, false)
+				if webtoon != null and WebtoonStage.should_cutin_parry(_parry_count):
+					webtoon.trigger_cutin(str(e[1].char_id), "쳐내기!", "%s · 첫 쳐내기" % str(e[1].name), int(e[1].team), 0.88, true)
 			"block":
 				fx.block(e[2])
 				snd.play("guard", -4.0, 0.9)
@@ -212,7 +221,7 @@ func apply(d: Dictionary) -> void:
 				snd.play("wind", -2.0, 0.8)
 				cam.punch_zoom(0.85)
 				if webtoon != null:
-					webtoon.trigger_cutin(str(e[1].char_id), "%s · 전력" % str(e[1].name), "2차 페이즈", int(e[1].team), 0.85, true)
+					webtoon.trigger_cutin(str(e[1].char_id), "%s · 전력" % str(e[1].name), "2차 페이즈", int(e[1].team), 1.40, true)
 				if d.get("kind", "duel") == "duel":
 					var l2: Array = Lines.at("ch6.phase2")
 					var msg2 := [l2[0], l2[1], 2.4]
@@ -231,24 +240,29 @@ func apply(d: Dictionary) -> void:
 				_line(w, str(e[1]), str(e[2]), float(e[3]), maxf(late, 1.2 if busy else 0.0))
 			"bubble":
 				var raw_sid := str(e[4]) if e.size() > 4 else ""
-				if bubbles != null:
-					bubbles.say(e[1], str(e[2]), float(e[3]), "" if e[1] != null else _speaker_name(w, raw_sid))
 				if webtoon != null:
-					var sp_id := str(e[1].char_id) if e[1] != null else raw_sid
+					var sp_id := str(e[1].char_id) if e[1] != null else ("" if raw_sid == "@" else raw_sid)
 					var sp_nm := str(e[1].name) if e[1] != null else _speaker_name(w, raw_sid)
 					var sp_tm := int(e[1].team) if e[1] != null else 0
 					webtoon.show_speaker(sp_id, sp_nm, sp_tm, str(e[2]), float(e[3]))
+				elif bubbles != null:
+					bubbles.say(e[1], str(e[2]), float(e[3]), "" if e[1] != null else _speaker_name(w, raw_sid))
+			"cutin":
+				if webtoon != null:
+					webtoon.trigger_cutin(str(e[1]), str(e[2]), str(e[3]), 0, float(e[4]), true)
 			"jump", "evade":
 				snd.play("step" if e[0] == "jump" else "wind", -8.0, 1.2)
 			"wall_step":
 				snd.play("kick", -6.0, 1.3)
 				fx.pop(Vector3(e[1].pos.x, 1.0 + e[1].air, e[1].pos.y), "탁", Color(0.95, 0.9, 0.8), 40, 0.4)
 			"bubble_later":
-				if bubbles != null:
-					bubbles.say_later(e[1], str(e[2]), float(e[3]), float(e[4]))
 				if webtoon != null and e[1] != null:
 					webtoon.show_speaker_later(str(e[1].char_id), str(e[1].name), int(e[1].team), str(e[2]), float(e[3]), float(e[4]))
+				elif bubbles != null:
+					bubbles.say_later(e[1], str(e[2]), float(e[3]), float(e[4]))
 			"bubble_cut":
+				if webtoon != null:
+					webtoon.cut_dialogue()
 				if bubbles != null:
 					bubbles.cut_oldest()
 			"prop_fx":
@@ -264,35 +278,35 @@ func apply(d: Dictionary) -> void:
 				cam.punch_zoom(0.9)
 
 
-## 알림 글 — 작은 글이 '이름: 말 — 덧말' 이고 그 이름의 사람이 판에 있으면 말은 그 사람 머리 위 말풍선으로(2026-11-12 사용자
-## "캐릭터들의 말과 대화는 … 말풍선으로"), 제목과 덧말은 가운데 알림. 아니면 예전처럼 가운데 알림 하나
+## 알림 글 — '이름: 말 — 덧말' 또는 [사람 이름, 말] 이면 프롤로그~13장 전체를 2D 원작 웹툰 스탠딩 + 이름표 리본 + 대사창으로 통합.
+## 판에 아직 없거나 대화 방(5·7·9장) 인물도 Portraits.key_by_name 으로 매칭해 원작 초상화와 함께 표시한다.
 func _line(w, title: String, small: String, secs: float, delay: float) -> void:
 	var m := _quote.search(small)
-	if m != null and bubbles != null:
-		var who = _by_name(w, m.get_string(1).strip_edges())
-		if who != null:
-			hud.message(title, m.get_string(3), secs, delay)
+	if m != null and webtoon != null:
+		var raw_nm := m.get_string(1).strip_edges()
+		var who = _by_name(w, raw_nm)
+		var pk := str(who.char_id) if who != null else Portraits.key_by_name(raw_nm)
+		if who != null or pk != "":
+			var sp_nm := str(who.name) if who != null else raw_nm
+			var sp_tm := int(who.team) if who != null else (1 if Portraits.side_of(pk, 0) > 0 else 0)
+			if title != "" or m.get_string(3) != "":
+				hud.message(title, m.get_string(3), secs, delay)
 			if delay > 0.0:
-				bubbles.say_later(who, m.get_string(2), secs, delay)
-				if webtoon != null:
-					webtoon.show_speaker_later(str(who.char_id), str(who.name), int(who.team), m.get_string(2), secs, delay)
+				webtoon.show_speaker_later(pk, sp_nm, sp_tm, m.get_string(2), secs, delay)
 			else:
-				bubbles.say(who, m.get_string(2), secs)
-				if webtoon != null:
-					webtoon.show_speaker(str(who.char_id), str(who.name), int(who.team), m.get_string(2), secs)
+				webtoon.show_speaker(pk, sp_nm, sp_tm, m.get_string(2), secs)
 			return
-	# 제목이 사람 이름이고 작은 글이 그 사람 말이면([김신, "윤덕수, 넌 여기까지다."]) — 말풍선만
-	if bubbles != null and title != "" and small != "" and not small.contains(" — "):
+	# 제목이 사람 이름이고 작은 글이 그 사람 말이면([김신, "윤덕수, 넌 여기까지다."] · 5/7/9장 대화 방) — 웹툰 스탠딩 대사창
+	if webtoon != null and title != "" and small != "" and not small.contains(" — "):
 		var sp = _by_name(w, title)
-		if sp != null:
+		var pk2 := str(sp.char_id) if sp != null else Portraits.key_by_name(title)
+		if sp != null or pk2 != "":
+			var sp_nm2 := str(sp.name) if sp != null else title
+			var sp_tm2 := int(sp.team) if sp != null else (1 if Portraits.side_of(pk2, 0) > 0 else 0)
 			if delay > 0.0:
-				bubbles.say_later(sp, small, secs, delay)
-				if webtoon != null:
-					webtoon.show_speaker_later(str(sp.char_id), str(sp.name), int(sp.team), small, secs, delay)
+				webtoon.show_speaker_later(pk2, sp_nm2, sp_tm2, small, secs, delay)
 			else:
-				bubbles.say(sp, small, secs)
-				if webtoon != null:
-					webtoon.show_speaker(str(sp.char_id), str(sp.name), int(sp.team), small, secs)
+				webtoon.show_speaker(pk2, sp_nm2, sp_tm2, small, secs)
 			return
 	hud.message(title, small, secs, delay)
 

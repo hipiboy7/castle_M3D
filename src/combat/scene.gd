@@ -27,9 +27,9 @@ extends RefCounted
 ##   {"pose": who, "name": "sit"}         장면 자세(그림만 — poses.gd SCENE: sit · lean · arms · hands_up · kneel · lie_up · lie_bed, "" = 보통)
 ##   {"end": "fight" | "clear" | "win"}  장면을 끝낸다 — fight 싸움 계속(기본), clear 방을 깸, win 판을 이김(끝 방이 아니어도)
 
-const SAY_MIN := 1.6
-const SAY_MAX := 4.2
-const SAY_PER_CHAR := 0.085
+const SAY_MIN := 2.2
+const SAY_MAX := 4.8
+const SAY_PER_CHAR := 0.095
 const WALK_TIMEOUT := 12.0           # 절뚝이며 걷는 의뢰인(0장 주점) 6m 도 닿게
 const LEAVE_PAD := 1.4             # 가장자리 밖 이만큼 나가면 사라진다
 const CARRY_GAP := 0.55
@@ -117,6 +117,7 @@ static func _run(d: Dictionary, sc: Dictionary, st: Dictionary) -> bool:
 			if who != null:
 				who.facing = _face_to_talk(d, who)
 				sc["speaker"] = who
+				sc["focus"] = who
 			w.events.append(["bubble", who, str(st["say"][1]), secs - 0.15, str(st["say"][0])])
 		return t >= int(secs * 60.0)
 	if st.has("says"):
@@ -131,6 +132,8 @@ static func _run(d: Dictionary, sc: Dictionary, st: Dictionary) -> bool:
 			var who2 = who_of(d, str(ln[0]), true)
 			if who2 != null:
 				who2.facing = _face_to_talk(d, who2)
+				sc["speaker"] = who2
+				sc["focus"] = who2
 			w.events.append(["bubble", who2, str(ln[1]), secs2 - 0.15, str(ln[0])])
 		sc["sub_t"] = int(sc["sub_t"]) + 1
 		if skip and int(sc["sub_t"]) > 1:
@@ -141,6 +144,24 @@ static func _run(d: Dictionary, sc: Dictionary, st: Dictionary) -> bool:
 			sc["sub_t"] = 0
 			return k + 1 >= lines.size()
 		return false
+	if st.has("cam"):
+		var cf = who_of(d, str(st["cam"]), true)
+		if cf != null:
+			sc["focus"] = cf
+			sc["speaker"] = cf
+		return true
+	if st.has("reveal"):
+		var rf = who_of(d, str(st["reveal"]), true)
+		if rf != null:
+			var hid: Array = d.get("hidden", [])
+			hid.erase(rf)
+			d["hidden"] = hid
+			sc["focus"] = rf
+			w.events.append(["reveal", rf, bool(st.get("spot", false))])
+		return true
+	if st.has("cutin"):
+		w.events.append(["cutin", str(st["cutin"]), str(st.get("title", "")), str(st.get("sub", "")), float(st.get("secs", 1.2))])
+		return true
 	if st.has("wait"):
 		return t >= int(float(st["wait"]) * 60.0)
 	if st.has("place"):
@@ -169,6 +190,8 @@ static func _run(d: Dictionary, sc: Dictionary, st: Dictionary) -> bool:
 		var f = who_of(d, str(st["walk"]))
 		if f == null:
 			return true
+		if first:
+			sc["focus"] = f
 		var goal: Vector2 = v2(st.get("to", f.pos))
 		if st.has("to_who"):
 			var o = who_of(d, str(st["to_who"]))
@@ -306,9 +329,16 @@ static func _tick_leaving(d: Dictionary, sc: Dictionary) -> void:
 			l.intent = {"move": Vector2(float(lv[i][1]), 0.0)}
 
 
-## 장면 카메라가 볼 사람: 지금 말하는 사람(없으면 null) — main.gd 가 따라간다. 걸어 나가는 사람은 화면에서 뺀다(leaving)
+## 장면 카메라가 볼 사람: 지금 걷거나 포커스 지정된 사람 → 말하는 사람(없으면 null) — main.gd 가 따라간다.
 static func speaker(d: Dictionary):
-	return d["scene"].get("speaker") if d.has("scene") else null
+	if not d.has("scene"):
+		return null
+	var sc: Dictionary = d["scene"]
+	return sc.get("focus", sc.get("speaker"))
+
+
+static func hidden(d: Dictionary) -> Array:
+	return d.get("hidden", [])
 
 
 static func leaving(d: Dictionary) -> Array:

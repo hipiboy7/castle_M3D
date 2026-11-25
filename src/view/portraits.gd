@@ -1,6 +1,12 @@
 extends RefCounted
-## 2D 웹툰 포트레이트 · 컷인 레지스트리(OCP — 새 인물 추가 시 SPECS · ALIASES 에 한 줄만 추가).
-## assets/portraits/<id>_{stand,hud,cutin}.png 를 캐싱하며, 헤드리스 · 미등록 인물은 안전하게 null 반환.
+## 2D 원작 웹툰(정연 「캐슬」) 포트레이트 · 컷인 레지스트리(OCP — portraits_data.gd 113인 원작 자산 자동 등록).
+## assets/portraits/<id>_{stand,hud,cutin}.jpg 를 캐싱하며, 헤드리스 · 미등록 인물은 안전하게 null 반환.
+
+const Data = preload("res://src/view/portraits_data.gd")
+const Common = preload("res://src/data/common.gd")
+const Addendum = preload("res://src/data/addendum.gd")
+
+const SPECS := Data.SPECS
 
 const ALIASES := {
 	"kimshin": "kimshin",
@@ -8,6 +14,8 @@ const ALIASES := {
 	"kim_bare": "kimshin",
 	"kim_coat": "kimshin",
 	"kim_p1_blade": "kimshin",
+	"kimshin_coat": "kimshin",
+	"kimshin_shadow": "kimshin_shadow",
 	"baekdochan": "baekdochan",
 	"baek": "baekdochan",
 	"risa": "risa",
@@ -16,60 +24,85 @@ const ALIASES := {
 	"seojintae": "jintae",
 	"ojiin": "ojiin",
 	"client_woman": "client_woman",
+	"piwoojin": "woojin",
+	"woojin": "woojin",
+	"shingen": "shingen",
+	"sasakishingen": "shingen",
 }
 
-const SPECS := {
-	"kimshin": {
-		"stand": "res://assets/portraits/kimshin_stand.png",
-		"hud": "res://assets/portraits/kimshin_hud.png",
-		"cutin": "res://assets/portraits/kimshin_cutin.png",
-		"accent": Color(0.28, 0.80, 0.98),
-		"faces_right": false,
-		"prefer_right": false,
-	},
-	"baekdochan": {
-		"stand": "res://assets/portraits/baekdochan_stand.png",
-		"hud": "res://assets/portraits/baekdochan_hud.png",
-		"cutin": "res://assets/portraits/baekdochan_cutin.png",
-		"accent": Color(0.92, 0.16, 0.20),
-		"faces_right": false,
-		"prefer_right": true,
-	},
-	"risa": {
-		"stand": "res://assets/portraits/risa_stand.png",
-		"hud": "res://assets/portraits/risa_hud.png",
-		"cutin": "",
-		"accent": Color(0.94, 0.74, 0.34),
-		"faces_right": false,
-		"prefer_right": true,
-	},
-	"jintae": {
-		"stand": "res://assets/portraits/jintae_stand.png",
-		"hud": "res://assets/portraits/jintae_hud.png",
-		"cutin": "res://assets/portraits/jintae_cutin.png",
-		"accent": Color(0.98, 0.76, 0.18),
-		"faces_right": true,
-		"prefer_right": false,
-	},
-	"ojiin": {
-		"stand": "res://assets/portraits/ojiin_stand.png",
-		"hud": "res://assets/portraits/ojiin_hud.png",
-		"cutin": "res://assets/portraits/ojiin_cutin.png",
-		"accent": Color(0.86, 0.18, 0.30),
-		"faces_right": false,
-		"prefer_right": true,
-	},
-	"client_woman": {
-		"stand": "res://assets/portraits/client_woman_stand.png",
-		"hud": "res://assets/portraits/client_woman_hud.png",
-		"cutin": "",
-		"accent": Color(0.78, 0.70, 0.64),
-		"faces_right": true,
-		"prefer_right": false,
-	},
+const NAME_ALIASES := {
+	"김신": "kimshin",
+	"아무르 티그로": "kimshin",
+	"백도찬": "baekdochan",
+	"파이톤": "baekdochan",
+	"리사": "risa",
+	"서진태": "jintae",
+	"사로카": "jintae",
+	"오지인": "ojiin",
+	"의뢰인": "client_woman",
+	"의뢰인 여성": "client_woman",
+	"피우진": "woojin",
+	"사사키 신겐": "shingen",
+	"신겐": "shingen",
+	"군터": "gunter",
+	"윤덕수": "yundeoksu",
+	"김대건": "kimdaegeon",
+	"차수민": "chasumin",
+	"김혁주": "kimhyeokju",
+	"김성준": "kimseongjun",
+	"강만재": "gangmanjae",
+	"강창석": "gangchangseok",
+	"이슬": "iseul",
+	"인수": "insu",
+	"신태진": "sintaejin",
+	"남궁혁": "namgunghyuk",
+	"황보민철": "hwangbomincheol",
+	"김재훈": "kimjaehoon",
+	"김태훈": "kimtaehoon",
+	"김용성": "kimyongseong",
+	"류지학": "ryujihak",
+	"최민욱": "choeminuk",
+	"마학영": "mahakyoung",
+	"마준영": "majunyeong",
+	"구일화": "guilhwa",
+	"하야부사": "hayabusa",
+	"천일도": "cheonildo",
+	"주로": "juro",
+	"유우성": "yuwoosung",
+	"도우첸": "douchen",
+	"링링": "lingling",
+	"리천": "richeon",
+	"구스타프": "gustav",
+	"아킬라": "akila",
+	"그롤라": "grolla",
+	"바실리": "vasily",
+	"크리샤": "keurisa",
+	"표영": "pyoyoung",
+	"강민성": "gangminseong",
+	"임무열": "immuyeol",
+	"히데": "hide",
+	"코모도": "komodo",
+	"바리스타": "barista",
+	"이희성": "ihuiseong",
+	"여민수": "yeominsu",
+	"크로트": "krot",
+	"블랙맘바": "blackmamba",
+	"메드베디": "medvedi",
+	"라텔": "ratel",
+	"마크": "mark",
+	"스케일단장": "scaledanjang",
+	"앤디청": "andycheong",
+	"현석": "hyeonseok",
+	"최달천": "choedalcheon",
+	"사인진": "sainjin",
+	"정단": "jeongdan",
+	"이와시로": "iwashiro",
+	"야마모토 쿄지": "yamamotokyoji",
+	"쿄지": "yamamotokyoji",
 }
 
 static var _tex_cache := {}
+static var _name_map: Dictionary = {}
 
 
 ## 인물 id 또는 외형 이름(look) → 포트레이트 키(없으면 "")
@@ -79,7 +112,36 @@ static func key_of(id_or_look: String) -> String:
 	var clean := id_or_look.strip_edges().to_lower()
 	if clean.ends_with("_a") or clean.ends_with("_b"):
 		clean = clean.left(-2)
-	return str(ALIASES.get(clean, ""))
+	if ALIASES.has(clean):
+		var mapped := str(ALIASES[clean])
+		return mapped if SPECS.has(mapped) else ""
+	if SPECS.has(clean):
+		return clean
+	return ""
+
+
+## 한글 표시 이름("김신" · "리사" · "백도찬" 등) → 포트레이트 키(없으면 "")
+static func key_by_name(display_name: String) -> String:
+	var nm := display_name.strip_edges()
+	if nm == "":
+		return ""
+	if NAME_ALIASES.has(nm):
+		return key_of(str(NAME_ALIASES[nm]))
+	if _name_map.is_empty():
+		_build_name_map()
+	if _name_map.has(nm):
+		return str(_name_map[nm])
+	return key_of(nm)
+
+
+static func _build_name_map() -> void:
+	for id in SPECS.keys():
+		var c := Addendum.character(str(id))
+		var nm := str(c.get("name", "")).strip_edges()
+		if nm != "":
+			_name_map[nm] = str(id)
+	for k in NAME_ALIASES:
+		_name_map[k] = str(NAME_ALIASES[k])
 
 
 static func has_stand(id_or_look: String) -> bool:
@@ -132,7 +194,7 @@ static func should_flip(id_or_look: String, side: int) -> bool:
 	var k := key_of(id_or_look)
 	if k == "":
 		return false
-	var faces_right: bool = bool(SPECS[k].get("faces_right", true))
+	var faces_right: bool = bool(SPECS[k].get("faces_right", false))
 	return (side < 0) != faces_right
 
 
@@ -161,3 +223,9 @@ static func hud_tex(id_or_look: String) -> Texture2D:
 
 static func cutin_tex(id_or_look: String) -> Texture2D:
 	return _load_tex(cutin_path(id_or_look))
+
+
+## 종료 시 정적 캐시 해제(Godot 4.7 종료 ObjectDB / Resource leak 방지)
+static func clear_cache() -> void:
+	_tex_cache.clear()
+	_name_map.clear()

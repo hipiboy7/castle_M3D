@@ -36,7 +36,7 @@ const ROLES := {
 	"kimshin_coat": {"look": "kim_coat",
 		"moveset": {"combo": "kf_jab", "dash": "kf_dash", "counter": "kf_counter", "finisher": "kf_finisher"}},
 	"risa": {"hp": 200.0, "posture": 60.0, "walk": 1.9, "run": 4.0, "stagger": 60, "look": "risa_p1"},     # 모피 코트를 걸친 프롤로그 차림
-	"client_woman": {"hp": 100.0, "posture": 40.0, "walk": 1.1, "run": 2.0, "stagger": 60, "look": "client_woman"},   # 절뚝이며 걷는다
+	"client_woman": {"hp": 100.0, "posture": 40.0, "walk": 1.6, "run": 2.4, "stagger": 60, "look": "client_woman"},   # 절뚝이며 걷는다
 	"gunter_guard": {"hp": 420.0, "posture": 100.0, "walk": 1.8, "run": 3.8, "stagger": 70, "poise": 0.0, "ai": "thug",
 		"look": "gunter_suit"},
 	"gunter": {"hp": 520.0, "posture": 260.0, "walk": 1.6, "run": 3.4, "stagger": 70, "poise": 24.0, "ai": "gunter",
@@ -52,8 +52,10 @@ const ROOMS := [
 	{"id": "vlad_bar", "fixed": true, "theme": "vlad_bar", "bounds": Rect2(-6.0, -2.2, 12.0, 4.4), "kit": {"kimshin": "kimshin_coat"},
 		"heroes": [Vector2(-5.0, -1.7)], "allies": [], "enemies": [], "boss": "",
 		# 리사는 바 끝 앞 안락의자에 다리를 꼬고 앉아 문 쪽을 본다(2026-11-12 사용자 "리사는 의자에 앉아있어야해. 그것도 고고하게")
-		"standing": [["risa", Vector2(2.6, 0.75), 0], ["client_woman", Vector2(-6.0, 1.6), 0]],
+		# 김신은 리사 '은퇴식에 어울릴 만한' 멘트 전까지 어둠 속에 숨겼다가 조명과 함께 리빌(2026-11-25 사용자)
+		"standing": [["risa", Vector2(2.6, 0.75), 0], ["client_woman", Vector2(-4.4, 0.9), 0]],
 		"poses": {"kimshin": "sit", "risa": "sit_cross"},
+		"hidden": ["kimshin"], "cam_start": "client_woman",
 		"scene": "bar_request"},
 	{"id": "vlad_hotel", "fixed": true, "theme": "vlad_hotel", "bounds": Rect2(-7.0, -1.9, 26.0, 3.8),
 		"heroes": [Vector2(-5.4, 0.2)], "allies": [],

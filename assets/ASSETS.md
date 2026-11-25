@@ -3,9 +3,9 @@
 > 정정 이력: 2026-11-06 — 전인물 외형: 장 이름 8명 그림 A · B 줄 + 명부(roster) 무리 줄(첫 칸에 `*` — verify 가 무리로 맞춘다, APK 에서 뺌).
 > 정정 이력: 2026-11-05 — 첫 작성(S1 · 개발 규격 `게임개발규격.md` 6절). `scripts/verify.py` '자산 출처' 줄이 `assets/` 의 파일(`.import` 빼고)과 이 표의 첫 칸을 맞춰 본다 — 새 자산을 넣으면 여기 한 줄.
 
-- 원작 컷 · 원작 그림을 쓴 자산은 **없다**(인물 · 무대는 코드로 만든 3D 관절 인형 · 도형 — `src/view/`). 그림 A GLB 안의 그림(붓 결 · 펜 빗금 — 2026-11-11 `tools/make_models.gd` ③)도 스크립트가 칠한 것 — 원작 조각(castle_common `work/looks/ref`)은 보고 맞추는 데만 썼고 픽셀은 쓰지 않았다
+- **원작 웹툰(정연 「캐슬」) 그림 직접 사용 승인**(2026-11-25 사용자 "그림은 원작 그대로 사용할 것(작가와 협의 완료)"): 2D 포트레이트 · 스탠딩 · HUD · 사선 컷인(`assets/portraits/*_{stand,hud,cutin}.jpg`, `tools/extract_canon_portraits.py` 로 `castle_common` `sources/character_profile/` · `sources/castle1/002화/` · `work/looks/ref/` 에서 읽기 전용 추출) 및 3단계 로컬 만화 3D 파일럿 얼굴 텍스처(`tools/bake_webtoon3d.py`)에 원작 정연 작가 그림을 직접 반영한다. 나머지 모델은 스크립트 생성(`tools/make_models.gd`)이다.
 - 효과음 · 음악은 castle_M 이 절차 생성한 파일을 그대로 가져왔다(castle_M `tools/gen_sfx.py` · `tools/gen_music.py` + `tools/synth.py` · `tools/music.py`, 처음 출처는 캐슬 취호전 v1.4.1 — castle_M `6da1bb0`). 다시 만들려면 castle_M 에서 그 도구를 돌려 복사한다. 이 판으로 가져온 커밋 `b57db00`(2026-10-26, castle_M `c8fc86c` 무렵)
-- 외부 자산은 글꼴(SIL OFL 1.1) 및 실사 파일럿 캐릭터/모션용 CC0 자산(MakeHuman Community MPFB2 CC0 에셋팩: `makehuman_system_assets_cc0` · `skins01/02_cc0` · `eyebrows01_cc0` · `eyelashes01_cc0` · `hair01_cc0` · `suits01/02_cc0` · `shirts01_cc0` · `pants01_cc0` · `skirts01_cc0` · `dress01_cc0` · `shoes01_cc0` · `glasses01_cc0`, `tools/bake_realistic.py` 로 9종 파일럿 GLB 생성: `kimshin_a` · `kimshin_coat_a` · `kimshin_p1_a` · `baekdochan_a` · `risa_p1_a` · `risa_a` · `jintae_a` · `ojiin_a` · `client_woman_a`, 그리고 Quaternius Universal Animation Library CC0 `animations/humanoid_cc0.glb`)이다. 나머지 인물 모델은 스크립트 생성(`tools/make_models.gd`)이다.
+- 외부 자산은 글꼴(SIL OFL 1.1) 및 3단계 로컬 만화 3D 파일럿 베이스/모션용 CC0 자산(MakeHuman Community MPFB2 CC0 에셋팩 + Quaternius Universal Animation Library CC0 `animations/humanoid_cc0.glb`)이다. 9종 파일럿 GLB(`kimshin_a` · `kimshin_coat_a` · `kimshin_p1_a` · `baekdochan_a` · `risa_p1_a` · `risa_a` · `jintae_a` · `ojiin_a` · `client_woman_a`)는 `tools/prep_webtoon_faces.py` + `tools/bake_webtoon3d.py` 로 MPFB2 CC0 체형/의상 위에 **원작 정연 웹툰 얼굴 투영 + 조각 3D 만화 헤어 + 웹툰 잉크/셀 텍스처**를 결합해 구웠으며(`src/view/shaders/webtoon_3d.gdshader`), 나머지 인물 모델은 스크립트 생성(`tools/make_models.gd`)이다.
 
 | 파일 (`assets/` 기준) | 출처 | 쓰는 곳 |
 |---|---|---|
@@ -17,9 +17,9 @@
 | `fonts/BlackHanSans-OFL.txt` | Black Han Sans 라이선스 원문(SIL OFL 1.1) | — |
 | `textures/ink_lut.png` | 직접(절차 생성) — `tools/gen_ink_lut.py` (256x256 타일 RGBA8: 붓결 · 얼룩 · 균열 · 펜 해칭) | 화풍 셀 셰이더 공유 LUT(`src/view/ink.gd` · `ink_cel.gdshader`) |
 | `animations/humanoid_cc0.glb` | 외부 — Quaternius Universal Animation Library (CC0 1.0 Public Domain · https://quaternius.com/packs/universalanimationlibrary.html · `tools/bake_anims.py` 17본 리타게팅) | 실사 캐릭터 공용 모션캡처 애니메이션(`src/view/mocap_driver.gd`) |
-| `portraits/*_stand.png` | 직접(AI 신규 생성 + `tools/process_portraits.py` 크로마키/후처리 · 2026-11-25, 원작 픽셀 미사용 · 외형 명세 기반 느와르 웹툰 오마주 6인: 김신 · 백도찬 · 리사 · 서진태 · 오지인 · 의뢰인) | 대화/컷신 2D 웹툰 스탠딩 포트레이트(`src/view/portraits.gd` · `src/ui/webtoon_stage.gd`) |
-| `portraits/*_hud.png` | 〃 — 위 스탠딩 일러스트 얼굴 크롭(192×192 RGBA) | 전투 HUD 좌상단 조작 인물 · 상단 보스 초상화(`src/ui/hud.gd`) |
-| `portraits/*_cutin.png` | 직접(AI 신규 생성 + `tools/process_portraits.py` 960×300 파노라마 크롭 · 2026-11-25, 원작 픽셀 미사용 · 4인: 김신 · 백도찬 · 서진태 · 오지인) | 보스 등장 · 2차 페이즈 · 기술 · 엇박 · 쳐내기 사선 만화 컷인(`src/ui/webtoon_stage.gd`) |
+| `portraits/*_stand.jpg` | 원작 — 웹툰 「캐슬」(정연, 작가 협의 완료 · 2026-11-25 사용자) 공식 인물 프로필(`castle_common` `sources/character_profile/`) · 원작 컷(`sources/castle1/002화/` · `work/looks/ref/`) · `tools/extract_canon_portraits.py` 추출(113인, 340×400) | 전 챕터(0~13장) 대화/컷신 2D 웹툰 스탠딩 포트레이트(`src/view/portraits.gd` · `src/ui/webtoon_stage.gd`) |
+| `portraits/*_hud.jpg` | 〃 — 원작 인물 얼굴 크롭(160×160, 113인) | 전투 HUD 좌상단 조작 인물 · 상단 보스 초상화(`src/ui/hud.gd`) |
+| `portraits/*_cutin.jpg` | 〃 — 원작 주요 인물 눈매/대치 클로즈업 파노라마 컷인(960×300, 36인) | 보스 등장 · 2차 페이즈 · 기술 · 엇박 · 쳐내기 사선 만화 컷인(`src/ui/webtoon_stage.gd`) |
 | `sfx/counter.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 반격 베기 (`src/main.gd` `_play`) |
 | `sfx/fall.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 넘어짐 (`src/main.gd` `_play`) |
 | `sfx/guard.wav` | 직접(절차 생성) — castle_M `tools/gen_sfx.py` | 막기 (`src/main.gd` `_play`) |
